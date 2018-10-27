@@ -1,0 +1,61 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<link href="css/reset.css" rel="stylesheet">
+	<link rel="stylesheet" href="css/whu_template.css" />
+	<!-- Iconos -->
+	<link href="css/font-awesome.min.css" rel="stylesheet">
+	<link href="css/bootstrap.min.css" rel="stylesheet">
+	<link href="css/bootstrap-slider.min.css" rel="stylesheet">
+	<!--layUI-->
+	<!--	<link rel="stylesheet" href="js/lib/dist/css/layui.css"  media="all">-->
+	<meta charset="utf-8" />
+	<title></title>
+</head>
+<body>
+<div id="templateImg" class="LAY_demo2">
+	<div id="templateHead">
+		制图模板
+	</div>
+	<ul class="flow-default"  id="LAY_demo2">
+		<!--这一块动态创建
+        <li><img src="http://s17.mogucdn.com/p2/161011/upload_279h87jbc9l0hkl54djjjh42dc7i1_800x480.jpg?v=2">灾害模板</li>
+        -->
+	</ul>
+</div>
+<div id="templateType">
+	<li class="templateTitle">
+		<div class='link templateTitle'><i class="fa fa-search" id="searchTitleLi" aria-hidden='true'></i>制图模板查找</div>
+
+	</li>
+
+	<li id="templateSearch">
+		<div class="input-group">
+			<input type="text" class="form-control" id="inputSearch" placeholder="输入关键字查找模板...">
+			<button class="search-button" onclick="searchImg()">查找</button>
+		</div>
+
+	</li>
+	<li class="templateTitle">
+		<div class='link templateTitle'><i class="fa fa-map" id="templateTitleLi" aria-hidden='true'></i>制图模板类别</div>
+
+	</li>
+
+
+	<ul id='templateTypeList'>
+		<!--这一块动态创建
+        <li id='plot-point'>
+            <div class='link'><i aria-hidden='true'></i>应急响应</div>
+        </li>
+        -->
+	</ul>
+
+	<a class="backBtn" href="index.html">返回上一级</a>
+</div>
+</body>
+<script src="js/jquery-3.1.0.min.js"></script>
+<script src="js/whu_template.js"></script>
+<script type="text/javascript" src="js/bootstrap.min.js"></script>
+<script type="text/javascript" src="js/bootstrap-slider.min.js"></script>
+
+</html>

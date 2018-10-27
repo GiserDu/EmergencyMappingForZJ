@@ -1,0 +1,45 @@
+{
+    "mapScale": [],
+
+"featureLayer": {
+    "modules": [{
+            "type": "polygon", 
+            "name": "湖泊1", 
+            "data": "", 
+            "style": {
+                "opacity": "0.5", 
+                "render": {
+                    "type": "esriSFS", 
+                    "color": [115, 76, 0, 255],
+                    "outline": {
+                        "type": "esriSLS",
+                        "style": "esriSLSDot",
+                        "color": [115, 76, 0, 255],
+                        "width": 1
+                    }, 
+                    "style": "esriSFSSolid" 
+                }
+            }
+        },
+        {
+            "type": "point", 
+            "name": "点", 
+            "data": "", 
+            "style": {
+                "type": "PictureMarkerSymbol", 
+                "opacity": 1, 
+                "render": {
+                    "type": "esriPMS", 
+                    "url": "./assets/images/ss.png",
+                    "height": 8, 
+                    "width": 8, 
+                    "angle": 0, 
+                    "xoffset": 0, 
+                    "yoffset": 0		
+                }
+            }
+
+        }
+    ]
+}
+}

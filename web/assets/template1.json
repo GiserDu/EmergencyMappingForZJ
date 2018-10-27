@@ -1,0 +1,26 @@
+{
+    "mapScale": [],
+
+"featureLayer": {
+    "modules": [{
+            "type": "polygon", 
+            "name": "湖泊1", 
+            "data": "",
+            "style": {
+                "opacity": "0.5", 
+                "render": {
+                    "type": "esriSFS", 
+                    "color": [115, 76, 0, 255],
+                    "outline": {
+                        "type": "esriSLS",
+                        "style": "esriSLSDot",
+                        "color": [115, 76, 0, 255],
+                        "width": 1
+                    }, 
+                    "style": "esriSFSSolid" 
+                }
+            }
+        }
+    ]
+}
+}

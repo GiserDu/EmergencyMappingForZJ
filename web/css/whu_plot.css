@@ -1,0 +1,369 @@
+#nav-plot{
+    width: 0px;
+    height:100%;
+    float:left;
+	position:fixed; 
+	top:0px;
+	right:240px;
+    background: #202832;
+    overflow: auto;
+    border-right: 1px solid #4b4a5e;
+}
+
+.nav-header {
+    /*position: absolute;
+    top: 0px;*/
+    width: 100%;
+    background-color: #393D49;
+    z-index: 2;
+}
+
+.scalebar_bottom-left {
+    bottom: 5px !important;
+}
+
+.nav-header-log {
+    position: absolute;
+    left: 100px;
+    font-size: 30px;
+    line-height: 60px;
+    color: #fff;
+}
+
+#BasemapToggle {
+    position: absolute;
+    top: 80px;
+    right: 20px;
+    z-index: 50;
+}
+
+.nav-header-menu {
+    position: absolute;
+    right: 0px;
+}
+
+.nav-left-menu {
+    position: absolute;
+    top: 60px;
+    left: 0px;
+    z-index: 2;
+}
+
+/*地图控件（放大、缩小、定位）*/
+
+.map-controls {
+    position: absolute;
+    bottom: 100px;
+    right: 0px;
+    height: 80px;
+    width: 40px;
+    background-color: rgba(0, 0, 0, 0.6);
+    border-radius: 4px 0 0 4px;
+}
+
+.map-controls-button {
+    height: 40px;
+    width: 40px;
+    color: #fff;
+    font-size: 20px !important;
+    text-align: center;
+    line-height: 40px;
+}
+
+.map-controls-button:hover,
+.map-controls-button:active {
+    background-color: #393D49;
+    border-radius: 4px 0 0 4px;
+}
+
+.map-info {
+    position: absolute;
+    bottom: 0px;
+    right: 0px;
+    height: 40px;
+    /*padding: 0px 50px 0px 20px;*/
+    text-align: center;
+    min-width: 50%;
+    background-color: rgba(0, 0, 0, 0.6);
+    border-radius: 4px 0 0 0px;
+    color: #fff;
+    font-size: 15px;
+    line-height: 40px;
+}
+
+.map-info label {
+    margin-left: 20px;
+}
+
+
+/*地图标注面板*/
+
+.map-marking-panel {
+    position: absolute;
+    left: -400px;
+    top: 100px;
+    max-height:calc(100% - 100px);
+    overflow: scroll;
+    z-index: 2;
+    width: 400px;
+    background-color: #fff;
+    transition-property: all;
+    transition-duration: 500ms;
+    transition-timing-function: linear;
+    /* Safari */
+    -webkit-transition-property: all;
+    -webkit-transition-duration: 500ms;
+    -webkit-transition-timing-function: linear;
+}
+
+.map-marking-panel.show {
+    left: 0px;
+}
+
+.map-marking-panel-head {
+    background-color: #16436b;
+    /*width: 100%;*/
+    height: 50px;
+    border-radius: 0px 4px 0px 0px;
+    box-shadow: 1px 0px 1px #999;
+    color: #fff;
+    line-height: 50px;
+    padding-left: 20px;
+}
+
+.map-marking-panel-head label {
+    font-size: 18px;
+}
+
+.map-marking-panel-head .icon-guanbi {
+    float: right;
+    right: 0px;
+    margin-right: 15px;
+}
+
+.map-marking-panel-container {
+    background-color: #fff;
+    border-radius: 0px 0px 4px 0px;
+    box-shadow: 1px 1px 1px #999;
+    width: 100%;
+    /*height: 350px;*/
+    padding: 0px 0px 10px 0px;
+    transition-property: all;
+    transition-duration: 500ms;
+    transition-timing-function: linear;
+    /* Safari */
+    -webkit-transition-property: all;
+    -webkit-transition-duration: 500ms;
+    -webkit-transition-timing-function: linear;
+}
+
+.map-marking-info {
+    display: none;
+}
+
+.map-marking-info.show {
+    display: block;
+}
+
+.map-marking-panel-tip {
+    padding: 10px 20px;
+    color: #393D49;
+    font-size: 15px;
+    display: none;
+    transition-property: all;
+    transition-duration: 500ms;
+    transition-timing-function: linear;
+    /* Safari */
+    -webkit-transition-property: all;
+    -webkit-transition-duration: 500ms;
+    -webkit-transition-timing-function: linear;
+}
+
+.map-marking-panel-tip.show {
+    display: block;
+}
+
+.map-marking-info-container {
+    padding: 20px 5px !important;
+}
+
+.mark-style.show {
+    display: block;
+}
+
+.mark-style {
+    display: none;
+}
+
+.layui-input-block img {
+    max-width: 40px;
+    max-height: 40px;
+}
+
+.layui-input-block .line-style {
+    height: 2px;
+    width: 50px;
+    background-color: rgba(255,69,0,0.6);
+    display: inline-block;
+    margin-top: 15px;
+}
+
+.style-preview {
+    max-width: 100%;
+    padding: 30px 15px;
+    overflow: hidden;
+    margin: 10px;
+    border: 1px solid #D2D2D2;
+}
+
+.point-style-edit,
+.line-style-edit,
+.polygon-style-edit {
+    display: none;
+}
+
+.point-style-edit.show,
+.line-style-edit.show,
+.polygon-style-edit.show {
+    display: block;
+}
+
+.point-style-edit li {
+    display: inline-block;
+    vertical-align: middle;
+    width: 75px;
+    line-height: 40px;
+    padding: 10px 0;
+    margin-right: -1px;
+    /*margin-bottom: -1px;*/
+    border: 1px solid #e2e2e2;
+    font-size: 14px;
+    text-align: center;
+    color: #666;
+}
+
+.point-style-edit li:hover {
+    border: 1px solid #009688;
+}
+
+.point-style-edit li img {
+    max-width: 40px;
+    max-height: 40px;
+}
+
+.line-style-preview {
+    height: 5px;
+    background-color: rgba(51, 153, 204, 1);
+}
+
+.polygon-style-preview {
+    height: 50px;
+    background-color: rgba(255, 255, 255, 0.5);
+    border: 1px solid rgba(51, 153, 204, 1);
+}
+
+.layui-input-block .polygon-style {
+    height: 30px;
+    width: 50px;
+    background: rgba(255,69,0,0.5);
+    border: 2px solid rgba(255,215,0,0.6);
+    display: inline-block;
+}
+
+.layui-input-block label {
+    color: #1E9FFF;
+    text-decoration: underline;
+    font-size: 10px;
+}
+
+.warning {
+    font-size: 12px;
+    padding: 10px;
+    color: #FF5722;
+}
+
+.input-color,
+.input-number,
+.input-range {
+    width: 190px !important;
+    padding-left: 0px !important;
+}
+
+.margin-10 {
+    margin: 10px;
+}
+
+.map-mark-edit,
+.map-config,
+.measure-info {
+    padding: 10px;
+    display: none;
+}
+
+.map-mark-edit.show,
+.map-config.show,
+.measure-info.show {
+    display: block;
+}
+
+.map-config-item-title {
+    padding: 5px;
+    font-size: 15px;
+    /*height: 20px;*/
+    line-height: 20px;
+    color: #009688;
+}
+
+.map-config-item-content {
+    padding: 5px;
+    font-size: 15px;
+    /*height: 20px;*/
+    line-height: 20px;
+    color: #393D49;
+}
+
+
+/*地图测量*/
+
+/*.tooltip {*/
+    /*position: relative;*/
+    /*background: rgba(0, 0, 0, 0.5);*/
+    /*border-radius: 4px;*/
+    /*color: white;*/
+    /*padding: 4px 8px;*/
+    /*opacity: 0.7;*/
+    /*white-space: nowrap;*/
+/*}*/
+
+.tooltip-measure {
+    opacity: 1;
+    font-weight: bold;
+}
+
+.tooltip-static {
+    background-color: #ffcc33;
+    color: black;
+    border: 1px solid white;
+}
+
+.tooltip-measure:before,
+.tooltip-static:before {
+    border-top: 6px solid rgba(0, 0, 0, 0.5);
+    border-right: 6px solid transparent;
+    border-left: 6px solid transparent;
+    content: "";
+    position: absolute;
+    bottom: -6px;
+    margin-left: -7px;
+    left: 50%;
+}
+
+.tooltip-static:before {
+    border-top-color: #ffcc33;
+}
+
+.icon-close{
+	float: right;
+    right: 0px;
+    margin: 15px;
+}

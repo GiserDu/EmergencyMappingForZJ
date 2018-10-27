@@ -1,0 +1,22 @@
+
+<TChart>
+	<chartid>20103</chartid>
+	<renderer>
+		<DrawBarOutline>false</DrawBarOutline>
+		<Outline>
+			<Paint>0,0,0,255</Paint>
+			<BasicStroke>0.3</BasicStroke>
+		</Outline>
+		<MinimumBarLength>0.05</MinimumBarLength>
+		<ItemMargin>5</ItemMargin>
+	</renderer>
+	<Transparent>255</Transparent>
+	<Lable>
+		<bLable>false</bLable>
+		<ItemLabelFont>
+			<Name>Arial</Name>
+			<Size>5</Size>
+		</ItemLabelFont>
+		<ItemLabelPaint>0,0,0,255</ItemLabelPaint>
+	</Lable>
+</TChart>

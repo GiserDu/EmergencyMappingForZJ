@@ -1,0 +1,19 @@
+
+<TChart>
+	<chartid>60103</chartid>
+	<perValue>0</perValue>
+	<!-- 每个小建筑代表值 -->
+	<!-- if perValue=0(=maxValue/10) -->
+	<perLength>20</perLength>
+	<!-- 每个小建筑物长度 -->
+	<perWidth>20</perWidth>
+	<!-- 每个小建筑物宽度 -->
+	<perHeight>43</perHeight>
+	<!-- 每个小建筑物高度 -->
+	<ratioLengthGap>0.4</ratioLengthGap>
+	<!-- 两个相邻小建筑物之间的左后间距与小建筑物长度比 -->
+	<ratioWidthGap>0.5</ratioWidthGap>
+	<!-- 两个相邻小建筑物之间的前后间距与小建筑物宽度比 -->
+	<isLabel>0</isLabel>
+	<!-- 是否带数据标签 -->
+</TChart>

@@ -1,0 +1,211 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<gradeMapColorScheme>
+	<colorScheme1>
+		<color name="黄红色系">
+			<value>201,81,61</value>
+			<value>228,102,66</value>
+			<value>233,129,70</value>
+			<value>241,165,75</value>
+			<value>247,197,95</value>
+			<value>252,228,116</value>
+			<value>255,250,137</value>
+			<value>255,251,177</value>
+			<value>255,253,201</value>
+			<value>255,254,227</value>
+		</color>
+		<color name="蓝色色系">
+			<value>0,112,155</value>
+			<value>0,131,186</value>
+			<value>0,145,211</value>
+			<value>0,161,227</value>
+			<value>19,174,233</value>
+			<value>86,187,237</value>
+			<value>127,200,242</value>
+			<value>164,215,246</value>
+			<value>196,229,250</value>
+			<value>229,243,252</value>
+		</color>
+		<color name="红色色系">
+			<value>158,43,101</value>
+			<value>188,47,115</value>
+			<value>212,46,125</value>
+			<value>228,79,143</value>
+			<value>233,111,161</value>
+			<value>237,136,178</value>
+			<value>242,161,195</value>
+			<value>246,186,211</value>
+			<value>250,210,228</value>
+			<value>253,235,242</value>
+		</color>
+		<color name="黄绿色系">
+			<value>0,147,91</value>
+			<value>18,169,98</value>
+			<value>88,181,97</value>
+			<value>143,201,93</value>
+			<value>186,219,107</value>
+			<value>228,237,121</value>
+			<value>255,250,137</value>
+			<value>255,251,177</value>
+			<value>255,253,201</value>
+			<value>255,254,227</value>
+		</color>
+		<color name="黄棕色系">
+			<value>171,167,26</value>
+			<value>209,202,0</value>
+			<value>241,232,0</value>
+			<value>255,247,51</value>
+			<value>255,248,106</value>
+			<value>255,250,137</value>
+			<value>255,251,164</value>
+			<value>255,252,189</value>
+			<value>255,253,213</value>
+			<value>255,254,236</value>
+		</color>
+		<color name="棕蓝色系">
+			<value>246,202,156</value>
+			<value>237,210,169</value>
+			<value>242,228,186</value>
+			<value>241,235,198</value>
+			<value>227,232,205</value>
+			<value>201,213,203</value>
+			<value>177,197,198</value>
+			<value>148,175,187</value>
+			<value>123,159,177</value>
+			<value>115,147,162</value>
+		</color>
+		<color name="青黄色系">
+			<value>187,202,151</value>
+			<value>202,214,164</value>
+			<value>221,228,186</value>
+			<value>232,236,203</value>
+			<value>244,242,205</value>
+			<value>234,232,190</value>
+			<value>237,229,191</value>
+			<value>238,222,182</value>
+			<value>239,214,174</value>
+			<value>239,204,166</value>
+		</color>
+		<color name="棕青色系">
+			<value>188,202,151</value>
+			<value>183,113,73</value>
+			<value>208,133,88</value>
+			<value>228,153,107</value>
+			<value>232,175,126</value>
+			<value>246,202,156</value>
+			<value>237,210,167</value>
+			<value>242,230,187</value>
+			<value>248,241,208</value>
+			<value>255,254,227</value>
+		</color>
+		<color name="紫红色系">
+			<value>189,202,151</value>
+			<value>110,83,148</value>
+			<value>128,80,145</value>
+			<value>155,77,142</value>
+			<value>185,97,153</value>
+			<value>215,117,166</value>
+			<value>237,136,178</value>
+			<value>244,174,203</value>
+			<value>248,199,220</value>
+			<value>252,225,237</value>
+		</color>
+		<color name="青色色系">
+			<value>190,202,151</value>
+			<value>79,150,144</value>
+			<value>105,173,166</value>
+			<value>116,195,187</value>
+			<value>149,207,199</value>
+			<value>183,221,206</value>
+			<value>200,229,222</value>
+			<value>217,237,234</value>
+			<value>237,246,241</value>
+			<value>244,250,249</value>
+		</color>
+	</colorScheme1>
+	<colorScheme2>
+		<color name="粉红色系">
+			<value>231,101,155</value>
+			<value>247,191,215</value>
+			<value>253,235,242</value>
+			<value>254,250,252</value>
+		</color>
+		<color name="红棕色系">
+			<value>181,83,73</value>
+			<value>217,157,149</value>
+			<value>241,209,204</value>
+			<value>250,242,243</value>
+		</color>
+		<color name="棕色色系">
+			<value>188,131,92</value>
+			<value>228,192,161</value>
+			<value>248,236,218</value>
+			<value>255,251,244</value>
+		</color>
+		<color name="黄棕色系">
+			<value>238,155,90</value>
+			<value>247,209,166</value>
+			<value>252,232,218</value>
+			<value>254,249,243</value>
+		</color>
+		<color name="黄色色系">
+			<value>255,243,95</value>
+			<value>255,251,168</value>
+			<value>255,253,221</value>
+			<value>255,255,247</value>
+		</color>
+		<color name="绿色色系">
+			<value>144,200,81</value>
+			<value>199,226,160</value>
+			<value>237,244,202</value>
+			<value>251,252,239</value>
+		</color>
+		<color name="浅青色系">
+			<value>0,163,143</value>
+			<value>137,202,199</value>
+			<value>217,237,239</value>
+			<value>244,250,251</value>
+		</color>
+		<color name="蓝灰色系">
+			<value>88,127,185</value>
+			<value>170,194,227</value>
+			<value>217,226,242</value>
+			<value>248,249,252</value>
+		</color>
+		<color name="青色色系">
+			<value>0,170,231</value>
+			<value>164,215,246</value>
+			<value>216,237,251</value>
+			<value>248,252,254</value>
+		</color>
+		<color name="紫色色系">
+			<value>145,98,156</value>
+			<value>209,176,208</value>
+			<value>233,219,235</value>
+			<value>251,249,251</value>
+		</color>
+		<color name="浅绿色系">
+			<value>180,215,203</value>
+			<value>214,232,228</value>
+			<value>224,236,222</value>
+			<value>255,255,245</value>
+		</color>
+		<color name="蓝紫色系">
+			<value>209,196,224</value>
+			<value>226,210,230</value>
+			<value>244,238,245</value>
+			<value>255,255,255</value>
+		</color>
+		<color name="品红色系">
+			<value>242,196,192</value>
+			<value>250,218,213</value>
+			<value>253,238,227</value>
+			<value>255,254,242</value>
+		</color>
+		<color name="淡灰色系">
+			<value>209,208,197</value>
+			<value>223,223,216</value>
+			<value>237,237,237</value>
+			<value>255,255,255</value>
+		</color>
+	</colorScheme2>
+</gradeMapColorScheme>

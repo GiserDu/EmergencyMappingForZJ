@@ -1,0 +1,63 @@
+.featureLayerCss {
+	cursor: pointer;
+	display: block;
+	position: relative;
+	-webkit-transition: all 0.4s ease;
+	-o-transition: all 0.4s ease;
+	transition: all 0.4s ease;
+}
+
+.featureLayerCssI1 {
+	position: absolute;
+	top: 16px;
+	left: 20px;
+	font-size: 13px;
+	color: #e2e2e2;
+	-webkit-transition: all 0.4s ease;
+	-o-transition: all 0.4s ease;
+	transition: all 0.4s ease;
+}
+
+.featureLayerCssI2 {
+	position: absolute;
+	top: 16px;
+	right: 20px;
+	font-size: 13px;
+	color: #e2e2e2;
+	-webkit-transition: all 0.4s ease;
+	-o-transition: all 0.4s ease;
+	transition: all 0.4s ease;
+}
+
+.featureLayerCssI2:hover {
+	color: #e9e523;
+}
+#mapNameInfo{
+	top: 0px;
+	right: 242px;
+	position: absolute;
+	z-index: 99;
+	opacity: 0.8;
+	background-color: whitesmoke;
+	border-bottom-left-radius: 8px;
+	padding: 0px 0px 0px 10px;
+	font-size: 24px;
+}
+#info{
+	bottom: 0px;
+	right: 242px;
+	position: absolute;
+	z-index: 99;
+	opacity: 0.9;
+	background-color: whitesmoke;
+	border-bottom-left-radius: 8px;
+	padding: 0px 0px 0px 10px;
+}
+/*@YH改:*/
+.tree_p{
+	margin-top: 10px;
+}
+#tree{
+	overflow: scroll;
+	height: 350px;
+}

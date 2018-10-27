@@ -1,0 +1,67 @@
+[
+  {
+    "ID":"FBefCN010404",
+    "mapScale": "国家",
+    "baseLayer":
+    {
+      "type": "vector", //底图类型(矢量/影像/地形)
+      "url": "" //底图服务地址(供用户选择)
+    },
+    "serviceLayer":
+    {
+      "modules":
+      [
+
+      ]
+
+    },
+    "featureLayer":
+    {
+      "modules":
+      [
+        {
+
+          "type": "polyline", //要素类型
+          "name": "输油管", //要素图层模型名称(如:湖泊)
+          "data": "http://47.96.162.249:6080/arcgis/rest/services/project6/fire/MapServer/8", //要素数据来源(用户前端输入)
+          "style": {
+            "opacity": "1", //图层透明度
+            //1.SimpleLineSymbol的符号配置(可直接以json为参数构造对象)
+            "render": {
+              "type": "esriSLS", //SimpleLineSymbol(简单线类型)
+              "color": [210,105,30, 255], //颜色
+              "width": 1, //线宽
+              "style": "esriSLSDash" //线形
+            }
+          }
+        },
+        {
+
+          "type": "polyline", //要素类型
+          "name": "输气管", //要素图层模型名称(如:湖泊)
+          "data": "http://47.96.162.249:6080/arcgis/rest/services/project6/fire/MapServer/9", //要素数据来源(用户前端输入)
+          "style": {
+            "opacity": "1", //图层透明度
+            //1.SimpleLineSymbol的符号配置(可直接以json为参数构造对象)
+            "render": {
+              "type": "esriSLS", //SimpleLineSymbol(简单线类型)
+              "color": [0,100,0, 255], //颜色
+              "width": 1, //线宽
+              "style": "esriSLSDash" //线形
+            }
+          }
+        }
+
+      ]
+    },
+    "statisticLayer":
+    {
+      //统计图模型数组(包括:分级图/统计图/多种组合   module<-->layer对应)
+      "modules":
+      [
+
+      ]
+    }
+
+  }
+]

@@ -1,0 +1,380 @@
+* {
+	margin: 0;
+    padding:0;
+    box-sizing:border-box;
+    -moz-box-sizing:border-box; /* Firefox */
+    -webkit-box-sizing:border-box; /* Safari */
+}
+
+body {
+	padding-top: 0px;
+	height:100%;
+    overflow: hidden;
+    font:normal 100% Arial,sans-serif;
+    font-size:14px;
+    font-size:1.4rem;
+    background: #e7e9f0;
+}
+
+h1,h2,h3,h4,h5,h6{
+    font-family: "Microsoft YaHei";
+}
+
+#main{
+    width:100%;
+    height:100%;
+    float:left;
+}
+
+#main #mapContainer{
+    margin:0 240px 0 0;
+    background: #ffffff;
+    height:100%;
+}
+
+#nav-right{
+    width: 240px;
+    height:100%;
+    float:left;
+    margin-left:-240px;
+    background: #202832;
+    overflow: auto;
+}
+
+.slider-content{
+    position: absolute;
+    top:0px;
+    right: 240px;
+    z-index: 200;
+    display: block;
+    width: 0px;
+    /*width: 0px;*/
+    height: 100%;
+    overflow-y: auto;
+    border: 1px solid #223347;
+    background: #202832;
+    filter:alpha(Opacity=95);-moz-opacity:0.95;opacity: 0.95;
+    -webkit-transition:1.5s;
+    -moz-transition:1.5s;
+    -o-transition:1.5s;
+    -ms-transition:1.5s;
+    transition:1.5s;
+}
+
+.slider.slider-horizontal {
+    width: 217px;
+    height: 20px;
+}
+
+#profile{
+    margin-left: 10px;
+    padding: 14px;
+    /*width: 80%;*/
+    height: 100%;
+    /*border: 1px solid rosybrown;*/
+    /*overflow-y: scroll;*/
+}
+
+.slider-menu h5{
+    color: #998370;
+    font-size: 16px;
+    font-weight: bold;
+    letter-spacing: 2px;
+    font-family: "Microsoft YaHei";
+    /*padding-top: 10px;*/
+    /*padding-bottom: 10px;*/
+}
+
+.slider-menu h6{
+    color: white;
+}
+
+.slider-menu #apply{
+    opacity:0.45;
+}
+
+/*调节滑动条的样式*/
+.slider-selection {
+    background-image: linear-gradient(to bottom, #64b3f4 0px, #a3bded 100%);
+}
+
+.panel-group{
+    max-height: 770px;
+    min-width: 60px;
+    overflow: auto;
+    margin-bottom: 0px;
+}
+
+.leftMenu{
+    /*margin: 0 10px 10px;*/  /*这个样式留白有点多了*/
+    margin: 0;
+}
+
+.panel-body{
+    padding: 0px;
+}
+
+.leftMenu .panel-heading{
+    font-size:14px;
+    padding-left:20px;
+    height:36px;
+    line-height:36px;
+    color:black;
+    position:relative;
+    cursor:pointer;/*转成手形图标*/
+}
+
+.leftMenu .panel-title{
+    font-size: 15px;
+}
+
+.leftMenu .panel-heading span{
+    position:absolute;
+    right:10px;
+    top:12px;
+}
+
+.leftMenu .menu-item-left{
+    padding-left: 5px;
+    background: transparent;
+    border:1px solid transparent;
+    -moz-border-radius:6px;
+    -webkit-border-radius: 6px;
+    border-radius: 6px;
+}
+
+.leftMenu .menu-item-left:hover{
+    background:#C4E3F3;
+    border:1px solid #1E90FF;
+    text-decoration: none;
+}
+
+.leftMenu label{
+    font-family: "Microsoft YaHei";
+    font-size: 14px;
+    font-weight: normal;
+    color: #337ab7;
+    margin-bottom: 0px;
+}
+
+.sym-selected{
+    height: 46px;
+    width: 100%;
+    border: solid 1px honeydew;
+    -moz-border-radius:3px;
+    -webkit-border-radius:3px;
+    border-radius: 3px;
+    background: white;
+    overflow: hidden;
+}
+
+/*<整个左侧菜单栏的位置及样式>*/
+#theme-select{
+    /*float: left;*/
+    min-width: 150px;
+    max-width: 220px;
+    width: 16%;
+    max-height: 90%;
+    margin: 180px 0 0 20px;
+    position: absolute;
+    top:0;
+    z-index: 999;
+    display: none;
+}
+
+#themeHeading{
+    padding: 6px 20px;
+    background: #223347;
+}
+
+#themeHeading>h4{
+    font-size: 16px;
+}
+
+/*#map-theme-check{*/
+    /*max-height: 400px;*/
+    /*!*overflow-y: scroll;*!*/
+/*}*/
+
+/*<汉堡图标的位置>*/
+#themeHeading span{
+    /*//有滚动条时margin-left是20px*/
+    /*margin-left: 20px;*/
+    margin-left: 26px;
+}
+
+input[type="checkbox"]{
+    margin-top: 0px;
+    margin-right: 6px;
+}
+
+#color-solution,#color-selected {
+    height: 40px;
+}
+
+#chart-selected .select_title img{
+    padding-left: 91.5px;
+}
+
+.sym-selected .select_content img{
+    margin-top: 6px;
+}
+
+/*li横向排列*/
+#chart-selected ul li{
+    margin: 0px;
+    padding: 0px;
+}
+
+#chart-selected ul{
+    display: flex;
+    flex-direction: row;
+    flex-wrap: wrap;
+}
+
+#chart-selected li {
+    border: 1px solid whitesmoke;
+    width: 50px; /*每个元素的初始化宽度*/
+    text-align: center;
+    margin-top: 10px;
+    margin-bottom: 10px;
+    flex: auto; /*这是关键*/
+}/*li横向排列end*/
+
+.slider-border{
+    margin-top: 10px;
+    margin-bottom: 10px;
+}
+
+/*控制右下角图例的显示位置*/
+#mapContainer #legend-container{
+    display: none;
+    position:absolute;
+    left:10px;
+    bottom:40px;
+    z-index:9995;
+    border: 1px solid rgba(86,134,223,0.6);
+
+    -webkit-box-shadow:0 0 2px #24403c;
+    -moz-box-shadow: 0 0 2px #24403c;
+    box-shadow: 0 0 2px #24403c;
+}
+
+#mapContainer #legend-remove{
+    position: absolute;
+    top: 3px;
+    right: 5px;
+    z-index: 9999;
+    color: #F2EFE6;
+}
+
+
+#mapContainer #twoLegend{
+    position:absolute;
+    top: 25px;
+    left: 94px;
+    /*width: 150px;*/
+    width: 0px;
+    height: 58px;
+    /*border: 1px solid #82857c;*/
+    background-color: white;
+    /*visibility: hidden;*/
+    transition: width 0.8s;
+    z-index: 9999;
+}
+
+
+#mapContainer .legend-menu{
+    position:absolute;
+    top: 0px;
+    /*width: 58px;*/
+    width: 0px;
+    height: 57px;
+    /*border: 1px solid #c3bed4;*/
+    /*background-color: #b6ff7b;*/
+    z-index: 9999;
+    transition: width 0.8s;
+}
+
+
+#chartLegend{
+    right:10px;
+    background: url("../image/chart-legend.PNG") no-repeat 100%;
+}
+
+#classifyLegend{
+    right: 78px;
+    background: url("../image/classify-legend.PNG") no-repeat 100%;
+}
+
+/*地图打印过程中*/
+#loading{
+    display: none;
+    width: 160px;
+    height: 56px;
+    position: absolute;
+    top: 50%;
+    left:50%;
+    line-height: 56px;
+    color: #fff;
+    padding-left: 60px;
+    font-size: 15px;
+    background: #000 url("../image/loading.gif") no-repeat 10px 50%;
+    opacity: 0.7;
+    z-index: 9999;
+    -moz-border-radius: 20px;
+    -webkit-border-radius: 20px;
+    border-radius: 20px;
+    filter: progid:DXImageTransform.Microsoft.Alpha(opacity=70);
+}
+
+.right-top-bottom{
+    position: absolute;
+    left: 60px;
+    z-index: 999;
+    color: white;
+    width: 32px;
+    height: 32px;
+    text-align: center;
+    padding: 6px 0;
+    margin-bottom: 0;
+    /*background-color: #223347;*/
+    background-color: white;
+    border:1px solid #223347;;
+    cursor: pointer;
+    -webkit-transition:1.5s;
+    -moz-transition:1.5s;
+    -o-transition:1.5s;
+    -ms-transition:1.5s;
+    transition:1.5s;
+    /*-moz-border-radius:4px;*/
+    /*-webkit-border-radius:4px;*/
+    /*border-radius: 4px;*/
+}
+
+.right-top-bottom span{
+    font-size: 16px;
+    color: black;
+}
+
+#map-save{
+    top: 20px;
+    border-radius: 5px 5px 0 0;
+}
+
+#map-legend{
+    top: 52px;
+    border-radius: 0 0 5px 5px;
+}
+
+/*设置infoWindow的右上角按钮不可见*/
+.esriPopup .actionsPane .zoomTo {
+    display: none;
+}
+.esriPopup .titleButton.close {
+    display: none;
+}
+.esriPopup .titleButton.maximize {
+    display: none;
+}
+

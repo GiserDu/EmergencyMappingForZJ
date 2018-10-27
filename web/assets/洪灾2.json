@@ -1,0 +1,204 @@
+[
+  {
+    "ID":"WMidCN010101",
+    "mapScale": "国家",
+    "baseLayer":
+    {
+      "type": "vector", //底图类型(矢量/影像/地形)
+      "url": "" //底图服务地址(供用户选择)
+    },
+    "serviceLayer":
+    {
+      "modules":
+      [
+
+      ]
+
+    },
+    "featureLayer":
+    {
+      "modules":
+      [
+        {
+
+          "type": "polygon", //要素类型
+          "name": "百分之70概率范围", //要素图层模型名称(如:湖泊)
+          "data": "http://47.96.162.249:6080/arcgis/rest/services/project6/flood/MapServer/8" ,//要素数据来源(用户前端输入)
+          "style": {
+            "opacity": "0.5",
+            "render": {
+              "type": "esriSFS",
+              "color": [255,160,122,255],
+              "outline": {
+                "type": "esriSLS",
+                "style": "esriSLSSolid",
+                "color": [255,150,132, 255],
+                "width": 1
+              },
+              "style": "esriSFSSolid"
+            }
+          }
+        },
+        {
+
+          "type": "point", //要素类型
+          "name": "热带低压", //要素图层模型名称(如:湖泊)
+          "data": "http://47.96.162.249:6080/arcgis/rest/services/project6/flood/MapServer/2", //要素数据来源(用户前端输入)
+          "style": {
+            "opacity": "1", //图层透明度
+            //1.SimpleLineSymbol的符号配置(可直接以json为参数构造对象)
+            "render": {
+              "angle": 0,
+              "xoffset": 0,
+              "yoffset": 0,
+              "type": "esriSMS",
+              "style": "esriSMSCircle",
+              "color": [255,160,122, 255],
+              "size": 5,
+              "outline": {
+                "color":[255,11, 11, 255],
+                "width": 0.1,
+                "type": "esriSLS",
+                "style": "esriSLSSolid"
+              }
+            }
+          }
+        },
+        {
+
+          "type": "point", //要素类型
+          "name": "热带风暴", //要素图层模型名称(如:湖泊)
+          "data": "http://47.96.162.249:6080/arcgis/rest/services/project6/flood/MapServer/1" ,//要素数据来源(用户前端输入)
+          "style": {
+            "opacity": "1", //图层透明度
+            //1.SimpleLineSymbol的符号配置(可直接以json为参数构造对象)
+            "render": {
+              "angle": 0,
+              "xoffset": 0,
+              "yoffset": 0,
+              "type": "esriSMS",
+              "style": "esriSMSCircle",
+              "color": [255,127,80, 255],
+              "size": 5,
+              "outline": {
+                "color":[255,11, 11, 255],
+                "width": 0.1,
+                "type": "esriSLS",
+                "style": "esriSLSSolid"
+              }
+            }
+          }
+        },
+        {
+
+          "type": "point", //要素类型
+          "name": "强热带风暴", //要素图层模型名称(如:湖泊)
+          "data": "http://47.96.162.249:6080/arcgis/rest/services/project6/flood/MapServer/4", //要素数据来源(用户前端输入)
+          "style": {
+            "opacity": "1", //图层透明度
+            //1.SimpleLineSymbol的符号配置(可直接以json为参数构造对象)
+            "render": {
+              "angle": 0,
+              "xoffset": 0,
+              "yoffset": 0,
+              "type": "esriSMS",
+              "style": "esriSMSCircle",
+              "color": [255,69,0,255],
+              "size": 5,
+              "outline": {
+                "color":[255,11, 11, 255],
+                "width": 0.1,
+                "type": "esriSLS",
+                "style": "esriSLSSolid"
+              }
+            }
+          }
+        },
+        {
+
+          "type": "point", //要素类型
+          "name": "台风", //要素图层模型名称(如:湖泊)
+          "data": "http://47.96.162.249:6080/arcgis/rest/services/project6/flood/MapServer/0", //要素数据来源(用户前端输入)
+          "style": {
+            "opacity": "1", //图层透明度
+            //1.SimpleLineSymbol的符号配置(可直接以json为参数构造对象)
+            "render": {
+              "angle": 0,
+              "xoffset": 0,
+              "yoffset": 0,
+              "type": "esriSMS",
+              "style": "esriSMSCircle",
+              "color": [205,92,92,255],
+              "size": 5,
+              "outline": {
+                "color":[255,11, 11, 255],
+                "width": 0.1,
+                "type": "esriSLS",
+                "style": "esriSLSSolid"
+              }
+            }
+          }
+        },
+        {
+
+          "type": "point", //要素类型
+          "name": "强台风", //要素图层模型名称(如:湖泊)
+          "data": "http://47.96.162.249:6080/arcgis/rest/services/project6/flood/MapServer/3", //要素数据来源(用户前端输入)
+          "style": {
+            "opacity": "1", //图层透明度
+            //1.SimpleLineSymbol的符号配置(可直接以json为参数构造对象)
+            "render": {
+              "angle": 0,
+              "xoffset": 0,
+              "yoffset": 0,
+              "type": "esriSMS",
+              "style": "esriSMSCircle",
+              "color": [255,99,71,255],
+              "size": 5,
+              "outline": {
+                "color":[255,11, 11, 255],
+                "width": 0.1,
+                "type": "esriSLS",
+                "style": "esriSLSSolid"
+              }
+            }
+          }
+        },
+        {
+
+          "type": "point", //要素类型
+          "name": "超强台风", //要素图层模型名称(如:湖泊)
+          "data": "http://47.96.162.249:6080/arcgis/rest/services/project6/flood/MapServer/5", //要素数据来源(用户前端输入)
+          "style": {
+            "opacity": "1", //图层透明度
+            //1.SimpleLineSymbol的符号配置(可直接以json为参数构造对象)
+            "render": {
+              "angle": 0,
+              "xoffset": 0,
+              "yoffset": 0,
+              "type": "esriSMS",
+              "style": "esriSMSCircle",
+              "color": [139,0,0,255],
+              "size": 5,
+              "outline": {
+                "color":[255,11, 11, 255],
+                "width": 0.1,
+                "type": "esriSLS",
+                "style": "esriSLSSolid"
+              }
+            }
+          }
+        }
+      ]
+    },
+    "statisticLayer":
+    {
+      //统计图模型数组(包括:分级图/统计图/多种组合   module<-->layer对应)
+      "modules":
+      [
+
+      ]
+    }
+
+  }
+]

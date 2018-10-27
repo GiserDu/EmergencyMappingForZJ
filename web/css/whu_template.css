@@ -1,0 +1,499 @@
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+    -moz-box-sizing: border-box;
+    -webkit-box-sizing: border-box;
+    height: 100%;
+    width: 100%;
+}
+
+body{
+	background: url('../image/touming.png'),
+    url('../image/chengshi.png') ;
+    padding-top: 0px;
+    height: 100%;
+}
+
+#templateSearch{
+    height: 80px;
+    padding-top: 10px;
+    padding-left: 10px;
+    width: 229px;
+}
+
+.search-button{
+    text-decoration: none;
+    width: 100px;
+    margin-left: 28%;
+    margin-top: 5px;
+    height: 25px;
+    line-height: 25px;
+    padding: 0 10px;
+    font-size: 12px;
+    display: inline-block;
+    vertical-align: middle;
+    background-color: #009688;
+    color: #fff;
+    white-space: nowrap;
+    text-align: center;
+    border: none;
+    border-radius: 2px;
+    cursor: pointer;
+    opacity: 0.9;
+}
+
+#templateTypeList{
+	width: 100%;
+    max-width: 240px;
+    margin: 0;
+    background: #100f0f00;
+    -webkit-border-radius: 4px;
+    -moz-border-radius: 4px;
+    border-radius: 4px;
+    height: calc(100% - 215px);
+    overflow: auto;
+}
+
+#templateType{
+    width: 240px;
+    height:100%;
+    float:left;
+	position:fixed; 
+	top:0px;
+	right:0px;
+	background: url('../image/touming.png'),url('../image/touming.png');
+    overflow: hidden;
+    border-right: 1px solid #4b4a5e;
+}
+.backBtn{
+  text-decoration:none;
+  width: 50%;
+  margin-left: 25%;
+  margin-top: -15px;
+  height: 30px;
+  line-height: 30px;
+  padding: 0 10px;
+  font-size: 12px;
+  display: inline-block;
+  vertical-align: middle;
+  background-color: #009688;
+  color: #fff;
+  white-space: nowrap;
+  text-align: center;
+  border: none;
+  border-radius: 2px;
+  cursor: pointer;
+  opacity: 0.9;
+}
+
+
+li {
+    list-style: none;
+}
+
+.link {
+    cursor: pointer;
+    display: block;
+    padding: 15px 15px 15px 42px;
+    color: #e2e2e2;
+    font-size: 15px;
+    font-weight: 500;
+    border-bottom: 1px solid #202832;
+    position: relative;
+    -webkit-transition: all 0.4s ease;
+    -o-transition: all 0.4s ease;
+    transition: all 0.4s ease;
+}
+
+.accordion{
+	width: 100%;
+    max-width: 240px;
+    margin: 0;
+    background: #7798b5;
+    -webkit-border-radius: 4px;
+    -moz-border-radius: 4px;
+    border-radius: 4px;
+}   
+
+#templateTypeList .link
+{ 
+height: auto;
+}
+
+#templateTypeList li
+{ 
+height: auto;
+}
+
+#templateTypeList .link:hover
+{ 
+background-color:#16436b;
+}
+
+.link.active {
+	background-color:#16436b;
+}
+
+.link.templateTitle{
+	cursor: default;
+    display: block;
+    height: 55px;
+    padding: 15px 15px 15px 42px;
+    color: #e2e2e2;
+    font-size: 18px;
+    font-weight: 500;
+    border-bottom: 1.5px solid #202832;
+    position: relative;
+    -webkit-transition: all 0.4s ease;
+    -o-transition: all 0.4s ease;
+    transition: all 0.4s ease;
+}
+
+#templateTitleLi{
+	position: absolute;
+	left: 12px;
+	top:18px;
+}
+
+#searchTitleLi{
+    position: absolute;
+    left: 12px;
+    top:18px;
+}
+
+tr td{
+	height:33%;
+	width: calc(33% - 80px);
+	vertical-align:bottom;
+	text-align:center;
+	font-size: 16px;
+}
+
+.tableImg {
+	/*display: inline-block;*/
+	width: 418px;
+	height: 256px;
+	border: 1px solid #beceeb;
+	font-size: 18px;
+	text-align: center;
+  vertical-align: middle;
+  
+}
+
+.flow-default li{
+	float:left; 
+	display: inline-block;
+	margin-right: 35px;
+    margin-top: 35px;
+}
+
+.tableImg img{
+	height:256px;
+	width: 418px;
+}
+
+#LAY_demo2{
+	height:100%;
+	width: 100%;
+}
+
+#templateImg{
+	height:100%;
+	width: calc(100% - 240px);
+  float: left;
+  overflow: auto;
+}
+
+td{
+	/*background-image: url(../image/模板1.jpg);什么意思？*/
+	background-position: 50% 11px;
+	background-repeat:no-repeat;
+}
+
+#templateHead{
+	width: 100%;
+	height: 32px;
+    font-size: 24px;
+    text-align: center;
+    vertical-align: middle;
+    font-weight: bold;
+    color: whitesmoke;
+    float: right;
+    margin: 15px 25px 0px;
+}
+
+.flow-default li {
+	display: inline-block;
+	margin: 0 5px;
+	font-size: 18px;
+	margin: 25px 0 10px 7%;
+	text-align: center;
+	height:256px;
+	width: 418px;
+	color: whitesmoke;
+	font-family: "微软雅黑";
+	font-weight: bold;
+	
+}
+
+.flow-default img{width: 100%; height: 100%;}
+
+.templateTitle{
+	height: auto;
+}
+
+.hovereffect {
+	width: 100%;
+	height: 100%;
+	float: left;
+	overflow: hidden;
+	position: relative;
+	text-align: center;
+	cursor: default;
+}
+
+.hovereffect .overlay {
+	width: 100%;
+	height: 100%;
+	position: absolute;
+	overflow: hidden;
+	top: 0;
+	left: 0;
+	opacity: 0;
+	background-color: rgba(0, 0, 0, 0.3);
+	-webkit-transition: all .4s ease-in-out;
+	transition: all .4s ease-in-out
+}
+
+.hovereffect img {
+	display: block;
+	position: relative;
+	-webkit-transition: all .4s linear;
+	transition: all .4s linear;
+}
+
+.hovereffect h2 {
+	text-transform: uppercase;
+	color: #fff;
+	text-align: center;
+	position: relative;
+	font-size: 17px;
+	background: rgba(0, 0, 0, 0.05);
+	-webkit-transform: translatey(-100px);
+	-ms-transform: translatey(-100px);
+	transform: translatey(-100px);
+	-webkit-transition: all .2s ease-in-out;
+	transition: all .2s ease-in-out;
+	padding: 10px;
+}
+
+.hovereffect a.info {
+	text-decoration: none;
+	display: inline-block;
+	text-transform: uppercase;
+	color: #fff;
+	border: 1px solid #fff;
+	background-color: transparent;
+	opacity: 0;
+	filter: alpha(opacity=0);
+	-webkit-transition: all .2s ease-in-out;
+	transition: all .2s ease-in-out;
+	margin: 50px 0 0;
+	padding: 7px 14px;
+}
+
+.hovereffect a.info:hover {
+	box-shadow: 0 0 5px #fff;
+}
+
+.hovereffect:hover img {
+	-ms-transform: scale(1.2);
+	-webkit-transform: scale(1.2);
+	transform: scale(1.2);
+}
+
+.hovereffect:hover .overlay {
+	opacity: 1;
+	filter: alpha(opacity=100);
+}
+
+.hovereffect:hover h2,
+.hovereffect:hover a.info {
+	opacity: 1;
+	filter: alpha(opacity=100);
+	-ms-transform: translatey(0);
+	-webkit-transform: translatey(0);
+	transform: translatey(0);
+}
+
+.hovereffect:hover a.info {
+	-webkit-transition-delay: .2s;
+	transition-delay: .2s;
+}
+
+.ehover1 h2 {
+    -moz-transform: translatey(-100px);
+    -ms-transform: translatey(-100px);
+    -o-transform: translatey(-100px);
+    -webkit-transform: translatey(-100px);
+    transform: translatey(-100px);
+    opacity: 0;
+    -moz-transition: all 0.2s ease-in-out;
+    -o-transition: all 0.2s ease-in-out;
+    -webkit-transition: all 0.2s ease-in-out;
+    transition: all 0.2s ease-in-out;
+}
+
+.hover {
+  width: 100%;
+  height: 100%;
+  float: left;
+  overflow: hidden;
+  position: relative;
+  text-align: center;
+  cursor: default;
+}
+
+	
+.hover {
+  width: 100%;
+  height: 100%;
+  float: left;
+  overflow: hidden;
+  position: relative;
+  text-align: center;
+  cursor: default;
+}
+
+.hover .overlay {
+  width: 100%;
+  height: 100%;
+  position: absolute;
+  overflow: hidden;
+  top: 0;
+  left: 0;
+}
+
+.hover img {
+  display: block;
+  position: relative;
+}
+
+.hover h2 {
+  text-transform: uppercase;
+  color: #fff;
+  text-align: center;
+  position: relative;
+  font-size: 17px;
+  padding: 10px;
+  background: rgba(0, 0, 0, 0.6);
+  height: 42px;
+  margin-top: 12%;
+}
+
+.hover button.info {
+  display: inline-block;
+  text-decoration: none;
+  padding: 7px 14px;
+  text-transform: uppercase;
+  color: #fff;
+  border: 1px solid #fff;
+  margin: 50px 2px 0 0;
+  border-radius: 0px;
+  background-color: transparent;
+  -webkit-appearance: button;
+  cursor: pointer;
+  height: 44px;
+  width: 30%;
+  margin: 50% 2px 0 0;
+}
+
+.hover button.info:hover {
+  box-shadow: 0 0 5px #fff;
+}
+
+/* styling to remove box shadow and border from buttons for last few effects */
+
+.hover button.nullbutton {
+  border: none;
+  padding: 0px;
+  margin: 0px;
+}
+
+.hover button.nullbutton:hover {
+  box-shadow: none;
+}
+
+.ehover1 img {
+  transition: all 0.4s linear;
+  -moz-transition: all 0.4s linear;
+  -o-transition: all 0.4s linear;
+  -webkit-transition: all 0.4s linear;
+  transition: all 0.4s linear;
+}
+
+.ehover1 .overlay {
+  opacity: 0;
+  background-color: rgba(0,0,0, 0.5);
+  -moz-transition: all 0.4s ease-in-out;
+  -o-transition: all 0.4s ease-in-out;
+  -webkit-transition: all 0.4s ease-in-out;
+  transition: all 0.4s ease-in-out;
+}
+
+.ehover1 h2 {
+  -moz-transform: translatey(-100px);
+  -ms-transform: translatey(-100px);
+  -o-transform: translatey(-100px);
+  -webkit-transform: translatey(-100px);
+  transform: translatey(-100px);
+  opacity: 0;
+  -moz-transition: all 0.2s ease-in-out;
+  -o-transition: all 0.2s ease-in-out;
+  -webkit-transition: all 0.2s ease-in-out;
+  transition: all 0.2s ease-in-out;
+}
+
+.ehover1 button.info {
+  opacity: 0;
+  -moz-transition: all 0.2s ease-in-out;
+  -o-transition: all 0.2s ease-in-out;
+  -webkit-transition: all 0.2s ease-in-out;
+  transition: all 0.2s ease-in-out;
+}
+
+.ehover1:hover img {
+  -moz-transform: scale(1.2);
+  -ms-transform: scale(1.2);
+  -o-transform: scale(1.2);
+  -webkit-transform: scale(1.2);
+  transform: scale(1.2);
+}
+
+.ehover1:hover .overlay {
+  opacity: 1;
+}
+
+.ehover1:hover h2, .ehover1:hover button.info {
+  opacity: 1;
+  -moz-transform: translatey(0);
+  -ms-transform: translatey(0);
+  -o-transform: translatey(0);
+  -webkit-transform: translatey(0);
+  transform: translatey(0);
+}
+
+.ehover1:hover button.info {
+  -moz-transition-delay: 0.2s;
+  -o-transition-delay: 0.2s;
+  -webkit-transition-delay: 0.2s;
+  transition-delay: 0.2s;
+}
+
+.input-group{
+    weight: 34px;
+}
+ 
+
+

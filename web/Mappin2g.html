@@ -1,0 +1,375 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+
+<head>
+	<meta charset="utf-8">
+	<meta http-equiv="X-UA-Compatible" content="IE=edge">
+	<meta name="viewport" content="width=device-width, initial-scale=1">
+	<meta name="keywords" content="应急,灾害,快速制图" />
+	<meta name="description" content="">
+	<title>应急自适应快速制图</title>
+	<link href="css/reset.css" rel="stylesheet">
+	<link href="css/bootstrap.min.css" rel="stylesheet">
+	<link href="css/bootstrap-slider.min.css" rel="stylesheet">
+	<link href='css/fonts.css' rel='stylesheet' type='text/css'>
+	<!-- Iconos -->
+	<link href="css/font-awesome.min.css" rel="stylesheet">
+	<link href="css/whu_Mapping.css" rel="stylesheet">
+	<link href="css/whu_accordion.css" rel="stylesheet">
+	<link href="css/whu_plot.css" rel="stylesheet">
+	<link href="css/modules/layer/default/layer.css" rel="stylesheet">
+	<link href="css/whu_featureLayer.css" rel="stylesheet">
+	<link href="css/whu_serviceLayer.css" rel="stylesheet">
+	<link rel="stylesheet" href="http://localhost:8080/EmergencyMapping/js/lib/arcgis_js_api/library/3.24/3.24/esri/css/esri.css">
+	<link rel="stylesheet" href="http://localhost:8080/EmergencyMapping/js/lib/arcgis_js_api/library/3.24/3.24/dijit/themes/claro/claro.css">
+
+	<!--arcgis api加载天地图底图-->
+	<!--测试服务器ip:10.5.201.29-->
+	<script type="text/javascript">
+		var dojoConfig = {
+			async: true, //是否异步
+			parseOnLoad: true,
+			packages: [{ //解释：require(["js/.."],function(){}) 中  js/ 即为 location的值
+				name: "js", //对应require引用包里的js
+				location: location.pathname.replace(/\/[^/]*$/, '') + '/js' //对应的路径
+			}]
+		};
+	</script>
+
+	<link href="js/layui/css/layui.css" rel="stylesheet">
+    <link rel="stylesheet" type="text/css" href="js/sweetalert_lib/sweetalert_bk.css">
+</head>
+
+<body>
+	<div id="main">
+		<div id="mapContainer">
+			<!-- 		<div class="map-info">
+			<label id="zoom-level">缩放级别：5</label>
+			<label id="map-center">地图视图中心点：东0°0′0.00″  北0°0′0.00″ </label>
+			<label id="mouse-coordinate">当前鼠标位置：东经 160  北纬 55</label>
+
+		</div> -->
+            <div id="legend-container">
+                <img id="legend" class="legend">
+                <span id="legend-remove" class="glyphicon glyphicon-remove"></span>
+            </div>
+
+            <div id="twoLegend">
+                <div id="chartLegend" class="legend-menu"></div>
+                <div id="classifyLegend" class="legend-menu"></div>
+            </div>
+
+			<!--打印模态框-->
+			<div class="modal fade" id="map-save-Modal" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
+				<div class="modal-dialog" role="document" style="width:470px;">
+					<div class="modal-content">
+						<div class="modal-header">
+							<button type="button" class="close" data-dismiss="modal" aria-hidden="true">
+								&times;
+							</button>
+							<label class="modal-title" id="printLabel">地图输出</label>
+						</div>
+						<div class="modal-body" style="padding:5px 40px;">
+							<form class="form-horizontal" role="form">
+								<div class="form-group" style="margin-bottom: 3px">
+									<div class="input-div">
+										<label class="control-label">地图名称</label>
+										<input id="mapTitle" type="text" class="form-control" placeholder="请输入地图名称" style="width:410px;" />
+									</div>
+								</div>
+								<div class="form-group" style="margin-bottom: 16px">
+									<div class="input-div">
+										<label class="control-label ">版权信息</label>
+										<input id="copyrightText" type="text" class="form-control" placeholder="请输入制作人及版权信息" style="width:410px;" />
+									</div>
+								</div>
+								<!--<div class="form-group" style="margin-bottom: 20px">-->
+								<!--<div class="input-div">-->
+								<!--<label class="control-label ">比&nbsp;例&nbsp;尺&nbsp;</label>-->
+								<!--<input id="scaleText" type="text" class="form-control" value="3500000" style="width:370px;" />-->
+								<!--</div>-->
+								<!--</div>-->
+								<div class="print_main" style="width:410px;height:200px;margin:0 auto">
+									<div class="print_left" style="float:left;width:45%;height:100%;margin-top:8px">
+										<div class="form-group" >
+											<label class="control-label " style="float:left;margin-right:10px;margin-bottom:5px">输出纸张</label>
+											<select id="layoutpaper" class="form-control" style="width:130px;" >
+												<!--<option value="pdf">pdf</option>-->
+												<option value="A4">A4</option>
+												<option value="A3">A3</option>
+											</select>
+										</div>
+										<div class="form-group" >
+											<label class="control-label " style="float:left;margin-right:10px;margin-bottom:5px">输出版式</label>
+											<select id="layout" class="form-control" style="width:130px;" >
+												<option value="Landscape_01" layout="image/layout/Landscape_01.png">横向版式1</option>
+												<option value="Landscape_02" layout="image/layout/Landscape_02.png">横向版式2</option>
+												<option value="Landscape_03" layout="image/layout/Landscape_03.png">横向版式3</option>
+												<option value="Portrait_01" layout="image/layout/Portrait_01.png">纵向版式1</option>
+												<option value="Portrait_02" layout="image/layout/Portrait_02.png">纵向版式2</option>
+												<option value="Portrait_03" layout="image/layout/Portrait_03.png">纵向版式3</option>
+											</select>
+										</div>
+										<div class="form-group" >
+											<label class="control-label " style="float:left;margin-right:10px;margin-bottom:5px">输出精度</label>
+											<select id="dpi" class="form-control" style="width:130px;" >
+												<!--<option value="pdf">pdf</option>-->
+												<option value="120">120dpi</option>
+												<option value="200">200dpi</option>
+												<option value="300">300dpi</option>
+											</select>
+										</div>
+										<div class="form-group" >
+											<label class="control-label " style="float:left;margin-right:10px;">输出格式</label>
+											<select id="format" class="form-control" style="width:130px;" >
+												<!--<option value="pdf">pdf</option>-->
+												<option value="png32">png32</option>
+												<option value="png8">png8</option>
+												<option value="jpg">jpg</option>
+												<option value="gif">gif</option>
+											</select>
+										</div>
+									</div>
+
+									<div class="print_right" style="float:right;width:55%;height:100%;display:table-cell;text-align:center; vertical-align:middle;font-size: 124px;">
+										<img alt="" id="layoutPreview" src="image/layout/Landscape_01.png" style="vertical-align:middle;float: none;margin: auto"/>
+									</div>
+								</div>
+
+								<div class="modal-footer">
+									<button type="button" data-dismiss="modal" class="btn btn-default" data-dismiss="modal">关闭</button>
+									<button type="button" data-dismiss="modal" class="btn btn-primary" id="printbt">输出</button>
+								</div>
+							</form>
+						</div>
+					</div>
+				</div>
+			</div>
+			<!--END 打印模态框-->
+
+			<!--打印进度条-->
+			<div id="loading" class="loading">正在输出...</div>
+		</div>
+		<div id="nav-right">
+			<!-- 左侧导航栏(未来是要动态生成) -->
+			<ul id="accordion" class="accordion">
+				<li id="baseLayer" class="default open">
+					<div class="link">
+						<i class="fa fa-globe" aria-hidden="true"></i>地理底图图层
+						<i class="fa fa-chevron-down"></i>
+					</div>
+					<ul class="submenu">
+						<li>
+							<div class="indentify">
+								<i class="fa fa-heart" aria-hidden="true"></i>
+								<a href="#">矢量底图</a>
+							</div>
+						</li>
+						<li>
+							<div class="indentify">
+								<i class="" aria-hidden="true"></i>
+								<a href="#">影像底图</a>
+							</div>
+						</li>
+						<li>
+							<div class="indentify">
+								<i class="" aria-hidden="true"></i>
+								<a href="#">地形底图</a>
+							</div>
+						</li>
+					</ul>
+				</li>
+				<li id="serviceLayer">
+					<div class="link">
+						<i class="fa fa-map" aria-hidden="true"></i>专题服务图层
+						<i class="fa fa-chevron-down"></i>
+					</div>
+					<ul class="submenu">
+						<li>
+							<a href="#">待开发</a>
+						</li>
+					</ul>
+				</li>
+				<li id="featureLayer" class="default open">
+					<div class="link">
+						<i class="fa fa-bandcamp" aria-hidden="true"></i>要素图层
+						<i class="fa fa-chevron-down"></i>
+					</div>
+					<ul class="submenu" id="featureLayerSort">
+					</ul>
+				</li>
+				<li id="statisticLayer">
+					<div class="link">
+						<i class="fa fa-pie-chart" aria-hidden="true"></i>统计图层
+						<i class="fa fa-chevron-down"></i>
+					</div>
+					<ul class="submenu">
+						<li>
+							<a href="#" onclick="showSliderDiv()">统计图层设置</a>
+						</li>
+						<li>
+							<a href="#" onclick="hideSliderDiv()">取消</a>
+						</li>
+
+					</ul>
+				</li>
+				<li id="plotLayer">
+					<div class="link">
+						<i class="fa fa-paint-brush" aria-hidden="true"></i>地图标绘
+						<i class="fa fa-chevron-down"></i>
+					</div>
+					<ul class="submenu">
+						<li>
+							<a href="#" onclick="showPlotDiv()">态势符号标绘</a>
+						</li>
+						<li>
+							<a href="#" onclick="hidePlotDiv()">取消</a>
+						</li>
+					</ul>
+				</li>
+			</ul>
+			<a class="layui-btn layui-btn-small" style=" width: 50%; margin-left: 25%;margin-top: 25px;" href="template.html">返回上一级</a>
+		</div>
+		<div id="map-save" class="right-top-bottom" title="打印">
+			<span class="glyphicon glyphicon-print" data-toggle="modal" data-target="#map-save-Modal"></span>
+		</div>
+		<div id="map-legend" class="right-top-bottom" title="图例">
+			<span class="glyphicon glyphicon-th"></span>
+		</div>
+		<div class="slider-menu">
+			<!--<div class="tab-pane" id="slider-control">-->
+			<!--<span class="glyphicon glyphicon-chevron-right"></span>-->
+			<!--</div>-->
+
+			<div class="slider-content" id="chart-style">
+				<div role="tabpanel" class="tab-pane fade active in" id="profile" aria-labelledby="profile-tab">
+					<h5>指标选择</h5>
+					<h6>请选择专题指标：</h6>
+					<div class="panel-body panel-collapse collapse in" id="map-theme-check" role="tabpanel">
+						<div class="panel-group table-responsive" id="themeaccordion" role="tablist">
+						</div>
+					</div>
+					<hr class="slider-border" style="border:1px dashed #987cb9" width="100%" color=#987cb9 SIZE=1>
+
+
+					<h5>统计符号</h5>
+					<h6>符号类型：</h6>
+					<div class="sym-selected" id="chart-selected">
+						<div class="select_title" id="chart_select">
+							<img src="image/chartIcon/010101.png">
+						</div>
+						<ul class="select_content" style="display:none; z-index:1200;position: absolute;width: 239px;height: 200px;overflow:scroll;background-color: whitesmoke">
+						</ul>
+					</div>
+
+					<h6>色彩方案：</h6>
+					<div class="sym-selected" id="color-solution">
+						<div class="select_title" style="text-align: center;" >
+							<img style="width:100%;" name="青黄色系" src="image/gradeIcon/10/6.jpg">
+						</div>
+						<ul class="select_content" style="display:none; z-index:1200;position: absolute;width: 239px;height: 150px; overflow-y: scroll;background-color: whitesmoke">
+						</ul>
+					</div>
+
+					<!--<h6>时间定制：</h6>-->
+					<!--<select id="year_select" class="form-control">-->
+					<!--<option value="2016">2016年</option>-->
+					<!--<option value="2015">2015年</option>-->
+					<!--<option value="2014">2014年</option>-->
+					<!--</select>-->
+
+					<div style="margin-top:0px;">
+						<div class="title6"><h6 class="col-md-5">大小：</h6><input  cata="chartSize" id="chartSize" class="data_slider" data-slider-id="chartSizeSlider" type="text" data-slider-min="5" data-slider-max="200" data-slider-step="1" data-slider-value="60"/></div>
+						<div class="title6"><h6 class="col-md-5">透明度：</h6><input  cata="chartOpacity" id="chartOpacity" class="data_slider" type="text" data-slider-min="0" data-slider-max="100" data-slider-step="1" data-slider-value="90"/></div>
+					</div>
+
+					<!--<div class="checkbox">-->
+					<!--<label> <input id="isLabel" type="checkbox">-->
+					<!--是否显示数值-->
+					<!--</label>-->
+					<!--</div>-->
+					<!--<hr width="100%" color="#757575" style="margin:13px 0; border-top:1px solid #757575"/>-->
+
+					<hr class="slider-border" style="border:1px dashed #987cb9" width="100%" color=#987cb9 SIZE=1>
+
+					<h5>分级符号</h5>
+					<div style="margin-top:10px;">
+						<span style="font-size:12px;color: white">分级数量：</span>
+						<div class="quantity-form" style="display: inline-block;">
+							<input autocomplete="off" type="text" class="itxt" value="5" id="changeQuantity">
+						</div>
+					</div>
+					<h6>分级色系：</h6>
+					<div class="sym-selected" id="color-selected">
+						<div class="select_title" style="text-align: center" >
+							<img  style="width:100%;" color1="#FFFEE3" color2="#00935B" src="image/gradeIcon/10/4.jpg">
+						</div>
+						<ul class="select_content" style="display:none; z-index:999;position: absolute;width:239px;height: 150px; overflow-y: scroll;background-color: whitesmoke">
+						</ul>
+					</div>
+
+					<h6>分级模型：</h6>
+					<select id="model" class="form-control">
+						<option value="界限等分模型">界限等分模型</option>
+						<option value="间隔等分模型">间隔等分模型</option>
+						<option value="界限等比模型">界限等比模型</option>
+						<option value="间隔等比模型">间隔等比模型</option>
+						<!--<option value="standard-deviation">标准差分段</option>-->
+						<!--<option value="standard-deviation">自定义分段</option>-->
+					</select>
+
+					<div style="margin-top:2px;">
+						<div class="title6"><h6 class="col-md-5">透明度：</h6><input  cata="classOpacity" id="classOpacity" class="data_slider" type="text" data-slider-min="0" data-slider-max="100" data-slider-step="1" data-slider-value="95"/></div>
+					</div>
+
+					<!--<div style="margin-top:8px;">-->
+					<!--<button id="apply" class="btn btn-info" type="button" style="width:100%;margin:5px 0px;">应用</button>-->
+					<!--</div>-->
+				</div>
+			</div>
+		</div>
+		<div id="mapNameInfo"></div>
+		<div id="info"><div id="legendDiv"></div></div>
+	</div>
+
+	<script type="text/javascript" src="js/jquery-3.2.1.js"></script>
+	<!--<script src="js/jquery-3.1.0.min.js"></script>-->
+	<script type="text/javascript" src="js/bootstrap.min.js"></script>
+	<script type="text/javascript" src="js/bootstrap-slider.min.js"></script>
+    <script type="text/javascript" src="js/sweetalert_lib/sweetalert.min.js"></script>
+	<!--<script type="text/javascript" src="js/lib/arcgis_js_api/library/3.24/3.24/init.js"></script>-->
+	<!--重命名了一下init，改成了initMap-->
+	<script src="js/Sortable.min.js"></script>
+	<script src="http://localhost:8080/EmergencyMapping/js/lib/arcgis_js_api/library/3.24/3.24/init.js"></script>
+	<!--配置文件-->
+	<script src="js/whu_config.js"></script>
+
+	<script src="js/whu_Mapping.js"></script>
+	<script src="js/data-con.js"></script>
+	<script type="text/javascript" src="js/classLayer.js"></script>
+	<script type="text/javascript" src="js/Print.js"></script>
+<!-- 	<script src="http://www.jq22.com/jquery/jquery-ui-1.11.0.js"></script>
+ -->
+
+
+	<script src="js/nav-right.js"></script>
+
+	<!--标绘界面生成-->
+	<script src="js/plotIF.js"></script>
+	<script src="js/layui/layui.js"></script>
+	<!--原生js代码-->
+	<script src="js/common.js"></script>
+	<!--标绘核心代码-->
+	<script src="js/whu_plot.js"></script>
+	<!--颜色盘-->
+	<script src="js/tinycolor.js"></script>
+	<script src="js/jscolor.js"></script>
+
+	<script src="js/whu_featureLayer.js"></script>
+	<script src="js/whu_featureLayerEdit.js"></script>
+
+	<script src="js/whu_serviceLayer.js"></script>
+
+</body>
+
+</html>

@@ -1,0 +1,146 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<web-app xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns="http://java.sun.com/xml/ns/javaee" xsi:schemaLocation="http://java.sun.com/xml/ns/javaee http://java.sun.com/xml/ns/javaee/web-app_3_0.xsd" id="WebApp_ID" version="3.0">
+    <display-name>geoInfoHB</display-name>
+    <welcome-file-list>
+        <welcome-file>index.html</welcome-file>
+    </welcome-file-list>
+
+    <servlet>
+        <servlet-name>chartLayerServlet</servlet-name>
+        <servlet-class>com.zz.servlet.ChartLayerServlet</servlet-class>
+    </servlet>
+    <servlet>
+        <servlet-name>printMapServlet</servlet-name>
+        <servlet-class>com.zz.servlet.printMapServlet</servlet-class>
+    </servlet>
+    <servlet>
+        <servlet-name>ClassLayerServlet</servlet-name>
+        <servlet-class>com.zz.servlet.ClassLayerServlet</servlet-class>
+    </servlet>
+    <servlet>
+        <servlet-name>ZipFileServlet</servlet-name>
+        <servlet-class>telecarto.geoinfo.servlets.ZipFileServlet</servlet-class>
+    </servlet>
+    <servlet>
+        <description>This is the description of my J2EE component</description>
+        <display-name>This is the display name of my J2EE component</display-name>
+        <servlet-name>GetThematicMapServlet</servlet-name>
+        <servlet-class>telecarto.geoinfo.servlets.GetThematicMapServlet</servlet-class>
+    </servlet>
+    <servlet>
+        <description>This is the description of my J2EE component</description>
+        <display-name>This is the display name of my J2EE component</display-name>
+        <servlet-name>EditMapServlet</servlet-name>
+        <servlet-class>telecarto.geoinfo.servlets.EditMapServlet</servlet-class>
+    </servlet>
+    <servlet>
+        <description>This is the description of my J2EE component</description>
+        <display-name>This is the display name of my J2EE component</display-name>
+        <servlet-name>GetCatagoryServlet</servlet-name>
+        <servlet-class>telecarto.geoinfo.servlets.GetCatagoryServlet</servlet-class>
+    </servlet>
+    <servlet>
+        <description>This is the description of my J2EE component</description>
+        <display-name>This is the display name of my J2EE component</display-name>
+        <servlet-name>GetIndicatorServlet</servlet-name>
+        <servlet-class>telecarto.geoinfo.servlets.GetIndicatorServlet</servlet-class>
+    </servlet>
+    <servlet>
+        <description>This is the description of my J2EE component</description>
+        <display-name>This is the display name of my J2EE component</display-name>
+        <servlet-name>LoginServlet</servlet-name>
+        <servlet-class>telecarto.geoinfo.servlets.LoginServlet</servlet-class>
+    </servlet>
+    <servlet>
+        <description>This is the description of my J2EE component</description>
+        <display-name>This is the display name of my J2EE component</display-name>
+        <servlet-name>LogoutServlet</servlet-name>
+        <servlet-class>telecarto.geoinfo.servlets.LogoutServlet</servlet-class>
+    </servlet>
+    <servlet>
+        <description>This is the description of my J2EE component</description>
+        <display-name>This is the display name of my J2EE component</display-name>
+        <servlet-name>PrivilegeVerifyServlet</servlet-name>
+        <servlet-class>telecarto.geoinfo.servlets.PrivilegeVerifyServlet</servlet-class>
+    </servlet>
+    <servlet>
+        <description>This is the description of my J2EE component</description>
+        <display-name>This is the display name of my J2EE component</display-name>
+        <servlet-name>GetTemplateContent</servlet-name>
+        <servlet-class>telecarto.geoinfo.servlets.GetTemplateContent</servlet-class>
+    </servlet>
+    <servlet>
+        <description>This is the description of my J2EE component</description>
+        <display-name>This is the display name of my J2EE component</display-name>
+        <servlet-name>GetTemplateLayer</servlet-name>
+        <servlet-class>telecarto.geoinfo.servlets.GetTemplateLayer</servlet-class>
+    </servlet>
+    <servlet>
+        <description>This is the description of my J2EE component</description>
+        <display-name>This is the display name of my J2EE component</display-name>
+        <servlet-name>GetAdministrativeRegion</servlet-name>
+        <servlet-class>telecarto.geoinfo.servlets.GetAdministrativeRegion</servlet-class>
+    </servlet>
+
+
+
+
+
+
+    <servlet-mapping>
+        <servlet-name>GetAdministrativeRegion</servlet-name>
+        <url-pattern>/servlet/GetAdministrativeRegion</url-pattern>
+    </servlet-mapping>
+    <servlet-mapping>
+        <servlet-name>printMapServlet</servlet-name>
+        <url-pattern>/servlet/printMapServlet</url-pattern>
+    </servlet-mapping>
+    <servlet-mapping>
+        <servlet-name>chartLayerServlet</servlet-name>
+        <url-pattern>/servlet/chartLayerServlet</url-pattern>
+    </servlet-mapping>
+    <servlet-mapping>
+        <servlet-name>ClassLayerServlet</servlet-name>
+        <url-pattern>/servlet/ClassLayerServlet</url-pattern>
+    </servlet-mapping>
+    <servlet-mapping>
+        <servlet-name>ZipFileServlet</servlet-name>
+        <url-pattern>/servlet/ZipFileServlet</url-pattern>
+    </servlet-mapping>
+    <servlet-mapping>
+        <servlet-name>GetThematicMapServlet</servlet-name>
+        <url-pattern>/servlet/GetThematicMapServlet</url-pattern>
+    </servlet-mapping>
+    <servlet-mapping>
+        <servlet-name>EditMapServlet</servlet-name>
+        <url-pattern>/servlet/EditMapServlet</url-pattern>
+    </servlet-mapping>
+    <servlet-mapping>
+        <servlet-name>GetCatagoryServlet</servlet-name>
+        <url-pattern>/servlet/GetCatagoryServlet</url-pattern>
+    </servlet-mapping>
+    <servlet-mapping>
+        <servlet-name>GetIndicatorServlet</servlet-name>
+        <url-pattern>/servlet/GetIndicatorServlet</url-pattern>
+    </servlet-mapping>
+    <servlet-mapping>
+        <servlet-name>LoginServlet</servlet-name>
+        <url-pattern>/servlet/LoginServlet</url-pattern>
+    </servlet-mapping>
+    <servlet-mapping>
+        <servlet-name>LogoutServlet</servlet-name>
+        <url-pattern>/servlet/LogoutServlet</url-pattern>
+    </servlet-mapping>
+    <servlet-mapping>
+        <servlet-name>PrivilegeVerifyServlet</servlet-name>
+        <url-pattern>/servlet/PrivilegeVerifyServlet</url-pattern>
+    </servlet-mapping>
+    <servlet-mapping>
+        <servlet-name>GetTemplateContent</servlet-name>
+        <url-pattern>/servlet/GetTemplateContent</url-pattern>
+    </servlet-mapping>
+    <servlet-mapping>
+        <servlet-name>GetTemplateLayer</servlet-name>
+        <url-pattern>/servlet/GetTemplateLayer</url-pattern>
+    </servlet-mapping>
+</web-app>
