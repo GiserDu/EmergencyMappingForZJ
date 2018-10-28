@@ -391,7 +391,7 @@ $(document).ready(function() {
 
 
     }
-   // creatSettingspanel1();
+    creatSettingspanel1();
     //creatCityList("studyareaSort");
 
     /*$('#provinceSelect').change(function(cc){
