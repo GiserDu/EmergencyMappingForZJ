@@ -392,9 +392,7 @@ $(document).ready(function() {
 
     }
     creatSettingspanel1();
-    //creatCityList("studyareaSort");
-
-    /*$('#provinceSelect').change(function(cc){
+       $('#provinceSelect').change(function(cc){
         var regionCode=$(this).val();
         $.ajax({
             url:"./servlet/GetAdministrativeRegion",
@@ -417,11 +415,11 @@ $(document).ready(function() {
                     var symbol = new SimpleFillSymbol();
                     var graphic = new Graphic();
                     graphic.setGeometry(geometry);
-
+                    symbol.color.a=0.01;
                     graphic.setSymbol(symbol);
                     graphicLayer.add(graphic);
                     map.addLayer(graphicLayer);
-                    map.centerAt(geometry.getCentroid());
+                    map.setExtent(geometry.getExtent());
                 });
 
 
@@ -429,7 +427,7 @@ $(document).ready(function() {
 
             }
         });}
-    );*/
+    );
     //获取当前窗口尺寸
     function findDimensions() {
         //获取窗口宽度

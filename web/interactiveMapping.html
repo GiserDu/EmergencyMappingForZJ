@@ -8,14 +8,34 @@
     <link href='css/fonts.css' rel='stylesheet' type='text/css'>
     <link rel="stylesheet" href="http://localhost:8080/EmergencyMapping1027/js/lib/arcgis_js_api/library/3.24/3.24/esri/css/esri.css">
     <link rel="stylesheet" href="http://localhost:8080/EmergencyMapping1027/js/lib/arcgis_js_api/library/3.24/3.24/dijit/themes/claro/claro.css">
-    <link href="css/whu_Mapping.css" rel="stylesheet">
+    <link href="css/whu_interactiveMapping.css" rel="stylesheet">
 
 </head>
 <body>
 <div id="main">
 <div id="mapContainer"></div>
+    <div id="toolsMenu" class="btn-group">
+
+
+        <button type="button" class="btn btn-default dropdown-toggle" data-toggle="dropdown">定位
+            <span class="caret"></span>
+        </button>
+        <button type="button" class="btn btn-default">制图</button>
+        <button type="button" class="btn btn-default">标绘</button>
+        <ul class="dropdown-menu" role="menu">
+            <li>
+                <a id="adminNav" href="#">行政区</a>
+            </li>
+            <li>
+                <a id="RecNav" href="#">框选</a>
+            </li>
+        </ul>
+    </div>
 </div>
+
 <script type="text/javascript" src="js/jquery-3.2.1.js"></script>
 <script src="http://localhost:8080/EmergencyMapping1027/js/lib/arcgis_js_api/library/3.24/3.24/init.js"></script>
+<script src="js/whu_interactvieMapping_initial.js"></script>
+<script type="text/javascript" src="js/bootstrap.min.js"></script>
 </body>
 </html>
