@@ -9,18 +9,22 @@
     <link rel="stylesheet" href="http://localhost:8080/EmergencyMapping1027/js/lib/arcgis_js_api/library/3.24/3.24/esri/css/esri.css">
     <link rel="stylesheet" href="http://localhost:8080/EmergencyMapping1027/js/lib/arcgis_js_api/library/3.24/3.24/dijit/themes/claro/claro.css">
     <link href="css/whu_interactiveMapping.css" rel="stylesheet">
-
+    <link href="js/layui/css/layui.css" rel="stylesheet">
+    <link rel="stylesheet" href="css/ztree/bootstrapStyle.css" type="text/css">
 </head>
 <body>
 <div id="main">
+
+
 <div id="mapContainer"></div>
+    <div id="doMapTree" class="ztree"></div>
     <div id="toolsMenu" class="btn-group">
 
 
         <button type="button" class="btn btn-default dropdown-toggle" data-toggle="dropdown">定位
             <span class="caret"></span>
         </button>
-        <button type="button" class="btn btn-default">制图</button>
+        <button id="doMap" type="button" class="btn btn-default">制图</button>
         <button type="button" class="btn btn-default">标绘</button>
         <ul class="dropdown-menu" role="menu">
             <li>
@@ -36,6 +40,11 @@
 <script type="text/javascript" src="js/jquery-3.2.1.js"></script>
 <script src="http://localhost:8080/EmergencyMapping1027/js/lib/arcgis_js_api/library/3.24/3.24/init.js"></script>
 <script src="js/whu_interactvieMapping_initial.js"></script>
+
+<script src="js/ztreejs/jquery.ztree.core.js"></script>
+<script src="js/ztreejs/jquery.ztree.excheck.js"></script>
+<script src="js/ztreejs/jquery.ztree.exedit.js"></script>
 <script type="text/javascript" src="js/bootstrap.min.js"></script>
+<script src="js/layui/layui.js"></script>
 </body>
 </html>

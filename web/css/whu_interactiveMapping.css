@@ -38,7 +38,67 @@ h1,h2,h3,h4,h5,h6{
     right:100px;
 
 }
-
+#doMapTree{
+    min-height: 300px;
+    max-height: 800px;
+}
+.doMapEdit{
+    margin-left: 2px;
+    margin-right: -1px;
+    vertical-align: top;
+    line-height: 0;
+    margin: 0;
+    padding: 0;
+    width: 21px;
+    height: 21px;
+    display: inline-block;
+    vertical-align: middle;
+    border: 0 none;
+    cursor: pointer;
+    outline: none;
+    background: transparent url("ztree/img/bootstrap.png") no-repeat scroll -189px -21px;
+}
+.doMapEdit:hover {
+    background-position: -168px -21px;
+}
+.doMapRemove{
+    margin-left: 2px;
+    margin-right: -1px;
+    vertical-align: top;
+    line-height: 0;
+    margin: 0;
+    padding: 0;
+    width: 21px;
+    height: 21px;
+    display: inline-block;
+    vertical-align: middle;
+    border: 0 none;
+    cursor: pointer;
+    outline: none;
+    background: transparent url("ztree/img/bootstrap.png") no-repeat scroll -189px -42px;
+}
+.doMapRemove:hover {
+    background-position:-168px -42px;;
+}
+.doMapAdd{
+    margin-left: 2px;
+    margin-right: -1px;
+    vertical-align: top;
+    line-height: 0;
+    margin: 0;
+    padding: 0;
+    width: 21px;
+    height: 21px;
+    display: inline-block;
+    vertical-align: middle;
+    border: 0 none;
+    cursor: pointer;
+    outline: none;
+    background: transparent url("ztree/img/bootstrap.png") no-repeat scroll -189px 0;
+}
+.doMapAdd:hover {
+    background-position:-168px 0;;
+}
 .slider-content{
     position: absolute;
     top:0px;
