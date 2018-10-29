@@ -154,7 +154,7 @@ $("#doMap").click(function () {
     layui.use('layer', function (layui_index) {
         var layer = layui.layer;
         layer.open({
-            title: '交互图1',
+            title: '交互壶色弱1',
             skin: "layui-layer-lan",
             type: 1,
             shade: 0,
