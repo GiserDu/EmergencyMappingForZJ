@@ -149,7 +149,7 @@ $("#doMap").click(function () {
 
     };
 
-    //Creating a new branch is quick & simple.
+   //Creating a new branch
     layerNodesObj=$.fn.zTree.init($("#doMapTree"), setting, layerNodes);
     layui.use('layer', function (layui_index) {
         var layer = layui.layer;
