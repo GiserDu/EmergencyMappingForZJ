@@ -168,6 +168,74 @@ $("#doMap").click(function () {
 
 })
 
+//专题目录
+$("#featureContent").click(function () {
+
+    $.ajaxSetup({async:false});
+    $.getJSON("http://qk.casm.ac.cn:9090/ythjzweb/tucengbygl/getleveljson.it?pid=858",function(data) {
+
+        for (var i=0; i<data.length; i++){
+            data[i].name = data[i]["title"];
+            data[i].isParent = data[i]["isFolder"];
+            if (data[i].isFolder){
+                data[i]["nocheck"] = true;
+            }
+        }
+        console.log(data);
+
+        var zNodes = data;
+        var setting1 = {
+            check:{
+                chkStyle: "radio",
+                enable: true,
+                radioType: "all"
+            },
+            callback:{
+                beforeExpand: function (treeId, treeNode) {
+
+                    $.getJSON("http://qk.casm.ac.cn:9090/ythjzweb/tucengbygl/getleveljson.it?pid=" + treeNode["pid"], function (data2) {
+                        // console.log(treeNode);
+
+                        for (var j=0; j<data2.length; j++){
+                            data2[j].name = data2[j]["title"];
+                            data2[j].isParent = data2[j]["isFolder"];
+                            if (data2[j].isFolder){
+                                data2[j]["nocheck"] = true;
+                            }
+                        }
+                        console.log(data2);
+                        treeNode["children"] = data2;
+                        var treeObj = $.fn.zTree.getZTreeObj("treeContent");
+
+                        treeObj.updateNode(treeNode);
+                        treeObj.refresh();
+                    });
+
+                }
+            }
+        };
+
+        featureLayerTree = $.fn.zTree.init($("#treeContent"), setting1, zNodes);
+        var test = document.getElementById("treeContent");
+        console.log(test);
+
+    });
+    layui.use('layer', function () {
+        var layer1 = layui.layer;
+        layer1.open({
+            title: '专题图层',
+            skin: "layui-layer-lan",
+            type: 1,
+            shade: 0,
+            content: $('#treeContent'),
+            yes: function(index, layero) {//确定后执行回调
+
+            }
+        });
+    });
+
+})
+
 //图层check事件
 function layerOncheck(treeId, treeNode) {
     if(treeNode.isParent){
