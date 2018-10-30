@@ -13,6 +13,7 @@ var regionParam = 0;//regionParam为所选的区域代码(1:初始第一级17个
 var rgnName;//当前所选区域名称
 var geometry = new Object();//当前所选区域中心点对象
 var baseMap;//底图
+var studyAreaLayer;//制图区域
 var layerNodesObj;
 var layerNodes =[
     {id:1, pId:0, name:"地理底图", open:true, "nocheck":true},
@@ -58,7 +59,7 @@ $(document).ready(function() {
 
 
     function initMap() {
-        require(["esri/map","esri/layers/WebTiledLayer","esri/layers/ArcGISDynamicMapServiceLayer"],function (Map,WebTiledLayer,ArcGISDynamicMapServiceLayer) {
+        require(["esri/map","esri/layers/WebTiledLayer","esri/layers/ArcGISDynamicMapServiceLayer","esri/layers/GraphicsLayer"],function (Map,WebTiledLayer,ArcGISDynamicMapServiceLayer,GraphicsLayer) {
             map = new Map("mapContainer", {
                 //basemap:"dark-gray-vector",
                 center: [104,35],
@@ -67,12 +68,17 @@ $(document).ready(function() {
             baseMap = new ArcGISDynamicMapServiceLayer(
                 'http://cache1.arcgisonline.cn/arcgis/rest/services/ChinaOnlineStreetPurplishBlue/MapServer'
             );
-            map.addLayer(baseMap)
+            map.addLayer(baseMap);
+            studyAreaLayer=new GraphicsLayer('',{id:"studyAreaLayer",name:"studyAreaLayer"});
+            studyAreaLayer.name = "studyAreaLayer";
+            map.addLayer(studyAreaLayer);
             mapExtentChange = map.on("zoom-end", function zoomed() {
                 var zoomLevel = map.getZoom();
             });
         });
       }
+
+
 });
 //框选定位
 $("#RecNav").click(function () {
@@ -86,6 +92,23 @@ $("#RecNav").click(function () {
         map.disableMapNavigation();
         tb.activate(Draw.EXTENT);    //激活相应的图形
     })
+});
+//行政区定位
+$("#adminNav").click(function () {
+    creatARpanel("区域","administrativeRegion");
+    layui.use('layer', function () {
+        var layer1 = layui.layer;
+        layer1.open({
+            title: '行政区选择',
+            skin: "layui-layer-lan",
+            type: 1,
+            shade: 0,
+            content: $('#administrativeRegion'),
+            yes: function(index, layero) {//确定后执行回调
+
+            }
+        });
+    });
 });
 //制图
 $("#doMap").click(function () {

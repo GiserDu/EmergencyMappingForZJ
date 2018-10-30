@@ -22,7 +22,8 @@ var legendFlag=0;
 var classifyImg_url=undefined;//分级统计图图例的url
 // var classifyLegendMonitor;//分级统计图图例的定时器
 var mapExtentChange;
-
+//制图区域
+var studyAreaLayer;
 
 $(document).ready(function() {
     regionParam=localStorage.getItem("regionParam");
@@ -407,19 +408,20 @@ $(document).ready(function() {
                 //console.log(gson);
 
                 require(["esri/geometry/Polygon","esri/Color","esri/graphic","esri/layers/GraphicsLayer","esri/symbols/SimpleFillSymbol","esri/symbols/SimpleLineSymbol","esri/layers/FeatureLayer"],function (Polygon,Color,Graphic,GraphicsLayer,SimpleFillSymbol,SimpleLineSymbol,FeatureLayer) {
-                    var graphicLayer = new GraphicsLayer();
-                    graphicLayer.name = "chartGLayer1";
-
-
+                    studyAreaLayer.clear();
                     var geometry=new Polygon({"rings":data[0],"spatialReference":{"wkid":4326}});
+
+
+                    for(var i=1;i<data.length;i++){
+                        geometry.addRing(data[i][0]);
+                    }
                     var symbol = new SimpleFillSymbol();
                     var graphic = new Graphic();
                     graphic.setGeometry(geometry);
                     symbol.color.a=0.01;
                     graphic.setSymbol(symbol);
-                    graphicLayer.add(graphic);
-                    map.addLayer(graphicLayer);
-                    map.setExtent(geometry.getExtent());
+                    studyAreaLayer.add(graphic);
+                     map.setExtent(geometry.getExtent());
                 });
 
 
@@ -485,6 +487,10 @@ $(document).ready(function() {
                 classGLayer.name = "classGLayer";
                 chartGLayer=new GraphicsLayer('',{id:"chartGLayer",name:"chartGLayer"});
                 chartGLayer.name = "chartGLayer";
+
+                studyAreaLayer=new GraphicsLayer('',{id:"studyAreaLayer",name:"studyAreaLayer"});
+                studyAreaLayer.name = "studyAreaLayer";
+                map.addLayer(studyAreaLayer);
                 map.addLayer(classGLayer);
                 map.addLayer(chartGLayer);
                 //加载天地图底图

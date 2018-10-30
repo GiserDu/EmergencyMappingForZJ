@@ -122,6 +122,9 @@ h1,h2,h3,h4,h5,h6{
 .doMapAdd:hover {
     background-position:-168px 0;;
 }
+#administrativeRegion{
+    padding: 15px;
+}
 .slider-content{
     position: absolute;
     top:0px;
