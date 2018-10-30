@@ -121,16 +121,17 @@ $("#doMap").click(function () {
             aObj.append(editStr);
             var btn = $("#doMapAdd_"+treeNode.id);
             if (btn) btn.bind("click", function(){
-                alert("添加" + treeNode.name);
+                //alert("添加" + treeNode.name);
                 var treeObj = $.fn.zTree.getZTreeObj("doMapTree");
                 //var newNode = {name:"newNode1"};
-                treeObj.addNodes(treeNode, {id:(100 + newCount), pId:treeNode.id, name:"new node" + (newCount++)});
+                treeObj.addNodes(treeNode, {id:(100 + newCount), pId:treeNode.id, name:treeNode.name + (newCount++)});
             });
 
         }
         else{
             if ($("#doMapEdit_"+treeNode.id).length>0) return;
             var editStr = "<span id='doMapEdit_"+treeNode.id+"' class='button doMapEdit'  onfocus='this.blur();'></span>"+
+                "<span id='doMapData_"+treeNode.id+"' class='button doMapData'  onfocus='this.blur();'></span>"+
                 "<span id='doMapRemove_"+treeNode.id+"' class='button doMapRemove'  onfocus='this.blur();'></span>";
             aObj.append(editStr);
 
@@ -158,6 +159,7 @@ $("#doMap").click(function () {
         }
         else{
             $("#doMapEdit_" +treeNode.id).unbind().remove();
+            $("#doMapData_" +treeNode.id).unbind().remove();
             $("#doMapRemove_" +treeNode.id).unbind().remove();
         }
 
@@ -189,7 +191,7 @@ $("#doMap").click(function () {
     layui.use('layer', function (layui_index) {
         var layer = layui.layer;
         layer.open({
-            title: '交互壶色弱1',
+            title: '图层列表',
             skin: "layui-layer-lan",
             type: 1,
             shade: 0,
