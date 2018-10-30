@@ -13,7 +13,10 @@ var regionParam = 0;//regionParam为所选的区域代码(1:初始第一级17个
 var rgnName;//当前所选区域名称
 var geometry = new Object();//当前所选区域中心点对象
 var baseMap;//底图
+var doMapIndex=0;//制图目录树表示，0表示为构造，1表示构造
+var ARIndex=0;//行政区目录树表示，0表示为构造，1表示构造
 var studyAreaLayer;//制图区域
+var ServerLayerArr=[];//专题服务数组
 var layerNodesObj;
 var layerNodes =[
     {id:1, pId:0, name:"地理底图", open:true, "nocheck":true,children:[
@@ -67,7 +70,7 @@ $(document).ready(function() {
                 //zoom: 12
             });
             baseMap = new ArcGISDynamicMapServiceLayer(
-                'http://cache1.arcgisonline.cn/arcgis/rest/services/ChinaOnlineStreetPurplishBlue/MapServer'
+                'http://cache1.arcgisonline.cn/arcgis/rest/services/ChinaOnlineStreetPurplishBlue/MapServer',{id:"baseMap"}
             );
             map.addLayer(baseMap);
             studyAreaLayer=new GraphicsLayer('',{id:"studyAreaLayer",name:"studyAreaLayer"});
@@ -96,7 +99,11 @@ $("#RecNav").click(function () {
 });
 //行政区定位
 $("#adminNav").click(function () {
-    creatARpanel("区域","administrativeRegion");
+    if(ARIndex==0){
+        creatARpanel("区域","administrativeRegion");
+        ARIndex=1
+    }
+
     layui.use('layer', function () {
         var layer1 = layui.layer;
         layer1.open({
@@ -132,9 +139,7 @@ $("#doMap").click(function () {
             removeHoverDom: removeHoverDom
         },
         callback: {
-            beforeCheck: layerOncheck,
-            beforeRemove: beforeRemove,
-            beforeRename: beforeRename
+            beforeCheck: layerOncheck
         }
     };
     function addHoverDom(treeId, treeNode) {
@@ -165,6 +170,64 @@ $("#doMap").click(function () {
                                 layerNodes[1].children.push(newnode);
                                 var treeObj = $.fn.zTree.getZTreeObj("doMapTree");
                                 treeObj.addNodes(treeNode,-1, newnode);
+
+                                require([
+                                    "esri/layers/ArcGISDynamicMapServiceLayer",
+                                    "esri/InfoTemplate", "esri/dijit/PopupTemplate"
+                                ], function (ArcGISDynamicMapServiceLayer, InfoTemplate, PopupTemplate) {
+                                    var infoTemplate = new InfoTemplate("${NAME}", "${*}");
+                                    var serviceUrl =$("#newSLAds").val();
+                                    var layer = new ArcGISDynamicMapServiceLayer(serviceUrl,{id: $("#newSLName").val()+"_"+$("#newSLAds").val()});
+                                    ServerLayerArr.push(layer);
+                                    map.on("layer-add-result",function(e){
+                                        if(e.error){
+                                            error.errorMessage = e.error;
+                                            error.id=e.layer.id;
+                                            layui.use('layer', function () {
+                                                var layer = layui.layer;
+                                                layer.open({
+                                                    title: '服务地址有误'
+                                                    ,content: "服务地址有误，请确认！地址是"+error.id
+                                                });
+                                            })
+                                        }else{
+                                            layui.use('layer', function () {
+                                                var lay = layui.layer;
+                                                lay.confirm('加载成功，缩放到该图层?', {
+                                                    icon: 3,
+                                                    title: '提示'
+                                                }, function (layui_index) {
+                                                    try {
+                                                        layerExtent=layer.fullExtent;
+                                                        //如果图层与地图坐标系不同，转换一下再设置全局范围
+                                                        if(layerExtent.spatialReference.wkid!=map.spatialReference.wkid ){
+                                                            require(["esri/tasks/GeometryService","esri/config"], function(GeometryService,config) {
+                                                                //配置代理
+                                                                config.defaults.io.proxyUrl = "../esriproxy/";
+                                                                config.defaults.io.alwaysUseProxy = false;
+                                                                var geometryService = new GeometryService(ESRI_GeometyService);
+                                                                geometryService.project([layerExtent],map.spatialReference, function (p) {
+                                                                    console.log(p);
+                                                                    map.setExtent(p[0]);
+                                                                });
+                                                            });
+                                                        }else {
+                                                            map.setExtent(layerExtent);
+                                                        }
+                                                    }catch (e) {
+                                                        lay.open({
+                                                            title: '提示'
+                                                            ,content: '服务图层与底图图层坐标系统不同，暂时无法缩放！您可手动缩放到该图层！'
+                                                        });
+                                                        console.log(e);
+                                                    }
+                                                    lay.close(layui_index);
+                                                })
+                                            })
+                                        }
+                                    },this)
+                                });
+
                                 layer.close(index);
                             }});
                     });
@@ -198,17 +261,55 @@ $("#doMap").click(function () {
 
         }
         else{
-            if ($("#doMapEdit_"+treeNode.id).length>0) return;
             var editStr = "<span id='doMapEdit_"+treeNode.id+"' class='button doMapEdit'  onfocus='this.blur();'></span>"+
                 "<span id='doMapRemove_"+treeNode.id+"' class='button doMapRemove'  onfocus='this.blur();'></span>";
+            //如果是地理底图，不显示删除
+            if(treeNode.getParentNode().id==1){
+                editStr = "<span id='doMapEdit_"+treeNode.id+"' class='button doMapEdit'  onfocus='this.blur();'></span>";
+            }
+            if ($("#doMapEdit_"+treeNode.id).length>0) return;
+
             aObj.append(editStr);
 
 
             var btn = $("#doMapEdit_"+treeNode.id);
             if (btn) btn.bind("click", function(){
                 //编辑，根据父节点不同，功能不同
+                if(treeNode.getParentNode().id==1){//如果是专题服务
+                    layui.use('layer', function (layui_index) {
+                        var layer = layui.layer;
+                        layer.open({
+                            title: '编辑底图服务',
+                            skin: "layui-layer-lan",
+                            type: 0,
+                            shade: 0,
+                            content:"<div><p>服务名称：<input id='editBLName' disabled value='"+treeNode.name+"'></input></p><br/><p>服务地址：<input id='editBLAds' value='"+treeNode.url+"'></input></p></div>",
+                            yes: function(index, layero) {//确定后执行回调
+                                //  var editnode={name:$("#newSLName").val(),url:$("#newSLAds").val()};
+                                if($("#editBLName").val()==""||$("#editBLAds").val()==""){
+                                    alert("属性不能为空！");
+                                    return;
+                                }
+                                //treeNode.name=$("#editBLAds").val();
+                                treeNode.url=$("#editBLAds").val();
+                                var treeObj = $.fn.zTree.getZTreeObj("doMapTree");
+                                treeObj.updateNode(treeNode);
+                                layerNodes.filter(function (p) {
+                                    if(p.name==treeNode.name){
+                                        p.url=treeNode.url;
+                                    }
+                                });
+                                baseMap.url=$("#editBLAds").val();
+                                baseMap._url.path=$("#editBLAds").val();
+                                if($.inArray("baseMap",map.layerIds)!=-1){
+                                   map.getLayer("baseMap").refresh();
+                                }
+                                layer.close(index);
+                            }});
+                    });
+
+                }
                 if(treeNode.getParentNode().id==2){//如果是专题服务
-                    alert("编辑专题数据");
                     layui.use('layer', function (layui_index) {
                         var layer = layui.layer;
                         layer.open({
@@ -223,11 +324,24 @@ $("#doMap").click(function () {
                                     alert("属性不能为空！");
                                     return;
                                 }
+                                ServerLayerArr.filter(function (p) {
+                                    var id=treeNode.naume+"_"+(treeNode.url);
+                                    if(p.id==id){
+                                        p.url=$("#editSLAds").val();
+                                        p._url.path=$("#editSLAds").val();
+                                        //如果地图中已经有这个图层
+                                        if($.inArray(id,map.layerIds)!=-1){
+                                           // p.refresh();
+                                            map.getLayer(id).refresh();
+                                            //map.removeLayer(map.getLayer(id));
+                                        };
+                                    }
+                                });
                                 treeNode.name=$("#editSLName").val();
                                 treeNode.url=$("#editSLAds").val();
                                 var treeObj = $.fn.zTree.getZTreeObj("doMapTree");
                                 treeObj.updateNode(treeNode);
-                                //layerNodes=treeObj.transformToArray(treeObj.getNodes());
+
                                 layer.close(index);
                             }});
                     });
@@ -263,22 +377,43 @@ $("#doMap").click(function () {
                 zTree.selectNode(treeNode);
                 zTree.editName(treeNode);*/
             });
-            var btn1 = $("#doMapRemove_"+treeNode.id);
-            if (btn1) btn1.bind("click", function(){
-                //编辑，根据父节点不同，功能不同
-                if(treeNode.getParentNode().id==2){//如果是专题服务
-                    alert("删除专题数据");
+            if(treeNode.getParentNode().id!=1){
+                var btn1 = $("#doMapRemove_"+treeNode.id);
+                if (btn1) btn1.bind("click", function(){
+                    //编辑，根据父节点不同，功能不同
+                    if(treeNode.getParentNode().id==2){//如果是专题服务
+                        alert("删除专题数据");
+                        var index=0;
+                        ServerLayerArr.filter(function (p) {
+                            var id=treeNode.name+"_"+(treeNode.url);
+                            if(p.id==id){
+                                ServerLayerArr.splice(index,1);
+                                //如果地图中已经有这个图层
+                                if($.inArray(id,map.layerIds)!=-1){
+                                    // p.refresh();
+                                    map.removeLayer(map.getLayer(id));
+                                    //map.removeLayer(map.getLayer(id));
+                                };
+                                var treeObj = $.fn.zTree.getZTreeObj("doMapTree");
+                                treeObj.removeNode(treeNode,true);
+                                treeNode.getParentNode().isParent=true;
+                                treeObj.refresh();
+                            }
+                            index=index+1;
+                        });
 
-                }
-                if(treeNode.getParentNode().id==3){//如果是专题服务
-                    alert("删除要素数据");
+                    }
+                    if(treeNode.getParentNode().id==3){//如果是专题服务
+                        alert("删除要素数据");
 
-                }
-                //alert("删除" + treeNode.name);
-               /* var zTree = $.fn.zTree.getZTreeObj("doMapTree");
-                zTree.selectNode(treeNode);
-                zTree.removeNode(treeNode,true);*/
-            });
+                    }
+                    //alert("删除" + treeNode.name);
+                    /* var zTree = $.fn.zTree.getZTreeObj("doMapTree");
+                     zTree.selectNode(treeNode);
+                     zTree.removeNode(treeNode,true);*/
+                });
+            }
+
         }
 
     };
@@ -314,8 +449,11 @@ $("#doMap").click(function () {
         zTree.selectNode(treeNode);
         return confirm("确认删除 节点 -- " + treeNode.name + " 吗？");
     }
+    if(doMapIndex==0){
+        layerNodesObj=$.fn.zTree.init($("#doMapTree"), setting, layerNodes);
+        doMapIndex=1;
+    }
 
-    layerNodesObj=$.fn.zTree.init($("#doMapTree"), setting, layerNodes);
     layui.use('layer', function (layui_index) {
         var layer = layui.layer;
         layer.open({
@@ -400,23 +538,49 @@ function layerOncheck(treeId, treeNode) {
         return;
     }
     else {
-        if(treeNode.pId==1){
+        if(treeNode.getParentNode().id==1){
             //地理底图
-            require(["esri/layers/WebTiledLayer","esri/layers/ArcGISDynamicMapServiceLayer"],function (WebTiledLayer,ArcGISDynamicMapServiceLayer) {
-                var mate=treeNode.getParentNode().children;
-                for (var  i = 0; i < mate.length; i++) {
-                    if(mate[i].id==treeNode.id)
-                        continue;
-                    var node = layerNodesObj.getNodeByTId(mate[i].tId);
-                    layerNodesObj.checkNode(node, false, true);
-                }
+            if(treeNode.checked){
                 map.removeLayer(baseMap);
-                baseMap = new ArcGISDynamicMapServiceLayer(
-                    treeNode.url
-                );
-                map.addLayer(baseMap)
-                map.reorderLayer(baseMap,1);
-            });
+            }else {
+                require(["esri/layers/WebTiledLayer","esri/layers/ArcGISDynamicMapServiceLayer"],function (WebTiledLayer,ArcGISDynamicMapServiceLayer) {
+                    var mate=treeNode.getParentNode().children;
+                    for (var  i = 0; i < mate.length; i++) {
+                        if(mate[i].id==treeNode.id)
+                            continue;
+                        var node = layerNodesObj.getNodeByTId(mate[i].tId);
+                        layerNodesObj.checkNode(node, false, true);
+                    }
+                    map.removeLayer(baseMap);
+                    baseMap = new ArcGISDynamicMapServiceLayer(
+                        treeNode.url
+                    );
+                    map.addLayer(baseMap)
+                    map.reorderLayer(baseMap,1);
+                });
+
+            }
+                   }
+        if(treeNode.getParentNode().id==2){
+            //专题服务
+            if(treeNode.checked){
+                ServerLayerArr.filter(function (p) {
+                    var id=treeNode.name+"_"+(treeNode.url);
+                    if(p.id==id){
+                        map.removeLayer(map.getLayer(id));
+                    }
+                });
+
+            }
+            else {
+                ServerLayerArr.filter(function (p) {
+                    var id=treeNode.name+"_"+(treeNode.url);
+                    if(p.id==id){
+                        map.addLayer(p);
+                    }
+                });
+            }
         }
     }
 }
+

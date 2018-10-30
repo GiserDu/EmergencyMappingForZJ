@@ -272,7 +272,7 @@ function creatARpanel(mapScale,element){
         case "区域":
             creatCounList(element);
             $('#provinceSelect').change(function () {
-                AROnChange(this,"cityCode");
+                AROnChange(this,"proCode");
                 $("#citySelect").empty();
                 var selectedProcode=$('#provinceSelect').val();
                 if (selectedProcode==""){
@@ -304,6 +304,7 @@ function creatARpanel(mapScale,element){
 
             });
             $('#citySelect').change(function () {
+                AROnChange(this,"cityCode");
                 $("#coutSelect").empty();
                 var selectedProcode=$('#provinceSelect').val();
                 if (selectedProcode==""){
