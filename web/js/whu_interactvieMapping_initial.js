@@ -26,6 +26,7 @@ var layerNodes =[
     {id:3, pId:0, name:"要素图层", isParent:true,open:false, "nocheck":true},
 
 ];
+var newCount = 100;
 $(document).ready(function() {
     findDimensions();
     $("#mapContainer").height(winHeight);
@@ -60,7 +61,7 @@ $(document).ready(function() {
     function initMap() {
         require(["esri/map","esri/layers/WebTiledLayer","esri/layers/ArcGISDynamicMapServiceLayer","esri/layers/GraphicsLayer"],function (Map,WebTiledLayer,ArcGISDynamicMapServiceLayer,GraphicsLayer) {
             map = new Map("mapContainer", {
-               // basemap:"osm",
+                //basemap:"dark-gray-vector",
                 center: [104,35],
                 //zoom: 12
             });
@@ -112,7 +113,6 @@ $("#adminNav").click(function () {
 //制图
 $("#doMap").click(function () {
     var setting = {
-
         check: {
             enable: true
         },
@@ -131,20 +131,24 @@ $("#doMap").click(function () {
             removeHoverDom: removeHoverDom
         },
         callback: {
-            beforeCheck: layerOncheck
+            beforeCheck: layerOncheck,
+            beforeRemove: beforeRemove,
+            beforeRename: beforeRename
         }
     };
     function addHoverDom(treeId, treeNode) {
         var aObj = $("#" + treeNode.tId + "_a");
-
         if(treeNode.isParent){
             if ($("#doMapAdd_"+treeNode.id).length>0) return;
             var editStr = "<span id='doMapAdd_"+treeNode.id+"' class='button doMapAdd'  onfocus='this.blur();'></span>";
             aObj.append(editStr);
-
-
             var btn = $("#doMapAdd_"+treeNode.id);
-            if (btn) btn.bind("click", function(){alert("添加" + treeNode.name);});
+            if (btn) btn.bind("click", function(){
+                alert("添加" + treeNode.name);
+                var treeObj = $.fn.zTree.getZTreeObj("doMapTree");
+                //var newNode = {name:"newNode1"};
+                treeObj.addNodes(treeNode, {id:(100 + newCount), pId:treeNode.id, name:"new node" + (newCount++)});
+            });
 
         }
         else{
@@ -155,9 +159,19 @@ $("#doMap").click(function () {
 
 
             var btn = $("#doMapEdit_"+treeNode.id);
-            if (btn) btn.bind("click", function(){alert("编辑" + treeNode.name);});
+            if (btn) btn.bind("click", function(){
+                //alert("编辑" + treeNode.name);
+                var zTree = $.fn.zTree.getZTreeObj("doMapTree");
+                zTree.selectNode(treeNode);
+                zTree.editName(treeNode);
+            });
             var btn1 = $("#doMapRemove_"+treeNode.id);
-            if (btn1) btn1.bind("click", function(){alert("删除" + treeNode.name);});
+            if (btn1) btn1.bind("click", function(){
+                //alert("删除" + treeNode.name);
+                var zTree = $.fn.zTree.getZTreeObj("doMapTree");
+                zTree.selectNode(treeNode);
+                zTree.removeNode(treeNode,true);
+            });
         }
 
     };
@@ -172,31 +186,46 @@ $("#doMap").click(function () {
 
     };
 
-   //Creating a new branch
+    function beforeRename(treeId, treeNode, newName, isCancel) {
+        //className = (className === "dark" ? "":"dark");
+        //showLog((isCancel ? "<span style='color:red'>":"") + "[ "+getTime()+" beforeRename ]&nbsp;&nbsp;&nbsp;&nbsp; " + treeNode.name + (isCancel ? "</span>":""));
+        if (newName.length == 0) {
+            setTimeout(function() {
+                var zTree = $.fn.zTree.getZTreeObj("doMapTree");
+                zTree.cancelEditName();
+                alert("节点名称不能为空.");
+            }, 0);
+            return false;
+        }
+        return true;
+    }
+
+    function beforeRemove(treeId, treeNode) {
+        //className = (className === "dark" ? "":"dark");
+        //showLog("[ "+getTime()+" beforeRemove ]&nbsp;&nbsp;&nbsp;&nbsp; " + treeNode.name);
+        var zTree = $.fn.zTree.getZTreeObj("doMapTree");
+        zTree.selectNode(treeNode);
+        return confirm("确认删除 节点 -- " + treeNode.name + " 吗？");
+    }
+
     layerNodesObj=$.fn.zTree.init($("#doMapTree"), setting, layerNodes);
     layui.use('layer', function (layui_index) {
         var layer = layui.layer;
         layer.open({
-            title: '交互制图',
+            title: '交互壶色弱1',
             skin: "layui-layer-lan",
             type: 1,
             shade: 0,
             content:$('#doMapTree'),
             yes: function(index, layero) {//确定后执行回调
-
             }});
-
-
     });
-
 })
 
 //专题目录
 $("#featureContent").click(function () {
-
     $.ajaxSetup({async:false});
     $.getJSON("http://qk.casm.ac.cn:9090/ythjzweb/tucengbygl/getleveljson.it?pid=858",function(data) {
-
         for (var i=0; i<data.length; i++){
             data[i].name = data[i]["title"];
             data[i].isParent = data[i]["isFolder"];
@@ -256,7 +285,6 @@ $("#featureContent").click(function () {
             }
         });
     });
-
 })
 
 //图层check事件
@@ -274,22 +302,14 @@ function layerOncheck(treeId, treeNode) {
                         continue;
                     var node = layerNodesObj.getNodeByTId(mate[i].tId);
                     layerNodesObj.checkNode(node, false, true);
-
                 }
-
-
                 map.removeLayer(baseMap);
                 baseMap = new ArcGISDynamicMapServiceLayer(
                     treeNode.url
                 );
                 map.addLayer(baseMap)
-
                 map.reorderLayer(baseMap,1);
             });
-
-
-
-
         }
     }
 }
