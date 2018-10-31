@@ -148,6 +148,10 @@ $("#doMap").click(function () {
         var aObj = $("#" + treeNode.tId + "_a");
         //首先判断是否是父节点
         if(treeNode.isParent){
+            //如果是底图，没有增加按钮
+            if(treeNode.getParentNode().id==1){
+                return;
+            }
             if ($("#doMapAdd_"+treeNode.id).length>0) return;
             var editStr = "<span id='doMapAdd_"+treeNode.id+"' class='button doMapAdd'  onfocus='this.blur();'></span>";
             aObj.append(editStr);
