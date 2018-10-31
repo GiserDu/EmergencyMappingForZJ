@@ -149,7 +149,7 @@ $("#doMap").click(function () {
         //首先判断是否是父节点
         if(treeNode.isParent){
             //如果是底图，没有增加按钮
-            if(treeNode.getParentNode().id==1){
+            if(treeNode.id==1){
                 return;
             }
             if ($("#doMapAdd_"+treeNode.id).length>0) return;
@@ -182,8 +182,14 @@ $("#doMap").click(function () {
                                     "esri/InfoTemplate", "esri/dijit/PopupTemplate"
                                 ], function (ArcGISDynamicMapServiceLayer, InfoTemplate, PopupTemplate) {
                                     var infoTemplate = new InfoTemplate("${NAME}", "${*}");
-                                    var serviceUrl =$("#newSLAds").val();
-                                    var layer = new ArcGISDynamicMapServiceLayer(serviceUrl,{id: $("#newSLName").val()+"_"+$("#newSLAds").val()});
+
+                                    var serviceUrl = $("#newSLAds").val();
+                                    var serviceUrlstr=serviceUrl.substring(0,serviceUrl.lastIndexOf("/"));
+                                    var layer = new ArcGISDynamicMapServiceLayer(serviceUrlstr,{id:$("#newSLName").val()+"_"+$("#newSLAds").val()});
+                                    var showindex=serviceUrl.substring(serviceUrl.lastIndexOf("/")+1,serviceUrl.length);
+                                    layer.setVisibleLayers([showindex]);
+
+                                    //var layer = new ArcGISDynamicMapServiceLayer(serviceUrl,{id: $("#newSLName").val()+"_"+$("#newSLAds").val()});
                                     ServerLayerArr.push(layer);
                                     map.on("layer-add-result",function(e){
                                         if(e.error){
