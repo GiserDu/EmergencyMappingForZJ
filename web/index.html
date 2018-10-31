@@ -1,72 +1,210 @@
 <!DOCTYPE html>
 <html lang="zh-CN">
-
-<head>
-    <meta charset="utf-8">
-    <meta http-equiv="X-UA-Compatible" content="IE=edge">
-    <meta name="viewport" content="width=device-width, initial-scale=1">
+  <head>
+    <meta name="generator"
+    content="HTML Tidy for HTML5 (experimental) for Windows https://github.com/w3c/tidy-html5/tree/c63cc39" />
+    <meta charset="utf-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
     <meta name="keywords" content="应急,灾害,快速制图" />
-    <meta name="description" content="">
+    <meta name="description" content="" />
     <title>应急自适应快速制图</title>
-    <link href="css/reset.css" rel="stylesheet">
-    <link href="css/whu_index.css" rel="stylesheet">
+    <link href="css/reset.css" rel="stylesheet" />
+    <link href="css/whu_index.css" rel="stylesheet" />
+	<link rel="stylesheet" href="http://cdn.static.runoob.com/libs/bootstrap/3.3.7/css/bootstrap.min.css">
+	<script src="http://cdn.static.runoob.com/libs/jquery/2.1.1/jquery.min.js"></script>
+	<script src="http://cdn.static.runoob.com/libs/bootstrap/3.3.7/js/bootstrap.min.js"></script>
+	<style>
+		table div{
+		margin-top: 5%;
+		}
+		table{
+			height: 80%;margin-top: 20px;
+			}
+		#myTabContent {
+			height: 100%;
+			margin-top: -127px;
+			padding-top: 127px;
 
-</head>
+		}
+		#inMapping {
+			height: 100%;
+			margin-top: 40px;
+			width: 100%;
+			align-items: center;
+			justify-content: center
+		}
+		#inBack {
+			opacity: 0.60;
+			height: 520px;
+			background: url(./image/bg2.png) center center / 100% 100% no-repeat;
+			width: 750px;
+			margin: auto;
+			border-radius:40px
 
-<body>
-    <div id="main">
-        <table border="0">
-            <tr>
-                <th>
-                    <div id="earthquake" style="background-image: url('./image/index_earthquake.png');">
-                        <button class="disasterStatus_btn" value="灾前">灾前</button>
-                        <button class="disasterStatus_btn" value="灾中">灾中</button>
-                        <button class="disasterStatus_btn" value="灾后">灾后</button>
-                    </div>
-                </th>
-                <th>
-                    <div id="fire" style="background-image: url('./image/index_fire.png');">
-                        <button class="disasterStatus_btn" value="灾前">灾前</button>
-                        <button class="disasterStatus_btn" value="灾中">灾中</button>
-                        <button class="disasterStatus_btn" value="灾后">灾后</button>
-                    </div>
-                </th>
-                <th>
-                    <div id="flood" style="background-image: url('./image/index_flood.png');">
-                        <button class="disasterStatus_btn" value="灾前">灾前</button>
-                        <button class="disasterStatus_btn" value="灾中">灾中</button>
-                        <button class="disasterStatus_btn" value="灾后">灾后</button>
-                    </div>
-                </th>
-            </tr>
-            <tr>
-                <th>
-                    <div id="transport" style="background-image: url('./image/index_traffic.png');">
-                        <button class="disasterStatus_btn" value="灾前">灾前</button>
-                        <button class="disasterStatus_btn" value="灾中">灾中</button>
-                        <button class="disasterStatus_btn" value="灾后">灾后</button>
-                    </div>
-                </th>
-                <th>
-                    <div id="geology" style="background-image: url('./image/index_geo.png');">
-                        <button class="disasterStatus_btn" value="灾前">灾前</button>
-                        <button class="disasterStatus_btn" value="灾中">灾中</button>
-                        <button class="disasterStatus_btn" value="灾后">灾后</button>
-                    </div>
-                </th>
-                <th>
-                    <div id="house" style="background-image: url('./image/index_house.png');">
-                        <button class="disasterStatus_btn" value="灾前">灾前</button>
-                        <button class="disasterStatus_btn" value="灾中">灾中</button>
-                        <button class="disasterStatus_btn" value="灾后">灾后</button>
-                    </div>
-                </th>
-            </tr>
-        </table>
+		}
+		#start_btn{
+			width: 200px;
+			height:60px;
+			font-size:30px;
+			margin: auto;
+		
+			display: block;
 
-    </div>
-    <script src="js/jquery-3.1.0.min.js"></script>
-    <script src="js/whu_index.js"></script>
+		}
+		#inBack:hover{
+			box-shadow: rgb(235, 233, 233) 0px 0px 0px;
+			cursor: pointer;
+			opacity: 1;
+		}
+		.flex-container{
+			display: -webkit-flex;
+			display: flex;
+			width: 400px;
+			height: 250px;
+			background-color: ;
+		}
+		.flex-item{
+		    width: 300px;
+			height: 230px;
+			margin: auto;
+			background-size: 100%;
+			text-align: center;
+			color: black;
+			font-size: 20px;
+
+		}
+		.flex-item:hover{
+			box-shadow: rgb(233, 233, 233) 0px 0px 30px;
+		}
+		.nav-tabs>li.active>a:hover{
+			color：white；
+		}
+		.btn-info{
+			font-size: 20px;
+			margin-top: 187px;
+		}
+		
+	</style>
+
+  </head>
+  <body>
+  <div id="main" style="padding:0px;">
+    <nav class="navbar navbar-inverse " style="margin:0;role=navigation;background:;border: none;">
+		<div class="container-fluid">
+		
+			<h1 class="navbar-brand " style="font-size:36px;    text-align: center; color:white;  float: none; ;" >应急自适应快速制图系统</h1>
+		
+		</div>
+			<div class="navbar-collapse collapse" style="text-align: center;">
+	
+			<ul class="nav nav-tabs " style="display: inline-block;float: none;">
+			
+				<li class="active"><a href="#modelMapping" style="background:transparent;border:none;"data-toggle="tab" >模板制图</a></li>
+				<li><a href="#inMapping" style="background:transparent;border:none;"data-toggle="tab">交互制图</a></li>
+				<li><a href="#emMapping" style="background:transparent;border:none;"data-toggle="tab">应用示例</a></li>
+			
+			</ul>
+			</div>
+    </nav>
+	<div id="myTabContent"  style=" height: 100%;" class="tab-content">
+		<div class="tab-pane fade in active" style=" height: 100%;" id="modelMapping">		
+		  <table id ="tb1" border="0"     style ="height: 80%;">
+			  <tr>
+				<th>
+				
+				  <div id="earthquake" style="background-image: url(&#39;./image/index_earthquake.png&#39;);">
+				  <button class="disasterStatus_btn" value="灾前">灾前</button> 
+				  <button class="disasterStatus_btn" value="灾中">灾中</button> 
+				  <button class="disasterStatus_btn" value="灾后">灾后</button></div>
+				</th>
+				<th>
+				  <div id="fire" style="background-image: url(&#39;./image/index_fire.png&#39;);">
+				  <button class="disasterStatus_btn" value="灾前">灾前</button> 
+				  <button class="disasterStatus_btn" value="灾中">灾中</button> 
+				  <button class="disasterStatus_btn" value="灾后">灾后</button></div>
+				</th>
+				<th>
+				  <div id="flood" style="background-image: url(&#39;./image/index_flood.png&#39;);">
+				  <button class="disasterStatus_btn" value="灾前">灾前</button> 
+				  <button class="disasterStatus_btn" value="灾中">灾中</button> 
+				  <button class="disasterStatus_btn" value="灾后">灾后</button></div>
+				</th>
+			  </tr>
+			  <tr>
+				<th>
+				  <div id="transport" style="background-image: url(&#39;./image/index_traffic.png&#39;);">
+				  <button class="disasterStatus_btn" value="灾前">灾前</button> 
+				  <button class="disasterStatus_btn" value="灾中">灾中</button> 
+				  <button class="disasterStatus_btn" value="灾后">灾后</button></div>
+				</th>
+				<th>
+				  <div id="geology" style="background-image: url(&#39;./image/index_geo.png&#39;);">
+				  <button class="disasterStatus_btn" value="灾前">灾前</button> 
+				  <button class="disasterStatus_btn" value="灾中">灾中</button> 
+				  <button class="disasterStatus_btn" value="灾后">灾后</button></div>
+				</th>
+				<th>
+				  <div id="house" style="background-image: url(&#39;./image/index_house.png&#39;);">
+				  <button class="disasterStatus_btn" value="灾前">灾前</button> 
+				  <button class="disasterStatus_btn" value="灾中">灾中</button> 
+				  <button class="disasterStatus_btn" value="灾后">灾后</button></div>
+				</th>
+			  </tr>
+			</table>
+		</div>
+		<div class="tab-pane fade " id="inMapping">
+			<div id="inBack" onclick="window.location.href='interactiveMapping.html';" >
+				  
+			</div>
+		</div>
+		
+		<div class="tab-pane fade" style="height:100%"id="emMapping">
+			<div class="flex-container"style="height:100%;width:100%;">
+			  <div class="flex-item"style="background-image:url(./image/处突.jpg)" >
+				<button class="btn btn-info" href="#">处突响应示意图</button>
+				</div>
+			  <div class="flex-item"style="background-image:url(./image/范围.jpg)">
+				<button class="btn btn-info" href="#">救援路线指示图</button>
+			  </div>	  
+			  <div class="flex-item"style="background-image:url(./image/警力.jpg)">
+				<button class="btn btn-info" href="#" >事件影响范围图</button>
+			  </div>  
+			</div>
+		</div>
+	</div>
+  
+  </div>
+ 
+  <script src="js/whu_index.js"></script>
+  <script>
+  $(document).ready(function(){
+		$("a").css("color","gray");
+		$(".active>a").css("color","white");
+		 $("a").mouseenter(function(){
+			
+			$("a").css("color","gray");
+			$(this).css("color","white");
+			$(".active>a").css("color","white");
+		});
+		$("a").mouseleave(function(){
+			
+			$("a").css("color","gray");
+			
+			$(".active>a").css("color","white");
+		});
+		
+		$(".btn-info").click(function(){
+			localStorage.setItem("disaster_status","灾中");
+            localStorage.setItem("disaster_type","transport");
+            localStorage.setItem("regionParam","1");
+            localStorage.setItem("template_map",this.innerText);
+            localStorage.setItem("template_scale","区域");
+            localStorage.setItem("template_theme","应急信息");
+            window.location.href='Mapping.html';
+		});
+	});
+	 
+  </script>
 </body>
-
 </html>

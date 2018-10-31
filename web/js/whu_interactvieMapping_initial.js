@@ -20,9 +20,8 @@ var ServerLayerArr=[];//专题服务数组
 var layerNodesObj;
 var layerNodes =[
     {id:1, pId:0, name:"地理底图", open:true, "nocheck":true,children:[
-            {id:101, name:"矢量图",url:"http://cache1.arcgisonline.cn/arcgis/rest/services/ChinaOnlineStreetPurplishBlue/MapServer",checked:true},
-            {id:102, name:"影像图",url:"http://cache1.arcgisonline.cn/arcgis/rest/services/ChinaOnlineStreetGray/MapServer"},
-            {id:103, name:"地形图",url:"http://cache1.arcgisonline.cn/arcgis/rest/services/ChinaOnlineCommunityENG/MapServer"},
+            {id:101, name:"矢量图",url:"http://qk.casm.ac.cn:9090/geowinmap/ds?serviceproviderid=map.cachedtms&serviceid=gettile&tilename=map&y=${row}&x=${col}&z=${level}",checked:true},
+            {id:102, name:"影像图",url:"http://qk.casm.ac.cn:9090/geowinmap/ds?serviceproviderid=map.cachedtms&serviceid=gettile&tilename=sate&y=${row}&x=${col}&z=${level}"}
         ]},
 
     {id:2, pId:0, name:"专题服务图层",isParent:true, open:false,children:[], "nocheck":true},
@@ -68,10 +67,10 @@ $(document).ready(function() {
             map = new Map("mapContainer", {
                 //basemap:"dark-gray-vector",
                 center: [104,35],
-                //zoom: 12
+                zoom: 5
             });
-            baseMap = new ArcGISDynamicMapServiceLayer(
-                'http://cache1.arcgisonline.cn/arcgis/rest/services/ChinaOnlineStreetPurplishBlue/MapServer',{id:"baseMap"}
+            baseMap = new WebTiledLayer(
+                'http://qk.casm.ac.cn:9090/geowinmap/ds?serviceproviderid=map.cachedtms&serviceid=gettile&tilename=map&y=${row}&x=${col}&z=${level}',{id:"baseMap"}
             );
             map.addLayer(baseMap);
             studyAreaLayer=new GraphicsLayer('',{id:"studyAreaLayer",name:"studyAreaLayer"});
@@ -142,8 +141,7 @@ $("#doMap").click(function () {
         callback: {
             beforeCheck: layerOncheck,
             beforeRemove: beforeRemove,
-            beforeRename: beforeRename,
-            onCheck:onCheck
+            beforeRename: beforeRename
         }
     };
     function addHoverDom(treeId, treeNode) {
@@ -245,9 +243,9 @@ $("#doMap").click(function () {
                             type: 0,
                             shade: 0,
                            // content:"<div><p>要素名称：<input id='newFLName'></input></p><br/><p>要素地址：<input id='newFLAds'></input></p></div>",
-                            content: "<div id='zeo'><form><p style='padding-left: 12px'>要素名称：<input id='newFLName'></input></p><br/><p class='FLS_p'><input id='textLayer' name='layer' value='text' type='radio' onclick='changeSource(this)'/>服务地址：<input id='newFLAds' disabled></input><i class='FLS_i fa fa-cog'></i></p>"
+                            content: "<div id='zeo'><p style='padding-left: 12px'>要素名称：<input id='newFLName'></input></p><br/><p class='FLS_p'><input id='textLayer' name='layer' value='text' type='radio' onclick='changeSource(this)'/>服务地址：<input id='newFLAds' disabled></input><i class='FLS_i fa fa-cog'></i></p>"
                                 // @YH改：
-                                + "<br/><p class='tree_p'><input id='buttonLayer' name='layer' value='button' type='radio' onclick='changeSource(this)' />专题服务：<button id='selectButton' class='layui-btn layui-btn-sm layui-btn-disabled' disabled>选择要素</button></p><form/></div>",
+                                + "<br/><p class='tree_p'><input id='buttonLayer' name='layer' value='button' type='radio' onclick='changeSource(this)' />专题服务：<button id='selectButton' class='layui-btn layui-btn-sm layui-btn-disabled' disabled>选择要素</button></p></div>",
                             //----------
                             yes: function(index, layero) {//确定后执行回调
                                 if($("#newFLName").val()==""||$("#newFLAds").val()==""){
@@ -590,7 +588,7 @@ function layerOncheck(treeId, treeNode) {
                         layerNodesObj.checkNode(node, false, true);
                     }
                     map.removeLayer(baseMap);
-                    baseMap = new ArcGISDynamicMapServiceLayer(
+                    baseMap = new WebTiledLayer(
                         treeNode.url
                     );
                     map.addLayer(baseMap)
@@ -619,7 +617,121 @@ function layerOncheck(treeId, treeNode) {
                 });
             }
         }
-}
+        if (treeNode.getParentNode().id===3) {//如果操作的是要素图层
+            var isChecked = !treeNode.checked;
+            var dataUrl = treeNode.url;
+            var lastDataUrl = treeNode.lastUrl;//上一次存储的url。加载时，应先将上一次存储的url代表的要素删去
+            if(isChecked){//如果被勾选
+                if (dataUrl == "") {//服务地址为空，则返回
+                    layui.use('layer', function () {
+                        var lay = layui.layer;
+                        lay.open({
+                            title: '提示'
+                            ,content: '请先设置要素图层地址！'
+                        });
+                    })
+                    return;
+                }else{//如果服务地址不为空
+                    //先判断上次存储的url代表的图层是否加载，如果加载了，则删去
+                    if(map&&(map.getLayer(lastDataUrl))){
+                        map.removeLayer(map.getLayer(lastDataUrl));
+                    }
+                    if(map&&(map.getLayer(dataUrl))){//如果已经加载，只是做了隐藏，显示就好了，下面的步骤跳过
+                        var thisLayer = map.getLayer(dataUrl);
+                        thisLayer.show();
+                        return;
+                    }
+                    require([
+                        "esri/layers/FeatureLayer",
+                        "esri/InfoTemplate", "esri/dijit/PopupTemplate", "esri/renderers/SimpleRenderer"
+                    ], function (FeatureLayer, InfoTemplate, PopupTemplate, SimpleRenderer) {
+
+                        var infoTemplate = new InfoTemplate("${NAME}", "${*}");
+                        var layer = new FeatureLayer(dataUrl, {
+                            mode: FeatureLayer.MODE_SNAPSHOT,
+                            outFields: ["*"],
+                            opacity: "1",
+                            infoTemplate: infoTemplate,
+                            id: dataUrl
+                        });
+                        layer.on("load", function(){
+                            var simpleJson_line = {
+                                "type": "simple",
+                                "label": treeNode.name,
+                                "description": "",
+                                "symbol":  {
+                                    "type": "esriSLS", //SimpleLineSymbol(简单线类型)
+                                    "color": [115, 76, 0, 255], //颜色
+                                    "width": 2, //线宽
+                                    "style": "esriSLSDash" //线形
+                                }
+                            };
+                            var simpleJson_polygon = {
+                                "type": "simple",
+                                "label": treeNode.name,
+                                "description": "",
+                                "symbol":  {
+                                    "type": "esriSFS",
+                                    "style": "esriSFSSolid",
+                                    "color": [115,76,0,255],
+                                    "outline": {
+                                        "type": "esriSLS",
+                                        "style": "esriSLSSolid",
+                                        "color": [110,110,110,255],
+                                        "width": 1
+                                    }}
+                            };
+                            var simpleJson_point = {
+                                "type": "simple",
+                                "label": treeNode.name,
+                                "description": "",
+                                "symbol":  {
+                                    "type": "esriSMS",
+                                    "style": "esriSMSSquare",
+                                    "color": [76,115,0,255],
+                                    "size": 8,
+                                    "angle": 0,
+                                    "xoffset": 0,
+                                    "yoffset": 0,
+                                    "outline":
+                                        {
+                                            "color": [152,230,0,255],
+                                            "width": 1
+                                        }}
+                            };
+                            var rend;
+                            require(["esri/renderers/SimpleRenderer"
+                            ], function ( SimpleRenderer) {
+                                switch (layer.geometryType)  {
+                                    case "esriGeometryPoint":
+                                        rend = new SimpleRenderer(simpleJson_point)
+                                        break;
+                                    case "esriGeometryPolyline":
+                                        rend = new SimpleRenderer(simpleJson_line)
+                                        break;
+                                    case "esriGeometryPolygon":
+                                        rend = new SimpleRenderer(simpleJson_polygon)
+                                        break;
+                                }
+                                layer.setRenderer(rend);
+                            });
+
+
+                        });
+                        map.addLayer(layer);
+
+                    })
+                }
+            }else{//如果取消勾选
+                //hide当前url的图层
+                if(map&&(map.getLayer(dataUrl))){
+                    var thisLayer = map.getLayer(dataUrl);
+                    thisLayer.hide()
+                }
+                return;
+            }
+        }
+    }
 }
 
 //专题数据check之前回调，用于请求数据
@@ -735,66 +847,3 @@ function changeSource(node){
     }
 }
 
-function onCheck(e,treeId, treeNode) {
-    var isChecked = treeNode.checked;
-    var dataUrl = treeNode.url;
-    var lastDataUrl = treeNode.lastUrl;//上一次存储的url。加载时，应先将上一次存储的url代表的要素删去
-    if (treeNode.pId==3) {//如果操作的是要素图层
-        if(isChecked){//如果被勾选
-            if (dataUrl == "") {//服务地址为空，则返回
-                layui.use('layer', function () {
-                    var lay = layui.layer;
-                    lay.open({
-                        title: '提示'
-                        ,content: '请先设置要素图层地址！'
-                    });
-                })
-                return;
-            }else{//如果服务地址不为空
-                //先判断上次存储的url代表的图层是否加载，如果加载了，则删去
-                if(map&&(map.getLayer(lastDataUrl))){
-                    map.removeLayer(map.getLayer(lastDataUrl));
-                }
-                if(map&&(map.getLayer(dataUrl))){//如果已经加载，只是做了隐藏，显示就好了，下面的步骤跳过
-                    var thisLayer = map.getLayer(dataUrl);
-                    thisLayer.show();
-                    return;
-                }
-                require([
-                    "esri/layers/FeatureLayer",
-                    "esri/InfoTemplate", "esri/dijit/PopupTemplate", "esri/renderers/SimpleRenderer"
-                ], function (FeatureLayer, InfoTemplate, PopupTemplate, SimpleRenderer) {
-                    var simpleJson = {
-                        "type": "simple",
-                        "label": treeNode.name,
-                        "description": "",
-                        "symbol":  {
-                            "type": "esriSLS", //SimpleLineSymbol(简单线类型)
-                            "color": [115, 76, 0, 255], //颜色
-                            "width": 2, //线宽
-                            "style": "esriSLSDash" //线形
-                        }
-                    }
-                    var rend = new SimpleRenderer(simpleJson);
-                    var infoTemplate = new InfoTemplate("${NAME}", "${*}");
-                    var layer = new FeatureLayer(dataUrl, {
-                        mode: FeatureLayer.MODE_SNAPSHOT,
-                        outFields: ["*"],
-                        opacity: "1",
-                        infoTemplate: infoTemplate,
-                        id: dataUrl
-                    });
-                    layer.setRenderer(rend)
-                    map.addLayer(layer);
-                })
-            }
-        }else{//如果取消勾选
-            //hide当前url的图层
-            if(map&&(map.getLayer(dataUrl))){
-                var thisLayer = map.getLayer(dataUrl);
-                thisLayer.hide()
-            }
-            return;
-        }
-    }
-}

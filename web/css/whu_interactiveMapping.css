@@ -41,6 +41,7 @@ h1,h2,h3,h4,h5,h6{
 #doMapTree{
     min-height: 300px;
     max-height: 800px;
+    min-width: 200px;
 }
 #treeContent{
     width: 280px;
