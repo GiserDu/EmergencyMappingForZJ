@@ -38,6 +38,10 @@ h1,h2,h3,h4,h5,h6{
     right:100px;
 
 }
+#backHome{
+
+margin-left: 35px;
+}
 #doMapTree{
     min-height: 300px;
     max-height: 800px;

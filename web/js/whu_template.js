@@ -137,6 +137,7 @@ function createImg(thistheme) {
                 localStorage.setItem("regionParam", regionParam);
                 localStorage.setItem("template_scale", scale);
                 localStorage.setItem("template_map", map);
+                localStorage.setItem("templateHome", "1");
                 window.location.href='Mapping.html';
 
 

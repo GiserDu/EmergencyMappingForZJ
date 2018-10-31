@@ -27,7 +27,10 @@ var studyAreaLayer;
 
 $(document).ready(function() {
     regionParam=localStorage.getItem("regionParam");
-
+    //判断是否是应用示范
+    if(localStorage.getItem("templateHome")=="0"){
+        $("#backHome").attr("href","index.html");
+    }
 
     findDimensions();
     $("#mapContainer").height(winHeight);
@@ -466,9 +469,8 @@ $(document).ready(function() {
 
 
 
-                    center: [113.2561395,31.01224452],
-                    //  center:   [120.78484503768885,28.933081922343742],
-                    zoom: 7,
+                    center: [104,35],
+                    zoom: 5,
                     logo : false, //logo
                     nav: false,
                     showAttribution: false,
