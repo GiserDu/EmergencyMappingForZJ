@@ -65,6 +65,25 @@ h1,h2,h3,h4,h5,h6{
 .doMapEdit:hover {
     background-position: -168px -21px;
 }
+.doMapData{
+    margin-left: 2px;
+    margin-right: -1px;
+    vertical-align: top;
+    line-height: 0;
+    margin: 0;
+    padding: 0;
+    width: 21px;
+    height: 21px;
+    display: inline-block;
+    vertical-align: middle;
+    border: 0 none;
+    cursor: pointer;
+    outline: none;
+    background: transparent url("ztree/img/bootstrap.png") no-repeat scroll -189px -21px;
+}
+.doMapData:hover {
+    background-position: -168px -21px;
+}
 .doMapRemove{
     margin-left: 2px;
     margin-right: -1px;
