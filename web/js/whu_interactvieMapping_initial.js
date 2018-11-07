@@ -1,3 +1,5 @@
+
+var map;//没有使用var声明的变量，会成为全局对象window的属性,这里仅仅声明map为一个全局变量!
 var map;//没有使用var声明的变量，会成为全局对象window的属性,这里仅仅声明map为一个全局变量!
 var tb;//toolbar,绘制用
 var featureLayerTree;
@@ -17,6 +19,7 @@ var doMapIndex=0;//制图目录树表示，0表示为构造，1表示构造
 var ARIndex=0;//行政区目录树表示，0表示为构造，1表示构造
 var studyAreaLayer;//制图区域
 var ServerLayerArr=[];//专题服务数组
+var iframeWinIndex //制图模板弹窗索引
 var layerNodesObj;
 var layerNodes =[
     {id:1, pId:0, name:"地理底图", open:true, "nocheck":true,children:[
@@ -34,6 +37,7 @@ var thematicData={};
 $(document).ready(function() {
     findDimensions();
     $("#mapContainer").height(winHeight);
+    window.ddd="111"
     initMap();
 
     //获取当前窗口尺寸
@@ -118,8 +122,8 @@ $("#adminNav").click(function () {
         });
     });
 });
-//制图
-$("#doMap").click(function () {
+//制图树实现函数
+function doMapping(layerNodes_InFunc) {
     var setting = {
         check: {
             enable: true
@@ -252,10 +256,10 @@ $("#doMap").click(function () {
                             skin: "layui-layer-lan",
                             type: 0,
                             shade: 0,
-                           // content:"<div><p>要素名称：<input id='newFLName'></input></p><br/><p>要素地址：<input id='newFLAds'></input></p></div>",
+                            // content:"<div><p>要素名称：<input id='newFLName'></input></p><br/><p>要素地址：<input id='newFLAds'></input></p></div>",
                             content: "<div id='zeo'><p style='padding-left: 12px'>要素名称：<input id='newFLName'></input></p><br/><p class='FLS_p'><input id='textLayer' name='layer' value='text' type='radio' onclick='changeSource(this)'/>服务地址：<input id='newFLAds' disabled></input><i class='FLS_i fa fa-cog'></i></p>"
-                                // @YH改：
-                                + "<br/><p class='tree_p'><input id='buttonLayer' name='layer' value='button' type='radio' onclick='changeSource(this)' />专题服务：<button id='selectButton' class='layui-btn layui-btn-sm layui-btn-disabled' disabled>选择要素</button></p></div>",
+                            // @YH改：
+                            + "<br/><p class='tree_p'><input id='buttonLayer' name='layer' value='button' type='radio' onclick='changeSource(this)' />专题服务：<button id='selectButton' class='layui-btn layui-btn-sm layui-btn-disabled' disabled>选择要素</button></p></div>",
                             //----------
                             yes: function(index, layero) {//确定后执行回调
                                 if($("#newFLName").val()==""||$("#newFLAds").val()==""){
@@ -277,7 +281,7 @@ $("#doMap").click(function () {
                 //alert("添加" + treeNode.name);
                 //var treeObj = $.fn.zTree.getZTreeObj("doMapTree");
                 //var newNode = {name:"newNode1"};
-               // treeObj.addNodes(treeNode, {id:(100 + newCount), pId:treeNode.id, name:"new node" + (newCount++)});
+                // treeObj.addNodes(treeNode, {id:(100 + newCount), pId:treeNode.id, name:"new node" + (newCount++)});
             });
 
         }
@@ -323,7 +327,7 @@ $("#doMap").click(function () {
                                 baseMap.url=$("#editBLAds").val();
                                 baseMap._url.path=$("#editBLAds").val();
                                 if($.inArray("baseMap",map.layerIds)!=-1){
-                                   map.getLayer("baseMap").refresh();
+                                    map.getLayer("baseMap").refresh();
                                 }
                                 layer.close(index);
                             }});
@@ -340,7 +344,7 @@ $("#doMap").click(function () {
                             shade: 0,
                             content:"<div><p>服务名称：<input id='editSLName' value='"+treeNode.name+"'></input></p><br/><p>服务地址：<input id='editSLAds' value='"+treeNode.url+"'></input></p></div>",
                             yes: function(index, layero) {//确定后执行回调
-                              //  var editnode={name:$("#newSLName").val(),url:$("#newSLAds").val()};
+                                //  var editnode={name:$("#newSLName").val(),url:$("#newSLAds").val()};
                                 if($("#editSLName").val()==""||$("#editSLAds").val()==""){
                                     alert("属性不能为空！");
                                     return;
@@ -352,7 +356,7 @@ $("#doMap").click(function () {
                                         p._url.path=$("#editSLAds").val();
                                         //如果地图中已经有这个图层
                                         if($.inArray(id,map.layerIds)!=-1){
-                                           // p.refresh();
+                                            // p.refresh();
                                             map.getLayer(id).refresh();
                                             //map.removeLayer(map.getLayer(id));
                                         };
@@ -379,7 +383,7 @@ $("#doMap").click(function () {
                             shade: 0,
                             //content:"<div><p>要素名称：<input id='editFLName' value='"+treeNode.name+"'></input></p><br/><p>要素地址：<input id='editFLAds' value='"+treeNode.url+"'></input></p></div>",
                             content: "<div id='zeo'><form><p style='padding-left: 12px'>要素名称：<input id='editFLName' value='"+treeNode.name+"'></input></p><br/><p class='FLS_p'><input id='textLayer' name='layer' value='text' type='radio' onclick='changeSource(this)' "+treeNode.textLayerChecked+"/>服务地址：<input id='editFLAds' "+treeNode.textLayerDisabled+" value='"+treeNode.url+"'></input><i class='FLS_i fa fa-cog'></i></p>"
-                             + "<br/><p class='tree_p'><input id='buttonLayer' name='layer' value='button' type='radio' onclick='changeSource(this)' "+treeNode.buttonLayerChecked+"/>专题服务：<button id='selectButton' class='layui-btn layui-btn-sm layui-btn-disabled' "+treeNode.buttonLayerDisabled+">选择要素</button></p><form/></div>",
+                            + "<br/><p class='tree_p'><input id='buttonLayer' name='layer' value='button' type='radio' onclick='changeSource(this)' "+treeNode.buttonLayerChecked+"/>专题服务：<button id='selectButton' class='layui-btn layui-btn-sm layui-btn-disabled' "+treeNode.buttonLayerDisabled+">选择要素</button></p><form/></div>",
                             yes: function(index, layero) {//确定后执行回调
                                 //  var editnode={name:$("#newSLName").val(),url:$("#newSLAds").val()};
                                 if($("#editFLName").val()==""||$("#editFLAds").val()==""){
@@ -496,9 +500,14 @@ $("#doMap").click(function () {
         return confirm("确认删除 节点 -- " + treeNode.name + " 吗？");
     }
     if(doMapIndex==0){
-        layerNodesObj=$.fn.zTree.init($("#doMapTree"), setting, layerNodes);
+        layerNodesObj=$.fn.zTree.init($("#doMapTree"), setting, layerNodes_InFunc);
         doMapIndex=1;
     }
+
+}
+//制图
+$("#doMap").click(function () {
+    doMapping(layerNodes)
 
     layui.use('layer', function (layui_index) {
         var layer = layui.layer;
@@ -512,7 +521,6 @@ $("#doMap").click(function () {
             }});
     });
 })
-
 //专题目录
 $("#featureContent").click(function () {
     $.ajaxSetup({async:false});
@@ -571,6 +579,130 @@ $("#featureContent").click(function () {
             type: 1,
             shade: 0,
             content: $('#treeContent'),
+            yes: function(index, layero) {//确定后执行回调
+
+            }
+        });
+    });
+})
+
+//为每个制图模板添加弹出框
+function addModelLayUI(mapName) {
+    //根据本地存储获取模板
+    (function getTemplate() {
+        var disaster_status = localStorage.getItem("disaster_status");
+        var disaster_type = localStorage.getItem("disaster_type");
+        var template_scale = localStorage.getItem("template_scale");
+        var template_theme = localStorage.getItem("template_theme");
+        var template_map = localStorage.getItem("template_map");
+        // $("#mapNameInfo").html(template_map);
+        var url = "./servlet/GetTemplateLayer?disasterStatus="+disaster_status+"&disasterType="+disaster_type+"&templateScale="+template_scale+"&templateTheme="+template_theme+"&templateMap="+template_map+"&queryType=queryLayer";
+        $.ajax({
+            url: url,
+            type: 'GET',
+            dataType: 'json',
+            cache:false,
+            contentType: "charset=utf-8",
+            async:false,//设置为同步操作就可以给全局变量赋值成功
+            scriptCharset: 'utf-8',
+            success: function (data) {
+                //str=data[0]["SIX_LZJTU_LAYER"].slice(1,data[0]["SIX_LZJTU_LAYER"].length-4);
+                var jsonStr;
+                if ((typeof data[0]["SIX_LZJTU_LAYER"])==="string"&&!(data[0]["SIX_LZJTU_LAYER"]==="")&&!(data[0]["SIX_LZJTU_LAYER"].toLowerCase()==="null")) {
+                    //要考虑到字符串string为空的情况
+                    try{
+                        str=eval("(" + data[0]["SIX_LZJTU_LAYER"] + ")");
+                        jsonStr=str[0];
+                    }
+                    catch(e){
+                        alert("数据库中模板格式错误");
+                        console.log(e);
+                    }
+                }else if ((typeof data[0]["SIX_LZJTU_LAYER"])==="object"&&!(data[0]["SIX_LZJTU_LAYER"]===null)){
+                    //要考虑到object为空的情况
+                    str=data[0]["SIX_LZJTU_LAYER"];
+                    jsonStr=str[0];
+                }
+                try{
+                    //if(jsonStr&&jsonStr.featureLayer&&jsonStr.featureLayer.modules&&jsonStr.featureLayer.modules.length&&jsonStr.featureLayer.modules[0].name)
+                    if(jsonStr)
+                    {
+                        template=jsonStr;
+                    }else{
+                        console.log(jsonStr)
+                        alert("数据库中模板为空或格式错误，使用缺省模板")
+                    }
+                    console.log(template);
+                    return;
+                }catch (e) {
+                    alert("数据库中模板格式错误");
+                    console.log(e);
+                }
+            },
+            error: function (xhr, status, errMsg) {
+                alert('error');
+                console.log(errMsg);
+            }
+
+        });
+    })();
+    //利用template生成树节点
+    //生成树
+    doMapIndex=0
+    //编辑节点
+    var baseLayer_Model=template.baseLayer
+    var featureLayer_Model=template.featureLayer
+    var serviceLayer_Model=template.serviceLayer
+    var statisticLayer_Model= template.statisticLayer
+    //修改底图节点_暂时不用
+
+    var layerNodes_Model=layerNodes.slice(0);
+
+    /*增加专题服务图层节点*/
+    layerNodes_Model[1].children=serviceLayer_Model.modules;
+    //增加要素图层
+    layerNodes_Model[2].children=featureLayer_Model.modules;
+    //增加统计图层
+    layerNodes_Model.push({id:4, pId:0, name:"统计图层", isParent:true,open:false,children:[], "nocheck":true});
+    layerNodes_Model[3].children=statisticLayer_Model.modules;
+
+    doMapping(layerNodes_Model)
+
+    layui.use('layer', function () {
+        var tTreeLayer = layui.layer;
+        tTreeLayer.open({
+            title: mapName,
+            skin: "layui-layer-lan",
+            type: 1,
+            shade: 0,
+            resize: false,
+            btn: ['确定'],
+            content: $('#doMapTree'),
+            yes: function(index, layero) {//确定后执行回调
+                alert("添加响应事件")
+            }
+        });
+    });
+
+}
+//选择制图模板
+$("#templateMap").click(function () {
+    /**
+    * @Description: 制图模板函数，点击出现详细灾害标签
+    * @Param:
+    * @return:
+    */
+    layui.use('layer', function () {
+        var layer1 = layui.layer;
+        layer1.open({
+            title: '制图模板',
+            skin: "layui-layer-lan",
+            type: 2,
+            shade: 0,
+            resize: false,
+            area: ["800px","600px"],
+            // btn: ['按钮1','按钮2','按钮3'],
+            content: 'indexMini.html',
             yes: function(index, layero) {//确定后执行回调
 
             }

@@ -11,9 +11,9 @@
     <title>应急自适应快速制图</title>
     <link href="css/reset.css" rel="stylesheet" />
     <link href="css/whu_index.css" rel="stylesheet" />
-	  <link rel="stylesheet" href="./css/bootstrap.min.css">
-	  <script src="./js/jquery-3.2.1.js"></script>
-	  <script src="./js/bootstrap.min.js"></script>
+	<link rel="stylesheet" href="./css/bootstrap.min.css">
+	<script src="./js/jquery-3.2.1.js"></script>
+	<script src="./js/bootstrap.min.js"></script>
 	<style>
 		table div{
 		margin-top: 5%;
@@ -27,28 +27,14 @@
 			padding-top: 127px;
 
 		}
-		#inMapping {
-			height: 100%;
-			margin-top: 40px;
-			width: 100%;
-			align-items: center;
-			justify-content: center
+		#main {
+			background-color: #ddd;
+			background-image: url(" ");
 		}
-		#inBack {
-			opacity: 0.60;
-			height: 520px;
-			background: url(./image/bg2.png) center center / 100% 100% no-repeat;
-			width: 750px;
-			margin: auto;
-			border-radius:40px
-
+		#main nav{
+			background-color:#337ab7;
 		}
 
-		#inBack:hover{
-			box-shadow: rgb(235, 233, 233) 0px 0px 0px;
-			cursor: pointer;
-			opacity: 1;
-		}
 		.flex-container{
 			display: -webkit-flex;
 			display: flex;
@@ -58,7 +44,7 @@
 
 		}
 		.flex-item{
-		    width: 300px;
+			width: 30%;
 			height: 230px;
 			margin: auto;
 			background-size: 100%;
@@ -85,16 +71,16 @@
   <div id="main" style="padding:0px;">
     <nav class="navbar navbar-inverse " style="margin:0;role=navigation;background:;border: none;">
 		<div class="container-fluid">
-		
-			<h1 class="navbar-brand " style="font-size:36px;    text-align: center; color:white;  float: none; ;" >应急自适应快速制图系统</h1>
-		
+
+			<h1 class="navbar-brand " style="font-size:36px;    text-align: center; color:white;  float: none; ;" >制图模板选择</h1>
+
 		</div>
 			<div class="navbar-collapse collapse" style="text-align: center;">
 	
 			<ul class="nav nav-tabs " style="display: inline-block;float: none;">
 			
 				<li class="active"><a href="#modelMapping" style="background:transparent;border:none;"data-toggle="tab" >模板制图</a></li>
-				<li><a href="#inMapping" style="background:transparent;border:none;"data-toggle="tab">交互制图</a></li>
+
 				<li><a href="#emMapping" style="background:transparent;border:none;"data-toggle="tab">应用示例</a></li>
 			
 			</ul>
@@ -105,7 +91,6 @@
 		  <table id ="tb1" border="0"     style ="height: 80%;">
 			  <tr>
 				<th>
-				
 				  <div id="earthquake" style="background-image: url(&#39;./image/index_earthquake.png&#39;);">
 				  <button class="disasterStatus_btn" value="灾前">灾前</button> 
 				  <button class="disasterStatus_btn" value="灾中">灾中</button> 
@@ -146,11 +131,7 @@
 			  </tr>
 			</table>
 		</div>
-		<div class="tab-pane fade " id="inMapping">
-			<div id="inBack" onclick="window.location.href='interactiveMapping.html';" >
-				  
-			</div>
-		</div>
+
 		
 		<div class="tab-pane fade" style="height:100%"id="emMapping">
 			<div class="flex-container"style="height:100%;width:100%;">
@@ -172,17 +153,17 @@
   <script src="js/whu_index.js"></script>
   <script>
   $(document).ready(function(){
-		$("a").css("color","gray");
+		$("a").css("color","black");
 		$(".active>a").css("color","white");
 		 $("a").mouseenter(function(){
 			
-			$("a").css("color","gray");
+			$("a").css("color","black");
 			$(this).css("color","white");
 			$(".active>a").css("color","white");
 		});
 		$("a").mouseleave(function(){
 			
-			$("a").css("color","gray");
+			$("a").css("color","black");
 			
 			$(".active>a").css("color","white");
 		});
@@ -195,7 +176,16 @@
             localStorage.setItem("template_scale","区域");
             localStorage.setItem("template_theme","应急信息");
             localStorage.setItem("templateHome", "0");
-            window.location.href='Mapping.html';
+
+            if(self!=top){
+                //关闭子窗口并弹出新的layUI
+                var index=parent.layer.getFrameIndex(window.name);
+                parent.layer.close(index);
+                parent.addModelLayUI(this.innerText)
+            }
+            else{
+                window.location.href='Mapping.html';
+            }
 		});
 	});
 	 

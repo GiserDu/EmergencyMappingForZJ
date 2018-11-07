@@ -15,7 +15,11 @@ body {
     font-size:1.4rem;
     background: #e7e9f0;
 }
-
+#map-save{
+    top: 90px;
+    left: 20px;
+    border-radius: 5px;
+}
 h1,h2,h3,h4,h5,h6{
     font-family: "Microsoft YaHei";
 }
@@ -446,11 +450,9 @@ input[type="checkbox"]{
     color: black;
 }
 
-#map-save{
-    top: 20px;
-    border-radius: 5px 5px 0 0;
+#map-save-Modal{
+    display: none;
 }
-
 #map-legend{
     top: 52px;
     border-radius: 0 0 5px 5px;

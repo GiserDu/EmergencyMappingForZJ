@@ -12,7 +12,14 @@ $(document).ready(function() {
       localStorage.setItem("disaster_status", disaster_status)
       localStorage.setItem("disaster_type",disaster_type)
       //跳转到模板选择页面
-      window.location.href='template.html';
+        if(self!=top){
+            //关闭子窗口并弹出新的layUI
+            window.location.href='templateMini.html';
+        }
+        else{
+            window.location.href='template.html';
+        }
+
 
     });
       
