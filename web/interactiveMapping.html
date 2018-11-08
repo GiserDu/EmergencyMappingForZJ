@@ -14,6 +14,8 @@
     <link rel="stylesheet" href="css/bootstrap-select.css">
     <link rel="stylesheet" href="css/ztree/bootstrapStyle.css" type="text/css">
     <link href="css/font-awesome.min.css" rel="stylesheet">
+    <link rel="stylesheet" type="text/css" href="js/sweetalert_lib/sweetalert_bk.css">
+    <link href="css/bootstrap-slider.min.css" rel="stylesheet">
 </head>
 <body>
 <div id="main">
@@ -24,6 +26,7 @@
 
     </div>
     <div id="doMapTree" class="ztree"></div>
+    <div id="doMapTree_Template" class="ztree"></div>
     <div id="treeContent" class="ztree"></div>
     <div id="toolsMenu" >
         <div class="btn-group">
@@ -65,15 +68,112 @@
                 <li><a class="fa fa-tags" href="#" id="measurePlot" onclick="addMeasureInteraction()">&nbsp&nbsp测量</a></li>
             </ul>
         </div>
-        <!--<button id="featureContent" type="button" class="btn btn-default" onclick="openSelectedTree(nodePath)">专题目录</button>-->
+            <button id="templateMap" type="button" class="btn btn-default">制图模板</button>
         </div>
         <a id="backHome" href="index.html" type="button" class="btn btn-default  fa  fa-home"></a>
     </div>
 
+    <div id="map-save" class="right-top-bottom" title="打印">
+        <span class="glyphicon glyphicon-print" data-toggle="modal" data-target="#map-save-Modal"></span>
+    </div>
+
+    <div class="modal fade in" id="map-save-Modal" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true" >
+        <div class="modal-dialog" role="document" style="width:470px;">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <button type="button" class="close" data-dismiss="modal" aria-hidden="true">
+                        ×
+                    </button>
+                    <label class="modal-title" id="printLabel">地图输出</label>
+                </div>
+                <div class="modal-body" style="padding:5px 40px;">
+                    <form class="form-horizontal" role="form">
+                        <div class="form-group" style="margin-bottom: 3px">
+                            <div class="input-div">
+                                <label class="control-label">地图名称</label>
+                                <input id="mapTitle" type="text" class="form-control" placeholder="请输入地图名称" style="width:410px;">
+                            </div>
+                        </div>
+                        <div class="form-group" style="margin-bottom: 16px">
+                            <div class="input-div">
+                                <label class="control-label ">版权信息</label>
+                                <input id="copyrightText" type="text" class="form-control" placeholder="请输入制作人及版权信息" style="width:410px;">
+                            </div>
+                        </div>
+                        <!--<div class="form-group" style="margin-bottom: 20px">-->
+                        <!--<div class="input-div">-->
+                        <!--<label class="control-label ">比&nbsp;例&nbsp;尺&nbsp;</label>-->
+                        <!--<input id="scaleText" type="text" class="form-control" value="3500000" style="width:370px;" />-->
+                        <!--</div>-->
+                        <!--</div>-->
+                        <div class="print_main" style="width:410px;height:200px;margin:0 auto">
+                            <div class="print_left" style="float:left;width:45%;height:100%;margin-top:8px">
+                                <div class="form-group">
+                                    <label class="control-label " style="float:left;margin-right:10px;margin-bottom:5px">输出纸张</label>
+                                    <select id="layoutpaper" class="form-control" style="width:130px;">
+                                        <!--<option value="pdf">pdf</option>-->
+                                        <option value="A4">A4</option>
+                                        <option value="A3">A3</option>
+                                    </select>
+                                </div>
+                                <div class="form-group">
+                                    <label class="control-label " style="float:left;margin-right:10px;margin-bottom:5px">输出版式</label>
+                                    <select id="layout" class="form-control" style="width:130px;">
+                                        <option value="Landscape_01" layout="image/layout/Landscape_01.png">横向版式1</option>
+                                        <option value="Landscape_02" layout="image/layout/Landscape_02.png">横向版式2</option>
+                                        <option value="Landscape_03" layout="image/layout/Landscape_03.png">横向版式3</option>
+                                        <option value="Portrait_01" layout="image/layout/Portrait_01.png">纵向版式1</option>
+                                        <option value="Portrait_02" layout="image/layout/Portrait_02.png">纵向版式2</option>
+                                        <option value="Portrait_03" layout="image/layout/Portrait_03.png">纵向版式3</option>
+                                    </select>
+                                </div>
+                                <div class="form-group">
+                                    <label class="control-label " style="float:left;margin-right:10px;margin-bottom:5px">输出精度</label>
+                                    <select id="dpi" class="form-control" style="width:130px;">
+                                        <!--<option value="pdf">pdf</option>-->
+                                        <option value="120">120dpi</option>
+                                        <option value="200">200dpi</option>
+                                        <option value="300">300dpi</option>
+                                    </select>
+                                </div>
+                                <div class="form-group">
+                                    <label class="control-label " style="float:left;margin-right:10px;">输出格式</label>
+                                    <select id="format" class="form-control" style="width:130px;">
+                                        <!--<option value="pdf">pdf</option>-->
+                                        <option value="png32">png32</option>
+                                        <option value="png8">png8</option>
+                                        <option value="jpg">jpg</option>
+                                        <option value="gif">gif</option>
+                                    </select>
+                                </div>
+                            </div>
+
+                            <div class="print_right" style="float:right;width:55%;height:100%;display:table-cell;text-align:center; vertical-align:middle;font-size: 124px;">
+                                <img alt="" id="layoutPreview" src="image/layout/Landscape_01.png" style="vertical-align:middle;float: none;margin: auto">
+                            </div>
+                        </div>
+
+                        <div class="modal-footer">
+                            <button type="button" data-dismiss="modal" class="btn btn-default">关闭</button>
+                            <button type="button" data-dismiss="modal" class="btn btn-primary" id="printbt">输出</button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div id="loading"  class="loading">正在输出...</div>
+
 </div>
 
+
 <script type="text/javascript" src="js/jquery-3.2.1.js"></script>
+
+<script type="text/javascript" src="js/sweetalert_lib/sweetalert.min.js"></script>
+<script src="js/layui/layui.js"></script>
+
 <script src="http://localhost:8080/EmergencyMapping1027/js/lib/arcgis_js_api/library/3.24/3.24/init.js"></script>
+<script type="text/javascript" src="js/Print.js"></script>
 <script src="js/plotIF.js"></script>
 <script src="js/whu_interactvieMapping_initial.js"></script>
 <script src="js/common.js"></script>
