@@ -96,63 +96,63 @@ function print(){
 }
 function printResult(renderer) {
 	if (renderer != null) {
-		// window.open(renderer.url);
+		window.open(renderer.url);
 		console.log(renderer.url);
-		var imgURL = renderer.url;//本机测试用
-		//var imgURL = renderer.url.replace(/223.75.52.36:26080/, "localhost:6080");//实际部署用
-
-		var printLegendFlag;
-		if(indi.length==0 &&field_cn ==0){
-			printLegendFlag = 'none';
-		}
-		else if(indi.length!=0 &&field_cn ==0){
-			printLegendFlag = 'chart';
-		}
-		else if(indi.length==0 &&field_cn !=0){
-			printLegendFlag = 'class';
-		}
-		else {
-			printLegendFlag = 'both';
-		}
-
-        var layout = document.getElementById("layout").value;
-        var layoutpaper = document.getElementById("layoutpaper").value;
-        var layoutID = layout + "_" + layoutpaper;
-		var dpi=document.getElementById("dpi").value;
-        var print_url = "./servlet/printMapServlet?img=" + imgURL + "&flag=" + printLegendFlag +
-			"&layoutID=" + layoutID + "&dpi=" + dpi;
-
-		if(printLegendFlag!="none"){
-            $.ajax({
-                url: print_url,
-                type: 'POST',
-                dataType: 'text',
-                cache:false,
-                scriptCharset: 'utf-8',
-                success: function (data) {
-                    if(data!=null){
-                        window.open(data);
-                    }
-                    else {
-                        swal({
-                            title: "操作失败",
-                            text: "地图输出失败",
-                            type: "warning",
-                            showCancelButton: false,
-                            confirmButtonText: "确定",
-                            closeOnConfirm: false,
-                            closeOnCancel: false
-                        });
-                    }
-                },
-                error: function (xhr, status, errMsg) {
-                    console.log(errMsg);
-                }
-            });
-        }
-        else {
-            window.open(renderer.url);
-        }
+        // var imgURL = renderer.url;//本机测试用
+        // //var imgURL = renderer.url.replace(/223.75.52.36:26080/, "localhost:6080");//实际部署用
+        //
+        // var printLegendFlag;
+        // if(indi.length==0 &&field_cn ==0){
+			// printLegendFlag = 'none';
+        // }
+        // else if(indi.length!=0 &&field_cn ==0){
+			// printLegendFlag = 'chart';
+        // }
+        // else if(indi.length==0 &&field_cn !=0){
+			// printLegendFlag = 'class';
+        // }
+        // else {
+			// printLegendFlag = 'both';
+        // }
+        //
+        // var layout = document.getElementById("layout").value;
+        // var layoutpaper = document.getElementById("layoutpaper").value;
+        // var layoutID = layout + "_" + layoutpaper;
+        // var dpi=document.getElementById("dpi").value;
+        // var print_url = "./servlet/printMapServlet?img=" + imgURL + "&flag=" + printLegendFlag +
+			// "&layoutID=" + layoutID + "&dpi=" + dpi;
+        //
+        // if(printLegendFlag!="none"){
+        //     $.ajax({
+        //         url: print_url,
+        //         type: 'POST',
+        //         dataType: 'text',
+        //         cache:false,
+        //         scriptCharset: 'utf-8',
+        //         success: function (data) {
+        //             if(data!=null){
+        //                 window.open(data);
+        //             }
+        //             else {
+        //                 swal({
+        //                     title: "操作失败",
+        //                     text: "地图输出失败",
+        //                     type: "warning",
+        //                     showCancelButton: false,
+        //                     confirmButtonText: "确定",
+        //                     closeOnConfirm: false,
+        //                     closeOnCancel: false
+        //                 });
+        //             }
+        //         },
+        //         error: function (xhr, status, errMsg) {
+        //             console.log(errMsg);
+        //         }
+        //     });
+        // }
+        // else {
+        //     window.open(renderer.url);
+        // }
 		$("#loading").css("display","none");
 	}
 }
