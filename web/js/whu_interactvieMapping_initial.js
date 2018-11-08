@@ -2,7 +2,7 @@ var map;//没有使用var声明的变量，会成为全局对象window的属性,
 var tb;//toolbar,绘制用
 var featureLayerTree;
 var baseLayerHB;
-var baseLayerURL;//用于进行矢量,影像底图切换时,保证当前行政区划底图的url
+var baseLayerURL;//123用于进行矢量,影像底图切换时,保证当前行政区划底图的url
 var winWidth=0;
 var winHeight=0;
 var template = {};//
