@@ -466,9 +466,6 @@ $(document).ready(function() {
             function (Map,TDTLayer,TDTAnnoLayer,DynamicMap,GraphicsLayer,WebTiledLayer,Extent,SpatialReference) {
                 map = new Map("mapContainer", {
                     basemap:"osm",
-
-
-
                     center: [104,35],
                     zoom: 5,
                     logo : false, //logo

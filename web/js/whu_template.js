@@ -24,7 +24,20 @@ $(document).ready(function () {
     createRule();
     createImg( $($($("#templateTypeList").children()[0]).children(0)).text());
 })
-
+//返回上一级判断函数
+function backClick() {
+//     if($(this).parents().find('iframe').selector=="iframe") {
+//         window.location.href = "indexMini.html";
+//     }
+//     else {
+//         window.location.href = "index.html";
+//     }
+    if(self!=top){
+        window.location.href = "indexMini.html";
+    }else {
+         window.location.href = "index.html";
+    }
+}
 function suitWin() {
     $(".flow-default img").width(0.24 * (winWidth - 240));
     $(".flow-default img").height(0.27 * winHeight);
@@ -138,8 +151,18 @@ function createImg(thistheme) {
                 localStorage.setItem("template_scale", scale);
                 localStorage.setItem("template_map", map);
                 localStorage.setItem("templateHome", "1");
-                window.location.href='Mapping.html';
 
+
+                // window.location.href='Mapping.html';
+                if(self!=top){
+                    //关闭子窗口并弹出新的layUI
+                    var index=parent.layer.getFrameIndex(window.name);
+                    parent.layer.close(index);
+                    parent.addModelLayUI(map);
+                    }
+                else{
+                    window.location.href='Mapping.html';
+                }
 
             });
         },
