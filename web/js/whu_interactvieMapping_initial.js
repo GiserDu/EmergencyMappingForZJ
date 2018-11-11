@@ -43,7 +43,7 @@ var addressChanged ;//记录要素编辑时，要素地址有无发生变化
 var buttonChanged;//记录要素编辑时，有没有点击button改变要素
 var thematicData={};
 var iMLegend;//iM means interactiveMapping
-var iMLegendCreated = false;//图例是否创建
+var iMLegendCreated = false;//图例是否创建？
 $(document).ready(function() {
     findDimensions();
     $("#mapContainer").height(winHeight);
