@@ -468,4 +468,26 @@ input[type="checkbox"]{
 .esriPopup .titleButton.maximize {
     display: none;
 }
+layui-layer-btn0{
+    border-color: #1E9FFF;
+    background-color: #1E9FFF;
+    color: #fff;
+}
+layui-layer-btn1{
+    border-color: #1E9FFF;
+    background-color: #1E9FFF;
+    color: #fff;
+}
+#LegendInfo{
+    bottom: 0px;
+    right: 0px;
+    position: absolute;
+    z-index: 99;
+    opacity: 0.9;
+    background-color: whitesmoke;
+    border-bottom-left-radius: 8px;
+    padding: 0px 0px 0px 10px;
+}
+#iMNameInfo{
 
+}

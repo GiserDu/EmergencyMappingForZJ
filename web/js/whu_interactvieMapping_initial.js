@@ -39,8 +39,11 @@ var layerNodes =[
     {id:3, pId:0, name:"要素图层", isParent:true,open:false,children:[], "nocheck":true},
 
 ];
-var newCount = 100;
+var addressChanged ;//记录要素编辑时，要素地址有无发生变化
+var buttonChanged;//记录要素编辑时，有没有点击button改变要素
 var thematicData={};
+var iMLegend;//iM means interactiveMapping
+var iMLegendCreated = false;//图例是否创建
 $(document).ready(function() {
     findDimensions();
     $("#mapContainer").height(winHeight);
@@ -262,16 +265,16 @@ $("#doMap").click(function () {
                         layui.use('layer', function (layui_index) {
                             var layer = layui.layer;
                             layer.open({
-                                title: '添加要素服务',
+                                title: '添加要素图层',
                                 skin: "layui-layer-lan",
                                 type: 0,
                                 shade: 0,
                                 // content:"<div><p>要素名称：<input id='newFLName'></input></p><br/><p>要素地址：<input id='newFLAds'></input></p></div>",
-                                content: "<div id='zeo'><p style='padding-left: 12px'>要素名称：<input id='newFLName'></input></p><br/><p class='FLS_p'><input id='textLayer' name='layer' value='text' type='radio' onclick='changeSource(this)'/>服务地址：<input id='newFLAds' disabled></input><i class='FLS_i fa fa-cog'></i></p>"
+                                content: "<div id='zeo'><p style='padding-left: 12px'>要素名称：<input id='newFLName'></input></p><br/><p class='FLS_p'><input id='textLayer' name='layer' value='text' type='radio' onclick='changeSource(this)'/>服务地址：<input id='newFLAds' disabled></input></p>"
 
                                 + "<br/><p class='tree_p'><input id='buttonLayer' name='layer' value='button' type='radio' onclick='changeSource(this)' />专题服务：<button id='selectButton' onclick='openTreeWindow()' class='layui-btn layui-btn-sm layui-btn-disabled' disabled>选择要素</button></p></div>",
 
-                                yes: function(index, layero) {//确定后执行回调
+                                yes: function(index, layero) {//（第一个按钮，即确认）确定后执行回调
 
                                     var textLayerChecked = $("#textLayer").is(":checked")?"checked":"unchecked";
                                     var buttonLayerChecked = $("#buttonLayer").is(":checked")?"checked":"unchecked";
@@ -306,7 +309,8 @@ $("#doMap").click(function () {
                                     treeObj.addNodes(treeNode,-1, newNode);
                                     console.log(newNode["nodePath"]);
                                     layer.close(index);
-                                }});
+                                }
+                            });
                         });
                     }
                     //alert("添加" + treeNode.name);
@@ -403,8 +407,11 @@ $("#doMap").click(function () {
                         });
 
                     }
+                    //@838899414.qq.com
                     if(treeNode.getParentNode().id==3){//如果是要素服务
                         //alert("编辑要素数据");
+                        addressChanged = false;
+                        buttonChanged = false;
                         var layer = layui.layer;
                         getThisPath = treeNode["nodePath"];
                         getThisTheme = treeNode["theme"];
@@ -420,12 +427,13 @@ $("#doMap").click(function () {
                         layui.use('layer', function (layui_index) {
 
                             layer.open({
-                                title: '编辑要素服务',
-                                skin: "layui-layer-lan",
+                                title: '编辑要素图层',
+                                skin: "layui-layer-molv",
                                 type: 0,
                                 shade: 0,
+                                btn: ['确认','修改要素样式'],
                                 //content:"<div><p>要素名称：<input id='editFLName' value='"+treeNode.name+"'></input></p><br/><p>要素地址：<input id='editFLAds' value='"+treeNode.url+"'></input></p></div>",
-                                content: "<div id='zeo'><p style='padding-left: 12px'>要素名称：<input id='editFLName' value='"+treeNode.name+"'></input></p><br/><p class='FLS_p'><input id='textLayer' name='layer' value='text' type='radio' onclick='changeSource(this)' "+treeNode.textLayerChecked+"/>服务地址：<input id='editFLAds' "+treeNode.textLayerDisabled+" value='"+treeNode.url+"'></input><i class='FLS_i fa fa-cog'></i></p>"
+                                content: "<div id='zeo'><p style='padding-left: 12px'>要素名称：<input id='editFLName' value='"+treeNode.name+"'></input></p><br/><p class='FLS_p'><input id='textLayer' name='layer' value='text' type='radio' onclick='changeSource(this)' "+treeNode.textLayerChecked+"/>服务地址：<input id='editFLAds' "+treeNode.textLayerDisabled+" value='"+treeNode.url+"'onchange='addressChange()'></input></p>"
                                 + "<br/><p class='tree_p'><input id='buttonLayer' name='layer' value='button' type='radio' onclick='changeSource(this)' "+treeNode.buttonLayerChecked+"/>专题服务：<button id='selectButton' onclick='openSelectedTree(getThisPath)' class='layui-btn layui-btn-sm' "+treeNode.buttonLayerDisabled+">选择要素</button></p></div>",
                                 success: function (layero, index) {
                                     document.getElementById("selectButton").innerHTML = getThisTheme;
@@ -487,9 +495,15 @@ $("#doMap").click(function () {
                                     console.log(treeNode.checked);
                                     changeSource2 = (treeNode.textLayerChecked == "checked")?"text":"button";
                                     //如果数据来源方式发生了改变，则先移除原有图层
+                                    //FIXED:当图层地址填写错误时，是remove不掉的fromZeo
                                     if (changeSource2 != changeSource1){
-                                        if (changeSource1 == "text")
-                                            map.removeLayer(map.getLayer(treeNode.lastUrl));
+                                        if (changeSource1 == "text"){
+                                            if(map.getLayer(treeNode.lastUrl)){
+                                                map.removeLayer(map.getLayer(treeNode.lastUrl));
+                                            }else{
+                                                console.log("图层地址有误");
+                                            }
+                                        }
                                         else
                                             map.removeLayer(map.getLayer(treeNode.thematicData.id));
                                     }
@@ -503,7 +517,58 @@ $("#doMap").click(function () {
                                     treeObj.updateNode(treeNode);
                                     //layerNodes=treeObj.transformToArray(treeObj.getNodes());
                                     layer.close(index);
-                                }});
+                                },
+                                btn2: function(index, layero){
+                                    //按钮【修改要素样式】的回调
+                                    //判断是否勾选了
+                                    if(treeNode.textLayerChecked==='unchecked'&&treeNode.buttonLayerChecked==='unchecked'){
+                                        alert("未设置数据源，不能编辑！");
+                                        return false;
+                                    }else if($("#selectButton").html()==="选择要素"&&!($("#editFLAds").val())){//没有选择也没有填地址
+                                        alert("未设置数据源，不能编辑！");
+                                        return false;
+                                    }
+                                    //判断图层是否发生了任意改变
+                                   if((treeNode.theme&&$("#selectButton").html()!= treeNode.theme)||((changeSource1&&changeSource2)&&changeSource1!=changeSource2)||addressChanged){
+                                       alert("图层数据源发生了改变，请先点击确定加载图层！");
+                                       return false;
+                                   }
+                                    var layerID;
+                                    if(treeNode.textLayerChecked==="checked"){
+                                        layerID = treeNode.url;
+                                    }else if (treeNode.buttonLayerChecked==="checked"){
+                                        layerID = treeNode.thematicData.id;
+                                    }
+                                   //判断数据源是否加载到地图上，没有加载也不能编辑
+                                    if(treeNode.textLayerChecked==="checked"){//没有选择也没有填地址
+                                        if(!(map.getLayer(layerID))){
+                                            alert("在当前地图中找不到文本框所代表的图层，请检查地址是否有误！");
+                                            return false;
+                                        }
+                                    }
+                                    /*方法说明
+                                     *@method editFeatureLayer
+                                     *@param{layer,layerType,layerLabel}
+                                     *@return {void}
+                                    */
+                                    var layerInMap = map.getLayer(layerID);
+                                    var layerLabel = layerInMap.name;
+                                    var layerType;
+                                    switch (layerInMap.geometryType)  {
+                                        case "esriGeometryPoint":
+                                            layerType = 'point'
+                                            break;
+                                        case "esriGeometryPolyline":
+                                            layerType = 'polyline'
+                                            break;
+                                        case "esriGeometryPolygon":
+                                            layerType = 'polygon'
+                                            break;
+                                    }
+                                    editFeatureLayer(layerInMap,layerType,layerLabel);
+                                    //return false 开启该代码可禁止点击该按钮关闭
+                                }
+                            });
                         });
 
                     }
@@ -764,7 +829,7 @@ function openSelectedTree(thisNodePath){
                         nodePath = treeNode.getPath();
                         selectedNode = treeNode;
                         console.log(nodePath);
-                    }   //如果改变了选择}
+                    }   //如果改变了选择
                     else {
                         nodeTheme = thisNodePath[thisNodePath.length-1].name;
                         nodePath = thisNodePath;
@@ -1036,7 +1101,7 @@ function addModelLayUI(mapName) {
                                 type: 0,
                                 shade: 0,
                                 // content:"<div><p>要素名称：<input id='newFLName'></input></p><br/><p>要素地址：<input id='newFLAds'></input></p></div>",
-                                content: "<div id='zeo'><p style='padding-left: 12px'>要素名称：<input id='newFLName'></input></p><br/><p class='FLS_p'><input id='textLayer' name='layer' value='text' type='radio' onclick='changeSource(this)'/>服务地址：<input id='newFLAds' disabled></input><i class='FLS_i fa fa-cog'></i></p>"
+                                content: "<div id='zeo'><p style='padding-left: 12px'>要素名称：<input id='newFLName'></input></p><br/><p class='FLS_p'><input id='textLayer' name='layer' value='text' type='radio' onclick='changeSource(this)'/>服务地址：<input id='newFLAds' disabled></input></p>"
 
                                 + "<br/><p class='tree_p'><input id='buttonLayer' name='layer' value='button' type='radio' onclick='changeSource(this)' />专题服务：<button id='selectButton' onclick='openTreeWindow()' class='layui-btn layui-btn-sm layui-btn-disabled' disabled>选择要素</button></p></div>",
 
@@ -1195,7 +1260,7 @@ function addModelLayUI(mapName) {
                                 type: 0,
                                 shade: 0,
                                 //content:"<div><p>要素名称：<input id='editFLName' value='"+treeNode.name+"'></input></p><br/><p>要素地址：<input id='editFLAds' value='"+treeNode.url+"'></input></p></div>",
-                                content: "<div id='zeo'><p style='padding-left: 12px'>要素名称：<input id='editFLName' value='"+treeNode.name+"'></input></p><br/><p class='FLS_p'><input id='textLayer' name='layer' value='text' type='radio' onclick='changeSource(this)' "+treeNode.textLayerChecked+"/>服务地址：<input id='editFLAds' "+treeNode.textLayerDisabled+" value='"+treeNode.url+"'></input><i class='FLS_i fa fa-cog'></i></p>"
+                                content: "<div id='zeo'><p style='padding-left: 12px'>要素名称：<input id='editFLName' value='"+treeNode.name+"'></input></p><br/><p class='FLS_p'><input id='textLayer' name='layer' value='text' type='radio' onclick='changeSource(this)' "+treeNode.textLayerChecked+"/>服务地址：<input id='editFLAds' "+treeNode.textLayerDisabled+" value='"+treeNode.url+"'></input></p>"
                                 + "<br/><p class='tree_p'><input id='buttonLayer' name='layer' value='button' type='radio' onclick='changeSource(this)' "+treeNode.buttonLayerChecked+"/>专题服务：<button id='selectButton' onclick='openSelectedTree(getThisPath)' class='layui-btn layui-btn-sm' "+treeNode.buttonLayerDisabled+">选择要素</button></p></div>",
                                 success: function (layero, index) {
                                     document.getElementById("selectButton").innerHTML = getThisTheme;
@@ -1256,7 +1321,7 @@ function addModelLayUI(mapName) {
                                     }
                                     console.log(treeNode.checked);
                                     changeSource2 = (treeNode.textLayerChecked == "checked")?"text":"button";
-                                    //如果数据来源方式发生了改变，则先移除原有图层
+                                    //如果数据来源方式发生了改变，则先移除原有图层(改变了数据源，先移除旧图层，再添加新图层)
                                     if (changeSource2 != changeSource1){
                                         if (changeSource1 == "text")
                                             map.removeLayer(map.getLayer(treeNode.lastUrl));
@@ -1422,6 +1487,22 @@ $("#templateMap").click(function () {
 
 //图层check事件
 function layerOncheck(treeId, treeNode) {
+    //如果没有创建图例，先创建图例
+    if(!iMLegendCreated){
+        require([
+            "esri/dijit/Legend",
+            "dojo/domReady!"
+        ], function(
+            Legend
+        ) {
+            iMLegend = new Legend({
+                autoUpdate:true,
+                map: map
+            }, "iMLegendDiv");
+            iMLegend.startup();
+            iMLegendCreated = true;
+        })
+    }
     if(treeNode.isParent){
         return;
     }
@@ -1570,11 +1651,8 @@ function layerOncheck(treeId, treeNode) {
                                     }
                                     layer.setRenderer(rend);
                                 });
-
-
                             });
                             map.addLayer(layer);
-
                         })
                     }
                 }
@@ -1601,7 +1679,6 @@ function layerOncheck(treeId, treeNode) {
                     if(layerNow1)
                         layerNow1.hide();
                 }
-
                 return;
             }
         }
@@ -1734,3 +1811,6 @@ function changeSource(node){
     }
 }
 
+function addressChange(){
+    addressChanged = true;
+}

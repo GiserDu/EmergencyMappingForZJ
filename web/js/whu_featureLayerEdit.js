@@ -1,7 +1,6 @@
 //定义几个全局变量
 var rendererNow = null;
 var thisFeatureLayer = {};
-var featureLayerType =null;
 var edited = false;
 
 var editFeatureLayer = function (featureLayer,type,name){
@@ -21,37 +20,7 @@ var editFeatureLayer = function (featureLayer,type,name){
 	//创建要素服务编辑面板
 	creatFeatureLayerEditPanel();
 	//注册当前要素图层的点击事件
-	 //var featureLayerType = type;
-     selectedFeatureLayer(featureLayer,type);
-/*	featureLayerClick = thisFeatureLayer.feature.on("click", function (evt) {
-        var featureLayer = evt.graphic.getLayer();
-
-   });*/
-/*	require([
-		"esri/layers/FeatureLayer",
-		"esri/InfoTemplate", "esri/dijit/PopupTemplate", "esri/renderers/SimpleRenderer", "esri/layers/GraphicsLayer"
-	], function(FeatureLayer, InfoTemplate, PopupTemplate, SimpleRenderer, GraphicsLayer) {
-		var simpleJson = {
-			"type": "simple",
-			"label": "",
-			"description": "",
-			"symbol": {
-				"type": "esriSFS", //SimpleFillSymbol(简单填充类型)
-				"color": [0, 0, 0, 255], //填充颜色(仅在style为STYLE_SOLID时生效)
-				"outline": {
-					"type": "esriSLS",
-					"style": "esriSLSDot",
-					"color": [0, 76, 0, 255],
-					"width": 1
-				}, //填充轮廓线要素"render"对象(见下述线要素)
-				"style": "esriSFSSolid" //填充样式
-			}
-		};
-		var rend = new SimpleRenderer(simpleJson);
-		thisFLayer = map.getLayer(featureLayerItem.data);
-		thisFLayer.setRenderer(rend);
-		thisFLayer.refresh();
-	});*/
+	selectedFeatureLayer(featureLayer,type);
 	editFeatureLayerStart();
 };
 
@@ -65,44 +34,32 @@ var creatFeatureLayerEditPanel = function(){
 		'<div class="map-marking-panel-container">',
 		'<div id="map-featureLayer-panel-tip" class="map-marking-panel-tip">地图上待标注位置鼠标左键点击地图添加一个点标注，可填写名称、备注、图标，点击保存生效！</div>',
 	
-		//编辑
-		'<div id="map-featureLayer-edit" class="map-mark-edit">',
-		'<button class="layui-btn layui-btn-small " onclick="" title="选择">',
-		'<i class="fa fa-mouse-pointer"></i>',
-		'</button>',
-		'<fieldset class="layui-elem-field layui-field-title">',
-		'<legend>操作提示</legend>',
-		'<div id="map-featureLayer-edit-tip" class="layui-field-box">',
-		'</div>',
-		'</fieldset>',
-		'</div>',
-	
 		//标注
 		'<div class="map-marking-info" id="map-featureLayer-info">',
 		'<div id="map-featureLayer-info-container" class="map-marking-info-container">',
-		'<div class="layui-form-item mark-style" id="point-style-item">',
+		'<div class="layui-form-item mark-style" id="pointFeatureLayer-style-item">',
 		'<label class="layui-form-label">图标</label>',
 		'<div class="layui-input-block">',
-		'<img id="pointIcon" src="assets/img/pointIcon/8.png">',
+		'<img id="pointFeatureLayerIcon" src="assets/img/pointIcon/8.png">',
 		'<button class="layui-btn layui-btn-mini layui-btn-normal" onclick="changePointFeatureLayerStyle()">更换</button>',
 		'</div>',
-		'<div class="layui-form-item"><label class="layui-form-label">高度</label><div class="layui-input-inline"><input type="number" id="point-height" class="layui-input input-number" onchange="pointFeatureLayerStyleChange()"></div><div class="layui-form-mid layui-word-aux">(单位：像素)</div></div>',
-		'<div class="layui-form-item"><label class="layui-form-label">宽度</label><div class="layui-input-inline"><input type="number" id="point-width" class="layui-input input-number" onchange="pointFeatureLayerStyleChange()"></div><div class="layui-form-mid layui-word-aux">(单位：像素)</div></div>',
-		'<div class="layui-form-item"><label class="layui-form-label">偏移角度</label><div class="layui-input-inline"><input type="number" id="point-angle" class="layui-input input-number" onchange="pointFeatureLayerStyleChange()"></div><div class="layui-form-mid layui-word-aux">(单位：度)</div></div>',
-		'<div class="layui-form-item"><label class="layui-form-label">Y轴偏移量</label><div class="layui-input-inline"><input type="number" id="point-xoffset" class="layui-input input-number" onchange="pointFeatureLayerStyleChange()"></div><div class="layui-form-mid layui-word-aux">(单位：像素)</div></div>',
-		'<div class="layui-form-item"><label class="layui-form-label">Y轴偏移量</label><div class="layui-input-inline"><input type="number" id="point-yoffset" class="layui-input input-number" onchange="pointFeatureLayerStyleChange()"></div><div class="layui-form-mid layui-word-aux">(单位：像素)</div></div>',
+		'<div class="layui-form-item"><label class="layui-form-label">高度</label><div class="layui-input-inline"><input type="number" id="pointFeatureLayer-height" class="layui-input input-number" onchange="pointFeatureLayerStyleChange()"></div><div class="layui-form-mid layui-word-aux">(单位：像素)</div></div>',
+		'<div class="layui-form-item"><label class="layui-form-label">宽度</label><div class="layui-input-inline"><input type="number" id="pointFeatureLayer-width" class="layui-input input-number" onchange="pointFeatureLayerStyleChange()"></div><div class="layui-form-mid layui-word-aux">(单位：像素)</div></div>',
+		'<div class="layui-form-item"><label class="layui-form-label">偏移角度</label><div class="layui-input-inline"><input type="number" id="pointFeatureLayer-angle" class="layui-input input-number" onchange="pointFeatureLayerStyleChange()"></div><div class="layui-form-mid layui-word-aux">(单位：度)</div></div>',
+		'<div class="layui-form-item"><label class="layui-form-label">Y轴偏移量</label><div class="layui-input-inline"><input type="number" id="pointFeatureLayer-xoffset" class="layui-input input-number" onchange="pointFeatureLayerStyleChange()"></div><div class="layui-form-mid layui-word-aux">(单位：像素)</div></div>',
+		'<div class="layui-form-item"><label class="layui-form-label">Y轴偏移量</label><div class="layui-input-inline"><input type="number" id="pointFeatureLayer-yoffset" class="layui-input input-number" onchange="pointFeatureLayerStyleChange()"></div><div class="layui-form-mid layui-word-aux">(单位：像素)</div></div>',
 		'</div>',
-		'<div class="layui-form-item mark-style" id="line-style-item">',
+		'<div class="layui-form-item mark-style" id="lineFeatureLayer-style-item">',
 		'<label class="layui-form-label">线样式</label>',
 		'<div class="layui-input-block">',
-		'<div id="line-style" class="line-style"></div>',
+		'<div id="lineFeatureLayer-style" class="line-style"></div>',
 		'<button class="layui-btn layui-btn-mini layui-btn-normal" onclick="changeLineFeatureLayerStyle()">更换</button>',
 		'</div>',
 		'</div>',
-		'<div class="layui-form-item mark-style" id="polygon-style-item">',
+		'<div class="layui-form-item mark-style" id="polygonFeatureLayer-style-item">',
 		'<label class="layui-form-label">面样式</label>',
 		'<div class="layui-input-block">',
-		'<div id="polygon-style" class="polygon-style"></div>',
+		'<div id="polygonFeatureLayer-style" class="polygon-style"></div>',
 		'<button class="layui-btn layui-btn-mini layui-btn-normal" onclick="changePolygonFeatureLayerStyle()">更换</button>',
 		'</div>',
 		'</div>',
@@ -200,37 +157,37 @@ var creatFeatureLayerEditPanel = function(){
 		//线样式面板
 		'<div class="line-style-edit" id="lineFeatureLayer-style-edit">',
 		'<div class="style-preview">',
-		'<div id="line-style-preview" class="line-style-preview"></div>',
+		'<div id="lineFeatureLayer-style-preview" class="line-style-preview"></div>',
 		'</div>',
 		'<div class="layui-form-item layui-form-text">',
 		'<label class="layui-form-label">线颜色</label>',
 		'<div class="layui-input-inline">',
-		'<input id="line-color" type = "color" class="layui-input input-color" onchange="lineFeatureLayerStyleChange()" value="#ff4500">',
+		'<input id="lineFeatureLayer-color" type = "color" class="layui-input input-color" onchange="lineFeatureLayerStyleChange()" value="#ff4500">',
 		'</div>',
 		'</div>',
 		'<div class="layui-form-item layui-form-text">',
 		'<label class="layui-form-label">线型</label>',
 		'<div class="layui-input-inline">',
-		'<select onchange="lineFeatureLayerStyleChange()" id="line-line-style"><option value="esriSLSSolid">实线</option><option value="esriSLSDash">虚线</option><option value="esriSLSDot">点</option><option value="esriSLSDashDot">虚线-点</option><option value="esriSLSDashDotDot">虚线-点-点</option><option value="esriSLSLongDash">长虚线</option><option value="esriSLSLongDashDot">长虚线-点</option><option value="esriSLSShortDash">短虚线</option><option value="esriSLSShortDashDot">短虚线-点</option><option value="esriSLSShortDashDotDot">短虚线-点-点</option><option value="esriSLSLongDashDot">长虚线-点</option><option value="esriSLSShortDash">短虚线</option><option value="esriSLSShortDashDot">短虚线-点</option><option value="esriSLSShortDashDotDot">短虚线-点-点</option><option value="esriSLSShortDot">细点</option></select>',
+		'<select class="form-control" style="width:190px" onchange="lineFeatureLayerStyleChange()" id="lineFeatureLayer-line-style"><option value="esriSLSSolid">实线</option><option value="esriSLSDash">虚线</option><option value="esriSLSDot">点</option><option value="esriSLSDashDot">虚线-点</option><option value="esriSLSDashDotDot">虚线-点-点</option><option value="esriSLSLongDash">长虚线</option><option value="esriSLSLongDashDot">长虚线-点</option><option value="esriSLSShortDash">短虚线</option><option value="esriSLSShortDashDot">短虚线-点</option><option value="esriSLSShortDashDotDot">短虚线-点-点</option><option value="esriSLSLongDashDot">长虚线-点</option><option value="esriSLSShortDash">短虚线</option><option value="esriSLSShortDashDot">短虚线-点</option><option value="esriSLSShortDashDotDot">短虚线-点-点</option><option value="esriSLSShortDot">细点</option></select>',
 		'</div>',
 		'</div>',
 		'<div class="layui-form-item layui-form-text">',
 		'<label class="layui-form-label">线样式</label>',
 		'<div class="layui-input-inline">',
-		'<select onchange="lineFeatureLayerStyleChange()" id="line-marker-style"><option value="">无</option><option value="arrow">箭头</option></select>',
+		'<select class="form-control" style="width:190px"  style="width:190px"  onchange="lineFeatureLayerStyleChange()" id="lineFeatureLayer-marker-style"><option value="">无</option><option value="arrow">箭头</option></select>',
 		'</div>',
 		'</div>',
 		'<div class="layui-form-item">',
 		'<label class="layui-form-label">线透明度</label>',
 		'<div class="layui-input-inline">',
-		'<input type="range" id="line-opacity" min="0" max="1" step="0.1" class="layui-input input-range" onchange="lineFeatureLayerStyleChange()">',
+		'<input type="range" id="lineFeatureLayer-opacity" min="0" max="1" step="0.1" class="input-range" onchange="lineFeatureLayerStyleChange()">',
 		'</div>',
 		'<div class="layui-form-mid layui-word-aux">0:完全透明,1:不透明</div>',
 		'</div>',
 		'<div class="layui-form-item">',
 		'<label class="layui-form-label">线宽</label>',
 		'<div class="layui-input-inline">',
-		'<input type="number" id="line-width" class="layui-input input-number" onchange="lineFeatureLayerStyleChange()">',
+		'<input type="number" id="lineFeatureLayer-width" class="layui-input input-number" onchange="lineFeatureLayerStyleChange()">',
 		'</div>',
 		'<div class="layui-form-mid layui-word-aux">(单位：像素)</div>',
 		'</div>',
@@ -245,50 +202,50 @@ var creatFeatureLayerEditPanel = function(){
 		//面样式面板
 		'<div class="polygon-style-edit" id="polygonFeatureLayer-style-edit">',
 		'<div class="style-preview">',
-		'<div id="polygon-style-preview" class="polygon-style-preview"></div>',
+		'<div id="polygonFeatureLayer-style-preview" class="polygon-style-preview"></div>',
 		'</div>',
 		'<div class="layui-form-item layui-form-text">',
 		'<label class="layui-form-label">填充色(仅在填充样式为实心的生效)</label>',
 		'<div class="layui-input-inline">',
-		'<input id="polygon-fill-color"  type = "color" class="layui-input input-color" onchange="polygonFeatureLayerStyleChange()" value="#ff4500">',
+		'<input id="polygonFeatureLayer-fill-color"  type = "color" class="layui-input input-color" onchange="polygonFeatureLayerStyleChange()" value="#ff4500">',
 		'</div>',
 		'</div>',
 		'<div class="layui-form-item layui-form-text">',
 		'<label class="layui-form-label">填充样式</label>',
 		'<div class="layui-input-inline">',
-		'<select onchange="polygonFeatureLayerStyleChange()" id="polygon-fill-style"><option value="esriSFSSolid">实心</option><option value="esriSFSForwardDiagonal">斜线</option><option value="esriSFSBackwardDiagonal">反斜线</option><option value="esriSFSCross">格网</option><option value="esriSFSDiagonalCross">交叉格网</option><option value="esriSFSHorizontal">水平线</option><option value="esriSFSVertical">垂线</option></select>',
+		'<select class="form-control" style="width:190px" onchange="polygonFeatureLayerStyleChange()" id="polygonFeatureLayer-fill-style"><option value="esriSFSSolid">实心</option><option value="esriSFSForwardDiagonal">斜线</option><option value="esriSFSBackwardDiagonal">反斜线</option><option value="esriSFSCross">格网</option><option value="esriSFSDiagonalCross">交叉格网</option><option value="esriSFSHorizontal">水平线</option><option value="esriSFSVertical">垂线</option></select>',
 		'</div>',
 		'</div>',
 		'<div class="layui-form-item">',
 		'<label class="layui-form-label">填充透明度</label>',
 		'<div class="layui-input-inline">',
-		'<input type="range" id="polygon-fill-opacity" min="0" step="0.1" max="1" class="layui-input input-range" onchange="polygonFeatureLayerStyleChange()">',
+		'<input type="range" id="polygonFeatureLayer-fill-opacity" min="0" step="0.1" max="1" class="input-range" onchange="polygonFeatureLayerStyleChange()">',
 		'</div>',
 		'<div class="layui-form-mid layui-word-aux">0:完全透明,1:不透明</div>',
 		'</div>',
 		'<div class="layui-form-item layui-form-text">',
 		'<label class="layui-form-label">边框颜色</label>',
 		'<div class="layui-input-inline">',
-		'<input id="polygon-border-color" type="color" class="layui-input input-color" onchange="polygonFeatureLayerStyleChange()" value="FFD700">',
+		'<input id="polygonFeatureLayer-border-color" type="color" class="layui-input input-color" onchange="polygonFeatureLayerStyleChange()" value="#FFD700">',
 		'</div>',
 		'</div>',
 		'<div class="layui-form-item layui-form-text">',
 		'<label class="layui-form-label">边线样式</label>',
 		'<div class="layui-input-inline">',
-		'<select onchange="polygonFeatureLayerStyleChange()" id="polygon-border-style"><option value="esriSLSSolid">实线</option><option value="esriSLSShortDot">细点</option><option value="esriSLSDot">点</option><option value="esriSLSDash">虚线</option><option value="esriSLSDashDot">虚线-点</option><option value="esriSLSDashDot">虚线-点-点</option><option value="esriSLSLongDash">长虚线</option><option value="esriSLSLongDashDot">长虚线-点</option><option value="esriSLSShortDash">短虚线</option><option value="esriSLSShortDashDot">短虚线-点</option><option value="esriSLSShortDashDotDot">短虚线-点-点</option><option value="esriSLSNull">无</option></select>',
+		'<select class="form-control" style="width:190px"  onchange="polygonFeatureLayerStyleChange()" id="polygonFeatureLayer-border-style"><option value="esriSLSSolid">实线</option><option value="esriSLSShortDot">细点</option><option value="esriSLSDot">点</option><option value="esriSLSDash">虚线</option><option value="esriSLSDashDot">虚线-点</option><option value="esriSLSDashDot">虚线-点-点</option><option value="esriSLSLongDash">长虚线</option><option value="esriSLSLongDashDot">长虚线-点</option><option value="esriSLSShortDash">短虚线</option><option value="esriSLSShortDashDot">短虚线-点</option><option value="esriSLSShortDashDotDot">短虚线-点-点</option><option value="esriSLSNull">无</option></select>',
 		'</div>',
 		'</div>',
 		'<div class="layui-form-item">',
 		'<label class="layui-form-label">边框透明度</label>',
 		'<div class="layui-input-inline">',
-		'<input type="range" id="polygon-border-opacity" min="0" step="0.1" max="1" class="layui-input input-range" onchange="polygonFeatureLayerStyleChange()">',
+		'<input type="range" id="polygonFeatureLayer-border-opacity" min="0" step="0.1" max="1" class="input-range" onchange="polygonFeatureLayerStyleChange()">',
 		'</div>',
 		'<div class="layui-form-mid layui-word-aux">(0-1)0:完全透明,1:不透明</div>',
 		'</div>',
 		'<div class="layui-form-item">',
 		'<label class="layui-form-label">边框宽</label>',
 		'<div class="layui-input-inline">',
-		'<input type="number" id="polygon-border-width" class="layui-input input-number" onchange="polygonFeatureLayerStyleChange()">',
+		'<input type="number" id="polygonFeatureLayer-border-width" class="layui-input input-number" onchange="polygonFeatureLayerStyleChange()">',
 		'</div>',
 		'<div class="layui-form-mid layui-word-aux">(单位：像素)</div>',
 		'</div>',
@@ -320,9 +277,9 @@ var editFeatureLayerStart = function() {
 
 //对选择的要素进行属性编辑
 var selectedFeatureLayer = function (featureLayer,type) {
-    var pointStyleItem = document.getElementById('point-style-item');
-    var lineStyleItem = document.getElementById('line-style-item');
-    var polygonStyleItem = document.getElementById('polygon-style-item');
+    var pointStyleItem = document.getElementById('pointFeatureLayer-style-item');
+    var lineStyleItem = document.getElementById('lineFeatureLayer-style-item');
+    var polygonStyleItem = document.getElementById('polygonFeatureLayer-style-item');
     switch (type) {
     case "point":
         addClass(pointStyleItem, "show");
@@ -344,22 +301,21 @@ var selectedFeatureLayer = function (featureLayer,type) {
     thisFeatureLayer.feature = featureLayer;
     thisFeatureLayer.type = type;
 
-    document.getElementById('pointIcon').src = rendererNow.url;
-   	document.getElementById('point-height').value=rendererNow.height;
-	document.getElementById('point-width').value=rendererNow.width;
-	document.getElementById('point-angle').value=rendererNow.angle;
-	document.getElementById('point-xoffset').value=rendererNow.xoffset;
-	document.getElementById('point-yoffset').value=rendererNow.yoffset;
+    document.getElementById('pointFeatureLayerIcon').src = rendererNow.url;
+   	document.getElementById('pointFeatureLayer-height').value=rendererNow.height;
+	document.getElementById('pointFeatureLayer-width').value=rendererNow.width;
+	document.getElementById('pointFeatureLayer-angle').value=rendererNow.angle;
+	document.getElementById('pointFeatureLayer-xoffset').value=rendererNow.xoffset;
+	document.getElementById('pointFeatureLayer-yoffset').value=rendererNow.yoffset;
     
-    var lineStyle = document.getElementById('line-style');
-    var lineStyle = document.getElementById('line-style');
+    var lineStyle = document.getElementById('lineFeatureLayer-style');
+    var lineStyle = document.getElementById('lineFeatureLayer-style');
     lineStyle.style.backgroundColor = rendererNow.color;
     lineStyle.style.height = rendererNow.width + 'px';
-    var polygonStyle = document.getElementById('polygon-style');
+    var polygonStyle = document.getElementById('polygonFeatureLayer-style');
     polygonStyle.style.backgroundColor =  rendererNow.color;
     polygonStyle.style.border = rendererNow.width + 'px solid ' + rendererNow.color;
-    openFeatureLayerPanelContent(['map-featureLayer-panel', 'map-featureLayer-panel-tip', 'map-featureLayer-edit', 'map-featureLayer-info']);
-    document.getElementById('map-featureLayer-edit-tip').innerHTML = "鼠标左键点击选择标注对象"
+    openFeatureLayerPanelContent(['map-featureLayer-panel', 'map-featureLayer-panel-tip', 'map-featureLayer-info']);
 };
 
 //改变点的图标
@@ -369,13 +325,13 @@ var changePointFeatureLayerStyle = function () {
     for (var i = 0; i < obj.children[0].children.length; i++) {
         obj.children[0].children[i].onclick = function () {
             var img = this.children[0];
-            document.getElementById('pointIcon').src = img.src;
+            document.getElementById('pointFeatureLayerIcon').src = img.src;
             //在这一步改变点要素图层的图片文件
             rendererNow={};
             rendererNow.url = img.src;
             rendererNow.type = "esriPMS";
             if (drawType == 'edit') {
-                openFeatureLayerPanelContent(['map-featureLayer-panel', 'map-featureLayer-info', 'map-featureLayer-panel-tip', 'map-featureLayer-edit'])
+                openFeatureLayerPanelContent(['map-featureLayer-panel', 'map-featureLayer-info', 'map-featureLayer-panel-tip'])
             } else {
                // addDrawInteraction('Point');
                 openFeatureLayerPanelContent(['map-featureLayer-panel', 'map-featureLayer-info', 'map-featureLayer-panel-tip'])
@@ -386,11 +342,11 @@ var changePointFeatureLayerStyle = function () {
 
 //监听点图标参数的变化
 var pointFeatureLayerStyleChange = function(){
-	var height = document.getElementById('point-height').value;
-	var width = document.getElementById('point-width').value;
-	var angle = document.getElementById('point-angle').value;
-	var xoffset = document.getElementById('point-xoffset').value;
-	var yoffset = document.getElementById('point-yoffset').value;
+	var height = document.getElementById('pointFeatureLayer-height').value;
+	var width = document.getElementById('pointFeatureLayer-width').value;
+	var angle = document.getElementById('pointFeatureLayer-angle').value;
+	var xoffset = document.getElementById('pointFeatureLayer-xoffset').value;
+	var yoffset = document.getElementById('pointFeatureLayer-yoffset').value;
 	rendererNow.height = parseInt(height);
 	rendererNow.width = parseInt(width);
 	rendererNow.angle = parseInt(angle);
@@ -404,22 +360,22 @@ var changeLineFeatureLayerStyle = function () {
     var border_rgba = tinycolor(rendererNow.color).toRgb();
     var border_opacity = border_rgba.a;
     var border_colorHex = tinycolor(rendererNow.color).toHexString();
-    document.getElementById('line-color').value = border_colorHex;
-    document.getElementById('line-opacity').value = border_opacity;
-    document.getElementById('line-width').value = rendererNow.width;
-    var preview = document.getElementById('line-style-preview');
+    document.getElementById('lineFeatureLayer-color').value = border_colorHex;
+    document.getElementById('lineFeatureLayer-opacity').value = border_opacity;
+    document.getElementById('lineFeatureLayer-width').value = rendererNow.width;
+    var preview = document.getElementById('lineFeatureLayer-style-preview');
     preview.style.backgroundColor = rendererNow.color;
     preview.style.border = rendererNow.width + 'px solid ' + rendererNow.color
 };
 
 //目的是改变“预览框”中的颜色预览
 var lineFeatureLayerStyleChange = function () {
-    var colorHex = document.getElementById('line-color').value;
+    var colorHex = document.getElementById('lineFeatureLayer-color').value;
     var rgb = tinycolor(colorHex).toRgb();
-    var opacity = document.getElementById('line-opacity').value;
+    var opacity = document.getElementById('lineFeatureLayer-opacity').value;
     var rgba = 'rgba(' + rgb.r + ',' + rgb.g + ',' + rgb.b + ',' + opacity + ')';
-    var lineWidth = document.getElementById('line-width').value;
-    var preview = document.getElementById('line-style-preview');
+    var lineWidth = document.getElementById('lineFeatureLayer-width').value;
+    var preview = document.getElementById('lineFeatureLayer-style-preview');
     preview.style.backgroundColor = rgba;
     preview.style.height = lineWidth + 'px'
 };
@@ -427,13 +383,13 @@ var lineFeatureLayerStyleChange = function () {
 
 //目的是改变多边形图层的整体样式
 var saveLineFeatureLayerStyle = function() {
-	var colorHex = document.getElementById('line-color').value;
+	var colorHex = document.getElementById('lineFeatureLayer-color').value;
     var rgb = tinycolor(colorHex).toRgb();
-    var opacity = document.getElementById('line-opacity').value;
+    var opacity = document.getElementById('lineFeatureLayer-opacity').value;
     var rgba = 'rgba(' + rgb.r + ',' + rgb.g + ',' + rgb.b + ',' + opacity + ')';
-    var lineWidth = document.getElementById('line-width').value;
-    var lineStyle = document.getElementById('line-line-style').value;
-    var markerStyle = document.getElementById('line-marker-style').value;
+    var lineWidth = document.getElementById('lineFeatureLayer-width').value;
+    var lineStyle = document.getElementById('lineFeatureLayer-line-style').value;
+    var markerStyle = document.getElementById('lineFeatureLayer-marker-style').value;
     var simpleJson = {};
 	require(["esri/Color"], function(Color) {rgba= Color.fromString(rgba);});
 	//用交互得来的数值重新设置renderrenderer
@@ -461,11 +417,11 @@ var saveLineFeatureLayerStyle = function() {
 	}
 	rendererNow = simpleJson;
 	
-	var lineStyle = document.getElementById('line-style');
+	var lineStyle = document.getElementById('lineFeatureLayer-style');
     lineStyle.style.backgroundColor = rgba;
     lineStyle.style.height = lineWidth + 'px';
     if (drawType == 'edit') {
-        openFeatureLayerPanelContent(['map-featureLayer-panel', 'map-featureLayer-info', 'map-featureLayer-panel-tip', 'map-featureLayer-edit'])
+        openFeatureLayerPanelContent(['map-featureLayer-panel', 'map-featureLayer-info', 'map-featureLayer-panel-tip'])
     } else {
        // addDrawInteraction('LineString');
         openFeatureLayerPanelContent(['map-featureLayer-panel', 'map-featureLayer-info', 'map-featureLayer-panel-tip'])
@@ -478,32 +434,32 @@ var changePolygonFeatureLayerStyle = function () {
     var border_rgba = tinycolor(rendererNow.outline.color).toRgb();
     var border_opacity = border_rgba.a;
     var border_colorHex = tinycolor(rendererNow.outline.color).toHexString();
-    document.getElementById('polygon-border-color').value = border_colorHex;
-    document.getElementById('polygon-border-opacity').value = border_opacity;
-    document.getElementById('polygon-border-width').value = rendererNow.outline.width;
+    document.getElementById('polygonFeatureLayer-border-color').value = border_colorHex;
+    document.getElementById('polygonFeatureLayer-border-opacity').value = border_opacity;
+    document.getElementById('polygonFeatureLayer-border-width').value = rendererNow.outline.width;
     var fill_rgba = tinycolor(rendererNow.color).toRgb();
     var fill_opacity = fill_rgba.a;
     var fill_colorHex = tinycolor(rendererNow.color).toHexString();
-    document.getElementById('polygon-fill-color').value = fill_colorHex;
-    document.getElementById('polygon-fill-opacity').value = fill_opacity;
-    var preview = document.getElementById('polygon-style-preview');
+    document.getElementById('polygonFeatureLayer-fill-color').value = fill_colorHex;
+    document.getElementById('polygonFeatureLayer-fill-opacity').value = fill_opacity;
+    var preview = document.getElementById('polygonFeatureLayer-style-preview');
     preview.style.backgroundColor = rendererNow.color;
     preview.style.border = rendererNow.outline.width + 'px solid ' + rendererNow.outline.color
 };
 
 //目的是改变“预览框”中的颜色预览
 var polygonFeatureLayerStyleChange = function () {
-    var border_colorHex = document.getElementById('polygon-border-color').value;
-    var border_opacity = document.getElementById('polygon-border-opacity').value;
-    var border_width = document.getElementById('polygon-border-width').value;
-    var fill_style = document.getElementById('polygon-border-style').value
+    var border_colorHex = document.getElementById('polygonFeatureLayer-border-color').value;
+    var border_opacity = document.getElementById('polygonFeatureLayer-border-opacity').value;
+    var border_width = document.getElementById('polygonFeatureLayer-border-width').value;
+    var fill_style = document.getElementById('polygonFeatureLayer-border-style').value
     var border_rgb = tinycolor(border_colorHex).toRgb();
     var border_rgba = 'rgba(' + border_rgb.r + ',' + border_rgb.g + ',' + border_rgb.b + ',' + border_opacity + ')';
-    var fill_colorHex = document.getElementById('polygon-fill-color').value;
-    var fill_opacity = document.getElementById('polygon-fill-opacity').value;
+    var fill_colorHex = document.getElementById('polygonFeatureLayer-fill-color').value;
+    var fill_opacity = document.getElementById('polygonFeatureLayer-fill-opacity').value;
     var fill_rgb = tinycolor(fill_colorHex).toRgb();
     var fill_rgba = 'rgba(' + fill_rgb.r + ',' + fill_rgb.g + ',' + fill_rgb.b + ',' + fill_opacity + ')';
-    var preview = document.getElementById('polygon-style-preview');
+    var preview = document.getElementById('polygonFeatureLayer-style-preview');
     preview.style.backgroundColor = fill_rgba;
     preview.style.border = border_width + 'px solid' + border_rgba
 };
@@ -511,7 +467,7 @@ var polygonFeatureLayerStyleChange = function () {
 //目的是取消面样式的改变
 var changePolygonaFeatureLayerStyleBack = function () {
     if (drawType == 'edit') {
-        openFeatureLayerPanelContent(['map-featureLayer-panel', 'map-featureLayer-info', 'map-featureLayer-panel-tip', 'map-featureLayer-edit'])
+        openFeatureLayerPanelContent(['map-featureLayer-panel', 'map-featureLayer-info', 'map-featureLayer-panel-tip'])
     } else {
         openFeatureLayerPanelContent(['map-featureLayer-panel', 'map-featureLayer-info', 'map-featureLayer-panel-tip'])
     }
@@ -520,7 +476,7 @@ var changePolygonaFeatureLayerStyleBack = function () {
 //目的是取消线样式的改变
 var changePolylineFeatureLayerStyleBack = function () {
     if (drawType == 'edit') {
-        openFeatureLayerPanelContent(['map-featureLayer-panel', 'map-featureLayer-info', 'map-featureLayer-panel-tip', 'map-featureLayer-edit'])
+        openFeatureLayerPanelContent(['map-featureLayer-panel', 'map-featureLayer-info', 'map-featureLayer-panel-tip'])
     } else {
         openFeatureLayerPanelContent(['map-featureLayer-panel', 'map-featureLayer-info', 'map-featureLayer-panel-tip'])
     }
@@ -528,7 +484,7 @@ var changePolylineFeatureLayerStyleBack = function () {
 //目的是取消点样式的改变
 var changePointFeatureLayerStyleBack = function () {
     if (drawType == 'edit') {
-        openFeatureLayerPanelContent(['map-featureLayer-panel', 'map-featureLayer-info', 'map-featureLayer-panel-tip', 'map-featureLayer-edit'])
+        openFeatureLayerPanelContent(['map-featureLayer-panel', 'map-featureLayer-info', 'map-featureLayer-panel-tip'])
     } else {
         openFeatureLayerPanelContent(['map-featureLayer-panel', 'map-featureLayer-info', 'map-featureLayer-panel-tip'])
     }
@@ -536,17 +492,17 @@ var changePointFeatureLayerStyleBack = function () {
 
 //目的是改变多边形图层的整体样式
 var savePolygonFeatureLayerStyle = function() {
-	var border_colorHex = document.getElementById('polygon-border-color').value;
-	var border_opacity = document.getElementById('polygon-border-opacity').value;
-	var border_width = document.getElementById('polygon-border-width').value;
-	var border_style = document.getElementById('polygon-border-style').value;
+	var border_colorHex = document.getElementById('polygonFeatureLayer-border-color').value;
+	var border_opacity = document.getElementById('polygonFeatureLayer-border-opacity').value;
+	var border_width = document.getElementById('polygonFeatureLayer-border-width').value;
+	var border_style = document.getElementById('polygonFeatureLayer-border-style').value;
 	var border_rgb = tinycolor(border_colorHex).toRgb();
 	var border_rgba = 'rgba(' + border_rgb.r + ',' + border_rgb.g + ',' + border_rgb.b + ',' + border_opacity + ')';
-	var fill_colorHex = document.getElementById('polygon-fill-color').value;
-	var fill_opacity = document.getElementById('polygon-fill-opacity').value;
+	var fill_colorHex = document.getElementById('polygonFeatureLayer-fill-color').value;
+	var fill_opacity = document.getElementById('polygonFeatureLayer-fill-opacity').value;
 	var fill_rgb = tinycolor(fill_colorHex).toRgb();
 	var fill_rgba = 'rgba(' + fill_rgb.r + ',' + fill_rgb.g + ',' + fill_rgb.b + ',' + fill_opacity + ')';
-	var fill_style = document.getElementById('polygon-fill-style').value
+	var fill_style = document.getElementById('polygonFeatureLayer-fill-style').value
 	var thisFillColor = null;
 	var thisborderColor = null;
 	require(["esri/Color"], function(Color) {thisFillColor= Color.fromString(fill_rgba);thisBorderColor= Color.fromString(border_rgba);});
@@ -567,12 +523,12 @@ var savePolygonFeatureLayerStyle = function() {
 	};
 	rendererNow = simpleJson;
 	
-	var polygonStyle = document.getElementById('polygon-style');
+	var polygonStyle = document.getElementById('polygonFeatureLayer-style');
 	polygonStyle.style.backgroundColor = fill_rgba;
 	polygonStyle.style.border = border_width + 'px solid ' + border_rgba;
 
 	if(drawType == 'edit') {
-		openFeatureLayerPanelContent(['map-featureLayer-panel', 'map-featureLayer-info', 'map-featureLayer-panel-tip', 'map-featureLayer-edit'])
+		openFeatureLayerPanelContent(['map-featureLayer-panel', 'map-featureLayer-info', 'map-featureLayer-panel-tip'])
 	} else {
 		//addDrawInteraction(drawType);
 		openFeatureLayerPanelContent(['map-featureLayer-panel', 'map-featureLayer-info', 'map-featureLayer-panel-tip'])
@@ -588,7 +544,7 @@ var featureLayerInfoSave = function(){
         if(thisFeatureLayer.type==="point")
 		{
             pointFeatureLayerStyleChange();
-            if(!(document.getElementById('point-height').value&& document.getElementById('point-width').value)){
+            if(!(document.getElementById('pointFeatureLayer-height').value&& document.getElementById('pointFeatureLayer-width').value)){
                 layui.use('layer', function () {
                     var lay = layui.layer;
                     lay.open({
@@ -608,10 +564,16 @@ var featureLayerInfoSave = function(){
 		var rend = new SimpleRenderer(simpleJson);
 		thisFeatureLayer.feature.setRenderer(rend);
 		thisFeatureLayer.feature.refresh();
-		legend.refresh();
+		if(!(typeof legend ==="undefined"||null===legend)){
+            legend.refresh();
+			return;
+		}else if(!(typeof iMLegend ==="undefined"||null===iMLegend)){
+            iMLegend.refresh();
+            return;
+		}
 	})
 	edited=true;
-};
+}
 
 //关闭图层编辑信息面板
 var closeFeatureLayerPanel = function () {
@@ -640,8 +602,6 @@ var openFeatureLayerPanelContent = function (idList) {
     removeClass(obj4, "show");
     var obj5 = document.getElementById('polygonFeatureLayer-style-edit');
     removeClass(obj5, "show");
-    var obj6 = document.getElementById('map-featureLayer-edit');
-    removeClass(obj6, "show");
     if (idList) {
         for (var index = 0; index < idList.length; index++) {
             var id = idList[index];

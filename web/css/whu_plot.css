@@ -101,11 +101,11 @@
 .map-marking-panel {
     position: absolute;
     left: -400px;
-    top: 100px;
+    top: 150px;
+    max-width:373px;
     max-height:calc(100% - 100px);
     overflow: auto;
     z-index: 2;
-    width: 400px;
     background-color: #fff;
     transition-property: all;
     transition-duration: 500ms;
