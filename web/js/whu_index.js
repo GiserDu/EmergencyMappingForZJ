@@ -24,3 +24,11 @@ $(document).ready(function() {
     });
       
 });
+
+//新建空白模板
+function blank_btnClick() {
+    var index=parent.layer.getFrameIndex(window.name);
+    parent.layer.close(index);
+
+    parent.blank_btnClick();
+}

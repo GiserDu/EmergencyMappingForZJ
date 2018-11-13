@@ -481,8 +481,7 @@ $("#doMap").click(function () {
                                         }
                                     }
                                     else if (textLayerChecked == "unchecked" && buttonLayerChecked == "checked"){
-                                        // document.getElementById("selectButton").innerHTML="New text!";
-                                        // alert($("#selectButton").html());
+
                                         if($("#newFLName").val()==""||$("#selectButton").html()=="选择要素") {
                                             alert("属性不能为空2！");
                                             return;
@@ -518,7 +517,8 @@ $("#doMap").click(function () {
                                     //layerNodes=treeObj.transformToArray(treeObj.getNodes());
                                     layer.close(index);
                                 },
-                                btn2: function(index, layero){
+                                btn2: function(index, layero)
+                                {
                                     //按钮【修改要素样式】的回调
                                     //判断是否勾选了
                                     if(treeNode.textLayerChecked==='unchecked'&&treeNode.buttonLayerChecked==='unchecked'){
@@ -570,11 +570,7 @@ $("#doMap").click(function () {
                                 }
                             });
                         });
-
                     }
-                    /*var zTree = $.fn.zTree.getZTreeObj("doMapTree");
-                    zTree.selectNode(treeNode);
-                    zTree.editName(treeNode);*/
                 });
                 if(treeNode.getParentNode().id!=1){
                     var btn1 = $("#doMapRemove_"+treeNode.id);
@@ -938,33 +934,30 @@ function addModelLayUI(mapName) {
     var statisticLayer_Model= template.statisticLayer
     //修改底图节点_暂时不用
 
-    var layerNodes_Model=JSON.parse(JSON.stringify(layerNodes));
+    var layerNodes_Model=[
+        {id:1, pId:0, name:"地理底图", open:true, "nocheck":true,children:[
+                {id:101, name:"矢量图",url:"http://qk.casm.ac.cn:9090/geowinmap/ds?serviceproviderid=map.cachedtms&serviceid=gettile&tilename=map&y=${row}&x=${col}&z=${level}",checked:true},
+                {id:102, name:"影像图",url:"http://qk.casm.ac.cn:9090/geowinmap/ds?serviceproviderid=map.cachedtms&serviceid=gettile&tilename=sate&y=${row}&x=${col}&z=${level}"}
+            ]},
 
-    // var layerNodes_Model=deepClone(layerNodes);
-    // function deepClone(source){
-    //     const targetObj = source.constructor === Array ? [] : {}; // 判断复制的目标是数组还是对象
-    //     for(var keys in source){ // 遍历目标
-    //         if(source.hasOwnProperty(keys)){
-    //             if(source[keys] && typeof source[keys] === 'object'){ // 如果值是对象，就递归一下
-    //                 targetObj[keys] = source[keys].constructor === Array ? [] : {};
-    //                 targetObj[keys] = deepClone(source[keys]);
-    //             }else{ // 如果不是，就直接赋值
-    //                 targetObj[keys] = source[keys];
-    //             }
-    //         }
-    //     }
-    //     return targetObj;
-    // }
-    //
+        {id:2, pId:0, name:"专题服务图层",isParent:true, open:false,children:[], "nocheck":true},
 
+        {id:3, pId:0, name:"要素图层", isParent:true,open:false,children:[], "nocheck":true},
+        {id:4, pId:0, name:"统计图层", isParent:true,open:false,children:[], "nocheck":true},
+
+    ];
 
 /*增加专题服务图层节点*/
     layerNodes_Model[1].children=serviceLayer_Model.modules;
     //增加要素图层
     layerNodes_Model[2].children=featureLayer_Model.modules;
-    //增加统计图层
-    layerNodes_Model.push({id:4, pId:0, name:"统计图层", isParent:true,open:false,children:[], "nocheck":true});
     layerNodes_Model[3].children=statisticLayer_Model.modules;
+
+    //添加模板数据标识属性 templateData 或 urlFeatureData
+    for (var i=0,l=layerNodes_Model[2].children.length;i<l;i++){
+        layerNodes_Model[2].children[i].dataType="templateData"
+    }
+
 
     doMapping_Template(layerNodes_Model)
     function doMapping_Template(layerNodes_InFunc) {
@@ -1134,7 +1127,17 @@ function addModelLayUI(mapName) {
                                         nodeTheme = null;
                                     }
 
-                                    var newNode={name:$("#newFLName").val(),url:$("#newFLAds").val(),textLayerChecked:textLayerChecked,buttonLayerChecked:buttonLayerChecked,textLayerDisabled:textLayerDisabled,buttonLayerDisabled:buttonLayerDisabled,lastUrl:"0", nodePath:nodePath, theme:nodeTheme};
+                                    var newNode={
+                                        name:$("#newFLName").val(),
+                                        url:$("#newFLAds").val(),
+                                        dataType:"urlFeatureData",
+                                        textLayerChecked:textLayerChecked,
+                                        buttonLayerChecked:buttonLayerChecked,
+                                        textLayerDisabled:textLayerDisabled,
+                                        buttonLayerDisabled:buttonLayerDisabled,
+                                        lastUrl:"0",
+                                        nodePath:nodePath,
+                                        theme:nodeTheme};
                                     layerNodes[2].children.push(newNode);
                                     var treeObj = $.fn.zTree.getZTreeObj("doMapTree_Template");
                                     treeObj.addNodes(treeNode,-1, newNode);
@@ -1158,10 +1161,7 @@ function addModelLayUI(mapName) {
                     editStr = "<span id='doMapEdit_"+treeNode.id+"' class='button doMapEdit'  onfocus='this.blur();'></span>";
                 }
                 if ($("#doMapEdit_"+treeNode.id).length>0) return;
-
                 aObj.append(editStr);
-
-
                 var btn = $("#doMapEdit_"+treeNode.id);
                 if (btn) btn.bind("click", function(){
                     //编辑，根据父节点不同，功能不同
@@ -1238,8 +1238,8 @@ function addModelLayUI(mapName) {
                         });
 
                     }
-                    if(treeNode.getParentNode().id==3){//如果是要素服务
-                        //alert("编辑要素数据");
+                    if(treeNode.getParentNode().id==3)//如果是要素服务
+                    {
                         var layer = layui.layer;
                         getThisPath = treeNode["nodePath"];
                         getThisTheme = treeNode["theme"];
@@ -1250,25 +1250,40 @@ function addModelLayUI(mapName) {
                             getThisTheme = "选择要素";
                             textEditFlag = 1;
                         }
-
                         console.log(getThisPath);
-                        layui.use('layer', function (layui_index) {
+                        //判断是否是示例图数据
+                        if (treeNode.data==undefined){
 
+                        }
+                        else {
+                            treeNode.textLayerChecked = "checked";
+                            treeNode.textLayerDisabled="undisabled"
+                            treeNode.buttonLayerChecked="unchecked";
+                            treeNode.buttonLayerDisabled="disabled";
+
+                        }
+
+                        layui.use('layer', function (layui_index) {
                             layer.open({
                                 title: '编辑要素服务',
-                                skin: "layui-layer-lan",
+                                skin: "layui-layer-molv",
                                 type: 0,
                                 shade: 0,
+                                btn: ['确认','修改要素样式'],
                                 //content:"<div><p>要素名称：<input id='editFLName' value='"+treeNode.name+"'></input></p><br/><p>要素地址：<input id='editFLAds' value='"+treeNode.url+"'></input></p></div>",
-                                content: "<div id='zeo'><p style='padding-left: 12px'>要素名称：<input id='editFLName' value='"+treeNode.name+"'></input></p><br/><p class='FLS_p'><input id='textLayer' name='layer' value='text' type='radio' onclick='changeSource(this)' "+treeNode.textLayerChecked+"/>服务地址：<input id='editFLAds' "+treeNode.textLayerDisabled+" value='"+treeNode.url+"'></input></p>"
-                                + "<br/><p class='tree_p'><input id='buttonLayer' name='layer' value='button' type='radio' onclick='changeSource(this)' "+treeNode.buttonLayerChecked+"/>专题服务：<button id='selectButton' onclick='openSelectedTree(getThisPath)' class='layui-btn layui-btn-sm' "+treeNode.buttonLayerDisabled+">选择要素</button></p></div>",
+                                content: "<div id='zeo'>" +
+                                    "<p style='padding-left: 12px'>要素名称：<input id='editFLName' value='"+treeNode.name+"'></input></p>" +
+                                    "<br/><p class='FLS_p'><input id='textLayer' name='layer' value='text' type='radio' onclick='changeSource(this)' "+treeNode.textLayerChecked+"/>服务地址：<input id='editFLAds' "+treeNode.textLayerDisabled+" value='"+((treeNode.data)?treeNode.data:treeNode.url)+"'></input></p>"
+                                    + "<br/><p class='tree_p'><input id='buttonLayer' name='layer' value='button' type='radio' onclick='changeSource(this)' "+treeNode.buttonLayerChecked+"/>专题服务：<button id='selectButton' onclick='openSelectedTree(getThisPath)' class='layui-btn layui-btn-sm' "+treeNode.buttonLayerDisabled+">选择要素</button></p></div>",
                                 success: function (layero, index) {
-                                    document.getElementById("selectButton").innerHTML = getThisTheme;
+                                    if  (treeNode.buttonLayerDisabled=="undisabled")
+                                        document.getElementById("selectButton").innerHTML = getThisTheme;
                                     if (treeNode.textLayerChecked == "checked")
                                         getThisTheme = undefined;
                                     changeSource1 = (treeNode.textLayerChecked == "checked")?"text":"button";
                                 },
-                                yes: function(index, layero) {//确定后执行回调
+                                yes: function(index, layero) //确定后执行回调
+                                {
                                     //  var editnode={name:$("#newSLName;").val(),url:$("#newSLAds").val()};
                                     // alert(selectedNode.name);
 
@@ -1287,20 +1302,19 @@ function addModelLayUI(mapName) {
                                     }
 
                                     console.log(treeNode);
-                                    //treeNode.name=$("#editSLName").val();
-                                    //treeNode.url=$("#editSLAds").val();
+
                                     var nodeIndex = treeNode.getIndex();
-                                    layerNodes[2].children[nodeIndex].lastUrl =treeNode.url;
+                                    layerNodes_InFunc[2].children[nodeIndex].lastUrl =treeNode.url;
                                     treeNode.lastUrl=treeNode.url;
                                     treeNode.name=$("#editFLName").val();
                                     treeNode.url=$("#editFLAds").val();
                                     //记录数据源的开源方式
-                                    layerNodes[2].children[nodeIndex].textLayerChecked = textLayerChecked;
-                                    layerNodes[2].children[nodeIndex].buttonLayerChecked  = buttonLayerChecked ;
-                                    layerNodes[2].children[nodeIndex].textLayerDisabled = textLayerDisabled;
-                                    layerNodes[2].children[nodeIndex].buttonLayerDisabled = buttonLayerDisabled;
-                                    layerNodes[2].children[nodeIndex].name = $("#editFLName").val();
-                                    layerNodes[2].children[nodeIndex].url =$("#editFLAds").val();
+                                    layerNodes_InFunc[2].children[nodeIndex].textLayerChecked = textLayerChecked;
+                                    layerNodes_InFunc[2].children[nodeIndex].buttonLayerChecked  = buttonLayerChecked ;
+                                    layerNodes_InFunc[2].children[nodeIndex].textLayerDisabled = textLayerDisabled;
+                                    layerNodes_InFunc[2].children[nodeIndex].buttonLayerDisabled = buttonLayerDisabled;
+                                    layerNodes_InFunc[2].children[nodeIndex].name = $("#editFLName").val();
+                                    layerNodes_InFunc[2].children[nodeIndex].url =$("#editFLAds").val();
                                     if (textLayerChecked == "checked" && buttonLayerChecked == "unchecked"){
                                         if($("#newFLName").val()==""||$("#newFLAds").val()=="") {
                                             alert("属性不能为空1！");
@@ -1329,7 +1343,7 @@ function addModelLayUI(mapName) {
                                             map.removeLayer(map.getLayer(treeNode.thematicData.id));
                                     }
                                     //如果在勾选状态下被编辑，点击确定后直接在地图上更新图层
-                                    if (treeNode.checked == true){
+                                    if ( treeNode.checked == true){
                                         treeNode.checked = false;
                                         layerOncheck("doMapTree_Template", treeNode);
                                         treeNode.checked = true;
@@ -1338,8 +1352,61 @@ function addModelLayUI(mapName) {
                                     treeObj.updateNode(treeNode);
                                     //layerNodes=treeObj.transformToArray(treeObj.getNodes());
                                     layer.close(index);
-                                }});
-                        });
+                                },
+                                btn2: function(index, layero)
+                                {
+                                    //按钮【修改要素样式】的回调
+                                    //判断是否勾选了
+                                    if(treeNode.textLayerChecked==='unchecked'&&treeNode.buttonLayerChecked==='unchecked'){
+                                        alert("未设置数据源，不能编辑！");
+                                        return false;
+                                    }else if($("#selectButton").html()==="选择要素"&&!($("#editFLAds").val())){//没有选择也没有填地址
+                                        alert("未设置数据源，不能编辑！");
+                                        return false;
+                                    }
+                                    //判断图层是否发生了任意改变
+                                    if((treeNode.theme&&$("#selectButton").html()!= treeNode.theme)||((changeSource1&&changeSource2)&&changeSource1!=changeSource2)||addressChanged){
+                                        alert("图层数据源发生了改变，请先点击确定加载图层！");
+                                        return false;
+                                    }
+                                    var layerID;
+                                    if(treeNode.textLayerChecked==="checked"){
+                                        layerID = treeNode.data;
+                                    }else if (treeNode.buttonLayerChecked==="checked"){
+                                        layerID = treeNode.thematicData.id;
+                                    }
+                                    //判断数据源是否加载到地图上，没有加载也不能编辑
+                                    if(treeNode.textLayerChecked==="checked"){//没有选择也没有填地址
+                                        if(!(map.getLayer(layerID))){
+                                            alert("在当前地图中找不到文本框所代表的图层，请检查地址是否有误！");
+                                            return false;
+                                        }
+                                    }
+                                    /*方法说明
+                                     *@method editFeatureLayer
+                                     *@param{layer,layerType,layerLabel}
+                                     *@return {void}
+                                    */
+                                    var layerInMap = map.getLayer(layerID);
+                                    var layerLabel = layerInMap.name;
+                                    var layerType;
+                                    switch (layerInMap.geometryType)  {
+                                        case "esriGeometryPoint":
+                                            layerType = 'point'
+                                            break;
+                                        case "esriGeometryPolyline":
+                                            layerType = 'polyline'
+                                            break;
+                                        case "esriGeometryPolygon":
+                                            layerType = 'polygon'
+                                            break;
+                                    }
+                                    editFeatureLayer(layerInMap,layerType,layerLabel);
+                                    //return false 开启该代码可禁止点击该按钮关闭
+                                },
+                            });
+                            });
+
 
                     }
                     /*var zTree = $.fn.zTree.getZTreeObj("doMapTree");
@@ -1393,10 +1460,6 @@ function addModelLayUI(mapName) {
                             }
 
                         }
-                        //alert("删除" + treeNode.name);
-                        /* var zTree = $.fn.zTree.getZTreeObj("doMapTree");
-                         zTree.selectNode(treeNode);
-                         zTree.removeNode(treeNode,true);*/
                     });
                 }
 
@@ -1435,10 +1498,11 @@ function addModelLayUI(mapName) {
             zTree.selectNode(treeNode);
             return confirm("确认删除 节点 -- " + treeNode.name + " 吗？");
         }
-        if(doMapIndex_Template==0){
-            layerNodesObj_Template=$.fn.zTree.init($("#doMapTree_Template"), setting, layerNodes_InFunc);
-            doMapIndex_Template=1;
-        }
+        // if(doMapIndex_Template==0){
+        layerNodesObj_Template=$.fn.zTree.init($("#doMapTree_Template"), setting, layerNodes_InFunc);
+
+            // doMapIndex_Template=1;
+        // }
 
     }
 
@@ -1450,16 +1514,31 @@ function addModelLayUI(mapName) {
             type: 1,
             shade: 0,
             resize: true,
-            // area: ['', '350px'],
-            btn: ['确定'],
+            maxmin:true,
+            area: ['250', '350px'],
+            //btn: ['确定'],
             content: $('#doMapTree_Template'),
             yes: function(index, layero) {//确定后执行回调
                 alert("添加响应事件")
+            },
+            cancel: function(index, layero){
+                if(confirm('确定要关闭么,将清除所有操作图层')){ //只有当点击confirm框的确定时，该层才会关闭
+
+                    layer.close(index)
+                }
+                return false;
             }
         });
     });
 
 }
+
+//空白模板制图按钮
+function blank_btnClick() {
+    $("#doMap").click();
+}
+
+
 //选择制图模板
 $("#templateMap").click(function () {
     /**
@@ -1475,7 +1554,7 @@ $("#templateMap").click(function () {
             type: 2,
             shade: 0,
             resize: false,
-            area: ["800px","600px"],
+            area: ["600px","500px"],
             // btn: ['按钮1','按钮2','按钮3'],
             content: 'indexMini.html',
             yes: function(index, layero) {//确定后执行回调
@@ -1551,8 +1630,319 @@ function layerOncheck(treeId, treeNode) {
             }
         }
         if (treeNode.getParentNode().id===3) {//如果操作的是要素图层
+            var dataUrl_template= treeNode.data;;
+            var lastDataUrl_template = treeNode.lastUrl;
             var isChecked = !treeNode.checked;
             var dataUrl = treeNode.url;
+            var lastDataUrl = treeNode.lastUrl;//上一次存储的url。加载时，应先将上一次存储的url代表的要素删去
+            var lastThematic = treeNode.thematicData; //上一次存储的专题数据。加载时，应先将上一次存储的专题要素删去
+            if(isChecked){//如果被勾选
+
+                if (treeNode.dataType=="templateData")
+                {
+                    //如果是模板数据
+                    //如果服务地址不为空
+                    //先判断上次存储的url代表的图层是否加载，如果加载了，则删去
+
+                    if (map && (map.getLayer(dataUrl_template))) {
+                        map.removeLayer(map.getLayer(dataUrl_template));
+                    }
+                    if (map && (map.getLayer(dataUrl_template))) {//如果已经加载，只是做了隐藏，显示就好了，下面的步骤跳过
+                        var thisLayer = map.getLayer(dataUrl_template);
+                        thisLayer.show();
+                        return;
+                    }
+                    require([
+                        "esri/layers/FeatureLayer",
+                        "esri/InfoTemplate", "esri/dijit/PopupTemplate", "esri/renderers/SimpleRenderer"
+                    ], function (FeatureLayer, InfoTemplate, PopupTemplate, SimpleRenderer) {
+
+                        var infoTemplate = new InfoTemplate("${NAME}", "${*}");
+                        var layer = new FeatureLayer(dataUrl_template, {
+                            mode: FeatureLayer.MODE_SNAPSHOT,
+                            outFields: ["*"],
+                            opacity: "1",
+                            infoTemplate: infoTemplate,
+                            id: dataUrl_template
+                        });
+                        layer.on("load", function () {
+                            var simpleJson_line = {
+                                "type": "simple",
+                                "label": treeNode.name,
+                                "description": "",
+                                "symbol": {
+                                    "type": "esriSLS", //SimpleLineSymbol(简单线类型)
+                                    "color": [115, 76, 0, 255], //颜色
+                                    "width": 2, //线宽
+                                    "style": "esriSLSDash" //线形
+                                }
+                            };
+                            var simpleJson_polygon = {
+                                "type": "simple",
+                                "label": treeNode.name,
+                                "description": "",
+                                "symbol": {
+                                    "type": "esriSFS",
+                                    "style": "esriSFSSolid",
+                                    "color": [115, 76, 0, 255],
+                                    "outline": {
+                                        "type": "esriSLS",
+                                        "style": "esriSLSSolid",
+                                        "color": [110, 110, 110, 255],
+                                        "width": 1
+                                    }
+                                }
+                            };
+                            var simpleJson_point = {
+                                "type": "simple",
+                                "label": treeNode.name,
+                                "description": "",
+                                "symbol": {
+                                    "type": "esriSMS",
+                                    "style": "esriSMSSquare",
+                                    "color": [76, 115, 0, 255],
+                                    "size": 8,
+                                    "angle": 0,
+                                    "xoffset": 0,
+                                    "yoffset": 0,
+                                    "outline":
+                                        {
+                                            "color": [152, 230, 0, 255],
+                                            "width": 1
+                                        }
+                                }
+                            };
+                            var rend;
+                            require(["esri/renderers/SimpleRenderer"
+                            ], function (SimpleRenderer) {
+                                switch (layer.geometryType) {
+                                    case "esriGeometryPoint":
+                                        rend = new SimpleRenderer(simpleJson_point)
+                                        break;
+                                    case "esriGeometryPolyline":
+                                        rend = new SimpleRenderer(simpleJson_line)
+                                        break;
+                                    case "esriGeometryPolygon":
+                                        rend = new SimpleRenderer(simpleJson_polygon)
+                                        break;
+                                }
+                                layer.setRenderer(rend);
+                            });
+                        });
+                        map.addLayer(layer);
+                    })
+                }
+                else {
+                    console.log(treeNode.textLayerChecked);
+                    if (treeNode.textLayerChecked == "checked") {
+                        if (dataUrl == "") {//服务地址为空，则返回
+                            layui.use('layer', function () {
+                                var lay = layui.layer;
+                                lay.open({
+                                    title: '提示'
+                                    , content: '请先设置要素图层地址！'
+                                });
+                            })
+                            return;
+                        } else {
+                            //如果服务地址不为空
+                            //先判断上次存储的url代表的图层是否加载，如果加载了，则删去
+                            if (map && (map.getLayer(lastDataUrl))) {
+                                map.removeLayer(map.getLayer(lastDataUrl));
+                            }
+                            if (map && (map.getLayer(dataUrl))) {//如果已经加载，只是做了隐藏，显示就好了，下面的步骤跳过
+                                var thisLayer = map.getLayer(dataUrl);
+                                thisLayer.show();
+                                return;
+                            }
+                            require([
+                                "esri/layers/FeatureLayer",
+                                "esri/InfoTemplate", "esri/dijit/PopupTemplate", "esri/renderers/SimpleRenderer"
+                            ], function (FeatureLayer, InfoTemplate, PopupTemplate, SimpleRenderer) {
+
+                                var infoTemplate = new InfoTemplate("${NAME}", "${*}");
+                                var layer = new FeatureLayer(dataUrl, {
+                                    mode: FeatureLayer.MODE_SNAPSHOT,
+                                    outFields: ["*"],
+                                    opacity: "1",
+                                    infoTemplate: infoTemplate,
+                                    id: dataUrl
+                                });
+                                layer.on("load", function () {
+                                    var simpleJson_line = {
+                                        "type": "simple",
+                                        "label": treeNode.name,
+                                        "description": "",
+                                        "symbol": {
+                                            "type": "esriSLS", //SimpleLineSymbol(简单线类型)
+                                            "color": [115, 76, 0, 255], //颜色
+                                            "width": 2, //线宽
+                                            "style": "esriSLSDash" //线形
+                                        }
+                                    };
+                                    var simpleJson_polygon = {
+                                        "type": "simple",
+                                        "label": treeNode.name,
+                                        "description": "",
+                                        "symbol": {
+                                            "type": "esriSFS",
+                                            "style": "esriSFSSolid",
+                                            "color": [115, 76, 0, 255],
+                                            "outline": {
+                                                "type": "esriSLS",
+                                                "style": "esriSLSSolid",
+                                                "color": [110, 110, 110, 255],
+                                                "width": 1
+                                            }
+                                        }
+                                    };
+                                    var simpleJson_point = {
+                                        "type": "simple",
+                                        "label": treeNode.name,
+                                        "description": "",
+                                        "symbol": {
+                                            "type": "esriSMS",
+                                            "style": "esriSMSSquare",
+                                            "color": [76, 115, 0, 255],
+                                            "size": 8,
+                                            "angle": 0,
+                                            "xoffset": 0,
+                                            "yoffset": 0,
+                                            "outline":
+                                                {
+                                                    "color": [152, 230, 0, 255],
+                                                    "width": 1
+                                                }
+                                        }
+                                    };
+                                    var rend;
+                                    require(["esri/renderers/SimpleRenderer"
+                                    ], function (SimpleRenderer) {
+                                        switch (layer.geometryType) {
+                                            case "esriGeometryPoint":
+                                                rend = new SimpleRenderer(simpleJson_point)
+                                                break;
+                                            case "esriGeometryPolyline":
+                                                rend = new SimpleRenderer(simpleJson_line)
+                                                break;
+                                            case "esriGeometryPolygon":
+                                                rend = new SimpleRenderer(simpleJson_polygon)
+                                                break;
+                                        }
+                                        layer.setRenderer(rend);
+                                    });
+                                });
+                                map.addLayer(layer);
+                            })
+                        }
+                    }
+                    else if (treeNode.buttonLayerChecked == "checked") {
+                        if (lastThematic) {
+                            if (map && (map.getLayer(lastThematic.id))) {
+                                map.removeLayer(map.getLayer(lastThematic.id));
+                            }
+                        }
+                        beforeThematicLayerAdd("doMapTree_Template", treeNode);
+                    }
+                }
+            }else{//如果取消勾选
+                //hide当前url的图层
+                if (treeNode.dataType=="templateData"){
+                    if (map && (map.getLayer(dataUrl_template))) {
+                        var thisLayer = map.getLayer(dataUrl_template);
+                        thisLayer.hide()
+                    }
+                }
+                else
+                {
+                    if (treeNode.textLayerChecked == "checked") {
+                        if (map && (map.getLayer(dataUrl))) {
+                            var thisLayer = map.getLayer(dataUrl);
+                            thisLayer.hide()
+                        }
+                    }
+                    //hide当前的专题要素图层
+                    else if (treeNode.buttonLayerChecked == "checked") {
+                        var layerNow1 = map.getLayer(treeNode["nodePath"][treeNode["nodePath"].length - 1].id);
+                        console.log(treeNode["nodePath"][treeNode["nodePath"].length - 1]);
+                        if (layerNow1)
+                            layerNow1.hide();
+                    }
+                }
+                return;
+            }
+        }
+    }
+}
+
+//模板制图check事件
+function layerOncheck_Template(treeId, treeNode) {
+    //如果没有创建图例，先创建图例
+    if(!iMLegendCreated){
+        require([
+            "esri/dijit/Legend",
+            "dojo/domReady!"
+        ], function(
+            Legend
+        ) {
+            iMLegend = new Legend({
+                autoUpdate:true,
+                map: map
+            }, "iMLegendDiv");
+            iMLegend.startup();
+            iMLegendCreated = true;
+        })
+    }
+    if(treeNode.isParent){
+        return;
+    }
+    else {
+        if(treeNode.getParentNode().id==1){
+            //地理底图
+            if(treeNode.checked){
+                map.removeLayer(baseMap);
+            }else {
+                require(["esri/layers/WebTiledLayer","esri/layers/ArcGISDynamicMapServiceLayer"],function (WebTiledLayer,ArcGISDynamicMapServiceLayer) {
+                    var mate=treeNode.getParentNode().children;
+                    for (var  i = 0; i < mate.length; i++) {
+                        if(mate[i].id==treeNode.id)
+                            continue;
+                        var node = layerNodesObj.getNodeByTId(mate[i].tId);
+                        layerNodesObj.checkNode(node, false, true);
+                    }
+                    map.removeLayer(baseMap);
+                    baseMap = new WebTiledLayer(
+                        treeNode.url
+                    );
+                    map.addLayer(baseMap)
+                    map.reorderLayer(baseMap,1);
+                });
+
+            }
+        }
+        if(treeNode.getParentNode().id==2){
+            //专题服务
+            if(treeNode.checked){
+                ServerLayerArr.filter(function (p) {
+                    var id=treeNode.name+"_"+(treeNode.url);
+                    if(p.id==id){
+                        map.removeLayer(map.getLayer(id));
+                    }
+                });
+
+            }
+            else {
+                ServerLayerArr.filter(function (p) {
+                    var id=treeNode.name+"_"+(treeNode.url);
+                    if(p.id==id){
+                        map.addLayer(p);
+                    }
+                });
+            }
+        }
+        if (treeNode.getParentNode().id===3) {//如果操作的是要素图层
+            var isChecked = !treeNode.checked;
+            var dataUrl = treeNode.data;
             var lastDataUrl = treeNode.lastUrl;//上一次存储的url。加载时，应先将上一次存储的url代表的要素删去
             var lastThematic = treeNode.thematicData; //上一次存储的专题数据。加载时，应先将上一次存储的专题要素删去
             if(isChecked){//如果被勾选
@@ -1630,10 +2020,10 @@ function layerOncheck(treeId, treeNode) {
                                         "xoffset": 0,
                                         "yoffset": 0,
                                         "outline":
-                                        {
-                                            "color": [152,230,0,255],
-                                            "width": 1
-                                        }}
+                                            {
+                                                "color": [152,230,0,255],
+                                                "width": 1
+                                            }}
                                 };
                                 var rend;
                                 require(["esri/renderers/SimpleRenderer"
@@ -1684,6 +2074,7 @@ function layerOncheck(treeId, treeNode) {
         }
     }
 }
+
 
 //专题数据check之前回调，用于请求数据
 function beforeThematicLayerAdd(treeId, treeNode) {

@@ -15,16 +15,26 @@
 	<script src="./js/jquery-3.2.1.js"></script>
 	<script src="./js/bootstrap.min.js"></script>
 	<style>
+		body{
+			height: 450px;
+		}
 		table div{
 		margin-top: 5%;
+		}
+		@media (min-width: 400px){
+		.navbar-collapse.collapse {
+		display: block!important;
+		height: auto!important;
+		padding-bottom: 0;
+		overflow: visible!important;
+		}
 		}
 		table{
 			height: 80%;margin-top: 20px;
 			}
 		#myTabContent {
 			height: 100%;
-			margin-top: -127px;
-			padding-top: 127px;
+			margin-top: -17px
 
 		}
 		#main {
@@ -39,8 +49,8 @@
 			display: -webkit-flex;
 			display: flex;
 			flex-wrap: wrap;
-			width: 400px;
-			height: 250px;
+
+			height: 90%;
 
 		}
 		.flex-item{
@@ -63,31 +73,32 @@
 			font-size: 20px;
 			margin-top: 187px;
 		}
+		.blank_btn{
+			margin-left: 229px;
+			margin-top: -16px;
+			background-color: #337ab7;
+		}
 		
 	</style>
 
   </head>
   <body>
   <div id="main" style="padding:0px;">
-    <nav class="navbar navbar-inverse " style="margin:0;role=navigation;background:;border: none;">
-		<div class="container-fluid">
+    <nav class="navbar navbar-inverse " style="margin:0;    background-color: #dddddd;border: none;">
 
-			<h1 class="navbar-brand " style="font-size:36px;    text-align: center; color:white;  float: none; ;" >制图模板选择</h1>
-
-		</div>
 			<div class="navbar-collapse collapse" style="text-align: center;">
 	
-			<ul class="nav nav-tabs " style="display: inline-block;float: none;">
+			<ul class="nav nav-tabs " style="display: inline-block;float: none; border-bottom: 1px solid #759dc0;">
 			
-				<li class="active"><a href="#modelMapping" style="background:transparent;border:none;"data-toggle="tab" >模板制图</a></li>
+				<li class="active"><a href="#modelMapping" style="background:transparent;border:none;"data-toggle="tab" >灾害模板</a></li>
 
 				<li><a href="#emMapping" style="background:transparent;border:none;"data-toggle="tab">应用示例</a></li>
 			
 			</ul>
 			</div>
     </nav>
-	<div id="myTabContent"  style=" height: 100%;" class="tab-content">
-		<div class="tab-pane fade in active" style=" height: 100%;" id="modelMapping">		
+	<div id="myTabContent"   class="tab-content">
+		<div class="tab-pane fade in active" style=" height: 100%;" id="modelMapping">
 		  <table id ="tb1" border="0"     style ="height: 80%;">
 			  <tr>
 				<th>
@@ -130,11 +141,12 @@
 				</th>
 			  </tr>
 			</table>
+			<button type="button" class="btn btn-primary blank_btn" onclick="blank_btnClick()">新建空白模板</button>
 		</div>
 
 		
 		<div class="tab-pane fade" style="height:100%"id="emMapping">
-			<div class="flex-container"style="height:100%;width:100%;">
+			<div class="flex-container">
 			  <div class="flex-item"style="background-image:url(./image/处突.jpg)" >
 				<button class="btn btn-info" href="#">处突响应示意图</button>
 				</div>
@@ -154,18 +166,18 @@
   <script>
   $(document).ready(function(){
 		$("a").css("color","black");
-		$(".active>a").css("color","white");
+		$(".active>a").css("color","#337ab7");
 		 $("a").mouseenter(function(){
 			
 			$("a").css("color","black");
-			$(this).css("color","white");
-			$(".active>a").css("color","white");
+			$(this).css("color","#337ab7");
+			$(".active>a").css("color","#337ab7");
 		});
 		$("a").mouseleave(function(){
 			
 			$("a").css("color","black");
 			
-			$(".active>a").css("color","white");
+			$(".active>a").css("color","#337ab7");
 		});
 		
 		$(".btn-info").click(function(){
