@@ -83,7 +83,10 @@ $(document).ready(function() {
                 zoom: 5
             });
             baseMap = new WebTiledLayer(
-                'http://qk.casm.ac.cn:9090/geowinmap/ds?serviceproviderid=map.cachedtms&serviceid=gettile&tilename=map&y=${row}&x=${col}&z=${level}',{id:"baseMap"}
+                //'http://qk.casm.ac.cn:9090/geowinmap/ds?serviceproviderid=map.cachedtms&serviceid=gettile&tilename=map&y=${row}&x=${col}&z=${level}',{id:"baseMap"}
+                'https://${subDomain}.tile.thunderforest.com/cycle/${level}/${col}/${row}.png',{"copyright": 'Maps © <a href="http://www.thunderforest.com">Thunderforest</a>, Data © <a href="http://www.openstreetmap.org/copyright">OpenStreetMap contributors</a>',
+                    "id": "OpenCycleMap",
+                    "subDomains": ["a", "b", "c"]}
             );
             map.addLayer(baseMap);
             studyAreaLayer=new GraphicsLayer('',{id:"studyAreaLayer",name:"studyAreaLayer"});
@@ -1515,6 +1518,7 @@ function addModelLayUI(mapName) {
             shade: 0,
             resize: true,
             maxmin:true,
+            closeBtn:0,
             area: ['250', '350px'],
             //btn: ['确定'],
             content: $('#doMapTree_Template'),
