@@ -1,8 +1,0 @@
-<component name="ArtifactManager">
-  <artifact type="exploded-war" name="EmergencyMapping1027:war exploded">
-    <output-path>$PROJECT_DIR$/out/artifacts/EmergencyMapping1027_war_exploded</output-path>
-    <root id="root">
-      <element id="javaee-facet-resources" facet="EmergencyMapping1027/web/Web" />
-    </root>
-  </artifact>
-</component>
