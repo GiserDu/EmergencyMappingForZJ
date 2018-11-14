@@ -1631,7 +1631,7 @@ function layerOncheck(treeId, treeNode) {
         }
         if (treeNode.getParentNode().id===3) {//如果操作的是要素图层
             var dataUrl_template= treeNode.data;;
-            var lastDataUrl_template = treeNode.lastUrl;
+            var lastDataUrl_template = treeNode.lastUrl;//
             var isChecked = !treeNode.checked;
             var dataUrl = treeNode.url;
             var lastDataUrl = treeNode.lastUrl;//上一次存储的url。加载时，应先将上一次存储的url代表的要素删去
