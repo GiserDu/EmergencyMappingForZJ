@@ -1661,12 +1661,12 @@ function layerOncheck(treeId, treeNode) {
                         "esri/InfoTemplate", "esri/dijit/PopupTemplate", "esri/renderers/SimpleRenderer"
                     ], function (FeatureLayer, InfoTemplate, PopupTemplate, SimpleRenderer) {
 
-                        var infoTemplate = new InfoTemplate("${NAME}", "${*}");
+                        //var infoTemplate = new InfoTemplate("${NAME}", "${*}");
                         var layer = new FeatureLayer(dataUrl_template, {
                             mode: FeatureLayer.MODE_SNAPSHOT,
                             outFields: ["*"],
                             opacity: "1",
-                            infoTemplate: infoTemplate,
+                            //infoTemplate: infoTemplate,
                             id: dataUrl_template
                         });
                         layer.on("load", function () {
@@ -1764,12 +1764,12 @@ function layerOncheck(treeId, treeNode) {
                                 "esri/InfoTemplate", "esri/dijit/PopupTemplate", "esri/renderers/SimpleRenderer"
                             ], function (FeatureLayer, InfoTemplate, PopupTemplate, SimpleRenderer) {
 
-                                var infoTemplate = new InfoTemplate("${NAME}", "${*}");
+                                //var infoTemplate = new InfoTemplate("${NAME}", "${*}");
                                 var layer = new FeatureLayer(dataUrl, {
                                     mode: FeatureLayer.MODE_SNAPSHOT,
                                     outFields: ["*"],
                                     opacity: "1",
-                                    infoTemplate: infoTemplate,
+                                    //infoTemplate: infoTemplate,
                                     id: dataUrl
                                 });
                                 layer.on("load", function () {
@@ -1976,12 +1976,12 @@ function layerOncheck_Template(treeId, treeNode) {
                             "esri/InfoTemplate", "esri/dijit/PopupTemplate", "esri/renderers/SimpleRenderer"
                         ], function (FeatureLayer, InfoTemplate, PopupTemplate, SimpleRenderer) {
 
-                            var infoTemplate = new InfoTemplate("${NAME}", "${*}");
+                            //var infoTemplate = new InfoTemplate("${NAME}", "${*}");
                             var layer = new FeatureLayer(dataUrl, {
                                 mode: FeatureLayer.MODE_SNAPSHOT,
                                 outFields: ["*"],
                                 opacity: "1",
-                                infoTemplate: infoTemplate,
+                                //infoTemplate: infoTemplate,
                                 id: dataUrl
                             });
                             layer.on("load", function(){
@@ -2143,6 +2143,7 @@ function addThematicLayer(treeNode) {
         "objectIdField": "ObjectID",
         "drawingInfo": {
             "renderer": {
+                "label":treeNode.name,
                 "type": "simple",
                 "symbol": {
                     "type": "esriPMS",
@@ -2169,9 +2170,27 @@ function addThematicLayer(treeNode) {
     };
     require([
         "esri/layers/FeatureLayer",
-    ], function(FeatureLayer) {
+        "esri/dijit/PopupTemplate"
+    ], function(FeatureLayer,PopupTemplate) {
+        map.on("mouse-drag", function(evt) {
+            if (map.infoWindow.isShowing) {
+                var loc = map.infoWindow.getSelectedFeature().geometry;
+                if (!map.extent.contains(loc)) {
+                    map.infoWindow.hide();
+                }
+            }
+        });
+        var popupTemplate = new PopupTemplate({
+            title: "{title}",
+            description: "{description}"
+        });
         featureLayer = new FeatureLayer(featureCollection, {
-            id: treeNode["thematicData"].id
+            id: treeNode["thematicData"].id,
+            infoTemplate: popupTemplate,
+            showLabels: true
+        });
+        featureLayer.on("click", function(evt) {
+            map.infoWindow.setFeatures([evt.graphic]);
         });
     });
     map.on("layers-add-result", function(results) {
@@ -2182,6 +2201,18 @@ function addThematicLayer(treeNode) {
             for(i in treeNode["thematicData"].data){
                 var geometry = new Point(treeNode["thematicData"].data[i].point);
                 var graphic = new Graphic(geometry);
+                var attr = {};
+                attr["title"] = treeNode["thematicData"].data[i].name ? treeNode["thematicData"].data[i].name : "无名称";
+                var info=""
+                for ( j in treeNode["thematicData"].data[i]){
+                    info +=j+":"+treeNode["thematicData"].data[i][j]+'<br>'
+                    //alert(info)
+                }
+                attr["description"] = info;
+
+                //attr["description"] = JSON.stringify(poi);
+                graphic.setAttributes(attr);
+                graphic.attributes.Name=treeNode["thematicData"].data[i].name;
                 features.push(graphic);
             }
         });
