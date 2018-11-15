@@ -155,10 +155,11 @@ function createImg(thistheme) {
 
                 // window.location.href='Mapping.html';
                 if(self!=top){
-                    //关闭子窗口并弹出新的layUI
+
                     var index=parent.layer.getFrameIndex(window.name);
                     parent.layer.close(index);
-                    parent.addModelLayUI(map);
+                    parent.sweetAlert1(map);
+
                     }
                 else{
                     window.location.href='Mapping.html';
