@@ -27,13 +27,6 @@ var editFeatureLayer = function (featureLayer,type,name){
     //注册当前要素图层的点击事件
     selectedFeatureLayer(featureLayer,type);
     editFeatureLayerStart();
-    if(!iconCreated){
-        crearFeatureIconList();
-    }
-
-	//注册当前要素图层的点击事件
-	selectedFeatureLayer(featureLayer,type);
-	editFeatureLayerStart();
 };
 
 //创建要素服务编辑面板
@@ -395,6 +388,7 @@ var crearFeatureIconList=function () {
         }
 
     }
+        iconCreated = true;
 }
 
 //开始编辑，打开面板
