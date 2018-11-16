@@ -42,10 +42,14 @@ var layerNodes =[
 ];
 var addressChanged ;//记录要素编辑时，要素地址有无发生变化
 var buttonChanged;//记录要素编辑时，有没有点击button改变要素
-var alertFlag = 0;
-var mapTitle;
-var layerIndex;
-var typeFlag;
+var alertFlag = 0; //是否第一次弹出模板选择layer
+var layerIndex; 
+var typeFlag; //记录当前打开的是模板还是空白制图
+var layerCloseFlag = 0; //是否选择了模板或新建了空白模板
+var templateFlag = 0; //是否打开过模板layer
+var blankFlag = 0; //是否打开过空白制图layer
+var templateClassNo; //模板layer的id
+var blankClassNo; //空白制图layer的id
 var thematicData={};
 var iMLegend;//iM means interactiveMapping
 var iMLegendCreated = false;//图例是否创建？
@@ -947,27 +951,33 @@ function openSelectedTree(thisNodePath){
 function sweetAlert1(mapName) {
     if (alertFlag ==0){
         typeFlag = 0;
+        layerCloseFlag = 1;
+        templateFlag = 1;
         addModelLayUI(mapName);
+        templateClassNo = layer.index;
     }
 
     else if (alertFlag ==1){
         layer.confirm('该操作会清除之前编辑的内容，是否继续？', {icon: 3, title:'提示'}, function(index){
+            layerCloseFlag = 1;
            layer.close(layer.index);
-            if (layerIndex)
-                if (typeFlag == 1)
-                 layer.close(layerIndex);
+            if (layerIndex){
+                if (typeFlag == 1){
+                    for(var i=1; i<layerIndex+1; i++){
+                        $("#layui-layer"+ i).css("display", "none");
+                    }
+                    // layer.close(layerIndex);
+                }
+            }
             map.removeAllLayers();
             map.addLayer(baseMap);
-            // for(var i=0; i<$(".layui-layer").length; i++){
-            //     var title = $($(".layui-layer-title")[i]).text();
-            //     if(title == "交互制图"){
-            //        $($(".layui-layer")[i]).css("display", "none");
-            //     }
-            // }
             addModelLayUI(mapName);
+            if (templateFlag == 0)
+                templateClassNo = layer.index;
+            templateFlag = 1;
+            $("#layui-layer"+ (templateClassNo)).css("display", "block");
             // layerIndex = layer.index;
             typeFlag = 0;
-            mapTitle = mapName;
             $(".layui-layer-title").text(mapName);
         });
 
@@ -1665,24 +1675,26 @@ function blank_btnClick() {
     // parent.location.reload();
     // var parentId=parent.$("#id").val();
     if (alertFlag ==0){
-        typeFlag =2;
+        typeFlag = 1;
+        layerCloseFlag = 1;
+        blankFlag = 1;
         doMap();
+        blankClassNo = layer.index;
     }
     else if (alertFlag ==1){
         layer.confirm('该操作会清除之前编辑的内容，是否继续？', {icon: 3, title:'提示'}, function(index){
+            layerCloseFlag = 1;
             layer.close(layer.index);
-            if (layerIndex)
-                if (typeFlag == 0)
-                   layer.close(layerIndex);
-            // for(var i=0; i<1000; i++){
-            //     var title = $($(".layui-layer-title")[i]).text();
-            //     if(title == mapTitle){
-            //         $($(".layui-layer")[i]).css("display", "none");
-            //     }
-            // }
+            if (layerIndex){
+                if (typeFlag == 0){
+                    for(var i=1; i<layerIndex+1; i++){
+                        $("#layui-layer"+ i).css("display", "none");
+                    }
+                    // layer.close(layerIndex);
+                }
+            }
             map.removeAllLayers();
             map.addLayer(baseMap);
-            $(".layui-layer").css("display", "block");
             //清空之前交互制图中添加的图层节点
             var treeObj = $.fn.zTree.getZTreeObj("doMapTree");
             if (treeObj){
@@ -1694,8 +1706,14 @@ function blank_btnClick() {
             }
 
             //$("#doMap").click();
+            
             doMap();
+            if (blankFlag == 0)
+                blankClassNo = layer.index;
+            blankFlag = 1;
+            $("#layui-layer"+ (blankClassNo)).css("display", "block");
             typeFlag = 1;
+            $(".layui-layer-title").text('交互制图');
             // layerIndex = layer.index;
             // $(".layui-layer").css("display", "block");
         });
@@ -1718,7 +1736,10 @@ $("#templateMap").click(function () {
     * @return:
     */
     //
-    layerIndex = layer.index;
+    if (layerCloseFlag == 1)
+        layerIndex = layer.index;
+    layerCloseFlag = 0;
+    console.log(layerIndex);
     for(var i=0; i<$(".layui-layer-title").length; i++){
         var title = $($(".layui-layer-title")[i]).text();
         if(title == "制图模板选择"){
