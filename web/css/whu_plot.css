@@ -103,7 +103,7 @@
     left: -400px;
     top: 150px;
     max-width:373px;
-    max-height:calc(100% - 100px);
+    max-height:calc(100% - 150px);
     overflow: auto;
     z-index: 2;
     background-color: #fff;
@@ -366,4 +366,11 @@
 	float: right;
     right: 0px;
     margin: 15px;
+}
+
+
+/*所有点图标的样式控制*/
+.layui-colla-item{
+    max-height: 300px;
+    overflow: auto;
 }
