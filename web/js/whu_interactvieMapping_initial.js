@@ -129,18 +129,30 @@ $(document).ready(function() {
 });
 //框选定位
 $("#RecNav").click(function () {
-    require(["esri/toolbars/draw"],function (Draw) {
+
+    require(["esri/toolbars/draw","esri/graphic","esri/symbols/SimpleFillSymbol"],function (Draw,Graphic,SimpleFillSymbol) {
+        studyAreaLayer.clear();
         tb= new Draw(map);
         tb.on("draw-end", function(evt){
+
             map.setExtent(evt.geometry.getExtent());
+            var symbol_Rec = new SimpleFillSymbol();
+            symbol_Rec.color.a=0.01;
+            var graphic = new Graphic(evt.geometry,symbol_Rec);
+            studyAreaLayer.add(graphic);
             tb.deactivate();
+            map.enableMapNavigation();
             map.showZoomSlider();
         });
         map.disableMapNavigation();
         tb.activate(Draw.EXTENT);    //激活相应的图形
     })
 });
+//取消定位选择框
+$("#cancelSelect").click(function () {
+    studyAreaLayer.clear();
 
+})
 //行政区定位
 $("#adminNav").click(function () {
     if(ARIndex==0){
@@ -1653,7 +1665,7 @@ function blank_btnClick() {
     // parent.location.reload();
     // var parentId=parent.$("#id").val();
     if (alertFlag ==0){
-        typeFlag = 1;
+        typeFlag =2;
         doMap();
     }
     else if (alertFlag ==1){
