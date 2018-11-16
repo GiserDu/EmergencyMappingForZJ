@@ -22,6 +22,7 @@ public class GetAdministrativeRegion extends HttpServlet {
         String type=request.getParameter("type");
         String regionName="";
         String regionCode="";
+        System.out.println("11111");
         MysqlAccessBean mysql = null;
         ResultSet resultSet = null;
         String proCode="";

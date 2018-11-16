@@ -611,7 +611,7 @@ function doMap() {
                                      *@return {void}
                                     */
                                     var layerInMap = map.getLayer(layerID);
-                                    var layerLabel = layerInMap.name;
+                                    var layerLabel = treeNode.name;
                                     var layerType;
                                     switch (layerInMap.geometryType)  {
                                         case "esriGeometryPoint":
@@ -1499,7 +1499,7 @@ function addModelLayUI(mapName) {
                                      *@return {void}
                                     */
                                     var layerInMap = map.getLayer(layerID);
-                                    var layerLabel = layerInMap.name;
+                                    var layerLabel = treeNode.name;
                                     var layerType;
                                     switch (layerInMap.geometryType)  {
                                         case "esriGeometryPoint":
@@ -1654,7 +1654,7 @@ function blank_btnClick() {
     // var parentId=parent.$("#id").val();
     if (alertFlag ==0){
         typeFlag = 1;
-        $("#doMap").click();
+        doMap();
     }
     else if (alertFlag ==1){
         layer.confirm('该操作会清除之前编辑的内容，是否继续？', {icon: 3, title:'提示'}, function(index){
@@ -2005,11 +2005,14 @@ function layerOncheck(treeId, treeNode) {
                         }
                     }
                     else if (treeNode.buttonLayerChecked == "checked") {
+                        var renderer = null;
                         if (lastThematic) {
                             if (map && (map.getLayer(lastThematic.id))) {
+                                renderer = (map.getLayer(lastThematic.id)).renderer;
                                 map.removeLayer(map.getLayer(lastThematic.id));
                             }
                         }
+                        treeNode.featureRenderer = renderer;
                         beforeThematicLayerAdd("doMapTree_Template", treeNode);
                     }
                 }
@@ -2380,6 +2383,12 @@ function addThematicLayer(treeNode) {
             }
         });
         featureLayer.applyEdits(features, null, null);
+        if(treeNode.featureRenderer){
+            var renderer = treeNode.featureRenderer;
+            renderer.label = treeNode.name;
+            featureLayer.setRenderer(renderer);
+            featureLayer.refresh();
+        }
     });
     map.addLayers([featureLayer]);
 }
