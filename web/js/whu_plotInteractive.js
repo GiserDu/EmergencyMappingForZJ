@@ -604,21 +604,34 @@ var infoSave = function () {
 
 //改变标绘点的图标
 var changeIcon = function () {
+    // openPanelContent(['map-marking-panel', 'point-style-edit']);
+    // var obj = document.getElementById('point-style-edit');
+    // for (var i = 0; i < obj.children[0].children.length; i++) {
+    //     obj.children[0].children[i].onclick = function () {
+    //         var img = this.children[0];
+    //         document.getElementById('pointIcon').src = img.src;
+    //         markStyle.point.icon = img.src;
+    //         if (drawType == 'edit') {
+    //             openPanelContent(['map-marking-panel', 'map-marking-info', 'map-marking-panel-tip', 'map-mark-edit'])
+    //         } else {
+    //             addDrawInteraction('Point');
+    //             openPanelContent(['map-marking-panel', 'map-marking-info', 'map-marking-panel-tip'])
+    //         }
+    //     }
+    // }
     openPanelContent(['map-marking-panel', 'point-style-edit']);
-    var obj = document.getElementById('point-style-edit');
-    for (var i = 0; i < obj.children[0].children.length; i++) {
-        obj.children[0].children[i].onclick = function () {
-            var img = this.children[0];
-            document.getElementById('pointIcon').src = img.src;
-            markStyle.point.icon = img.src;
-            if (drawType == 'edit') {
-                openPanelContent(['map-marking-panel', 'map-marking-info', 'map-marking-panel-tip', 'map-mark-edit'])
-            } else {
-                addDrawInteraction('Point');
-                openPanelContent(['map-marking-panel', 'map-marking-info', 'map-marking-panel-tip'])
-            }
+    var obj = document.getElementsByClassName('emergencyPlotIcon');
+    $(obj).click(function(e){
+        var thisDom = e.target;
+        document.getElementById('pointIcon').src = thisDom.src;
+        markStyle.point.icon = thisDom.src;
+        if (drawType == 'edit') {
+            openPanelContent(['map-marking-panel', 'map-marking-info', 'map-marking-panel-tip', 'map-mark-edit'])
+        } else {
+            addDrawInteraction('Point');
+            openPanelContent(['map-marking-panel', 'map-marking-info', 'map-marking-panel-tip'])
         }
-    }
+    });
 };
 
 //关闭标绘信息面板
