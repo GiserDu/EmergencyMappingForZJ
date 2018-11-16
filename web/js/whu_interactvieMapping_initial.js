@@ -709,6 +709,9 @@ $("#doMap").click(function () {
             skin: "layui-layer-lan",
             type: 1,
             shade: 0,
+            resize: true,
+            maxmin:true,
+            closeBtn:0,
             content:$('#doMapTree'),
             yes: function(index, layero) {//确定后执行回调
             }});
