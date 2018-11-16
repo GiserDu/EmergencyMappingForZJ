@@ -99,11 +99,19 @@ $(document).ready(function() {
 });
 //框选定位
 $("#RecNav").click(function () {
-    require(["esri/toolbars/draw"],function (Draw) {
+
+    require(["esri/toolbars/draw","esri/graphic","esri/symbols/SimpleFillSymbol"],function (Draw,Graphic,SimpleFillSymbol) {
+        studyAreaLayer.clear();
         tb= new Draw(map);
         tb.on("draw-end", function(evt){
+
             map.setExtent(evt.geometry.getExtent());
+            var symbol_Rec = new SimpleFillSymbol();
+            symbol_Rec.color.a=0.01;
+            var graphic = new Graphic(evt.geometry,symbol_Rec);
+            studyAreaLayer.add(graphic);
             tb.deactivate();
+            map.enableMapNavigation();
             map.showZoomSlider();
         });
         map.disableMapNavigation();
@@ -130,6 +138,13 @@ $("#adminNav").click(function () {
             }
         });
     });
+});
+
+
+//取消定位选择框
+$("#cancelSelect").click(function () {
+    studyAreaLayer.clear();
+
 });
 
 //制图
