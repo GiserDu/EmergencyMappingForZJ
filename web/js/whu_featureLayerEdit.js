@@ -167,63 +167,63 @@ var creatFeatureLayerEditPanel = function(){
 
         '<div class="point-style-edit" id="pointFeatureLayer-style-edit">',
         '<div class="layui-collapse" lay-accordion="">\n' +
-        '    <div class="layui-colla-item">\n' +
+        '    <div class="layui-colla-item featureEditIcon">\n' +
         '        <h2 class="layui-colla-title">默认样式</h2>\n' +
-        '        <div class="layui-colla-content layui-show" id="default-symbol">\n' +
+        '        <div class="layui-colla-content layui-show">\n' +
         '            <ul></ul>\n' +
         '        </div>\n' +
         '    </div>\n' +
-        '    <div class="layui-colla-item">\n' +
+        '    <div class="layui-colla-item featureEditIcon">\n' +
         '        <h2 class="layui-colla-title">避难场所</h2>\n' +
-        '        <div class="layui-colla-content " id="shelter-symbol">\n' +
+        '        <div class="layui-colla-content ">\n' +
         '            <ul></ul>\n' +
         '        </div>\n' +
         '    </div>\n' +
-        '    <div class="layui-colla-item">\n' +
+        '    <div class="layui-colla-item featureEditIcon">\n' +
         '        <h2 class="layui-colla-title">防护目标</h2>\n' +
-        '        <div class="layui-colla-content" id="defense-object-symbol">\n' +
+        '        <div class="layui-colla-content">\n' +
         '            <ul></ul>\n' +
         '        </div>\n' +
         '    </div>\n' +
-        '    <div class="layui-colla-item">\n' +
+        '    <div class="layui-colla-item featureEditIcon">\n' +
         '        <h2 class="layui-colla-title">交通工具</h2>\n' +
-        '        <div class="layui-colla-content" id="vehicle-symbol">\n' +
+        '        <div class="layui-colla-content">\n' +
         '            <ul></ul>\n' +
         '        </div>\n' +
         '    </div>\n' +
-        '    <div class="layui-colla-item">\n' +
+        '    <div class="layui-colla-item featureEditIcon">\n' +
         '        <h2 class="layui-colla-title">救援队伍</h2>\n' +
-        '        <div class="layui-colla-content" id="rescue-team-symbol">\n' +
+        '        <div class="layui-colla-content">\n' +
         '            <ul></ul>\n' +
         '        </div>\n' +
         '    </div>\n' +
-        '    <div class="layui-colla-item">\n' +
+        '    <div class="layui-colla-item featureEditIcon">\n' +
         '        <h2 class="layui-colla-title">事件类型</h2>\n' +
-        '        <div class="layui-colla-content" id="incident-type-symbol">\n' +
+        '        <div class="layui-colla-content">\n' +
         '            <ul></ul>\n' +
         '        </div>\n' +
         '    </div>\n' +
-        '    <div class="layui-colla-item">\n' +
+        '    <div class="layui-colla-item featureEditIcon">\n' +
         '        <h2 class="layui-colla-title">危险源</h2>\n' +
-        '        <div class="layui-colla-content" id="hazard-source-symbol">\n' +
+        '        <div class="layui-colla-content" >\n' +
         '            <ul></ul>\n' +
         '        </div>\n' +
         '    </div>\n' +
-        '    <div class="layui-colla-item">\n' +
+        '    <div class="layui-colla-item featureEditIcon">\n' +
         '        <h2 class="layui-colla-title">物资储备库</h2>\n' +
-        '        <div class="layui-colla-content" id="Reserve-store-symbol">\n' +
+        '        <div class="layui-colla-content">\n' +
         '            <ul></ul>\n' +
         '        </div>\n' +
         '    </div>\n' +
-        '    <div class="layui-colla-item">\n' +
+        '    <div class="layui-colla-item featureEditIcon">\n' +
         '        <h2 class="layui-colla-title">医疗单位</h2>\n' +
-        '        <div class="layui-colla-content" id="medical-symbol">\n' +
+        '        <div class="layui-colla-content">\n' +
         '            <ul></ul>\n' +
         '        </div>\n' +
         '    </div>\n' +
-        '    <div class="layui-colla-item">\n' +
+        '    <div class="layui-colla-item featureEditIcon">\n' +
         '        <h2 class="layui-colla-title">应急通信资源</h2>\n' +
-        '        <div class="layui-colla-content" id="communication-resources-symbol">\n' +
+        '        <div class="layui-colla-content">\n' +
         '            <ul></ul>\n' +
         '        </div>\n' +
         '    </div>\n' +
@@ -373,7 +373,7 @@ var crearFeatureIconList=function () {
         ["default-0_3","default-1_3","default-2_3","default-3_3","default-4_3","default-5_3","default-6_3","交通通信中心-0_3","交通通信中心-1_3","交通通信中心-2_3","交通通信中心-3_3","交通通信中心-4_3","交通通信中心-5_3","交通通信中心-6_3","党政专用通信保障机构-0_3","党政专用通信保障机构-1_3","党政专用通信保障机构-2_3","党政专用通信保障机构-3_3","党政专用通信保障机构-4_3","党政专用通信保障机构-5_3","党政专用通信保障机构-6_3","其它通信保障机构-0_3","其它通信保障机构-1_3","其它通信保障机构-2_3","其它通信保障机构-3_3","其它通信保障机构-4_3","其它通信保障机构-5_3","其它通信保障机构-6_3","基础电信运营企业地市分公司-0_3","基础电信运营企业地市分公司-1_3","基础电信运营企业地市分公司-2_3","基础电信运营企业地市分公司-3_3","基础电信运营企业地市分公司-4_3","基础电信运营企业地市分公司-5_3","基础电信运营企业地市分公司-6_3","基础电信运营企业省公司-0_3","基础电信运营企业省公司-1_3","基础电信运营企业省公司-2_3","基础电信运营企业省公司-3_3","基础电信运营企业省公司-4_3","基础电信运营企业省公司-5_3","基础电信运营企业省公司-6_3","基础电信运营企业集团公司-0_3","基础电信运营企业集团公司-1_3","基础电信运营企业集团公司-2_3","基础电信运营企业集团公司-3_3","基础电信运营企业集团公司-4_3","基础电信运营企业集团公司-5_3","基础电信运营企业集团公司-6_3","电信运营企业-0_3","电信运营企业-1_3","电信运营企业-2_3","电信运营企业-3_3","电信运营企业-4_3","电信运营企业-5_3","电信运营企业-6_3","移动运营企业-0_3","移动运营企业-1_3","移动运营企业-2_3","移动运营企业-3_3","移动运营企业-4_3","移动运营企业-5_3","移动运营企业-6_3","联通运营企业-0_3","联通运营企业-1_3","联通运营企业-2_3","联通运营企业-3_3","联通运营企业-4_3","联通运营企业-5_3","联通运营企业-6_3","通信保障机构-0_3","通信保障机构-1_3","通信保障机构-2_3","通信保障机构-3_3","通信保障机构-4_3","通信保障机构-5_3","通信保障机构-6_3","铁通运营企业-0_3","铁通运营企业-1_3","铁通运营企业-2_3","铁通运营企业-3_3","铁通运营企业-4_3","铁通运营企业-5_3","铁通运营企业-6_3"]
     ];
 
-    var  collaItem=document.getElementsByClassName('layui-colla-item');
+    var  collaItem=document.getElementsByClassName('featureEditIcon');
 
     for (var i=0;i<collaItem.length;i++){
         //获取到ul节点添加li
