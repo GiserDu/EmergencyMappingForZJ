@@ -26,7 +26,7 @@ var selectedNode; //当前选择的要素节点
 var nodeTheme;
 var nodePath; //存储节点的路径
 var getThisTheme;
-var getThisPath;//当前要素节点的所有父节点（包括自己）
+var getThisPath = [];//当前要素节点的所有父节点（包括自己）
 var textEditFlag = 0; //标识对服务地址要素图层编辑时的一种特殊情况
 var layerNodes =[
     {id:1, pId:0, name:"地理底图", open:true, "nocheck":true,children:[
@@ -37,10 +37,15 @@ var layerNodes =[
     {id:2, pId:0, name:"专题服务图层",isParent:true, open:false,children:[], "nocheck":true},
 
     {id:3, pId:0, name:"要素图层", isParent:true,open:false,children:[], "nocheck":true},
+    {id:4, pId:0, name:"统计图层", isParent:true,open:false,children:[], "nocheck":true}
 
 ];
 var addressChanged ;//记录要素编辑时，要素地址有无发生变化
 var buttonChanged;//记录要素编辑时，有没有点击button改变要素
+var alertFlag = 0;
+var mapTitle;
+var layerIndex;
+var typeFlag;
 var thematicData={};
 var iMLegend;//iM means interactiveMapping
 var iMLegendCreated = false;//图例是否创建？
@@ -83,7 +88,10 @@ $(document).ready(function() {
                 zoom: 5
             });
             baseMap = new WebTiledLayer(
-                'http://qk.casm.ac.cn:9090/geowinmap/ds?serviceproviderid=map.cachedtms&serviceid=gettile&tilename=map&y=${row}&x=${col}&z=${level}',{id:"baseMap"}
+                //'http://qk.casm.ac.cn:9090/geowinmap/ds?serviceproviderid=map.cachedtms&serviceid=gettile&tilename=map&y=${row}&x=${col}&z=${level}',{id:"baseMap"}
+                'https://${subDomain}.tile.thunderforest.com/cycle/${level}/${col}/${row}.png',{"copyright": 'Maps © <a href="http://www.thunderforest.com">Thunderforest</a>, Data © <a href="http://www.openstreetmap.org/copyright">OpenStreetMap contributors</a>',
+                    "id": "OpenCycleMap",
+                    "subDomains": ["a", "b", "c"]}
             );
             map.addLayer(baseMap);
             studyAreaLayer=new GraphicsLayer('',{id:"studyAreaLayer",name:"studyAreaLayer"});
@@ -94,6 +102,28 @@ $(document).ready(function() {
             });
         });
       }
+    layui.use('layer', function () {
+        var layer1 = layui.layer;
+        layer1.open({
+            title: '制图模板选择',
+            skin: "layui-layer-lan",
+            type: 2,
+            shade: 0,
+            resize: false,
+            area: ["600px","500px"],
+            // btn: ['按钮1','按钮2','按钮3'],
+            content: 'indexMini.html',
+            success: function (layero, index) {
+                $("#layui-layer-iframe1").css("height",'456px');
+            },
+            yes: function(index, layero) {//确定后执行回调
+
+            },
+            cancel: function(index, layero){
+                blank_btnClick();
+            }
+        });
+    });
 
 
 });
@@ -118,6 +148,7 @@ $("#RecNav").click(function () {
         tb.activate(Draw.EXTENT);    //激活相应的图形
     })
 });
+
 //行政区定位
 $("#adminNav").click(function () {
     if(ARIndex==0){
@@ -133,6 +164,9 @@ $("#adminNav").click(function () {
             type: 1,
             shade: 0,
             content: $('#administrativeRegion'),
+            success: function () {
+
+            },
             yes: function(index, layero) {//确定后执行回调
 
             }
@@ -149,14 +183,21 @@ $("#cancelSelect").click(function () {
 
 //制图
 $("#doMap").click(function () {
+//空模板制图
+//TODO:增加统计图层配置，图层排序
+function doMap() {
     doMapping(layerNodes)
     //制图树实现函数
     function doMapping(layerNodes_InFunc) {
+        //树的设置选项，大部分是回调函数
         var setting = {
             check: {
                 enable: true
             },
             data: {
+                keep:{
+                    parent: true
+                },
                 simpleData: {
                     enable: true
                 }
@@ -171,19 +212,22 @@ $("#doMap").click(function () {
                 removeHoverDom: removeHoverDom
             },
             callback: {
-                beforeCheck: layerOncheck,
-                beforeRemove: beforeRemove,
-                beforeRename: beforeRename
+                beforeCheck: layerOncheck,//勾选前回调，用于加载图层
+                beforeRemove: beforeRemove,//移除前回调
+                beforeRename: beforeRename//修改名字之前回调
             }
         };
         function addHoverDom(treeId, treeNode) {
             var aObj = $("#" + treeNode.tId + "_a");
-            //首先判断是否是父节点
+
+            //首先判断是否是父节点，非父亲节点不能增加
             if(treeNode.isParent){
-                //如果是底图，没有增加按钮
+
+                //如果是底图，没有增加按钮，直接return
                 if(treeNode.id==1){
                     return;
                 }
+
                 if ($("#doMapAdd_"+treeNode.id).length>0) return;
                 var editStr = "<span id='doMapAdd_"+treeNode.id+"' class='button doMapAdd'  onfocus='this.blur();'></span>";
                 aObj.append(editStr);
@@ -217,7 +261,12 @@ $("#doMap").click(function () {
 
                                         var serviceUrl = $("#newSLAds").val();
                                         var serviceUrlstr=serviceUrl.substring(0,serviceUrl.lastIndexOf("/"));
-                                        var layer = new ArcGISDynamicMapServiceLayer(serviceUrlstr,{id:$("#newSLName").val()+"_"+$("#newSLAds").val()});
+                                        try{
+                                            var layer = new ArcGISDynamicMapServiceLayer(serviceUrlstr,{id:$("#newSLName").val()+"_"+$("#newSLAds").val()});
+                                        }catch (e) {
+                                            alert("服务地址有误！")
+                                            return false;
+                                        }
                                         var showindex=serviceUrl.substring(serviceUrl.lastIndexOf("/")+1,serviceUrl.length);
                                         layer.setVisibleLayers([showindex]);
 
@@ -328,13 +377,26 @@ $("#doMap").click(function () {
                             });
                         });
                     }
-                    //alert("添加" + treeNode.name);
-                    //var treeObj = $.fn.zTree.getZTreeObj("doMapTree");
-                    //var newNode = {name:"newNode1"};
-                    // treeObj.addNodes(treeNode, {id:(100 + newCount), pId:treeNode.id, name:"new node" + (newCount++)});
+                    if(treeNode.id==4){
+                        layui.use('layer', function(){
+                            var layer = layui.layer;
+                            layer.open({
+                                title: '添加统计图层',
+                                skin: "layui-layer-lan",
+                                type: 0,
+                                shade: 0,
+                                content:$('#test'),
+                                yes:function(index, layero){
+                                    //do something
+                                    layer.close(index); //如果设定了yes回调，需进行手工关闭
+                                }
+                            });
+                        });
+                    }
                 });
-
             }
+
+            //如果不是父亲节点
             else{
                 var editStr = "<span id='doMapEdit_"+treeNode.id+"' class='button doMapEdit'  onfocus='this.blur();'></span>"+
                     "<span id='doMapRemove_"+treeNode.id+"' class='button doMapRemove'  onfocus='this.blur();'></span>";
@@ -343,14 +405,13 @@ $("#doMap").click(function () {
                     editStr = "<span id='doMapEdit_"+treeNode.id+"' class='button doMapEdit'  onfocus='this.blur();'></span>";
                 }
                 if ($("#doMapEdit_"+treeNode.id).length>0) return;
-
                 aObj.append(editStr);
-
 
                 var btn = $("#doMapEdit_"+treeNode.id);
                 if (btn) btn.bind("click", function(){
                     //编辑，根据父节点不同，功能不同
-                    if(treeNode.getParentNode().id==1){//如果是专题服务
+                    //编辑底图，只能编辑底图地址，不能编辑名字
+                    if(treeNode.getParentNode().id==1){//如果是底图服务
                         layui.use('layer', function (layui_index) {
                             var layer = layui.layer;
                             layer.open({
@@ -384,6 +445,7 @@ $("#doMap").click(function () {
                         });
 
                     }
+                    //编辑专题服务图层
                     if(treeNode.getParentNode().id==2){//如果是专题服务
                         layui.use('layer', function (layui_index) {
                             var layer = layui.layer;
@@ -422,9 +484,8 @@ $("#doMap").click(function () {
                         });
 
                     }
-                    //@838899414.qq.com
+                    //编辑要素服务图层
                     if(treeNode.getParentNode().id==3){//如果是要素服务
-                        //alert("编辑要素数据");
                         addressChanged = false;
                         buttonChanged = false;
                         var layer = layui.layer;
@@ -590,7 +651,8 @@ $("#doMap").click(function () {
                 if(treeNode.getParentNode().id!=1){
                     var btn1 = $("#doMapRemove_"+treeNode.id);
                     if (btn1) btn1.bind("click", function(){
-                        //编辑，根据父节点不同，功能不同
+                        //删除，根据父节点不同，功能不同
+                        //删除专题服务图层
                         if(treeNode.getParentNode().id==2){//如果是专题服务
                             alert("删除专题数据");
                             var index=0;
@@ -613,8 +675,8 @@ $("#doMap").click(function () {
                             });
 
                         }
-                        if(treeNode.getParentNode().id==3){//如果是专题服务
-                            // alert("删除要素数据");
+                       //删除要素服务图层
+                        if(treeNode.getParentNode().id==3){//如果是要素服务
                             var treeObj = $.fn.zTree.getZTreeObj("doMapTree");
                             treeObj.removeNode(treeNode,true);
                             treeNode.getParentNode().isParent=true;
@@ -634,16 +696,11 @@ $("#doMap").click(function () {
                             }
 
                         }
-                        //alert("删除" + treeNode.name);
-                        /* var zTree = $.fn.zTree.getZTreeObj("doMapTree");
-                         zTree.selectNode(treeNode);
-                         zTree.removeNode(treeNode,true);*/
                     });
                 }
-
             }
-
         };
+
         function removeHoverDom(treeId, treeNode) {
             if(treeNode.isParent){
                 $("#doMapAdd_" +treeNode.id).unbind().remove();
@@ -676,11 +733,11 @@ $("#doMap").click(function () {
             zTree.selectNode(treeNode);
             return confirm("确认删除 节点 -- " + treeNode.name + " 吗？");
         }
+
         if(doMapIndex==0){
             layerNodesObj=$.fn.zTree.init($("#doMapTree"), setting, layerNodes_InFunc);
             doMapIndex=1;
         }
-
     }
     layui.use('layer', function (layui_index) {
         var layer = layui.layer;
@@ -688,15 +745,19 @@ $("#doMap").click(function () {
             title: '交互制图',
             skin: "layui-layer-lan",
             type: 1,
+            maxmin:true,
+            closeBtn:0,
             shade: 0,
+            resize: true,
+            maxmin:true,
+            closeBtn:0,
             content:$('#doMapTree'),
             yes: function(index, layero) {//确定后执行回调
             }});
     });
-})
+}
 
-
-//专题目录
+//打开专题目录
 function openTreeWindow() {
     $.ajaxSetup({async:false});
     $.getJSON("http://qk.casm.ac.cn:9090/ythjzweb/tucengbygl/getleveljson.it?pid=858",function(data) {
@@ -757,7 +818,7 @@ function openTreeWindow() {
     });
 }
 
-//构造子节点
+//构造目录树子节点
 function buildChildren(treeId, treeNode) {
     $.getJSON("http://qk.casm.ac.cn:9090/ythjzweb/tucengbygl/getleveljson.it?pid=" + treeNode["pid"], function (data2) {
         // console.log(treeNode);
@@ -782,6 +843,10 @@ function buildChildren(treeId, treeNode) {
 function openSelectedTree(thisNodePath){
     $.ajaxSetup({async:false});
     console.log(featureLayerTree);
+    if (thisNodePath == undefined){
+        alert('模板要素数据不能另选数据，若要另外添加数据请添加图层！');
+        return;
+    }
     if (textEditFlag == 1){
         openTreeWindow();
         textEditFlag = 0;
@@ -880,6 +945,40 @@ function openSelectedTree(thisNodePath){
         });
     });
 }
+
+//为每个制图模板添加配置面板的弹出框
+//TODO:增加统计图层配置，图层排序
+//选择其他模板的提示
+function sweetAlert1(mapName) {
+    if (alertFlag ==0){
+        typeFlag = 0;
+        addModelLayUI(mapName);
+    }
+
+    else if (alertFlag ==1){
+        layer.confirm('该操作会清除之前编辑的内容，是否继续？', {icon: 3, title:'提示'}, function(index){
+           layer.close(layer.index);
+            if (layerIndex)
+                if (typeFlag == 1)
+                 layer.close(layerIndex);
+            map.removeAllLayers();
+            map.addLayer(baseMap);
+            // for(var i=0; i<$(".layui-layer").length; i++){
+            //     var title = $($(".layui-layer-title")[i]).text();
+            //     if(title == "交互制图"){
+            //        $($(".layui-layer")[i]).css("display", "none");
+            //     }
+            // }
+            addModelLayUI(mapName);
+            // layerIndex = layer.index;
+            typeFlag = 0;
+            mapTitle = mapName;
+            $(".layui-layer-title").text(mapName);
+        });
+
+    }
+}
+
 //为每个制图模板添加弹出框
 function addModelLayUI(mapName) {
     //根据本地存储获取模板
@@ -950,6 +1049,7 @@ function addModelLayUI(mapName) {
     //修改底图节点_暂时不用
 
     var layerNodes_Model=[
+        // {id:0, pId:0, name:mapName, open:true, "nocheck":true},
         {id:1, pId:0, name:"地理底图", open:true, "nocheck":true,children:[
                 {id:101, name:"矢量图",url:"http://qk.casm.ac.cn:9090/geowinmap/ds?serviceproviderid=map.cachedtms&serviceid=gettile&tilename=map&y=${row}&x=${col}&z=${level}",checked:true},
                 {id:102, name:"影像图",url:"http://qk.casm.ac.cn:9090/geowinmap/ds?serviceproviderid=map.cachedtms&serviceid=gettile&tilename=sate&y=${row}&x=${col}&z=${level}"}
@@ -958,7 +1058,7 @@ function addModelLayUI(mapName) {
         {id:2, pId:0, name:"专题服务图层",isParent:true, open:false,children:[], "nocheck":true},
 
         {id:3, pId:0, name:"要素图层", isParent:true,open:false,children:[], "nocheck":true},
-        {id:4, pId:0, name:"统计图层", isParent:true,open:false,children:[], "nocheck":true},
+        // {id:4, pId:0, name:"统计图层", isParent:true,open:false,children:[], "nocheck":true},
 
     ];
 
@@ -966,7 +1066,7 @@ function addModelLayUI(mapName) {
     layerNodes_Model[1].children=serviceLayer_Model.modules;
     //增加要素图层
     layerNodes_Model[2].children=featureLayer_Model.modules;
-    layerNodes_Model[3].children=statisticLayer_Model.modules;
+    // layerNodes_Model[3].children=statisticLayer_Model.modules;
 
     //添加模板数据标识属性 templateData 或 urlFeatureData
     for (var i=0,l=layerNodes_Model[2].children.length;i<l;i++){
@@ -1038,10 +1138,14 @@ function addModelLayUI(mapName) {
                                         "esri/InfoTemplate", "esri/dijit/PopupTemplate"
                                     ], function (ArcGISDynamicMapServiceLayer, InfoTemplate, PopupTemplate) {
                                         var infoTemplate = new InfoTemplate("${NAME}", "${*}");
-
                                         var serviceUrl = $("#newSLAds").val();
                                         var serviceUrlstr=serviceUrl.substring(0,serviceUrl.lastIndexOf("/"));
-                                        var layer = new ArcGISDynamicMapServiceLayer(serviceUrlstr,{id:$("#newSLName").val()+"_"+$("#newSLAds").val()});
+                                        try{
+                                            var layer = new ArcGISDynamicMapServiceLayer(serviceUrlstr,{id:$("#newSLName").val()+"_"+$("#newSLAds").val()});
+                                        }catch (e) {
+                                            alert("服务地址有误！")
+                                            return false;
+                                        }
                                         var showindex=serviceUrl.substring(serviceUrl.lastIndexOf("/")+1,serviceUrl.length);
                                         layer.setVisibleLayers([showindex]);
 
@@ -1261,6 +1365,8 @@ function addModelLayUI(mapName) {
                         var changeSource1; //比较编辑前后数据来源方式是否发生变化
                         var changeSource2;
                         //对服务地址图层编辑时的一种特殊情况
+                        console.log(treeNode);
+                        console.log(getThisTheme);
                         if (treeNode.textLayerChecked == "checked" && getThisTheme == undefined){
                             getThisTheme = "选择要素";
                             textEditFlag = 1;
@@ -1319,17 +1425,19 @@ function addModelLayUI(mapName) {
                                     console.log(treeNode);
 
                                     var nodeIndex = treeNode.getIndex();
-                                    layerNodes_InFunc[2].children[nodeIndex].lastUrl =treeNode.url;
-                                    treeNode.lastUrl=treeNode.url;
-                                    treeNode.name=$("#editFLName").val();
-                                    treeNode.url=$("#editFLAds").val();
-                                    //记录数据源的开源方式
-                                    layerNodes_InFunc[2].children[nodeIndex].textLayerChecked = textLayerChecked;
-                                    layerNodes_InFunc[2].children[nodeIndex].buttonLayerChecked  = buttonLayerChecked ;
-                                    layerNodes_InFunc[2].children[nodeIndex].textLayerDisabled = textLayerDisabled;
-                                    layerNodes_InFunc[2].children[nodeIndex].buttonLayerDisabled = buttonLayerDisabled;
-                                    layerNodes_InFunc[2].children[nodeIndex].name = $("#editFLName").val();
-                                    layerNodes_InFunc[2].children[nodeIndex].url =$("#editFLAds").val();
+                                    if (layerNodes_InFunc[2].children[nodeIndex]) {
+                                        layerNodes_InFunc[2].children[nodeIndex].lastUrl = treeNode.url;
+                                        treeNode.lastUrl = treeNode.url;
+                                        //记录数据源的开源方式
+                                        layerNodes_InFunc[2].children[nodeIndex].textLayerChecked = textLayerChecked;
+                                        layerNodes_InFunc[2].children[nodeIndex].buttonLayerChecked = buttonLayerChecked;
+                                        layerNodes_InFunc[2].children[nodeIndex].textLayerDisabled = textLayerDisabled;
+                                        layerNodes_InFunc[2].children[nodeIndex].buttonLayerDisabled = buttonLayerDisabled;
+                                        layerNodes_InFunc[2].children[nodeIndex].name = $("#editFLName").val();
+                                        layerNodes_InFunc[2].children[nodeIndex].url = $("#editFLAds").val();
+                                    }
+                                    treeNode.name = $("#editFLName").val();
+                                    treeNode.url = $("#editFLAds").val();
                                     if (textLayerChecked == "checked" && buttonLayerChecked == "unchecked"){
                                         if($("#newFLName").val()==""||$("#newFLAds").val()=="") {
                                             alert("属性不能为空1！");
@@ -1352,10 +1460,15 @@ function addModelLayUI(mapName) {
                                     changeSource2 = (treeNode.textLayerChecked == "checked")?"text":"button";
                                     //如果数据来源方式发生了改变，则先移除原有图层(改变了数据源，先移除旧图层，再添加新图层)
                                     if (changeSource2 != changeSource1){
-                                        if (changeSource1 == "text")
-                                            map.removeLayer(map.getLayer(treeNode.lastUrl));
-                                        else
-                                            map.removeLayer(map.getLayer(treeNode.thematicData.id));
+                                        if (changeSource1 == "text"){
+                                            if (map.getLayer(treeNode.lastUrl))
+                                                map.removeLayer(map.getLayer(treeNode.lastUrl));
+                                        }
+                                        else{
+                                                if (treeNode.thematicData)
+                                                    map.removeLayer(map.getLayer(treeNode.thematicData.id));
+                                            }
+
                                     }
                                     //如果在勾选状态下被编辑，点击确定后直接在地图上更新图层
                                     if ( treeNode.checked == true){
@@ -1523,6 +1636,7 @@ function addModelLayUI(mapName) {
 
     layui.use('layer', function () {
         var tTreeLayer = layui.layer;
+        console.log(mapName);
         tTreeLayer.open({
             title: mapName,
             skin: "layui-layer-lan",
@@ -1530,6 +1644,7 @@ function addModelLayUI(mapName) {
             shade: 0,
             resize: true,
             maxmin:true,
+            closeBtn:0,
             area: ['250', '350px'],
             //btn: ['确定'],
             content: $('#doMapTree_Template'),
@@ -1550,10 +1665,56 @@ function addModelLayUI(mapName) {
 
 //空白模板制图按钮
 function blank_btnClick() {
-    $("#doMap").click();
+    // var index=parent.layer.getFrameIndex(window.name);
+    // parent.layer.close(index);
+    // parent.location.reload();
+    // var parentId=parent.$("#id").val();
+    if (alertFlag ==0){
+        typeFlag = 1;
+        $("#doMap").click();
+    }
+    else if (alertFlag ==1){
+        layer.confirm('该操作会清除之前编辑的内容，是否继续？', {icon: 3, title:'提示'}, function(index){
+            layer.close(layer.index);
+            if (layerIndex)
+                if (typeFlag == 0)
+                   layer.close(layerIndex);
+            // for(var i=0; i<1000; i++){
+            //     var title = $($(".layui-layer-title")[i]).text();
+            //     if(title == mapTitle){
+            //         $($(".layui-layer")[i]).css("display", "none");
+            //     }
+            // }
+            map.removeAllLayers();
+            map.addLayer(baseMap);
+            $(".layui-layer").css("display", "block");
+            //清空之前交互制图中添加的图层节点
+            var treeObj = $.fn.zTree.getZTreeObj("doMapTree");
+            if (treeObj){
+                var nodes = treeObj.getNodesByParam("isParent", true, null);
+                console.log(nodes);
+                treeObj.removeChildNodes(nodes[1]);
+                treeObj.removeChildNodes(nodes[2]);
+                treeObj.refresh();
+            }
+
+            //$("#doMap").click();
+            doMap();
+            typeFlag = 1;
+            // layerIndex = layer.index;
+            // $(".layui-layer").css("display", "block");
+        });
+    }
+
+//选择制图模板,弹出制图模板图层
 }
 
-
+function chooseTemplate(mapName) {
+    var index=parent.layer.getFrameIndex(window.name);
+    parent.layer.close(index);
+    // parent.layer.closeAll();
+    parent.sweetAlert1(mapName);
+}
 //选择制图模板
 $("#templateMap").click(function () {
     /**
@@ -1561,10 +1722,19 @@ $("#templateMap").click(function () {
     * @Param:
     * @return:
     */
+    //
+    layerIndex = layer.index;
+    for(var i=0; i<$(".layui-layer-title").length; i++){
+        var title = $($(".layui-layer-title")[i]).text();
+        if(title == "制图模板选择"){
+            return;
+        }
+    }
+    alertFlag = 1;
     layui.use('layer', function () {
         var layer1 = layui.layer;
         layer1.open({
-            title: '制图模板',
+            title: '制图模板选择',
             skin: "layui-layer-lan",
             type: 2,
             shade: 0,
@@ -1672,12 +1842,12 @@ function layerOncheck(treeId, treeNode) {
                         "esri/InfoTemplate", "esri/dijit/PopupTemplate", "esri/renderers/SimpleRenderer"
                     ], function (FeatureLayer, InfoTemplate, PopupTemplate, SimpleRenderer) {
 
-                        var infoTemplate = new InfoTemplate("${NAME}", "${*}");
+                        //var infoTemplate = new InfoTemplate("${NAME}", "${*}");
                         var layer = new FeatureLayer(dataUrl_template, {
                             mode: FeatureLayer.MODE_SNAPSHOT,
                             outFields: ["*"],
                             opacity: "1",
-                            infoTemplate: infoTemplate,
+                            //infoTemplate: infoTemplate,
                             id: dataUrl_template
                         });
                         layer.on("load", function () {
@@ -1775,12 +1945,12 @@ function layerOncheck(treeId, treeNode) {
                                 "esri/InfoTemplate", "esri/dijit/PopupTemplate", "esri/renderers/SimpleRenderer"
                             ], function (FeatureLayer, InfoTemplate, PopupTemplate, SimpleRenderer) {
 
-                                var infoTemplate = new InfoTemplate("${NAME}", "${*}");
+                                //var infoTemplate = new InfoTemplate("${NAME}", "${*}");
                                 var layer = new FeatureLayer(dataUrl, {
                                     mode: FeatureLayer.MODE_SNAPSHOT,
                                     outFields: ["*"],
                                     opacity: "1",
-                                    infoTemplate: infoTemplate,
+                                    //infoTemplate: infoTemplate,
                                     id: dataUrl
                                 });
                                 layer.on("load", function () {
@@ -1987,12 +2157,12 @@ function layerOncheck_Template(treeId, treeNode) {
                             "esri/InfoTemplate", "esri/dijit/PopupTemplate", "esri/renderers/SimpleRenderer"
                         ], function (FeatureLayer, InfoTemplate, PopupTemplate, SimpleRenderer) {
 
-                            var infoTemplate = new InfoTemplate("${NAME}", "${*}");
+                            //var infoTemplate = new InfoTemplate("${NAME}", "${*}");
                             var layer = new FeatureLayer(dataUrl, {
                                 mode: FeatureLayer.MODE_SNAPSHOT,
                                 outFields: ["*"],
                                 opacity: "1",
-                                infoTemplate: infoTemplate,
+                                //infoTemplate: infoTemplate,
                                 id: dataUrl
                             });
                             layer.on("load", function(){
@@ -2090,7 +2260,6 @@ function layerOncheck_Template(treeId, treeNode) {
     }
 }
 
-
 //专题数据check之前回调，用于请求数据
 function beforeThematicLayerAdd(treeId, treeNode) {
     if(treeNode.checked){//如果已经加载，则移除图层
@@ -2154,6 +2323,7 @@ function addThematicLayer(treeNode) {
         "objectIdField": "ObjectID",
         "drawingInfo": {
             "renderer": {
+                "label":treeNode.name,
                 "type": "simple",
                 "symbol": {
                     "type": "esriPMS",
@@ -2180,9 +2350,27 @@ function addThematicLayer(treeNode) {
     };
     require([
         "esri/layers/FeatureLayer",
-    ], function(FeatureLayer) {
+        "esri/dijit/PopupTemplate"
+    ], function(FeatureLayer,PopupTemplate) {
+        map.on("mouse-drag", function(evt) {
+            if (map.infoWindow.isShowing) {
+                var loc = map.infoWindow.getSelectedFeature().geometry;
+                if (!map.extent.contains(loc)) {
+                    map.infoWindow.hide();
+                }
+            }
+        });
+        var popupTemplate = new PopupTemplate({
+            title: "{title}",
+            description: "{description}"
+        });
         featureLayer = new FeatureLayer(featureCollection, {
-            id: treeNode["thematicData"].id
+            id: treeNode["thematicData"].id,
+            infoTemplate: popupTemplate,
+            showLabels: true
+        });
+        featureLayer.on("click", function(evt) {
+            map.infoWindow.setFeatures([evt.graphic]);
         });
     });
     map.on("layers-add-result", function(results) {
@@ -2193,6 +2381,18 @@ function addThematicLayer(treeNode) {
             for(i in treeNode["thematicData"].data){
                 var geometry = new Point(treeNode["thematicData"].data[i].point);
                 var graphic = new Graphic(geometry);
+                var attr = {};
+                attr["title"] = treeNode["thematicData"].data[i].name ? treeNode["thematicData"].data[i].name : "无名称";
+                var info=""
+                for ( j in treeNode["thematicData"].data[i]){
+                    info +=j+":"+treeNode["thematicData"].data[i][j]+'<br>'
+                    //alert(info)
+                }
+                attr["description"] = info;
+
+                //attr["description"] = JSON.stringify(poi);
+                graphic.setAttributes(attr);
+                graphic.attributes.Name=treeNode["thematicData"].data[i].name;
                 features.push(graphic);
             }
         });
@@ -2201,6 +2401,7 @@ function addThematicLayer(treeNode) {
     map.addLayers([featureLayer]);
 }
 
+//要素图层数据源发生改变的监听
 function changeSource(node){
     if(node.value=='text'){
         $("#newFLAds").attr("disabled",false);
@@ -2217,6 +2418,7 @@ function changeSource(node){
     }
 }
 
+//监听要素服务地址栏有没有发生变化
 function addressChange(){
     addressChanged = true;
 }

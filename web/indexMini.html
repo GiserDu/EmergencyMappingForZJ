@@ -12,8 +12,10 @@
     <link href="css/reset.css" rel="stylesheet" />
     <link href="css/whu_index.css" rel="stylesheet" />
 	<link rel="stylesheet" href="./css/bootstrap.min.css">
+    <link href="js/layui/css/layui.css" rel="stylesheet">
 	<script src="./js/jquery-3.2.1.js"></script>
 	<script src="./js/bootstrap.min.js"></script>
+	  <script src="js/layui/layui.js"></script>
 	<style>
 		body{
 			height: 450px;
@@ -38,7 +40,7 @@
 
 		}
 		#main {
-			background-color: #ddd;
+			background: #ddd;
 
 		}
 		#main nav{
@@ -161,7 +163,7 @@
 	</div>
 	  <button type="button" class="btn btn-primary blank_btn" onclick="blank_btnClick()">新建空白模板</button>
   </div>
- 
+
   <script src="js/whu_index.js"></script>
   <script>
   $(document).ready(function(){
@@ -191,9 +193,10 @@
 
             if(self!=top){
                 //关闭子窗口并弹出新的layUI
+//				parent.layer.close(parent.layer.index);
                 var index=parent.layer.getFrameIndex(window.name);
                 parent.layer.close(index);
-                parent.addModelLayUI(this.innerText)
+                parent.sweetAlert1(this.innerText);
             }
             else{
                 window.location.href='Mapping.html';

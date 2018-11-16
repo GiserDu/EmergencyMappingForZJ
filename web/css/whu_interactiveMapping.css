@@ -43,8 +43,9 @@ h1,h2,h3,h4,h5,h6{
 
 }
 #backHome{
-
-margin-left: 35px;
+    margin-left: 5px;
+    height: 35px;
+    padding-top: 10px;
 }
 #doMapTree{
     min-height: 300px;
