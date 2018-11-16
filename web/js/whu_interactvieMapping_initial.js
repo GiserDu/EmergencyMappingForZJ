@@ -148,7 +148,11 @@ $("#RecNav").click(function () {
         tb.activate(Draw.EXTENT);    //激活相应的图形
     })
 });
+//取消定位选择框
+$("#cancelSelect").click(function () {
+    studyAreaLayer.clear();
 
+})
 //行政区定位
 $("#adminNav").click(function () {
     if(ARIndex==0){
@@ -1670,7 +1674,7 @@ function blank_btnClick() {
     // parent.location.reload();
     // var parentId=parent.$("#id").val();
     if (alertFlag ==0){
-        typeFlag = 1;
+        typeFlag =2;
         doMap();
     }
     else if (alertFlag ==1){
