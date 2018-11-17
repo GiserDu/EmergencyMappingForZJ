@@ -256,7 +256,8 @@ function doMap() {
                                     require([
                                         "esri/layers/ArcGISDynamicMapServiceLayer",
                                         "esri/InfoTemplate", "esri/dijit/PopupTemplate"
-                                    ], function (ArcGISDynamicMapServiceLayer, InfoTemplate, PopupTemplate) {
+                                    ], function (ArcGISDynamicMapServiceLayer, InfoTemplate, PopupTemplate)
+                                    {
                                         var infoTemplate = new InfoTemplate("${NAME}", "${*}");
 
                                         var serviceUrl = $("#newSLAds").val();
@@ -1589,9 +1590,9 @@ function addModelLayUI(mapName) {
                     if (btn1) btn1.bind("click", function(){
                         //编辑，根据父节点不同，功能不同
                         if(treeNode.getParentNode().id==2){//如果是专题服务
-                            alert("删除专题数据");
+                            //alert("删除专题数据11");
                             var index=0;
-                            ServerLayerArr.filter(function (p) {
+                            /*ServerLayerArr.filter(function (p) {
                                 var id=treeNode.name+"_"+(treeNode.url);
                                 if(p.id==id){
                                     ServerLayerArr.splice(index,1);
@@ -1607,7 +1608,11 @@ function addModelLayUI(mapName) {
                                     treeObj.refresh();
                                 }
                                 index=index+1;
-                            });
+                            });*/
+                            var treeObj = $.fn.zTree.getZTreeObj("doMapTree_Template");
+                            treeObj.removeNode(treeNode,true);
+                            treeNode.getParentNode().isParent=true;
+                            treeObj.refresh();
 
                         }
                         if(treeNode.getParentNode().id==3){//如果是专题服务
@@ -1667,7 +1672,21 @@ function addModelLayUI(mapName) {
             //showLog("[ "+getTime()+" beforeRemove ]&nbsp;&nbsp;&nbsp;&nbsp; " + treeNode.name);
             var zTree = $.fn.zTree.getZTreeObj("doMapTree_Template");
             zTree.selectNode(treeNode);
-            return confirm("确认删除 节点 -- " + treeNode.name + " 吗？");
+             if(confirm("确认删除 节点 -- " + treeNode.name + " 吗？")){
+                 if(treeNode.pId==2){
+                     var thisLayer = map.getLayer( treeNode.url);
+                     map.removeLayer(thisLayer);
+                     return true;
+                 }
+                 else if(treeNode.pId==3){
+                     var thisLayer = map.getLayer( treeNode.data);
+                     map.removeLayer(thisLayer);
+                     return true;
+                 }
+
+             }else {
+                 return false;
+             }
         }
         // if(doMapIndex_Template==0){
         layerNodesObj_Template=$.fn.zTree.init($("#doMapTree_Template"), setting, layerNodes_InFunc);
@@ -1861,22 +1880,45 @@ function layerOncheck(treeId, treeNode) {
                    }
         if(treeNode.getParentNode().id==2){
             //专题服务
-            if(treeNode.checked){
-                ServerLayerArr.filter(function (p) {
+            if(!treeNode.checked){
+             /*   ServerLayerArr.filter(function (p) {
                     var id=treeNode.name+"_"+(treeNode.url);
                     if(p.id==id){
                         map.removeLayer(map.getLayer(id));
                     }
-                });
+                });*/
+                require([
+                    "esri/layers/ArcGISDynamicMapServiceLayer",
+                    "esri/InfoTemplate", "esri/dijit/PopupTemplate"
+                ], function (ArcGISDynamicMapServiceLayer, InfoTemplate, PopupTemplate)
+                {
 
+
+                    var serviceUrl = treeNode.url;
+                    var serviceUrlstr=serviceUrl.substring(0,serviceUrl.lastIndexOf("/"));
+                    try{
+                        var layer = new ArcGISDynamicMapServiceLayer(serviceUrlstr,{id:serviceUrl});
+                    }catch (e) {
+                        alert("服务地址有误！")
+                        return false;
+                    }
+                    var showindex=serviceUrl.substring(serviceUrl.lastIndexOf("/")+1,serviceUrl.length);
+                    layer.setVisibleLayers([showindex]);
+                    map.addLayer(layer);
+                    /*//var layer = new ArcGISDynamicMapServiceLayer(serviceUrl,{id: $("#newSLName").val()+"_"+$("#newSLAds").val()});
+                    ServerLayerArr.push(layer);*/
+
+                });
             }
             else {
-                ServerLayerArr.filter(function (p) {
+                /*ServerLayerArr.filter(function (p) {
                     var id=treeNode.name+"_"+(treeNode.url);
                     if(p.id==id){
                         map.addLayer(p);
                     }
-                });
+                });*/
+                var thisLayer = map.getLayer( treeNode.url);
+                map.removeLayer(thisLayer);
             }
         }
         if (treeNode.getParentNode().id===3) {//如果操作的是要素图层
