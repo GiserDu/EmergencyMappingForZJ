@@ -66,7 +66,7 @@ public class GetAdministrativeRegion extends HttpServlet {
         String type=request.getParameter("type");
         String regionName="";
         String regionCode="";
-        System.out.println("*91311111");
+        System.out.println("*11311111");
         MysqlAccessBean mysql = null;
         ResultSet resultSet = null;
         String proCode="";
@@ -83,13 +83,13 @@ public class GetAdministrativeRegion extends HttpServlet {
                     for(int i =0;i<selectedRegion.length;i++){
 
                         if(code.equals("proCode")){
-                            sql = "SELECT gson from regionboundarys_copy WHERE  citycode = '' and coutcode ='' and name='";
+                            sql = "SELECT gson from regionboundarys_compress WHERE  citycode = '' and coutcode ='' and name='";
                         }
                         else if(code.equals("cityCode")){
-                            sql = "SELECT gson from regionboundarys_copy WHERE  coutcode ='' and citycode !='' and name='";
+                            sql = "SELECT gson from regionboundarys_compress WHERE  coutcode ='' and citycode !='' and name='";
                         }
                         else if(code.equals("coutCode")){
-                            sql = "SELECT gson from regionboundarys_copy WHERE coutcode !='' and name='";
+                            sql = "SELECT gson from regionboundarys_compress WHERE coutcode !='' and name='";
                         }
                         sql=sql+selectedRegion[i]+"'";
 
@@ -121,7 +121,7 @@ public class GetAdministrativeRegion extends HttpServlet {
             case "pro":
                 try {
                     mysql = new MysqlAccessBean();
-                    String sql = "SELECT name,procode from regionboundary1 WHERE citycode = '' and coutcode =''";
+                    String sql = "SELECT name,procode from regionboundarys_compress WHERE citycode = '' and coutcode =''";
                     resultSet = mysql.query(sql);
                     while (resultSet.next()) {
                         regionName=regionName+resultSet.getString(1)+",";
@@ -137,7 +137,7 @@ public class GetAdministrativeRegion extends HttpServlet {
                 proCode=request.getParameter("proCode");
                 try {
                     mysql = new MysqlAccessBean();
-                    String sql = "SELECT name,citycode from regionboundary1 WHERE procode = '"+proCode+"' and coutcode ='' and citycode !=''";
+                    String sql = "SELECT name,citycode from regionboundarys_compress WHERE procode = '"+proCode+"' and coutcode ='' and citycode !=''";
                     resultSet = mysql.query(sql);
                     while (resultSet.next()) {
                         regionName=regionName+resultSet.getString(1)+",";
@@ -154,7 +154,7 @@ public class GetAdministrativeRegion extends HttpServlet {
                 cityCode=request.getParameter("cityCode");
                 try {
                     mysql = new MysqlAccessBean();
-                    String sql = "SELECT name,coutcode from regionboundary1 WHERE procode = '"+proCode+"' and cityCode ='"+cityCode+"' and coutcode !=''";
+                    String sql = "SELECT name,coutcode from regionboundarys_compress WHERE procode = '"+proCode+"' and cityCode ='"+cityCode+"' and coutcode !=''";
                     resultSet = mysql.query(sql);
                     while (resultSet.next()) {
                         regionName=regionName+resultSet.getString(1)+",";
