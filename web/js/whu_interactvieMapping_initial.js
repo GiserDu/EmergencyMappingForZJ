@@ -34,13 +34,14 @@ var layerNodes =[
             {id:102, name:"影像图",url:"http://qk.casm.ac.cn:9090/geowinmap/ds?serviceproviderid=map.cachedtms&serviceid=gettile&tilename=sate&y=${row}&x=${col}&z=${level}"}
         ]},
 
-    {id:2, pId:0, name:"专题服务图层",isParent:true, open:false,children:[], "nocheck":true},
+    {id:2, pId:0, name:"专题服务图层",isParent:true, open:true,children:[], "nocheck":true},
 
-    {id:3, pId:0, name:"要素图层", isParent:true,open:false,children:[], "nocheck":true},
-    {id:4, pId:0, name:"统计图层", isParent:true,open:false,children:[], "nocheck":true}
+    {id:3, pId:0, name:"要素图层", isParent:true,open:true,children:[], "nocheck":true},
+    {id:4, pId:0, name:"统计图层", isParent:true,open:true,children:[], "nocheck":true}
 
 ];
 var addressChanged ;//记录要素编辑时，要素地址有无发生变化
+var nameChanged ;
 var buttonChanged;//记录要素编辑时，有没有点击button改变要素
 var alertFlag = 0; //是否第一次弹出模板选择layer
 var layerIndex; 
@@ -508,7 +509,7 @@ function doMap() {
                                 shade: 0,
                                 btn: ['确认','修改要素样式'],
                                 //content:"<div><p>要素名称：<input id='editFLName' value='"+treeNode.name+"'></input></p><br/><p>要素地址：<input id='editFLAds' value='"+treeNode.url+"'></input></p></div>",
-                                content: "<div id='zeo'><p style='padding-left: 12px'>要素名称：<input id='editFLName' value='"+treeNode.name+"'></input></p><br/><p class='FLS_p'><input id='textLayer' name='layer' value='text' type='radio' onclick='changeSource(this)' "+treeNode.textLayerChecked+"/>服务地址：<input id='editFLAds' "+treeNode.textLayerDisabled+" value='"+treeNode.url+"'onchange='addressChange()'></input></p>"
+                                content: "<div id='zeo'><p style='padding-left: 12px'>要素名称：<input id='editFLName' value='"+treeNode.name+"'onchange='nameChange()'></input></p><br/><p class='FLS_p'><input id='textLayer' name='layer' value='text' type='radio' onclick='changeSource(this)' "+treeNode.textLayerChecked+"/>服务地址：<input id='editFLAds' "+treeNode.textLayerDisabled+" value='"+treeNode.url+"'onchange='addressChange()'></input></p>"
                                 + "<br/><p class='tree_p'><input id='buttonLayer' name='layer' value='button' type='radio' onclick='changeSource(this)' "+treeNode.buttonLayerChecked+"/>专题服务：<button id='selectButton' onclick='openSelectedTree(getThisPath)' class='layui-btn layui-btn-sm' "+treeNode.buttonLayerDisabled+">选择要素</button></p></div>",
                                 success: function (layero, index) {
                                     document.getElementById("selectButton").innerHTML = getThisTheme;
@@ -590,6 +591,19 @@ function doMap() {
                                     var treeObj = $.fn.zTree.getZTreeObj("doMapTree");
                                     treeObj.updateNode(treeNode);
                                     //layerNodes=treeObj.transformToArray(treeObj.getNodes());
+                                    //如果名字发生了变化则更新图例
+                                    var layer_ = map.getLayer(treeNode.url)
+                                    if(nameChanged&&layer_){
+                                        var render_ = layer_.renderer;
+                                        render_.label = treeNode.name;
+                                        layer_.setRenderer(render_);
+                                        layer_.refresh();
+                                        if(!(typeof iMLegend ==="undefined"||null===iMLegend)){
+                                            iMLegend.refresh();
+                                        }
+
+                                    }
+                                    nameChanged = false;
                                     layer.close(index);
                                 },
                                 btn2: function(index, layero)
@@ -1060,9 +1074,9 @@ function addModelLayUI(mapName) {
                 {id:102, name:"影像图",url:"http://qk.casm.ac.cn:9090/geowinmap/ds?serviceproviderid=map.cachedtms&serviceid=gettile&tilename=sate&y=${row}&x=${col}&z=${level}"}
             ]},
 
-        {id:2, pId:0, name:"专题服务图层",isParent:true, open:false,children:[], "nocheck":true},
+        {id:2, pId:0, name:"专题服务图层",isParent:true, open:true,children:[], "nocheck":true},
 
-        {id:3, pId:0, name:"要素图层", isParent:true,open:false,children:[], "nocheck":true},
+        {id:3, pId:0, name:"要素图层", isParent:true,open:true,children:[], "nocheck":true},
         // {id:4, pId:0, name:"统计图层", isParent:true,open:false,children:[], "nocheck":true},
 
     ];
@@ -1398,7 +1412,7 @@ function addModelLayUI(mapName) {
                                 btn: ['确认','修改要素样式'],
                                 //content:"<div><p>要素名称：<input id='editFLName' value='"+treeNode.name+"'></input></p><br/><p>要素地址：<input id='editFLAds' value='"+treeNode.url+"'></input></p></div>",
                                 content: "<div id='zeo'>" +
-                                    "<p style='padding-left: 12px'>要素名称：<input id='editFLName' value='"+treeNode.name+"'></input></p>" +
+                                    "<p style='padding-left: 12px'>要素名称：<input id='editFLName' value='"+treeNode.name+"'onchange='nameChange()'></input></p>" +
                                     "<br/><p class='FLS_p'><input id='textLayer' name='layer' value='text' type='radio' onclick='changeSource(this)' "+treeNode.textLayerChecked+"/>服务地址：<input id='editFLAds' "+treeNode.textLayerDisabled+" value='"+((treeNode.data)?treeNode.data:treeNode.url)+"'></input></p>"
                                     + "<br/><p class='tree_p'><input id='buttonLayer' name='layer' value='button' type='radio' onclick='changeSource(this)' "+treeNode.buttonLayerChecked+"/>专题服务：<button id='selectButton' onclick='openSelectedTree(getThisPath)' class='layui-btn layui-btn-sm' "+treeNode.buttonLayerDisabled+">选择要素</button></p></div>",
                                 success: function (layero, index) {
@@ -1484,6 +1498,19 @@ function addModelLayUI(mapName) {
                                     var treeObj = $.fn.zTree.getZTreeObj("doMapTree_Template");
                                     treeObj.updateNode(treeNode);
                                     //layerNodes=treeObj.transformToArray(treeObj.getNodes());
+                                    //如果名字发生了变化则更新图例
+                                    var layer_ = map.getLayer(treeNode.url)
+                                    if(nameChanged&&layer_){
+                                        var render_ = layer_.renderer;
+                                        render_.label = treeNode.name;
+                                        layer_.setRenderer(render_);
+                                        layer_.refresh();
+                                        if(!(typeof iMLegend ==="undefined"||null===iMLegend)){
+                                            iMLegend.refresh();
+                                        }
+
+                                    }
+                                    nameChanged = false;
                                     layer.close(index);
                                 },
                                 btn2: function(index, layero)
@@ -1831,7 +1858,7 @@ function layerOncheck(treeId, treeNode) {
             }
         }
         if (treeNode.getParentNode().id===3) {//如果操作的是要素图层
-            var dataUrl_template= treeNode.data;;
+            var dataUrl_template= treeNode.data;
             var lastDataUrl_template = treeNode.lastUrl;//
             var isChecked = !treeNode.checked;
             var dataUrl = treeNode.url;
@@ -1844,14 +1871,13 @@ function layerOncheck(treeId, treeNode) {
                     //如果是模板数据
                     //如果服务地址不为空
                     //先判断上次存储的url代表的图层是否加载，如果加载了，则删去
-
-                    if (map && (map.getLayer(dataUrl_template))) {
-                        map.removeLayer(map.getLayer(dataUrl_template));
-                    }
                     if (map && (map.getLayer(dataUrl_template))) {//如果已经加载，只是做了隐藏，显示就好了，下面的步骤跳过
                         var thisLayer = map.getLayer(dataUrl_template);
                         thisLayer.show();
                         return;
+                    }
+                    if (map && (map.getLayer(dataUrl_template))) {
+                        map.removeLayer(map.getLayer(dataUrl_template));
                     }
                     require([
                         "esri/layers/FeatureLayer",
@@ -1918,12 +1944,21 @@ function layerOncheck(treeId, treeNode) {
                             ], function (SimpleRenderer) {
                                 switch (layer.geometryType) {
                                     case "esriGeometryPoint":
+                                        if(treeNode.style){
+                                            simpleJson_point.symbol = treeNode.style.render;
+                                        }
                                         rend = new SimpleRenderer(simpleJson_point)
                                         break;
                                     case "esriGeometryPolyline":
+                                        if(treeNode.style){
+                                            simpleJson_line.symbol = treeNode.style.render;
+                                        }
                                         rend = new SimpleRenderer(simpleJson_line)
                                         break;
                                     case "esriGeometryPolygon":
+                                        if(treeNode.style){
+                                            simpleJson_polygon.symbol = treeNode.style.render;
+                                        }
                                         rend = new SimpleRenderer(simpleJson_polygon)
                                         break;
                                 }
@@ -1948,6 +1983,10 @@ function layerOncheck(treeId, treeNode) {
                         } else {
                             //如果服务地址不为空
                             //先判断上次存储的url代表的图层是否加载，如果加载了，则删去
+                            //如果两次URL并没有发生改变,则不做操作
+                            if (dataUrl===lastDataUrl) {
+                                return;
+                            }
                             if (map && (map.getLayer(lastDataUrl))) {
                                 map.removeLayer(map.getLayer(lastDataUrl));
                             }
@@ -2446,4 +2485,9 @@ function changeSource(node){
 //监听要素服务地址栏有没有发生变化
 function addressChange(){
     addressChanged = true;
+}
+
+//如果名字发生了变化，则设置为true。每次点击确认之后，从新设置为false
+function nameChange(treeNode) {
+    nameChanged = true;
 }
