@@ -983,7 +983,18 @@ function sweetAlert1(mapName) {
                     // layer.close(layerIndex);
                 }
             }
-            map.removeAllLayers();
+            //移除非标绘的图层
+            var otherLayerIDs = (map.graphicsLayerIds).slice();
+            for (var i=0; i<otherLayerIDs.length;i++){
+                if(otherLayerIDs[i]==='pointPlotLayer'||otherLayerIDs[i]==='linePlotLayer'||otherLayerIDs[i]==='polygonPlotLayer'){
+                    otherLayerIDs.splice(i,1)
+                }
+            }
+            for (var i=0; i<otherLayerIDs.length;i++){
+                var layerRemoved = map.getLayer(otherLayerIDs[i])
+                map.removeLayer(layerRemoved);
+            }
+
             map.addLayer(baseMap);
             addModelLayUI(mapName);
             if (templateFlag == 0)
@@ -1720,7 +1731,18 @@ function blank_btnClick() {
                     // layer.close(layerIndex);
                 }
             }
-            map.removeAllLayers();
+            //移除非标绘的图层
+            var otherLayerIDs = (map.graphicsLayerIds).slice();
+            for (var i=0; i<otherLayerIDs.length;i++){
+                if(otherLayerIDs[i]==='pointPlotLayer'||otherLayerIDs[i]==='linePlotLayer'||otherLayerIDs[i]==='polygonPlotLayer'){
+                    otherLayerIDs.splice(i,1)
+                }
+            }
+            for (var i=0; i<otherLayerIDs.length;i++){
+                var layerRemoved = map.getLayer(otherLayerIDs[i])
+                map.removeLayer(layerRemoved);
+            }
+
             map.addLayer(baseMap);
             //清空之前交互制图中添加的图层节点
             var treeObj = $.fn.zTree.getZTreeObj("doMapTree");
