@@ -129,8 +129,9 @@ function creatARpanel(mapScale,element){
         html=[
             '<p> 省份：<select id="provinceSelect" class="selectpicker provinceSelect"  data-live-search="true">'
         ];
+        html.push( '<option value="未选择">未选择</option>');
         for(var name in proname){
-            html.push( '<option value="'+procode[name]+'">'+proname[name]+'</option>')
+            html.push( '<option value="'+procode[name]+'">'+proname[name]+'</option>');
         }
         html.push( '</select></p>');
         html=html.join('');
@@ -165,6 +166,7 @@ function creatARpanel(mapScale,element){
         var html=[
             '<p> 城市：<select id="citySelect" class="selectpicker provinceSelect"  data-live-search="true">'
         ];
+        html.push( '<option value="未选择">未选择</option>');
         for(var name in cityname){
             html.push( '<option value="'+citycode[name]+'">'+cityname[name]+'</option>')
         }
@@ -199,6 +201,7 @@ function creatARpanel(mapScale,element){
         var html=[
             '<p> 区县：<select id="coutSelect" class="selectpicker provinceSelect"  data-live-search="true">'
         ];
+        html.push( '<option value="未选择">未选择</option>');
         for(var name in coutname){
             html.push( '<option value="'+coutcode[name]+'">'+coutname[name]+'</option>')
         }
@@ -234,7 +237,6 @@ function creatARpanel(mapScale,element){
         case "省":
             creatCityList(element);
             $('#provinceSelect').change(function () {
-                AROnChange(this,"cityCode");
                 $("#citySelect").empty();
                 var selectedProcode=$('#provinceSelect').val();
                 if (selectedProcode==""){
@@ -263,21 +265,27 @@ function creatARpanel(mapScale,element){
                 $('#citySelect').selectpicker('render');
                 $('#citySelect').selectpicker('refresh');
                 $('#citySelect').selectpicker();
+            });
+
+            $($($("#provinceSelect").parent()).find("li")).click(function () {
+            //$('#provinceSelect').change(function () {
+                AROnChange(this,"cityCode");
+
 
             });
-            $('#citySelect').change(function(){
+            $($($("#citySelect").parent()).find("li")).click(function () {
                 AROnChange(this,"cityCode");
             });
             break;
         case "区域":
             creatCounList(element);
             $('#provinceSelect').change(function () {
-                AROnChange(this,"proCode");
-                $("#citySelect").empty();
+
                 var selectedProcode=$('#provinceSelect').val();
-                if (selectedProcode==""){
+                if (selectedProcode==""||selectedProcode=="未选择"){
                     return;
                 }
+                $("#citySelect").empty();
                 var cityname="";
                 var citycode="";
                 $.ajax({
@@ -293,6 +301,7 @@ function creatARpanel(mapScale,element){
                     }
                 });
                 var html=[        ];
+                html.push( '<option value="未选择">未选择</option>');
                 for(var name in cityname){
                     html.push( '<option value="'+citycode[name]+'">'+cityname[name]+'</option>')
                 }
@@ -301,17 +310,23 @@ function creatARpanel(mapScale,element){
                 $('#citySelect').selectpicker('render');
                 $('#citySelect').selectpicker('refresh');
                 $('#citySelect').selectpicker();
-
+                $($($("#citySelect").parent()).find("li")).click(function () {
+                    //$('#citySelect').change(function () {
+                    AROnChange(this,"cityCode")
+                });
+            });
+            $($($("#provinceSelect").parent()).find("li")).click(function () {
+            //$('#provinceSelect').change(function () {
+                AROnChange(this,"proCode");
             });
             $('#citySelect').change(function () {
-                AROnChange(this,"cityCode");
                 $("#coutSelect").empty();
                 var selectedProcode=$('#provinceSelect').val();
-                if (selectedProcode==""){
+                if (selectedProcode==""||selectedProcode=="未选择"){
                     return;
                 }
                 var selectedCitycode=$('#citySelect').val().trim();
-                if (selectedCitycode==""){
+                if (selectedCitycode==""||selectedCitycode=="未选择"){
                     return;
                 }
                 var coutname="";
@@ -331,8 +346,9 @@ function creatARpanel(mapScale,element){
                 });
                 //这个地方要根据选择的城市查询该省份所包含的线，然后将县放进一个迭代器，循环添加进变量html
                 var html=[
-                    '<select id="coutSelect" class="selectpicker provinceSelect" multiple data-live-search="true">'
+
                 ];
+                html.push( '<option value="未选择">未选择</option>');
                 for(var name in coutname){
                     html.push( '<option value="'+coutcode[name]+'">'+coutname[name]+'</option>')
                 }
@@ -342,11 +358,13 @@ function creatARpanel(mapScale,element){
                 $('#coutSelect').selectpicker('render');
                 $('#coutSelect').selectpicker('refresh');
                 $('#coutSelect').selectpicker();
+                $($($("#coutSelect").parent()).find("li")).click(function () {
+                    //$('#coutSelect').change(function(){
+                    AROnChange(this,"coutCode");
+                });
+            });
 
-            });
-            $('#coutSelect').change(function(){
-                AROnChange(this,"coutCode");
-            });
+
             break;
         default:
             alert("mapScale名称有误")
@@ -355,20 +373,25 @@ function creatARpanel(mapScale,element){
 
 //绑定定位事件
     function AROnChange(e,t){
+        var regionTXT=$(e).find("span").html();
         var regionCode=$(e).val();
         var selectedRegion=t;
+        if (regionTXT==""||regionTXT=="未选择"){
+            return;
+        }
         $.ajax({
             url:"./servlet/GetAdministrativeRegion",
             type:"post",
             async:false,
-            //dateType:"json",
-            data:{type:"boundary",selectedRegion:selectedRegion+"s-p-l"+regionCode},
+            dataType : "json",
+            data:{type:"boundary",selectedRegion:selectedRegion+"s-p-l"+regionTXT},
             success:function (data) {
-                data=eval("("+data+")");
+                //data=eval("("+data+")");
+                data=decodeRegion(data);
                 require(["esri/geometry/Polygon","esri/Color","esri/graphic","esri/layers/GraphicsLayer","esri/symbols/SimpleFillSymbol","esri/symbols/SimpleLineSymbol","esri/layers/FeatureLayer"],function (Polygon,Color,Graphic,GraphicsLayer,SimpleFillSymbol,SimpleLineSymbol,FeatureLayer) {
                     //制图区图层
                     studyAreaLayer.clear();
-                    var geometry=new Polygon({"rings":data[0],"spatialReference":{"wkid":4326}});
+                    var geometry=new Polygon({"rings":[data[0][0]],"spatialReference":{"wkid":4326}});
                     for(var i=1;i<data.length;i++){
                         geometry.addRing(data[i][0]);
                     }
@@ -385,5 +408,47 @@ function creatARpanel(mapScale,element){
         });}
 
 }
+//解码json
+function decodeRegion(gson) {
+    function decode_a_line(coordinate, encodeOffsets) {
+        var result = [];
 
+        var prevX = encodeOffsets[0]
+        var prevY = encodeOffsets[1]
+
+        var l = coordinate.length;
+        var i = 0;
+        while (i < l) {
+            var x = coordinate.charCodeAt(i) - 64
+            var y = coordinate.charCodeAt(i + 1) - 64
+            i += 2;
+
+            x = (x >> 1) ^ (-(x & 1));
+            y = (y >> 1) ^ (-(y & 1));
+
+            x += prevX;
+            y += prevY;
+
+            prevX = x;
+            prevY = y;
+
+            result.push([ x /  10000.0, y /  10000.0])
+        }
+        return result;
+    }
+    var type = gson["type"];
+    var polygons = gson["coordinates"];
+    var coords = [];
+    for (var i = 0; i < polygons.length; i++) {
+        var lines = polygons[i];
+        var cls = [];
+        for (var j = 0; j < lines.length; j++) {
+            var line = lines[j];
+            var cl = decode_a_line(line[0], line[1]);
+            cls.push(cl)
+        }
+        coords.push(cls);
+    }
+    return coords;
+}
 
