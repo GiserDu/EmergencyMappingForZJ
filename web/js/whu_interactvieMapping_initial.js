@@ -987,9 +987,18 @@ function sweetAlert1(mapName) {
             // for (var i=0; i<otherLayerIDs.length;i++){
             //     var layerRemoved = map.getLayer(otherLayerIDs[i])
             // }            //     map.removeLayer(layerRemoved);
-
+           //清除标绘图层graphics
+            polygonFeatureLayer.clear();
+            polylineFeatureLayer.clear();
+            pointFeatureLayer.clear();
+            //删除本地和缓存的标绘图形
+            deleteAllFeatureFromLocalstorage();
+            //移除所有图层
             map.removeAllLayers();
-
+            //将清将清空graphics的图层加上，因为后面还要标绘
+            map.addLayer(polygonFeatureLayer);
+            map.addLayer(polylineFeatureLayer);
+            map.addLayer(pointFeatureLayer);
             map.addLayer(baseMap);
             addModelLayUI(mapName);
             if (templateFlag == 0)
