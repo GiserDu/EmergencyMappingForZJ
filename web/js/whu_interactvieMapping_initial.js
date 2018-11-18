@@ -2007,6 +2007,14 @@ function layerOncheck(treeId, treeNode) {
                                 layer.setRenderer(rend);
                             });
                         });
+                        layer.on("update", function(evt) {
+                            if(evt.target.geometryType=="esriGeometryPolyline"||evt.target.renderer.symbol.url.indexOf(".")!=0){
+                                return;
+                            }
+                            var base64= getBase64Image( evt.target.renderer.symbol.url);
+                            evt.target.renderer.symbol.setUrl(base64);
+                            evt.target.refresh();
+                        });
                         map.addLayer(layer);
                     })
                 }
@@ -2113,6 +2121,14 @@ function layerOncheck(treeId, treeNode) {
                                         }
                                         layer.setRenderer(rend);
                                     });
+                                });
+                                layer.on("update", function(evt) {
+                                    if(evt.target.geometryType=="esriGeometryPolyline"||evt.target.renderer.symbol.url.indexOf(".")!=0){
+                                        return;
+                                    }
+                                    var base64= getBase64Image( evt.target.renderer.symbol.url);
+                                    evt.target.renderer.symbol.setUrl(base64);
+                                    evt.target.refresh();
                                 });
                                 map.addLayer(layer);
                             })
@@ -2472,6 +2488,14 @@ function addThematicLayer(treeNode) {
         featureLayer.on("click", function(evt) {
             map.infoWindow.setFeatures([evt.graphic]);
         });
+        featureLayer.on("update", function(evt) {
+            if(evt.target.geometryType=="esriGeometryPolyline"||evt.target.renderer.symbol.url.indexOf(".")!=0){
+              return;
+          }
+           var base64= getBase64Image( evt.target.renderer.symbol.url);
+            evt.target.renderer.symbol.setUrl(base64);
+            evt.target.refresh();
+        });
     });
     map.on("layers-add-result", function(results) {
         var features = [];
@@ -2532,4 +2556,17 @@ function addressChange(){
 //如果名字发生了变化，则设置为true。每次点击确认之后，从新设置为false
 function nameChange(treeNode) {
     nameChanged = true;
+}
+//图片转为base64
+function getBase64Image(imgurl) {
+    var img = new Image();
+    img.src = imgurl;
+    var canvas = document.createElement("canvas");
+    canvas.width = img.width;
+    canvas.height = img.height;
+    var ctx = canvas.getContext("2d");
+    ctx.drawImage(img, 0, 0, img.width, img.height);
+    var ext = img.src.substring(img.src.lastIndexOf(".")+1).toLowerCase();
+    var dataURL = canvas.toDataURL("image/"+ext);
+    return dataURL;
 }
