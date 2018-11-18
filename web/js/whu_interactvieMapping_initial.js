@@ -1967,18 +1967,11 @@ function layerOncheck(treeId, treeNode) {
                                 "label": treeNode.name,
                                 "description": "",
                                 "symbol": {
-                                    "type": "esriSMS",
-                                    "style": "esriSMSSquare",
-                                    "color": [76, 115, 0, 255],
-                                    "size": 8,
-                                    "angle": 0,
-                                    "xoffset": 0,
-                                    "yoffset": 0,
-                                    "outline":
-                                        {
-                                            "color": [152, 230, 0, 255],
-                                            "width": 1
-                                        }
+                                    "type": "esriPMS",
+                                    "url": "./assets/img/pointIcon/6.png",
+                                    "contentType": "image/png",
+                                    "width": 15,
+                                    "height": 15
                                 }
                             };
                             var rend;
@@ -2008,7 +2001,7 @@ function layerOncheck(treeId, treeNode) {
                             });
                         });
                         layer.on("update", function(evt) {
-                            if(evt.target.geometryType=="esriGeometryPolyline"){
+                            if(evt.target.geometryType!="esriGeometryPoint"){
 
                                 return;
                             }
@@ -2095,18 +2088,11 @@ function layerOncheck(treeId, treeNode) {
                                         "label": treeNode.name,
                                         "description": "",
                                         "symbol": {
-                                            "type": "esriSMS",
-                                            "style": "esriSMSSquare",
-                                            "color": [76, 115, 0, 255],
-                                            "size": 8,
-                                            "angle": 0,
-                                            "xoffset": 0,
-                                            "yoffset": 0,
-                                            "outline":
-                                                {
-                                                    "color": [152, 230, 0, 255],
-                                                    "width": 1
-                                                }
+                                            "type": "esriPMS",
+                                            "url": "./assets/img/pointIcon/6.png",
+                                            "contentType": "image/png",
+                                            "width": 15,
+                                            "height": 15
                                         }
                                     };
                                     var rend;
@@ -2127,7 +2113,7 @@ function layerOncheck(treeId, treeNode) {
                                     });
                                 });
                                 layer.on("update", function(evt) {
-                                    if(evt.target.geometryType=="esriGeometryPolyline"){
+                                    if(evt.target.geometryType!="esriGeometryPoint"){
 
                                         return;
                                     }
@@ -2351,6 +2337,18 @@ function layerOncheck_Template(treeId, treeNode) {
                                     layer.setRenderer(rend);
                                 });
                             });
+                            layer.on("update", function(evt) {
+                                if(evt.target.geometryType!="esriGeometryPoint"){
+
+                                    return;
+                                }
+                                if(evt.target.renderer.symbol.url.indexOf(".")!=0){
+                                    return;
+                                }
+                                var base64= getBase64Image( evt.target.renderer.symbol.url);
+                                evt.target.renderer.symbol.setUrl(base64);
+                                evt.target.refresh();
+                            });
                             map.addLayer(layer);
                         })
                     }
@@ -2497,7 +2495,7 @@ function addThematicLayer(treeNode) {
             map.infoWindow.setFeatures([evt.graphic]);
         });
         featureLayer.on("update", function(evt) {
-            if(evt.target.geometryType=="esriGeometryPolyline"){
+            if(evt.target.geometryType!="esriGeometryPoint"){
 
               return;
           }
