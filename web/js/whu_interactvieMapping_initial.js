@@ -222,7 +222,9 @@ function doMap() {
                 removeHoverDom: removeHoverDom
             },
             callback: {
-                beforeCheck: layerOncheck,//勾选前回调，用于加载图层
+                beforeCheck: function (treeId,treeNode) {
+                    layerOncheck("doMapTree",treeNode);
+                },//勾选前回调，用于加载图层
                 beforeRemove: beforeRemove,//移除前回调
                 beforeRename: beforeRename//修改名字之前回调
             }
@@ -1129,7 +1131,9 @@ function addModelLayUI(mapName) {
                 removeHoverDom: removeHoverDom
             },
             callback: {
-                beforeCheck: layerOncheck,
+                beforeCheck: function (treeId, treeNode) {
+                    layerOncheck("doMapTree_Template",treeNode);
+                },
                 beforeRemove: beforeRemove,
                 beforeRename: beforeRename
             }
@@ -1839,8 +1843,8 @@ function layerOncheck(treeId, treeNode) {
                     for (var  i = 0; i < mate.length; i++) {
                         if(mate[i].id==treeNode.id)
                             continue;
-                        var node = layerNodesObj.getNodeByTId(mate[i].tId);
-                        layerNodesObj.checkNode(node, false, true);
+                        var treeObj = $.fn.zTree.getZTreeObj(treeId);
+                        treeObj.checkNode(mate[i], false, true);
                     }
                     map.removeLayer(baseMap);
                     baseMap = new WebTiledLayer(
