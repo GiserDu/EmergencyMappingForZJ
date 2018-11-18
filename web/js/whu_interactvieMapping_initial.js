@@ -34,18 +34,23 @@ var layerNodes =[
             {id:102, name:"影像图",url:"http://qk.casm.ac.cn:9090/geowinmap/ds?serviceproviderid=map.cachedtms&serviceid=gettile&tilename=sate&y=${row}&x=${col}&z=${level}"}
         ]},
 
-    {id:2, pId:0, name:"专题服务图层",isParent:true, open:false,children:[], "nocheck":true},
+    {id:2, pId:0, name:"专题服务图层",isParent:true, open:true,children:[], "nocheck":true},
 
-    {id:3, pId:0, name:"要素图层", isParent:true,open:false,children:[], "nocheck":true},
-    {id:4, pId:0, name:"统计图层", isParent:true,open:false,children:[], "nocheck":true}
+    {id:3, pId:0, name:"要素图层", isParent:true,open:true,children:[], "nocheck":true},
+    {id:4, pId:0, name:"统计图层", isParent:true,open:true,children:[], "nocheck":true}
 
 ];
 var addressChanged ;//记录要素编辑时，要素地址有无发生变化
+var nameChanged ;
 var buttonChanged;//记录要素编辑时，有没有点击button改变要素
-var alertFlag = 0;
-var mapTitle;
+var alertFlag = 0; //是否第一次弹出模板选择layer
 var layerIndex;
-var typeFlag;
+var typeFlag; //记录当前打开的是模板还是空白制图
+var layerCloseFlag = 0; //是否选择了模板或新建了空白模板
+var templateFlag = 0; //是否打开过模板layer
+var blankFlag = 0; //是否打开过空白制图layer
+var templateClassNo; //模板layer的id
+var blankClassNo; //空白制图layer的id
 var thematicData={};
 var iMLegend;//iM means interactiveMapping
 var iMLegendCreated = false;//图例是否创建？
@@ -101,7 +106,7 @@ $(document).ready(function() {
                 var zoomLevel = map.getZoom();
             });
         });
-      }
+    }
     layui.use('layer', function () {
         var layer1 = layui.layer;
         layer1.open({
@@ -130,8 +135,8 @@ $(document).ready(function() {
 //框选定位
 $("#RecNav").click(function () {
 
-    require(["esri/toolbars/draw","esri/graphic","esri/symbols/SimpleFillSymbol"],function (Draw,Graphic,SimpleFillSymbol) {
-        studyAreaLayer.clear();
+    require(["esri/toolbars/draw","esri/graphic","esri/symbols/SimpleFillSymbol","esri/layers/GraphicsLayer"],function (Draw,Graphic,SimpleFillSymbol,GraphicsLayer) {
+
         tb= new Draw(map);
         tb.on("draw-end", function(evt){
 
@@ -139,7 +144,17 @@ $("#RecNav").click(function () {
             var symbol_Rec = new SimpleFillSymbol();
             symbol_Rec.color.a=0.01;
             var graphic = new Graphic(evt.geometry,symbol_Rec);
-            studyAreaLayer.add(graphic);
+            //判断框选图层是否被移除
+            if (!map.getLayer("studyAreaLayer")){
+                studyAreaLayer.clear();
+                map.addLayer(studyAreaLayer);
+                studyAreaLayer.add(graphic);
+            }
+            else {
+                studyAreaLayer.clear();
+                studyAreaLayer.add(graphic);
+            }
+
             tb.deactivate();
             map.enableMapNavigation();
             map.showZoomSlider();
@@ -178,15 +193,6 @@ $("#adminNav").click(function () {
     });
 });
 
-
-//取消定位选择框
-$("#cancelSelect").click(function () {
-    studyAreaLayer.clear();
-
-});
-
-//制图
-$("#doMap").click(function () {
 //空模板制图
 //TODO:增加统计图层配置，图层排序
 function doMap() {
@@ -260,7 +266,8 @@ function doMap() {
                                     require([
                                         "esri/layers/ArcGISDynamicMapServiceLayer",
                                         "esri/InfoTemplate", "esri/dijit/PopupTemplate"
-                                    ], function (ArcGISDynamicMapServiceLayer, InfoTemplate, PopupTemplate) {
+                                    ], function (ArcGISDynamicMapServiceLayer, InfoTemplate, PopupTemplate)
+                                    {
                                         var infoTemplate = new InfoTemplate("${NAME}", "${*}");
 
                                         var serviceUrl = $("#newSLAds").val();
@@ -465,21 +472,13 @@ function doMap() {
                                         alert("属性不能为空！");
                                         return;
                                     }
-                                    ServerLayerArr.filter(function (p) {
-                                        var id=treeNode.naume+"_"+(treeNode.url);
-                                        if(p.id==id){
-                                            p.url=$("#editSLAds").val();
-                                            p._url.path=$("#editSLAds").val();
-                                            //如果地图中已经有这个图层
-                                            if($.inArray(id,map.layerIds)!=-1){
-                                                // p.refresh();
-                                                map.getLayer(id).refresh();
-                                                //map.removeLayer(map.getLayer(id));
-                                            };
-                                        }
-                                    });
+                                    if(map&&(map.getLayer(treeNode.url))){
+                                        var thisLayer = map.getLayer(treeNode.url);
+                                        map.removeLayer(thisLayer);
+                                    }
                                     treeNode.name=$("#editSLName").val();
                                     treeNode.url=$("#editSLAds").val();
+                                    treeNode.checked=false;
                                     var treeObj = $.fn.zTree.getZTreeObj("doMapTree");
                                     treeObj.updateNode(treeNode);
 
@@ -513,7 +512,7 @@ function doMap() {
                                 shade: 0,
                                 btn: ['确认','修改要素样式'],
                                 //content:"<div><p>要素名称：<input id='editFLName' value='"+treeNode.name+"'></input></p><br/><p>要素地址：<input id='editFLAds' value='"+treeNode.url+"'></input></p></div>",
-                                content: "<div id='zeo'><p style='padding-left: 12px'>要素名称：<input id='editFLName' value='"+treeNode.name+"'></input></p><br/><p class='FLS_p'><input id='textLayer' name='layer' value='text' type='radio' onclick='changeSource(this)' "+treeNode.textLayerChecked+"/>服务地址：<input id='editFLAds' "+treeNode.textLayerDisabled+" value='"+treeNode.url+"'onchange='addressChange()'></input></p>"
+                                content: "<div id='zeo'><p style='padding-left: 12px'>要素名称：<input id='editFLName' value='"+treeNode.name+"'onchange='nameChange()'></input></p><br/><p class='FLS_p'><input id='textLayer' name='layer' value='text' type='radio' onclick='changeSource(this)' "+treeNode.textLayerChecked+"/>服务地址：<input id='editFLAds' "+treeNode.textLayerDisabled+" value='"+treeNode.url+"'onchange='addressChange()'></input></p>"
                                 + "<br/><p class='tree_p'><input id='buttonLayer' name='layer' value='button' type='radio' onclick='changeSource(this)' "+treeNode.buttonLayerChecked+"/>专题服务：<button id='selectButton' onclick='openSelectedTree(getThisPath)' class='layui-btn layui-btn-sm' "+treeNode.buttonLayerDisabled+">选择要素</button></p></div>",
                                 success: function (layero, index) {
                                     document.getElementById("selectButton").innerHTML = getThisTheme;
@@ -595,6 +594,19 @@ function doMap() {
                                     var treeObj = $.fn.zTree.getZTreeObj("doMapTree");
                                     treeObj.updateNode(treeNode);
                                     //layerNodes=treeObj.transformToArray(treeObj.getNodes());
+                                    //如果名字发生了变化则更新图例
+                                    var layer_ = map.getLayer(treeNode.url)
+                                    if(nameChanged&&layer_){
+                                        var render_ = layer_.renderer;
+                                        render_.label = treeNode.name;
+                                        layer_.setRenderer(render_);
+                                        layer_.refresh();
+                                        if(!(typeof iMLegend ==="undefined"||null===iMLegend)){
+                                            iMLegend.refresh();
+                                        }
+
+                                    }
+                                    nameChanged = false;
                                     layer.close(index);
                                 },
                                 btn2: function(index, layero)
@@ -609,17 +621,17 @@ function doMap() {
                                         return false;
                                     }
                                     //判断图层是否发生了任意改变
-                                   if((treeNode.theme&&$("#selectButton").html()!= treeNode.theme)||((changeSource1&&changeSource2)&&changeSource1!=changeSource2)||addressChanged){
-                                       alert("图层数据源发生了改变，请先点击确定加载图层！");
-                                       return false;
-                                   }
+                                    if((treeNode.theme&&$("#selectButton").html()!= treeNode.theme)||((changeSource1&&changeSource2)&&changeSource1!=changeSource2)||addressChanged){
+                                        alert("图层数据源发生了改变，请先点击确定加载图层！");
+                                        return false;
+                                    }
                                     var layerID;
                                     if(treeNode.textLayerChecked==="checked"){
                                         layerID = treeNode.url;
                                     }else if (treeNode.buttonLayerChecked==="checked"){
                                         layerID = treeNode.thematicData.id;
                                     }
-                                   //判断数据源是否加载到地图上，没有加载也不能编辑
+                                    //判断数据源是否加载到地图上，没有加载也不能编辑
                                     if(treeNode.textLayerChecked==="checked"){//没有选择也没有填地址
                                         if(!(map.getLayer(layerID))){
                                             alert("在当前地图中找不到文本框所代表的图层，请检查地址是否有误！");
@@ -657,29 +669,20 @@ function doMap() {
                     if (btn1) btn1.bind("click", function(){
                         //删除，根据父节点不同，功能不同
                         //删除专题服务图层
-                        if(treeNode.getParentNode().id==2){//如果是专题服务
-                            alert("删除专题数据");
-                            var index=0;
-                            ServerLayerArr.filter(function (p) {
-                                var id=treeNode.name+"_"+(treeNode.url);
-                                if(p.id==id){
-                                    ServerLayerArr.splice(index,1);
-                                    //如果地图中已经有这个图层
-                                    if($.inArray(id,map.layerIds)!=-1){
-                                        // p.refresh();
-                                        map.removeLayer(map.getLayer(id));
-                                        //map.removeLayer(map.getLayer(id));
-                                    };
-                                    var treeObj = $.fn.zTree.getZTreeObj("doMapTree");
-                                    treeObj.removeNode(treeNode,true);
-                                    treeNode.getParentNode().isParent=true;
-                                    treeObj.refresh();
-                                }
-                                index=index+1;
-                            });
-
+                        if(!confirm("确认删除 节点 -- " + treeNode.name + " 吗？")){
+                            return;
                         }
-                       //删除要素服务图层
+                        if(treeNode.getParentNode().id==2){//如果是专题服务
+                            var treeObj = $.fn.zTree.getZTreeObj("doMapTree");
+                            treeObj.removeNode(treeNode,true);
+                            treeNode.getParentNode().isParent=true;
+                            treeObj.refresh();
+                            if(map&&(map.getLayer(treeNode.url))){
+                                var thisLayer = map.getLayer(treeNode.url);
+                                map.removeLayer(thisLayer);
+                            }
+                        }
+                        //删除要素服务图层
                         if(treeNode.getParentNode().id==3){//如果是要素服务
                             var treeObj = $.fn.zTree.getZTreeObj("doMapTree");
                             treeObj.removeNode(treeNode,true);
@@ -733,9 +736,9 @@ function doMap() {
         function beforeRemove(treeId, treeNode) {
             //className = (className === "dark" ? "":"dark");
             //showLog("[ "+getTime()+" beforeRemove ]&nbsp;&nbsp;&nbsp;&nbsp; " + treeNode.name);
-            var zTree = $.fn.zTree.getZTreeObj("doMapTree");
+            /*var zTree = $.fn.zTree.getZTreeObj("doMapTree");
             zTree.selectNode(treeNode);
-            return confirm("确认删除 节点 -- " + treeNode.name + " 吗？");
+            return confirm("确认删除 节点 -- " + treeNode.name + " 吗？");*/
         }
 
         if(doMapIndex==0){
@@ -956,27 +959,45 @@ function openSelectedTree(thisNodePath){
 function sweetAlert1(mapName) {
     if (alertFlag ==0){
         typeFlag = 0;
+        layerCloseFlag = 1;
+        templateFlag = 1;
         addModelLayUI(mapName);
+        templateClassNo = layer.index;
     }
 
     else if (alertFlag ==1){
         layer.confirm('该操作会清除之前编辑的内容，是否继续？', {icon: 3, title:'提示'}, function(index){
-           layer.close(layer.index);
-            if (layerIndex)
-                if (typeFlag == 1)
-                 layer.close(layerIndex);
-            map.removeAllLayers();
-            map.addLayer(baseMap);
-            // for(var i=0; i<$(".layui-layer").length; i++){
-            //     var title = $($(".layui-layer-title")[i]).text();
-            //     if(title == "交互制图"){
-            //        $($(".layui-layer")[i]).css("display", "none");
+            layerCloseFlag = 1;
+            layer.close(layer.index);
+            if (layerIndex){
+                if (typeFlag == 1){
+                    for(var i=1; i<layerIndex+1; i++){
+                        $("#layui-layer"+ i).css("display", "none");
+                    }
+                    // layer.close(layerIndex);
+                }
+            }
+            //移除非标绘的图层
+            // var otherLayerIDs = (map.graphicsLayerIds).slice();
+            // for (var i=0; i<otherLayerIDs.length;i++){
+            //     if(otherLayerIDs[i]==='pointPlotLayer'||otherLayerIDs[i]==='linePlotLayer'||otherLayerIDs[i]==='polygonPlotLayer'){
+            //         otherLayerIDs.splice(i,1)
             //     }
             // }
+            // for (var i=0; i<otherLayerIDs.length;i++){
+            //     var layerRemoved = map.getLayer(otherLayerIDs[i])
+            // }            //     map.removeLayer(layerRemoved);
+
+            map.removeAllLayers();
+
+            map.addLayer(baseMap);
             addModelLayUI(mapName);
+            if (templateFlag == 0)
+                templateClassNo = layer.index;
+            templateFlag = 1;
+            $("#layui-layer"+ (templateClassNo)).css("display", "block");
             // layerIndex = layer.index;
             typeFlag = 0;
-            mapTitle = mapName;
             $(".layui-layer-title").text(mapName);
         });
 
@@ -1059,14 +1080,14 @@ function addModelLayUI(mapName) {
                 {id:102, name:"影像图",url:"http://qk.casm.ac.cn:9090/geowinmap/ds?serviceproviderid=map.cachedtms&serviceid=gettile&tilename=sate&y=${row}&x=${col}&z=${level}"}
             ]},
 
-        {id:2, pId:0, name:"专题服务图层",isParent:true, open:false,children:[], "nocheck":true},
+        {id:2, pId:0, name:"专题服务图层",isParent:true, open:true,children:[], "nocheck":true},
 
-        {id:3, pId:0, name:"要素图层", isParent:true,open:false,children:[], "nocheck":true},
+        {id:3, pId:0, name:"要素图层", isParent:true,open:true,children:[], "nocheck":true},
         // {id:4, pId:0, name:"统计图层", isParent:true,open:false,children:[], "nocheck":true},
 
     ];
 
-/*增加专题服务图层节点*/
+    /*增加专题服务图层节点*/
     layerNodes_Model[1].children=serviceLayer_Model.modules;
     //增加要素图层
     layerNodes_Model[2].children=featureLayer_Model.modules;
@@ -1338,21 +1359,13 @@ function addModelLayUI(mapName) {
                                         alert("属性不能为空！");
                                         return;
                                     }
-                                    ServerLayerArr.filter(function (p) {
-                                        var id=treeNode.naume+"_"+(treeNode.url);
-                                        if(p.id==id){
-                                            p.url=$("#editSLAds").val();
-                                            p._url.path=$("#editSLAds").val();
-                                            //如果地图中已经有这个图层
-                                            if($.inArray(id,map.layerIds)!=-1){
-                                                // p.refresh();
-                                                map.getLayer(id).refresh();
-                                                //map.removeLayer(map.getLayer(id));
-                                            };
-                                        }
-                                    });
+                                    if(map&&(map.getLayer(treeNode.url))){
+                                        var thisLayer = map.getLayer(treeNode.url);
+                                        map.removeLayer(thisLayer);
+                                    }
                                     treeNode.name=$("#editSLName").val();
                                     treeNode.url=$("#editSLAds").val();
+                                    treeNode.checked=false;
                                     var treeObj = $.fn.zTree.getZTreeObj("doMapTree_Template");
                                     treeObj.updateNode(treeNode);
 
@@ -1397,9 +1410,9 @@ function addModelLayUI(mapName) {
                                 btn: ['确认','修改要素样式'],
                                 //content:"<div><p>要素名称：<input id='editFLName' value='"+treeNode.name+"'></input></p><br/><p>要素地址：<input id='editFLAds' value='"+treeNode.url+"'></input></p></div>",
                                 content: "<div id='zeo'>" +
-                                    "<p style='padding-left: 12px'>要素名称：<input id='editFLName' value='"+treeNode.name+"'></input></p>" +
-                                    "<br/><p class='FLS_p'><input id='textLayer' name='layer' value='text' type='radio' onclick='changeSource(this)' "+treeNode.textLayerChecked+"/>服务地址：<input id='editFLAds' "+treeNode.textLayerDisabled+" value='"+((treeNode.data)?treeNode.data:treeNode.url)+"'></input></p>"
-                                    + "<br/><p class='tree_p'><input id='buttonLayer' name='layer' value='button' type='radio' onclick='changeSource(this)' "+treeNode.buttonLayerChecked+"/>专题服务：<button id='selectButton' onclick='openSelectedTree(getThisPath)' class='layui-btn layui-btn-sm' "+treeNode.buttonLayerDisabled+">选择要素</button></p></div>",
+                                "<p style='padding-left: 12px'>要素名称：<input id='editFLName' value='"+treeNode.name+"'onchange='nameChange()'></input></p>" +
+                                "<br/><p class='FLS_p'><input id='textLayer' name='layer' value='text' type='radio' onclick='changeSource(this)' "+treeNode.textLayerChecked+"/>服务地址：<input id='editFLAds' "+treeNode.textLayerDisabled+" value='"+((treeNode.data)?treeNode.data:treeNode.url)+"'></input></p>"
+                                + "<br/><p class='tree_p'><input id='buttonLayer' name='layer' value='button' type='radio' onclick='changeSource(this)' "+treeNode.buttonLayerChecked+"/>专题服务：<button id='selectButton' onclick='openSelectedTree(getThisPath)' class='layui-btn layui-btn-sm' "+treeNode.buttonLayerDisabled+">选择要素</button></p></div>",
                                 success: function (layero, index) {
                                     if  (treeNode.buttonLayerDisabled=="undisabled")
                                         document.getElementById("selectButton").innerHTML = getThisTheme;
@@ -1469,9 +1482,9 @@ function addModelLayUI(mapName) {
                                                 map.removeLayer(map.getLayer(treeNode.lastUrl));
                                         }
                                         else{
-                                                if (treeNode.thematicData)
-                                                    map.removeLayer(map.getLayer(treeNode.thematicData.id));
-                                            }
+                                            if (treeNode.thematicData)
+                                                map.removeLayer(map.getLayer(treeNode.thematicData.id));
+                                        }
 
                                     }
                                     //如果在勾选状态下被编辑，点击确定后直接在地图上更新图层
@@ -1483,6 +1496,19 @@ function addModelLayUI(mapName) {
                                     var treeObj = $.fn.zTree.getZTreeObj("doMapTree_Template");
                                     treeObj.updateNode(treeNode);
                                     //layerNodes=treeObj.transformToArray(treeObj.getNodes());
+                                    //如果名字发生了变化则更新图例
+                                    var layer_ = map.getLayer(treeNode.url)
+                                    if(nameChanged&&layer_){
+                                        var render_ = layer_.renderer;
+                                        render_.label = treeNode.name;
+                                        layer_.setRenderer(render_);
+                                        layer_.refresh();
+                                        if(!(typeof iMLegend ==="undefined"||null===iMLegend)){
+                                            iMLegend.refresh();
+                                        }
+
+                                    }
+                                    nameChanged = false;
                                     layer.close(index);
                                 },
                                 btn2: function(index, layero)
@@ -1537,7 +1563,7 @@ function addModelLayUI(mapName) {
                                     //return false 开启该代码可禁止点击该按钮关闭
                                 },
                             });
-                            });
+                        });
 
 
                     }
@@ -1548,39 +1574,37 @@ function addModelLayUI(mapName) {
                 if(treeNode.getParentNode().id!=1){
                     var btn1 = $("#doMapRemove_"+treeNode.id);
                     if (btn1) btn1.bind("click", function(){
+                        if(!confirm("确认删除 图层 -- " + treeNode.name + " 吗？")){
+                            return;
+                        }
                         //编辑，根据父节点不同，功能不同
                         if(treeNode.getParentNode().id==2){//如果是专题服务
-                            alert("删除专题数据");
-                            var index=0;
-                            ServerLayerArr.filter(function (p) {
-                                var id=treeNode.name+"_"+(treeNode.url);
-                                if(p.id==id){
-                                    ServerLayerArr.splice(index,1);
-                                    //如果地图中已经有这个图层
-                                    if($.inArray(id,map.layerIds)!=-1){
-                                        // p.refresh();
-                                        map.removeLayer(map.getLayer(id));
-                                        //map.removeLayer(map.getLayer(id));
-                                    };
-                                    var treeObj = $.fn.zTree.getZTreeObj("doMapTree_Template");
-                                    treeObj.removeNode(treeNode,true);
-                                    treeNode.getParentNode().isParent=true;
-                                    treeObj.refresh();
-                                }
-                                index=index+1;
-                            });
-
+                            var treeObj = $.fn.zTree.getZTreeObj("doMapTree_Template");
+                            treeObj.removeNode(treeNode,true);
+                            treeNode.getParentNode().isParent=true;
+                            treeObj.refresh();
+                            if(map&&(map.getLayer(treeNode.url))){
+                                var thisLayer = map.getLayer(treeNode.url);
+                                map.removeLayer(thisLayer);
+                            }
                         }
-                        if(treeNode.getParentNode().id==3){//如果是专题服务
+                        if(treeNode.getParentNode().id==3){//如果是要素
                             // alert("删除要素数据");
                             var treeObj = $.fn.zTree.getZTreeObj("doMapTree_Template");
                             treeObj.removeNode(treeNode,true);
                             treeNode.getParentNode().isParent=true;
                             treeObj.refresh();
                             //删除节点时将地图上的图层也删去
-                            if (treeNode.textLayerChecked == "checked"){
-                                if(map&&(map.getLayer(treeNode.url))){
-                                    var thisLayer = map.getLayer(treeNode.url);
+                            //判断是否是模板数据
+                            if (treeNode.dataType==="templateData"){
+                                if(map&&(map.getLayer(treeNode.data))){
+                                    var thisLayer = map.getLayer(treeNode.data);
+                                    map.removeLayer(thisLayer);
+                                }
+                            }
+                            else if (treeNode.textLayerChecked == "checked"){
+                                if(map&&(map.getLayer(treeNode.data))){
+                                    var thisLayer = map.getLayer(treeNode.data);
                                     map.removeLayer(thisLayer);
                                 }
                             }
@@ -1624,16 +1648,14 @@ function addModelLayUI(mapName) {
         }
 
         function beforeRemove(treeId, treeNode) {
-            //className = (className === "dark" ? "":"dark");
-            //showLog("[ "+getTime()+" beforeRemove ]&nbsp;&nbsp;&nbsp;&nbsp; " + treeNode.name);
-            var zTree = $.fn.zTree.getZTreeObj("doMapTree_Template");
-            zTree.selectNode(treeNode);
-            return confirm("确认删除 节点 -- " + treeNode.name + " 吗？");
+            /*  var zTree = $.fn.zTree.getZTreeObj("doMapTree_Template");
+              zTree.selectNode(treeNode);
+              return confirm("确认删除 图层 -- " + treeNode.name + " 吗？");*/
         }
         // if(doMapIndex_Template==0){
         layerNodesObj_Template=$.fn.zTree.init($("#doMapTree_Template"), setting, layerNodes_InFunc);
 
-            // doMapIndex_Template=1;
+        // doMapIndex_Template=1;
         // }
 
     }
@@ -1674,24 +1696,38 @@ function blank_btnClick() {
     // parent.location.reload();
     // var parentId=parent.$("#id").val();
     if (alertFlag ==0){
-        typeFlag =2;
+        typeFlag = 1;
+        layerCloseFlag = 1;
+        blankFlag = 1;
         doMap();
+        blankClassNo = layer.index;
     }
     else if (alertFlag ==1){
         layer.confirm('该操作会清除之前编辑的内容，是否继续？', {icon: 3, title:'提示'}, function(index){
+            layerCloseFlag = 1;
             layer.close(layer.index);
-            if (layerIndex)
-                if (typeFlag == 0)
-                   layer.close(layerIndex);
-            // for(var i=0; i<1000; i++){
-            //     var title = $($(".layui-layer-title")[i]).text();
-            //     if(title == mapTitle){
-            //         $($(".layui-layer")[i]).css("display", "none");
+            if (layerIndex){
+                if (typeFlag == 0){
+                    for(var i=1; i<layerIndex+1; i++){
+                        $("#layui-layer"+ i).css("display", "none");
+                    }
+                    // layer.close(layerIndex);
+                }
+            }
+            //移除非标绘的图层
+            // var otherLayerIDs = (map.graphicsLayerIds).slice();
+            // for (var i=0; i<otherLayerIDs.length;i++){
+            //     if(otherLayerIDs[i]==='pointPlotLayer'||otherLayerIDs[i]==='linePlotLayer'||otherLayerIDs[i]==='polygonPlotLayer'){
+            //         otherLayerIDs.splice(i,1)
             //     }
             // }
+            // for (var i=0; i<otherLayerIDs.length;i++){
+            //     var layerRemoved = map.getLayer(otherLayerIDs[i])
+            //     map.removeLayer(layerRemoved);
+            // }
             map.removeAllLayers();
+
             map.addLayer(baseMap);
-            $(".layui-layer").css("display", "block");
             //清空之前交互制图中添加的图层节点
             var treeObj = $.fn.zTree.getZTreeObj("doMapTree");
             if (treeObj){
@@ -1703,8 +1739,14 @@ function blank_btnClick() {
             }
 
             //$("#doMap").click();
+
             doMap();
+            if (blankFlag == 0)
+                blankClassNo = layer.index;
+            blankFlag = 1;
+            $("#layui-layer"+ (blankClassNo)).css("display", "block");
             typeFlag = 1;
+            $(".layui-layer-title").text('交互制图');
             // layerIndex = layer.index;
             // $(".layui-layer").css("display", "block");
         });
@@ -1722,12 +1764,15 @@ function chooseTemplate(mapName) {
 //选择制图模板
 $("#templateMap").click(function () {
     /**
-    * @Description: 制图模板函数，点击出现详细灾害标签
-    * @Param:
-    * @return:
-    */
+     * @Description: 制图模板函数，点击出现详细灾害标签
+     * @Param:
+     * @return:
+     */
     //
-    layerIndex = layer.index;
+    if (layerCloseFlag == 1)
+        layerIndex = layer.index;
+    layerCloseFlag = 0;
+    console.log(layerIndex);
     for(var i=0; i<$(".layui-layer-title").length; i++){
         var title = $($(".layui-layer-title")[i]).text();
         if(title == "制图模板选择"){
@@ -1797,29 +1842,52 @@ function layerOncheck(treeId, treeNode) {
                 });
 
             }
-                   }
+        }
         if(treeNode.getParentNode().id==2){
             //专题服务
-            if(treeNode.checked){
-                ServerLayerArr.filter(function (p) {
-                    var id=treeNode.name+"_"+(treeNode.url);
-                    if(p.id==id){
-                        map.removeLayer(map.getLayer(id));
-                    }
-                });
+            if(!treeNode.checked){
+                /*   ServerLayerArr.filter(function (p) {
+                       var id=treeNode.name+"_"+(treeNode.url);
+                       if(p.id==id){
+                           map.removeLayer(map.getLayer(id));
+                       }
+                   });*/
+                require([
+                    "esri/layers/ArcGISDynamicMapServiceLayer",
+                    "esri/InfoTemplate", "esri/dijit/PopupTemplate"
+                ], function (ArcGISDynamicMapServiceLayer, InfoTemplate, PopupTemplate)
+                {
 
+
+                    var serviceUrl = treeNode.url;
+                    var serviceUrlstr=serviceUrl.substring(0,serviceUrl.lastIndexOf("/"));
+                    try{
+                        var layer = new ArcGISDynamicMapServiceLayer(serviceUrlstr,{id:serviceUrl});
+                    }catch (e) {
+                        alert("服务地址有误！")
+                        return false;
+                    }
+                    var showindex=serviceUrl.substring(serviceUrl.lastIndexOf("/")+1,serviceUrl.length);
+                    layer.setVisibleLayers([showindex]);
+                    map.addLayer(layer);
+                    /*//var layer = new ArcGISDynamicMapServiceLayer(serviceUrl,{id: $("#newSLName").val()+"_"+$("#newSLAds").val()});
+                    ServerLayerArr.push(layer);*/
+
+                });
             }
             else {
-                ServerLayerArr.filter(function (p) {
+                /*ServerLayerArr.filter(function (p) {
                     var id=treeNode.name+"_"+(treeNode.url);
                     if(p.id==id){
                         map.addLayer(p);
                     }
-                });
+                });*/
+                var thisLayer = map.getLayer( treeNode.url);
+                map.removeLayer(thisLayer);
             }
         }
         if (treeNode.getParentNode().id===3) {//如果操作的是要素图层
-            var dataUrl_template= treeNode.data;;
+            var dataUrl_template= treeNode.data;
             var lastDataUrl_template = treeNode.lastUrl;//
             var isChecked = !treeNode.checked;
             var dataUrl = treeNode.url;
@@ -1832,14 +1900,13 @@ function layerOncheck(treeId, treeNode) {
                     //如果是模板数据
                     //如果服务地址不为空
                     //先判断上次存储的url代表的图层是否加载，如果加载了，则删去
-
-                    if (map && (map.getLayer(dataUrl_template))) {
-                        map.removeLayer(map.getLayer(dataUrl_template));
-                    }
                     if (map && (map.getLayer(dataUrl_template))) {//如果已经加载，只是做了隐藏，显示就好了，下面的步骤跳过
                         var thisLayer = map.getLayer(dataUrl_template);
                         thisLayer.show();
                         return;
+                    }
+                    if (map && (map.getLayer(dataUrl_template))) {
+                        map.removeLayer(map.getLayer(dataUrl_template));
                     }
                     require([
                         "esri/layers/FeatureLayer",
@@ -1906,12 +1973,21 @@ function layerOncheck(treeId, treeNode) {
                             ], function (SimpleRenderer) {
                                 switch (layer.geometryType) {
                                     case "esriGeometryPoint":
+                                        if(treeNode.style){
+                                            simpleJson_point.symbol = treeNode.style.render;
+                                        }
                                         rend = new SimpleRenderer(simpleJson_point)
                                         break;
                                     case "esriGeometryPolyline":
+                                        if(treeNode.style){
+                                            simpleJson_line.symbol = treeNode.style.render;
+                                        }
                                         rend = new SimpleRenderer(simpleJson_line)
                                         break;
                                     case "esriGeometryPolygon":
+                                        if(treeNode.style){
+                                            simpleJson_polygon.symbol = treeNode.style.render;
+                                        }
                                         rend = new SimpleRenderer(simpleJson_polygon)
                                         break;
                                 }
@@ -1936,6 +2012,10 @@ function layerOncheck(treeId, treeNode) {
                         } else {
                             //如果服务地址不为空
                             //先判断上次存储的url代表的图层是否加载，如果加载了，则删去
+                            //如果两次URL并没有发生改变,则不做操作
+                            if (dataUrl===lastDataUrl) {
+                                return;
+                            }
                             if (map && (map.getLayer(lastDataUrl))) {
                                 map.removeLayer(map.getLayer(lastDataUrl));
                             }
@@ -2276,11 +2356,11 @@ function beforeThematicLayerAdd(treeId, treeNode) {
         }
     }else{//如果没有加载，则先移除其他图层，再加载.
         if (treeNode["nodePath"][treeNode["nodePath"].length-1])
-        if(map&&(map.getLayer(treeNode["nodePath"][treeNode["nodePath"].length-1].id))){//如果已经加载，只是做了隐藏，显示就好了，下面的步骤跳过
-            var thisLayer = map.getLayer(treeNode["nodePath"][treeNode["nodePath"].length-1].id);
-            thisLayer.show();
-            return;
-        }
+            if(map&&(map.getLayer(treeNode["nodePath"][treeNode["nodePath"].length-1].id))){//如果已经加载，只是做了隐藏，显示就好了，下面的步骤跳过
+                var thisLayer = map.getLayer(treeNode["nodePath"][treeNode["nodePath"].length-1].id);
+                thisLayer.show();
+                return;
+            }
         // var layerNow = map.getLayer(thematicData.id);
         // console.log(layerNow);
         // if(layerNow){
@@ -2434,4 +2514,9 @@ function changeSource(node){
 //监听要素服务地址栏有没有发生变化
 function addressChange(){
     addressChanged = true;
+}
+
+//如果名字发生了变化，则设置为true。每次点击确认之后，从新设置为false
+function nameChange(treeNode) {
+    nameChanged = true;
 }
