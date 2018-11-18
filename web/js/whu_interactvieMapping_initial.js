@@ -2008,7 +2008,11 @@ function layerOncheck(treeId, treeNode) {
                             });
                         });
                         layer.on("update", function(evt) {
-                            if(evt.target.geometryType=="esriGeometryPolyline"||evt.target.renderer.symbol.url.indexOf(".")!=0){
+                            if(evt.target.geometryType=="esriGeometryPolyline"){
+
+                                return;
+                            }
+                            if(evt.target.renderer.symbol.url.indexOf(".")!=0){
                                 return;
                             }
                             var base64= getBase64Image( evt.target.renderer.symbol.url);
@@ -2123,7 +2127,11 @@ function layerOncheck(treeId, treeNode) {
                                     });
                                 });
                                 layer.on("update", function(evt) {
-                                    if(evt.target.geometryType=="esriGeometryPolyline"||evt.target.renderer.symbol.url.indexOf(".")!=0){
+                                    if(evt.target.geometryType=="esriGeometryPolyline"){
+
+                                        return;
+                                    }
+                                    if(evt.target.renderer.symbol.url.indexOf(".")!=0){
                                         return;
                                     }
                                     var base64= getBase64Image( evt.target.renderer.symbol.url);
@@ -2489,9 +2497,13 @@ function addThematicLayer(treeNode) {
             map.infoWindow.setFeatures([evt.graphic]);
         });
         featureLayer.on("update", function(evt) {
-            if(evt.target.geometryType=="esriGeometryPolyline"||evt.target.renderer.symbol.url.indexOf(".")!=0){
+            if(evt.target.geometryType=="esriGeometryPolyline"){
+
               return;
           }
+          if(evt.target.renderer.symbol.url.indexOf(".")!=0){
+                return;
+            }
            var base64= getBase64Image( evt.target.renderer.symbol.url);
             evt.target.renderer.symbol.setUrl(base64);
             evt.target.refresh();
