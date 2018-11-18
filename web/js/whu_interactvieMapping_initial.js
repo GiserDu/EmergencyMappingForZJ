@@ -995,7 +995,7 @@ function sweetAlert1(mapName) {
             deleteAllFeatureFromLocalstorage();
             //移除所有图层
             map.removeAllLayers();
-            //将清将清空graphics的图层加上，因为后面还要标绘
+            //将清将清空graphics的图层加上，因为后面还要标绘。
             map.addLayer(polygonFeatureLayer);
             map.addLayer(polylineFeatureLayer);
             map.addLayer(pointFeatureLayer);
