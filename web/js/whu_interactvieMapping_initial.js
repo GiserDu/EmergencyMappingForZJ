@@ -1926,12 +1926,12 @@ function layerOncheck(treeId, treeNode) {
                         "esri/InfoTemplate", "esri/dijit/PopupTemplate", "esri/renderers/SimpleRenderer"
                     ], function (FeatureLayer, InfoTemplate, PopupTemplate, SimpleRenderer) {
 
-                        //var infoTemplate = new InfoTemplate("${NAME}", "${*}");
+                        var infoTemplate = new InfoTemplate("${NAME}", "${*}");
                         var layer = new FeatureLayer(dataUrl_template, {
                             mode: FeatureLayer.MODE_SNAPSHOT,
                             outFields: ["*"],
                             opacity: "1",
-                            //infoTemplate: infoTemplate,
+                            infoTemplate: infoTemplate,
                             id: dataUrl_template
                         });
                         layer.on("load", function () {
@@ -2042,12 +2042,12 @@ function layerOncheck(treeId, treeNode) {
                                 "esri/InfoTemplate", "esri/dijit/PopupTemplate", "esri/renderers/SimpleRenderer"
                             ], function (FeatureLayer, InfoTemplate, PopupTemplate, SimpleRenderer) {
 
-                                //var infoTemplate = new InfoTemplate("${NAME}", "${*}");
+                                var infoTemplate = new InfoTemplate("${NAME}", "${*}");
                                 var layer = new FeatureLayer(dataUrl, {
                                     mode: FeatureLayer.MODE_SNAPSHOT,
                                     outFields: ["*"],
                                     opacity: "1",
-                                    //infoTemplate: infoTemplate,
+                                    infoTemplate: infoTemplate,
                                     id: dataUrl
                                 });
                                 layer.on("load", function () {
@@ -2257,12 +2257,12 @@ function layerOncheck_Template(treeId, treeNode) {
                             "esri/InfoTemplate", "esri/dijit/PopupTemplate", "esri/renderers/SimpleRenderer"
                         ], function (FeatureLayer, InfoTemplate, PopupTemplate, SimpleRenderer) {
 
-                            //var infoTemplate = new InfoTemplate("${NAME}", "${*}");
+                            var infoTemplate = new InfoTemplate("${NAME}", "${*}");
                             var layer = new FeatureLayer(dataUrl, {
                                 mode: FeatureLayer.MODE_SNAPSHOT,
                                 outFields: ["*"],
                                 opacity: "1",
-                                //infoTemplate: infoTemplate,
+                                infoTemplate: infoTemplate,
                                 id: dataUrl
                             });
                             layer.on("load", function(){
