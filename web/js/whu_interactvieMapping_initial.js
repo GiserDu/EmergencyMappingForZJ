@@ -2414,7 +2414,7 @@ function addThematicLayer(treeNode) {
                 "type": "simple",
                 "symbol": {
                     "type": "esriPMS",
-                    "url": "./image/title.png",
+                    "url": "./assets/img/pointIcon/6.png",
                     "contentType": "image/png",
                     "width": 15,
                     "height": 15
