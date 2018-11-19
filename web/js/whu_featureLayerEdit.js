@@ -388,7 +388,7 @@ var crearFeatureIconList=function () {
         }
 
     }
-        iconCreated = true;
+    iconCreated = true;
 }
 
 //开始编辑，打开面板
@@ -445,6 +445,20 @@ var selectedFeatureLayer = function (featureLayer,type) {
     openFeatureLayerPanelContent(['map-featureLayer-panel', 'map-featureLayer-panel-tip', 'map-featureLayer-info']);
 };
 
+//图片转为base64
+function getBase64Image(imgurl) {
+    var img = new Image();
+    img.src = imgurl;
+    var canvas = document.createElement("canvas");
+    canvas.width = img.width;
+    canvas.height = img.height;
+    var ctx = canvas.getContext("2d");
+    ctx.drawImage(img, 0, 0, img.width, img.height);
+    var ext = img.src.substring(img.src.lastIndexOf(".")+1).toLowerCase();
+    var dataURL = canvas.toDataURL("image/"+ext);
+    return dataURL;
+}
+
 //改变点的图标
 var changePointFeatureLayerStyle = function () {
     openFeatureLayerPanelContent(['map-featureLayer-panel', 'pointFeatureLayer-style-edit']);
@@ -454,7 +468,7 @@ var changePointFeatureLayerStyle = function () {
         document.getElementById('pointFeatureLayerIcon').src = thisDom.src;
         //在这一步改变点要素图层的图片文件
         rendererNow={};
-        rendererNow.url = thisDom.src;
+        rendererNow.url = getBase64Image(thisDom.src);
         rendererNow.type = "esriPMS";
         if (drawType == 'edit') {
             openFeatureLayerPanelContent(['map-featureLayer-panel', 'map-featureLayer-info', 'map-featureLayer-panel-tip'])
