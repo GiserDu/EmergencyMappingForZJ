@@ -3,6 +3,9 @@
 <head>
     <meta charset="UTF-8">
     <title>交互式制图</title>
+    <!--阿里的可视化库-->
+    <script src="https://gw.alipayobjects.com/os/antv/pkg/_antv.g2-3.3.2/dist/g2.min.js"></script>
+    <script src="js/echarts.js"></script>
     <link href="css/reset.css" rel="stylesheet">
     <link href="css/bootstrap.min.css" rel="stylesheet">
     <link href='css/fonts.css' rel='stylesheet' type='text/css'>
@@ -16,11 +19,20 @@
     <link rel="stylesheet" type="text/css" href="js/sweetalert_lib/sweetalert_bk.css">
     <link href="css/bootstrap-slider.min.css" rel="stylesheet">
     <link href="css/whu_interactiveMapping.css" rel="stylesheet">
+    <link href="css/ChartInfoWindow.css" rel="stylesheet"/>
     <style type="text/css">
         .esriLegendServiceLabel{
             display: none;
         }
     </style>
+    <script>
+        var dojoConfig = {
+            packages: [{
+                name: "chartModules",
+                location: location.pathname.replace(/\/[^/]+$/, "") + "/js"
+            }]
+        };
+    </script>
 </head>
 <body>
 <div id="main">
@@ -183,10 +195,11 @@
         </div>
     </div>
 </div>
+
+</div>
 <script type="text/javascript" src="js/jquery-3.2.1.js"></script>
 <script type="text/javascript" src="js/sweetalert_lib/sweetalert.min.js"></script>
 <script src="js/layui/layui.js"></script>
-
 <script src="http://localhost:8080/EmergencyMapping1027/js/lib/arcgis_js_api/library/3.24/3.24/init.js"></script>
 <script type="text/javascript" src="js/Print.js"></script>
 <script src="js/plotIF.js"></script>
@@ -202,6 +215,7 @@
 <!--<script src="js/layui/layui.js"></script>-->
 <script src="js/bootstrap-select.js"></script>
 <script src="js/whu_administrativeRegionSelection.js"></script>
+<!--<script src="js/whu_statisticalInteractiveMapping.js"></script>-->
 <script>
     layui.use('form', function(){
         var form = layui.form;

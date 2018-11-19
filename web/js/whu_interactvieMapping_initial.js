@@ -92,6 +92,9 @@ $(document).ready(function() {
                 center: [104,35],
                 zoom: 5
             });
+           /* map.on("load", function (evt) {
+                processResults(testData);
+            });*/
             baseMap = new WebTiledLayer(
                 //'http://qk.casm.ac.cn:9090/geowinmap/ds?serviceproviderid=map.cachedtms&serviceid=gettile&tilename=map&y=${row}&x=${col}&z=${level}',{id:"baseMap"}
                 'https://${subDomain}.tile.thunderforest.com/cycle/${level}/${col}/${row}.png',{"copyright": 'Maps © <a href="http://www.thunderforest.com">Thunderforest</a>, Data © <a href="http://www.openstreetmap.org/copyright">OpenStreetMap contributors</a>',
