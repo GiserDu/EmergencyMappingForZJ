@@ -12,7 +12,7 @@ var classGLayer,chartGLayer;//预设分级图层和统计图层
 var regionParam = 0;//regionParam为所选的区域代码(1:初始第一级17个地级市;其他:对应地州市的区域代码)
 var rgnName;//当前所选区域名称
 var geometry = new Object();//当前所选区域中心点对象
-var baseMap;//底图
+var baseMap=new Array();//底图
 var doMapIndex=0;//制图目录树表示，0表示为构造，1表示构造
 var doMapIndex_Template =0;//模板制图目录树表示
 var ARIndex=0;//行政区目录树表示，0表示为构造，1表示构造
@@ -30,8 +30,9 @@ var getThisPath = [];//当前要素节点的所有父节点（包括自己）
 var textEditFlag = 0; //标识对服务地址要素图层编辑时的一种特殊情况
 var layerNodes =[
     {id:1, pId:0, name:"地理底图", open:true, "nocheck":true,children:[
-            {id:101, name:"矢量图",url:"http://qk.casm.ac.cn:9090/geowinmap/ds?serviceproviderid=map.cachedtms&serviceid=gettile&tilename=map&y=${row}&x=${col}&z=${level}",checked:true},
-            {id:102, name:"影像图",url:"http://qk.casm.ac.cn:9090/geowinmap/ds?serviceproviderid=map.cachedtms&serviceid=gettile&tilename=sate&y=${row}&x=${col}&z=${level}"}
+            {id:101,name:"矢量图",url:"http://106.124.138.198:8080/OneMapServer/rest/services/XJ_VECTOR/MapServer,http://106.124.138.198:8080/OneMapServer/rest/services/XJ_POI/MapServer",checked:true}
+           /* {id:101, name:"矢量图",url:"http://qk.casm.ac.cn:9090/geowinmap/ds?serviceproviderid=map.cachedtms&serviceid=gettile&tilename=map&y=${row}&x=${col}&z=${level}",checked:true},
+            {id:102, name:"影像图",url:"http://qk.casm.ac.cn:9090/geowinmap/ds?serviceproviderid=map.cachedtms&serviceid=gettile&tilename=sate&y=${row}&x=${col}&z=${level}"}*/
         ]},
 
     {id:2, pId:0, name:"专题服务图层",isParent:true, open:true,children:[], "nocheck":true},
@@ -86,22 +87,35 @@ $(document).ready(function() {
 
 
     function initMap() {
-        require(["esri/map","esri/layers/WebTiledLayer","esri/layers/ArcGISDynamicMapServiceLayer","esri/layers/GraphicsLayer"],function (Map,WebTiledLayer,ArcGISDynamicMapServiceLayer,GraphicsLayer) {
+        require(["esri/map","esri/config","esri/layers/WebTiledLayer","esri/layers/ArcGISDynamicMapServiceLayer","esri/layers/ArcGISTiledMapServiceLayer","esri/layers/GraphicsLayer"],function (Map,config,WebTiledLayer,ArcGISDynamicMapServiceLayer,ArcGISTiledMapServiceLayer,GraphicsLayer) {
             map = new Map("mapContainer", {
                 //basemap:"dark-gray-vector",
                 center: [104,35],
                 zoom: 5
             });
+
+                //配置代理
+                config.defaults.io.proxyUrl = "../esriproxy/";
+                config.defaults.io.alwaysUseProxy = false;
            /* map.on("load", function (evt) {
                 processResults(testData);
             });*/
-            baseMap = new WebTiledLayer(
+           baseMap=new Array()
+           var baseMapUrls=layerNodes[0].children[0].url.split(",");
+            $.each(baseMapUrls, function (i) {
+                var url=baseMapUrls[i];
+                baseMap.push(new ArcGISTiledMapServiceLayer(url,{"id":url}));
+                map.addLayer(baseMap[i]);
+
+            });
+           //baseMap=new ArcGISTiledMapServiceLayer("http://106.124.138.198:8080/OneMapServer/rest/services/XJ_VECTOR/MapServer");
+           /* baseMap = new WebTiledLayer(
                 //'http://qk.casm.ac.cn:9090/geowinmap/ds?serviceproviderid=map.cachedtms&serviceid=gettile&tilename=map&y=${row}&x=${col}&z=${level}',{id:"baseMap"}
                 'https://${subDomain}.tile.thunderforest.com/cycle/${level}/${col}/${row}.png',{"copyright": 'Maps © <a href="http://www.thunderforest.com">Thunderforest</a>, Data © <a href="http://www.openstreetmap.org/copyright">OpenStreetMap contributors</a>',
                     "id": "OpenCycleMap",
                     "subDomains": ["a", "b", "c"]}
-            );
-            map.addLayer(baseMap);
+            );*/
+            //map.addLayer(baseMap);
             studyAreaLayer=new GraphicsLayer('',{id:"studyAreaLayer",name:"studyAreaLayer"});
             studyAreaLayer.name = "studyAreaLayer";
             map.addLayer(studyAreaLayer);
@@ -451,11 +465,30 @@ function doMap() {
                                             p.url=treeNode.url;
                                         }
                                     });
-                                    baseMap.url=$("#editBLAds").val();
-                                    baseMap._url.path=$("#editBLAds").val();
+
+                                    require(["esri/layers/ArcGISTiledMapServiceLayer"],function (ArcGISTiledMapServiceLayer) {
+                                        $.each(baseMap,function (i) {
+                                            map.removeLayer(baseMap[i]);
+                                        });
+                                        baseMap=new Array();
+                                        var urls= $("#editBLAds").val().split(",")
+                                        $.each(urls, function (i) {
+                                            var url=urls[i];
+                                            baseMap.push(new ArcGISTiledMapServiceLayer(url,{"id":url}));
+                                            map.addLayer(baseMap[i]);
+
+                                        });
+                                        $.each(baseMap,function (i) {
+                                            map.reorderLayer(baseMap[i],i);
+                                        });
+                                    });
+                                    /*baseMap._url.path=$("#editBLAds").val();
+                                    $.each(baseMap,function (i) {
+                                        map.addLayer(baseMap[i]);
+                                    });
                                     if($.inArray("baseMap",map.layerIds)!=-1){
                                         map.getLayer("baseMap").refresh();
-                                    }
+                                    }*/
                                     layer.close(index);
                                 }});
                         });
@@ -1004,7 +1037,9 @@ function sweetAlert1(mapName) {
             map.addLayer(polygonFeatureLayer);
             map.addLayer(polylineFeatureLayer);
             map.addLayer(pointFeatureLayer);
-            map.addLayer(baseMap);
+            $.each(baseMap,function (i) {
+                map.addLayer(baseMap[i]);
+            });
             addModelLayUI(mapName);
             if (templateFlag == 0)
                 templateClassNo = layer.index;
@@ -1088,16 +1123,23 @@ function addModelLayUI(mapName) {
     //修改底图节点_暂时不用
 
     var layerNodes_Model=[
-        // {id:0, pId:0, name:mapName, open:true, "nocheck":true},
-        {id:1, pId:0, name:"地理底图", open:true, "nocheck":true,children:[
+        /*{id:1, pId:0, name:"地理底图", open:true, "nocheck":true,children:[
                 {id:101, name:"矢量图",url:"http://qk.casm.ac.cn:9090/geowinmap/ds?serviceproviderid=map.cachedtms&serviceid=gettile&tilename=map&y=${row}&x=${col}&z=${level}",checked:true},
                 {id:102, name:"影像图",url:"http://qk.casm.ac.cn:9090/geowinmap/ds?serviceproviderid=map.cachedtms&serviceid=gettile&tilename=sate&y=${row}&x=${col}&z=${level}"}
             ]},
 
         {id:2, pId:0, name:"专题服务图层",isParent:true, open:true,children:[], "nocheck":true},
 
-        {id:3, pId:0, name:"要素图层", isParent:true,open:true,children:[], "nocheck":true},
-        // {id:4, pId:0, name:"统计图层", isParent:true,open:false,children:[], "nocheck":true},
+        {id:3, pId:0, name:"要素图层", isParent:true,open:true,children:[], "nocheck":true}*/
+        {id:1, pId:0, name:"地理底图", open:true, "nocheck":true,children:[
+                {id:101,name:"矢量图",url:["http://106.124.138.198:8080/OneMapServer/rest/services/XJ_VECTOR/MapServer","http://106.124.138.198:8080/OneMapServer/rest/services/XJ_POI/MapServer"],checked:true}
+                /* {id:101, name:"矢量图",url:"http://qk.casm.ac.cn:9090/geowinmap/ds?serviceproviderid=map.cachedtms&serviceid=gettile&tilename=map&y=${row}&x=${col}&z=${level}",checked:true},
+                 {id:102, name:"影像图",url:"http://qk.casm.ac.cn:9090/geowinmap/ds?serviceproviderid=map.cachedtms&serviceid=gettile&tilename=sate&y=${row}&x=${col}&z=${level}"}*/
+            ]},
+
+        {id:2, pId:0, name:"专题服务图层",isParent:true, open:true,children:[], "nocheck":true},
+
+        {id:3, pId:0, name:"要素图层", isParent:true,open:true,children:[], "nocheck":true}
 
     ];
 
@@ -1350,11 +1392,28 @@ function addModelLayUI(mapName) {
                                             p.url=treeNode.url;
                                         }
                                     });
-                                    baseMap.url=$("#editBLAds").val();
+                                    /*baseMap.url=$("#editBLAds").val();
                                     baseMap._url.path=$("#editBLAds").val();
                                     if($.inArray("baseMap",map.layerIds)!=-1){
                                         map.getLayer("baseMap").refresh();
-                                    }
+                                    }*/
+                                    require(["esri/layers/ArcGISTiledMapServiceLayer"],function (ArcGISTiledMapServiceLayer) {
+                                        $.each(baseMap,function (i) {
+                                            map.removeLayer(baseMap[i]);
+                                        });
+                                        baseMap=new Array();
+                                        var urls= $("#editBLAds").val().split(",")
+                                        $.each(urls, function (i) {
+                                            var url=urls[i];
+                                            baseMap.push(new ArcGISTiledMapServiceLayer(url,{"id":url}));
+                                            map.addLayer(baseMap[i]);
+
+                                        });
+                                        $.each(baseMap,function (i) {
+                                            map.reorderLayer(baseMap[i],i);
+                                        });
+                                    });
+
                                     layer.close(index);
                                 }});
                         });
@@ -1743,7 +1802,9 @@ function blank_btnClick() {
             // }
             map.removeAllLayers();
 
-            map.addLayer(baseMap);
+            $.each(baseMap,function (i) {
+                map.addLayer(baseMap[i]);
+            });
             //清空之前交互制图中添加的图层节点
             var treeObj = $.fn.zTree.getZTreeObj("doMapTree");
             if (treeObj){
@@ -1839,9 +1900,12 @@ function layerOncheck(treeId, treeNode) {
         if(treeNode.getParentNode().id==1){
             //地理底图
             if(treeNode.checked){
-                map.removeLayer(baseMap);
+                $.each(baseMap,function (i) {
+                    map.removeLayer(baseMap[i]);
+                });
+
             }else {
-                require(["esri/layers/WebTiledLayer","esri/layers/ArcGISDynamicMapServiceLayer"],function (WebTiledLayer,ArcGISDynamicMapServiceLayer) {
+                require(["esri/layers/WebTiledLayer","esri/layers/ArcGISDynamicMapServiceLayer","esri/layers/ArcGISTiledMapServiceLayer"],function (WebTiledLayer,ArcGISDynamicMapServiceLayer,ArcGISTiledMapServiceLayer) {
                     var mate=treeNode.getParentNode().children;
                     for (var  i = 0; i < mate.length; i++) {
                         if(mate[i].id==treeNode.id)
@@ -1849,12 +1913,26 @@ function layerOncheck(treeId, treeNode) {
                         var treeObj = $.fn.zTree.getZTreeObj(treeId);
                         treeObj.checkNode(mate[i], false, true);
                     }
-                    map.removeLayer(baseMap);
-                    baseMap = new WebTiledLayer(
+                    $.each(baseMap,function (i) {
+                        map.removeLayer(baseMap[i]);
+                    });
+                    baseMap=new Array();
+                    var urls=treeNode.url.split(",");
+                    $.each( urls, function (i) {
+                        var url=urls[i];
+                        baseMap.push(new ArcGISTiledMapServiceLayer(url,{"id":url}));
+                        map.addLayer(baseMap[i]);
+
+                    });
+                    $.each(baseMap,function (i) {
+                        map.reorderLayer(baseMap[i],i);
+                    });
+                    //map.removeLayer(baseMap);
+                   /* baseMap = new WebTiledLayer(
                         treeNode.url
                     );
                     map.addLayer(baseMap)
-                    map.reorderLayer(baseMap,1);
+                    map.reorderLayer(baseMap,1);*/
                 });
 
             }
@@ -2148,7 +2226,8 @@ function layerOncheck(treeId, treeNode) {
                 if (treeNode.dataType=="templateData"){
                     if (map && (map.getLayer(dataUrl_template))) {
                         var thisLayer = map.getLayer(dataUrl_template);
-                        thisLayer.hide()
+                        thisLayer.hide();
+
                     }
                 }
                 else
@@ -2198,9 +2277,11 @@ function layerOncheck_Template(treeId, treeNode) {
         if(treeNode.getParentNode().id==1){
             //地理底图
             if(treeNode.checked){
-                map.removeLayer(baseMap);
+                $.each(baseMap,function (i) {
+                    map.removeLayer(baseMap[i]);
+                });
             }else {
-                require(["esri/layers/WebTiledLayer","esri/layers/ArcGISDynamicMapServiceLayer"],function (WebTiledLayer,ArcGISDynamicMapServiceLayer) {
+                require(["esri/layers/WebTiledLayer","esri/layers/ArcGISDynamicMapServiceLayer","esri/layers/ArcGISTiledMapServiceLayer"],function (WebTiledLayer,ArcGISDynamicMapServiceLayer,ArcGISTiledMapServiceLayer) {
                     var mate=treeNode.getParentNode().children;
                     for (var  i = 0; i < mate.length; i++) {
                         if(mate[i].id==treeNode.id)
@@ -2208,12 +2289,26 @@ function layerOncheck_Template(treeId, treeNode) {
                         var node = layerNodesObj.getNodeByTId(mate[i].tId);
                         layerNodesObj.checkNode(node, false, true);
                     }
-                    map.removeLayer(baseMap);
+                   /* map.removeLayer(baseMap);
                     baseMap = new WebTiledLayer(
                         treeNode.url
                     );
                     map.addLayer(baseMap)
-                    map.reorderLayer(baseMap,1);
+                    map.reorderLayer(baseMap,1);*/
+                    $.each(baseMap,function (i) {
+                        map.removeLayer(baseMap[i]);
+                    });
+                    baseMap=new Array();
+                    var urls=treeNode.url.split(",");
+                    $.each( urls, function (i) {
+                        var url=urls[i];
+                        baseMap.push(new ArcGISTiledMapServiceLayer(url,{"id":url}));
+                        map.addLayer(baseMap[i]);
+
+                    });
+                    $.each(baseMap,function (i) {
+                        map.reorderLayer(baseMap[i],i);
+                    });
                 });
 
             }
