@@ -408,20 +408,21 @@ function doMap() {
                         });
                     }
                     if(treeNode.id==4){
-                        layui.use('layer', function(){
-                            var layer = layui.layer;
-                            layer.open({
-                                title: '添加统计图层',
-                                skin: "layui-layer-lan",
-                                type: 0,
-                                shade: 0,
-                                content:$('#test'),
-                                yes:function(index, layero){
-                                    //do something
-                                    layer.close(index); //如果设定了yes回调，需进行手工关闭
-                                }
-                            });
-                        });
+                        opentjMenuLayer();
+                        // layui.use('layer', function(){
+                        //     var layer = layui.layer;
+                        //     layer.open({
+                        //         title: '添加统计图层',
+                        //         skin: "layui-layer-lan",
+                        //         type: 0,
+                        //         shade: 0,
+                        //         content:$('#test'),
+                        //         yes:function(index, layero){
+                        //             //do something
+                        //             layer.close(index); //如果设定了yes回调，需进行手工关闭
+                        //         }
+                        //     });
+                        // });
                     }
                 });
             }

@@ -1,0 +1,84 @@
+/*统计图层面板的样式*/
+.layui-upload-choose{
+    position: absolute;
+    color: #3c3131;
+}
+
+.tjPanel{
+    font-size: 0;
+    width: 100%;
+    height: 100%;
+    box-sizing: content-box;
+}
+
+.tjPanel-leftBar{
+    box-sizing: border-box;
+    display:inline-block;/*两个子元素都设置为inline-block*/
+    vertical-align: top; /*两个inline-block的盒子，必须两个子元素都顶端对齐。*/
+    width:150px;
+    height: 100%;
+    background-color: #393d49;
+}
+
+.tjPanel-leftBar ul{
+    width: 100%;
+}
+
+.tjPanel-leftBar .layui-nav-item a{
+    height:69px;
+    font-size: 14px;
+    line-height: 69px;
+    text-align: center;
+}
+
+.tjPanel-content{
+    font-size: 14px;
+    box-sizing: border-box;
+    display:inline-block;
+    vertical-align: top;
+    width:-webkit-calc(100% - 150px);/*减号前后要有空格，否则无效，减去的宽度必须计算清楚*/
+    height: 100%;
+}
+
+.tjPanel-content .layui-tab-title{
+    text-align: center;
+}
+
+#shpFileUploadControl{
+    padding: 25px 50px;
+}
+
+#shpLoadConfirmBtn{
+    position: absolute;
+    bottom: 23px;
+    right: 20px;
+}
+
+.regionSelectItem{
+    margin-left: -20px;
+    margin-top: 20px;
+    float: left;
+    width: 100%;
+}
+
+.adminSelectTips{
+    font-size: 12px;
+    margin-left: 110px;
+    margin-top: -10px;
+}
+
+.admin-form-btn-group{
+    float: right;
+    bottom: 0px;
+}
+
+.admin-form-btn{
+    height: 33px;
+    line-height: 33px;
+}
+
+.select-region-label{
+    width: 109px;
+    line-height: 7px;
+    padding-top: 15px;
+}
