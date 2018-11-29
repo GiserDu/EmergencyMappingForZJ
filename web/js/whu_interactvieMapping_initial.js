@@ -231,6 +231,10 @@ function doMap() {
             },
             edit: {
                 enable: true,
+                drag: {
+                    isCopy: false,
+                    isMove: false,
+                }, //节点不能拖拽
                 showRenameBtn: false,
                 showRemoveBtn: false
             },
@@ -796,9 +800,12 @@ function doMap() {
             shade: 0,
             resize: true,
             maxmin:true,
+            area: ['250', '350px'],
+            // btn: ['编辑图层'],
             closeBtn:0,
             content:$('#doMapTree'),
             yes: function(index, layero) {//确定后执行回调
+
             }});
     });
 }
@@ -1010,9 +1017,10 @@ function sweetAlert1(mapName) {
             layer.close(layer.index);
             if (layerIndex){
                 if (typeFlag == 1){
-                    for(var i=1; i<layerIndex+1; i++){
-                        $("#layui-layer"+ i).css("display", "none");
-                    }
+                    // for(var i=1; i<layerIndex+1; i++){
+                     if (blankClassNo)
+                        $("#layui-layer"+ blankClassNo).css("display", "none");
+                    // }
                     // layer.close(layerIndex);
                 }
             }
@@ -1048,7 +1056,7 @@ function sweetAlert1(mapName) {
             $("#layui-layer"+ (templateClassNo)).css("display", "block");
             // layerIndex = layer.index;
             typeFlag = 0;
-            $(".layui-layer-title").text(mapName);
+            $("#layui-layer"+ (templateClassNo) +" .layui-layer-title").text(mapName);
         });
 
     }
@@ -1169,6 +1177,10 @@ function addModelLayUI(mapName) {
             },
             edit: {
                 enable: true,
+                drag: {
+                    isCopy: false,
+                    isMove: false,
+                }, //节点不能拖拽
                 showRenameBtn: false,
                 showRemoveBtn: false
             },
@@ -1748,10 +1760,10 @@ function addModelLayUI(mapName) {
             maxmin:true,
             closeBtn:0,
             area: ['250', '350px'],
-            //btn: ['确定'],
+            // btn: ['编辑图层'],
             content: $('#doMapTree_Template'),
             yes: function(index, layero) {//确定后执行回调
-                alert("添加响应事件")
+
             },
             cancel: function(index, layero){
                 if(confirm('确定要关闭么,将清除所有操作图层')){ //只有当点击confirm框的确定时，该层才会关闭
@@ -1784,9 +1796,9 @@ function blank_btnClick() {
             layer.close(layer.index);
             if (layerIndex){
                 if (typeFlag == 0){
-                    for(var i=1; i<layerIndex+1; i++){
-                        $("#layui-layer"+ i).css("display", "none");
-                    }
+                    // for(var i=1; i<layerIndex+1; i++){
+                    if (templateClassNo)
+                        $("#layui-layer"+ templateClassNo).css("display", "none");
                     // layer.close(layerIndex);
                 }
             }
@@ -1824,7 +1836,7 @@ function blank_btnClick() {
             blankFlag = 1;
             $("#layui-layer"+ (blankClassNo)).css("display", "block");
             typeFlag = 1;
-            $(".layui-layer-title").text('交互制图');
+            $("#layui-layer"+ (blankClassNo) +" .layui-layer-title").text('交互制图');
             // layerIndex = layer.index;
             // $(".layui-layer").css("display", "block");
         });
@@ -1839,6 +1851,316 @@ function chooseTemplate(mapName) {
     // parent.layer.closeAll();
     parent.sweetAlert1(mapName);
 }
+
+//图层顺序改变和编辑
+function layerEdit() {
+    //构造当前图层树
+    var layerObj;
+    var setting = {
+        check:{
+            enable: false,
+        },
+        view:{
+            showIcon: true,
+        },
+        edit:{
+            enable: true,
+            drag:{
+                isCopy: false,
+                isMove: true,
+                inner: false,
+                // prev: canPrev,
+                // next: canPrev,
+            },
+            showRenameBtn: false,
+            showRemoveBtn: false,
+        },
+        data:{
+            keep:{
+                leaf: true,
+                parent: true,
+            }
+        },
+        callback:{
+            beforeDrag: zTreeBeforeDrag,
+            beforeDrop: zTreeBeforeDrop,
+            onDrop: zTreeOnDrop,
+            onClick: zTreeOnClick,
+        }
+    };
+    // function canPrev(treeId, nodes, targetNode) {
+    //     return !targetNode.isParent;
+    // }
+    //父节点不能移动
+    function zTreeBeforeDrag(treeId, treeNodes) {
+        if(treeNodes[0]["isParent"] == true || treeNodes[0].name == "地理底图") //暂时设定地理底图节点不能移动
+            return false;     
+        return true;
+    }
+    var targetNodeIndex;
+    var targetLayerIndex1;
+    var baseMapNode1;
+    var baseMapNode1Index;
+    //节点只能在同一图层组中移动
+    function zTreeBeforeDrop(treeId, treeNodes, targetNode, moveType) {
+        var oldPid=treeNodes[0].getParentNode();
+        var targetPid=targetNode.getParentNode();
+        targetNodeIndex = targetNode.getIndex();
+
+        for (var ii=0; ii<map.layerIds.length; ii++){
+            if (map.layerIds[ii] == targetNode.mapId){
+                targetLayerIndex1 = ii;
+                break;
+            }
+        }
+        if(oldPid!=targetPid){
+            alert("只能在同一图层组中移动位置！");
+            return false;
+        }
+    }
+    //节点移动后改变图层顺序
+    function zTreeOnDrop(event, treeId, treeNodes, targetNode, moveType) {
+        if (targetNode){
+            if (treeNodes[0].getParentNode().name == "图层"){
+                console.log(targetNode.name);
+                var nodeIndex = treeNodes[0].getIndex();
+                var thisLayer = map.getLayer(treeNodes[0].mapId);
+                var newLayerIndex = treeNodes[0].getParentNode().children.length - nodeIndex - 1;
+                map.reorderLayer(thisLayer, newLayerIndex);
+            }
+            else {
+                if (treeNodes[0].name == "地理底图"){ //暂未实现底图节点的移动
+                    var nodeIndex = treeNodes[0].getIndex();
+                    var theseLayers = new Array();
+                    // var newLayerIndexs;
+                    // theseLayers.push(map.getLayer(treeNodes[0].mapId));
+                    var firstLayerIndex;
+                    for (var j=0; j<map.layerIds.length; j++){
+                        if (map.layerIds[j] == treeNodes[0].mapId){
+                            firstLayerIndex = j;
+                            break;
+                        }
+                    }
+                    for (var i=0; i<baseMap.length; i++){
+                        theseLayers.push(map.getLayer(map.layerIds[firstLayerIndex+i]));
+                        // newLayerIndexs = treeNodes[0].getParentNode().children.length + baseMap.length - 1 - (nodeIndex+i) - 1;
+                        // newLayerIndexs.push(nodeIndex + i + 1);
+                        // map.reorderLayer(theseLayers, newLayerIndexs);
+                    }
+                    console.log(targetNode.getIndex());
+                    var newLayerIndex;
+
+                    if (targetNode.getIndex() > targetNodeIndex){
+                        //移到了目标节点上面
+                        if (targetLayerIndex1 == (map.layerIds.length - 1)){
+                            newLayerIndex = targetLayerIndex1;
+                            for (var k=0; k<theseLayers.length; k++){
+                                map.reorderLayer(theseLayers[k], (newLayerIndex));
+                            }
+                        }
+
+                        else{
+                            newLayerIndex = targetLayerIndex1;
+                            for (var k=0; k<theseLayers.length; k++){
+                                map.reorderLayer(theseLayers[k], (newLayerIndex+1));
+                            }
+                        }
+
+                    }
+                    else if (targetNode.getIndex() < targetNodeIndex){
+                        //移到了目标节点下面
+                        if (targetLayerIndex1 == 0){
+                            newLayerIndex = targetLayerIndex1;
+                            for (var k=0; k<theseLayers.length; k++){
+                                map.reorderLayer(theseLayers[k], (newLayerIndex+k));
+                            }
+                        }
+
+                        else{
+                            newLayerIndex = targetLayerIndex1;
+                            for (var k=0; k<theseLayers.length; k++){
+                                map.reorderLayer(theseLayers[k], (newLayerIndex+k));
+                            }
+                        }
+                    }
+                }
+                else {
+                    var zTreeObj = $.fn.zTree.getZTreeObj("layerTree");
+                    var baseMapNode2 = zTreeObj.getNodeByParam("name", "地理底图", null);
+                    console.log(baseMapNode1Index);
+                    console.log(baseMapNode2.getIndex());
+                    if (baseMapNode2.getIndex() == baseMapNode1Index){
+                        var nodeIndex = treeNodes[0].getIndex();
+                        var thisLayer = map.getLayer(treeNodes[0].mapId);
+                        var newLayerIndex = treeNodes[0].getParentNode().children.length + baseMap.length - 1 - nodeIndex - 1;
+                        map.reorderLayer(thisLayer, newLayerIndex);
+                    }
+                    else if (baseMapNode2.getIndex() < baseMapNode1Index){
+                        //某个非底图图层移动到了底图图层下面
+                        var nodeIndex = treeNodes[0].getIndex();
+                        var thisLayer = map.getLayer(treeNodes[0].mapId);
+                        var newLayerIndex = treeNodes[0].getParentNode().children.length - nodeIndex - 1;
+                        map.reorderLayer(thisLayer, newLayerIndex);
+                    }
+                    else{ //某个非底图图层移动到了底图图层上面
+                        var nodeIndex = treeNodes[0].getIndex();
+                        var thisLayer = map.getLayer(treeNodes[0].mapId);
+                        var newLayerIndex = treeNodes[0].getParentNode().children.length + baseMap.length - 1 - nodeIndex - 1;
+                        map.reorderLayer(thisLayer, newLayerIndex);
+                    }
+                    baseMapNode1Index = baseMapNode2.getIndex();
+                }
+            }
+        }
+
+    }
+    //点击节点打开透明度设置窗口
+    function zTreeOnClick(event, treeId, treeNode, clickFlag) {
+        var nowOpacity = map.getLayer(treeNode.mapId).opacity * 100;
+        layui.use('layer', function (layui_index) {
+            var layer = layui.layer;
+            layer.open({
+                title: '图层透明度设置',
+                skin: "layui-layer-lan",
+                type: 0,
+                shade: 0,
+                content: "<div id='opacity'><p style='padding-left: 12px'><div cata='layerOpacity' id='layerOpacity' class='data_slider' style='padding-top: 25px'></div></p></div>",
+
+                yes: function (index, layero) {//确定后执行回调
+                    layer.close(index);
+                }
+            });
+        });
+        layui.use('slider', function(){
+            var slider = layui.slider;
+
+            //渲染
+            slider.render({
+                elem: '#layerOpacity',  //绑定元素
+                min: 0,
+                max: 100,
+                value: nowOpacity,
+                change: function (value) {
+                    var changeOpacity = value / 100;
+                    map.getLayer(treeNode.mapId).setOpacity(changeOpacity);
+                },
+            });
+        });
+    }
+    var treeObj;
+    var parentNodes;
+    var allServiceNodes; //当前模板的所有专题图层
+    var allFeatureNodes; //当前模板的所有要素图层
+    var serviceLayerNodes = new Array(); //当前在map中的地图图层
+    var featureLayerNodes = new Array(); //当前在map中的graphic图层
+    if (typeFlag == 0){
+        treeObj = $.fn.zTree.getZTreeObj("doMapTree_Template");
+    }
+    else if (typeFlag == 1)
+        treeObj = $.fn.zTree.getZTreeObj("doMapTree");
+    if (treeObj){
+        parentNodes = treeObj.getNodesByParam("isParent", true, null);
+        allFeatureNodes = parentNodes[2].children;
+        allServiceNodes = parentNodes[1].children;
+    }
+    //得到所有地图节点
+    for (var i=map.layerIds.length-1; i>=0; i--){
+        if (allServiceNodes){
+            for (var j=0; j<allServiceNodes.length; j++){
+                if (map.layerIds[i] == allServiceNodes[j].url){
+                    allServiceNodes[j].mapId = map.layerIds[i];
+                    serviceLayerNodes.push(allServiceNodes[j]);
+                }
+
+            }
+        }
+    }
+    var baseMapNode = {name: "地理底图", mapId: map.layerIds[0]};
+    serviceLayerNodes.push(baseMapNode);
+    //得到所有图层节点
+    for (var i=map.graphicsLayerIds.length-1; i>=0; i--){
+        switch (map.graphicsLayerIds[i]){
+            case "studyAreaLayer":
+                featureLayerNodes.push({name:"制图区域框", mapId:map.graphicsLayerIds[i]});
+                break;
+            case "pointPlotLayer":
+                featureLayerNodes.push({name:"标绘点", mapId:map.graphicsLayerIds[i]});
+                break;
+            case "linePlotLayer":
+                featureLayerNodes.push({name:"标绘线", mapId:map.graphicsLayerIds[i]});
+                break;
+            case "polygonPlotLayer":
+                featureLayerNodes.push({name:"标绘面", mapId:map.graphicsLayerIds[i]});
+                break;
+        }
+        if (allFeatureNodes){
+            for (var j=0; j<allFeatureNodes.length; j++){
+                if (allFeatureNodes[j].dataType){
+                    if (allFeatureNodes[j].dataType == "templateData"){
+                        if (map.graphicsLayerIds[i] == allFeatureNodes[j].data){
+                            allFeatureNodes[j].mapId = map.graphicsLayerIds[i];
+                            featureLayerNodes.push(allFeatureNodes[j]);
+                        }
+                    }
+                    else if (allFeatureNodes[j].dataType == "urlFeatureData"){
+                        if (map.graphicsLayerIds[i] == allFeatureNodes[j].url){
+                            allFeatureNodes[j].mapId = map.graphicsLayerIds[i];
+                            featureLayerNodes.push(allFeatureNodes[j]);
+                        }
+                        else if (allFeatureNodes[j]["thematicData"])
+                            if (map.graphicsLayerIds[i] == allFeatureNodes[j]["thematicData"].id){
+                                allFeatureNodes[j].mapId = map.graphicsLayerIds[i];
+                                featureLayerNodes.push(allFeatureNodes[j]);
+                            }
+                    }
+                }
+                else{
+                    if (map.graphicsLayerIds[i] == allFeatureNodes[j].url){
+                        allFeatureNodes[j].mapId = map.graphicsLayerIds[i];
+                        featureLayerNodes.push(allFeatureNodes[j]);
+                    }
+
+                    else if (allFeatureNodes[j]["thematicData"])
+                        if (map.graphicsLayerIds[i] == allFeatureNodes[j]["thematicData"].id){
+                            allFeatureNodes[j].mapId = map.graphicsLayerIds[i];
+                            featureLayerNodes.push(allFeatureNodes[j]);
+                        }
+                }
+                // else if (allFeatureNodes[j].textLayerChecked == "checked")
+            }
+        }
+
+    }
+    var layerTreeData = [
+        {name: "地图", pid: 1, isParent: true, open: true, children: serviceLayerNodes},
+        {name: "图层", pid: 2, isParent: true, open: true, children: featureLayerNodes}
+    ]
+
+    layui.use('layer', function () {
+        var layer1 = layui.layer;
+        layer1.open({
+            title: '图层编辑',
+            skin: "layui-layer-lan",
+            type: 1,
+            shade: 0,
+            resize: false,
+            area: ["200px","400px"],
+            btn: ['刷新'],
+            content: "<div id='layerEdit'>" +
+            "<p style='padding: 6px'>在下方拖动图层以改变叠放顺序，点击图层以设置其透明度:</p>" +
+            "<p><div id='layerTree' class='ztree' style='padding: 6px;'></div></p></div>",
+            // content: $('#layerTree'),
+            yes: function(index, layero) {
+                layerEdit();
+                layer.close(layer.index);
+            }
+        });
+    });
+    layerObj = $.fn.zTree.init($("#layerTree"), setting, layerTreeData);
+    baseMapNode1 = layerObj.getNodeByParam("name", "地理底图", null);
+    baseMapNode1Index = baseMapNode1.getIndex();
+}
+
 //选择制图模板
 $("#templateMap").click(function () {
     /**
@@ -1952,7 +2274,11 @@ function layerOncheck(treeId, treeNode) {
                     "esri/InfoTemplate", "esri/dijit/PopupTemplate"
                 ], function (ArcGISDynamicMapServiceLayer, InfoTemplate, PopupTemplate)
                 {
-
+                    if (map && (map.getLayer(treeNode.url))) {//如果已经加载，只是做了隐藏，显示就好了，下面的步骤跳过
+                        var thisLayer = map.getLayer(treeNode.url);
+                        thisLayer.show();
+                        return;
+                    }
 
                     var serviceUrl = treeNode.url;
                     var serviceUrlstr=serviceUrl.substring(0,serviceUrl.lastIndexOf("/"));
@@ -1978,7 +2304,7 @@ function layerOncheck(treeId, treeNode) {
                     }
                 });*/
                 var thisLayer = map.getLayer( treeNode.url);
-                map.removeLayer(thisLayer);
+                thisLayer.hide();
             }
         }
         if (treeNode.getParentNode().id===3) {//如果操作的是要素图层
@@ -2316,11 +2642,17 @@ function layerOncheck_Template(treeId, treeNode) {
         }
         if(treeNode.getParentNode().id==2){
             //专题服务
+            //改为show/hide的显示机制
             if(treeNode.checked){
+                if (map && (map.getLayer(treeNode.url))) {//如果已经加载，只是做了隐藏，显示就好了，下面的步骤跳过
+                    var thisLayer = map.getLayer(treeNode.url);
+                    thisLayer.show();
+                    return;
+                }
                 ServerLayerArr.filter(function (p) {
                     var id=treeNode.name+"_"+(treeNode.url);
                     if(p.id==id){
-                        map.removeLayer(map.getLayer(id));
+                        map.getLayer(id).hide();
                     }
                 });
 
