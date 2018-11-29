@@ -1892,14 +1892,26 @@ function layerEdit() {
     // }
     //父节点不能移动
     function zTreeBeforeDrag(treeId, treeNodes) {
-        if(treeNodes[0]["isParent"] == true)
+        if(treeNodes[0]["isParent"] == true || treeNodes[0].name == "地理底图") //暂时设定地理底图节点不能移动
             return false;     
         return true;
     }
+    var targetNodeIndex;
+    var targetLayerIndex1;
+    var baseMapNode1;
+    var baseMapNode1Index;
     //节点只能在同一图层组中移动
     function zTreeBeforeDrop(treeId, treeNodes, targetNode, moveType) {
         var oldPid=treeNodes[0].getParentNode();
         var targetPid=targetNode.getParentNode();
+        targetNodeIndex = targetNode.getIndex();
+
+        for (var ii=0; ii<map.layerIds.length; ii++){
+            if (map.layerIds[ii] == targetNode.mapId){
+                targetLayerIndex1 = ii;
+                break;
+            }
+        }
         if(oldPid!=targetPid){
             alert("只能在同一图层组中移动位置！");
             return false;
@@ -1907,10 +1919,99 @@ function layerEdit() {
     }
     //节点移动后改变图层顺序
     function zTreeOnDrop(event, treeId, treeNodes, targetNode, moveType) {
-        var nodeIndex = treeNodes[0].getIndex();
-        var thisLayer = map.getLayer(treeNodes[0].mapId);
-        var newLayerIndex = treeNodes[0].getParentNode().children.length - nodeIndex - 1;
-        map.reorderLayer(thisLayer, newLayerIndex);
+        if (targetNode){
+            if (treeNodes[0].getParentNode().name == "图层"){
+                console.log(targetNode.name);
+                var nodeIndex = treeNodes[0].getIndex();
+                var thisLayer = map.getLayer(treeNodes[0].mapId);
+                var newLayerIndex = treeNodes[0].getParentNode().children.length - nodeIndex - 1;
+                map.reorderLayer(thisLayer, newLayerIndex);
+            }
+            else {
+                if (treeNodes[0].name == "地理底图"){ //暂未实现底图节点的移动
+                    var nodeIndex = treeNodes[0].getIndex();
+                    var theseLayers = new Array();
+                    // var newLayerIndexs;
+                    // theseLayers.push(map.getLayer(treeNodes[0].mapId));
+                    var firstLayerIndex;
+                    for (var j=0; j<map.layerIds.length; j++){
+                        if (map.layerIds[j] == treeNodes[0].mapId){
+                            firstLayerIndex = j;
+                            break;
+                        }
+                    }
+                    for (var i=0; i<baseMap.length; i++){
+                        theseLayers.push(map.getLayer(map.layerIds[firstLayerIndex+i]));
+                        // newLayerIndexs = treeNodes[0].getParentNode().children.length + baseMap.length - 1 - (nodeIndex+i) - 1;
+                        // newLayerIndexs.push(nodeIndex + i + 1);
+                        // map.reorderLayer(theseLayers, newLayerIndexs);
+                    }
+                    console.log(targetNode.getIndex());
+                    var newLayerIndex;
+
+                    if (targetNode.getIndex() > targetNodeIndex){
+                        //移到了目标节点上面
+                        if (targetLayerIndex1 == (map.layerIds.length - 1)){
+                            newLayerIndex = targetLayerIndex1;
+                            for (var k=0; k<theseLayers.length; k++){
+                                map.reorderLayer(theseLayers[k], (newLayerIndex));
+                            }
+                        }
+
+                        else{
+                            newLayerIndex = targetLayerIndex1;
+                            for (var k=0; k<theseLayers.length; k++){
+                                map.reorderLayer(theseLayers[k], (newLayerIndex+1));
+                            }
+                        }
+
+                    }
+                    else if (targetNode.getIndex() < targetNodeIndex){
+                        //移到了目标节点下面
+                        if (targetLayerIndex1 == 0){
+                            newLayerIndex = targetLayerIndex1;
+                            for (var k=0; k<theseLayers.length; k++){
+                                map.reorderLayer(theseLayers[k], (newLayerIndex+k));
+                            }
+                        }
+
+                        else{
+                            newLayerIndex = targetLayerIndex1;
+                            for (var k=0; k<theseLayers.length; k++){
+                                map.reorderLayer(theseLayers[k], (newLayerIndex+k));
+                            }
+                        }
+                    }
+                }
+                else {
+                    var zTreeObj = $.fn.zTree.getZTreeObj("layerTree");
+                    var baseMapNode2 = zTreeObj.getNodeByParam("name", "地理底图", null);
+                    console.log(baseMapNode1Index);
+                    console.log(baseMapNode2.getIndex());
+                    if (baseMapNode2.getIndex() == baseMapNode1Index){
+                        var nodeIndex = treeNodes[0].getIndex();
+                        var thisLayer = map.getLayer(treeNodes[0].mapId);
+                        var newLayerIndex = treeNodes[0].getParentNode().children.length + baseMap.length - 1 - nodeIndex - 1;
+                        map.reorderLayer(thisLayer, newLayerIndex);
+                    }
+                    else if (baseMapNode2.getIndex() < baseMapNode1Index){
+                        //某个非底图图层移动到了底图图层下面
+                        var nodeIndex = treeNodes[0].getIndex();
+                        var thisLayer = map.getLayer(treeNodes[0].mapId);
+                        var newLayerIndex = treeNodes[0].getParentNode().children.length - nodeIndex - 1;
+                        map.reorderLayer(thisLayer, newLayerIndex);
+                    }
+                    else{ //某个非底图图层移动到了底图图层上面
+                        var nodeIndex = treeNodes[0].getIndex();
+                        var thisLayer = map.getLayer(treeNodes[0].mapId);
+                        var newLayerIndex = treeNodes[0].getParentNode().children.length + baseMap.length - 1 - nodeIndex - 1;
+                        map.reorderLayer(thisLayer, newLayerIndex);
+                    }
+                    baseMapNode1Index = baseMapNode2.getIndex();
+                }
+            }
+        }
+
     }
     //点击节点打开透明度设置窗口
     function zTreeOnClick(event, treeId, treeNode, clickFlag) {
@@ -2055,6 +2156,8 @@ function layerEdit() {
         });
     });
     layerObj = $.fn.zTree.init($("#layerTree"), setting, layerTreeData);
+    baseMapNode1 = layerObj.getNodeByParam("name", "地理底图", null);
+    baseMapNode1Index = baseMapNode1.getIndex();
 }
 
 //选择制图模板
