@@ -264,16 +264,12 @@ $(document).ready(function() {
 							break;
                         case "textsymbol":
                             geom = new Point(featureObj.coordinates);
-                            symbol = new TextSymbol();
+                            symbol = new TextSymbol(featureObj.style);
                             if(featureObj.name){
                                 symbol.setText(featureObj.name);
                             }else{
                                 symbol.setText(markStyle.textMarker.text);
                             }
-                            var font = new Font();
-                            font.setStyle(Font[markStyle.textMarker.font]);
-                            symbol.setFont(font);
-                            symbol.setColor(Color.fromRgb(markStyle.textMarker.color));
                             geom.spatialReference = new SpatialReference(3857);
                             graphic.setGeometry(geom);
                             graphic.setSymbol(symbol);
@@ -604,17 +600,14 @@ var addFeatureToLocalstorage = function (feature) {
         case 'point':
             coordinates = [geom.x, geom.y];
             if(feature.symbol.type==="textsymbol"){
-                symbol = new TextSymbol();
+                if(feature.symbol){
+                    symbol = new TextSymbol(feature.symbol);
+                }
                 if(feature.attributes['name']){
                     symbol.setText(feature.attributes['name']);
                 }else{
                     symbol.setText(markStyle.textMarker.text);
                 }
-
-                var font = new Font();
-                font.setStyle(Font[markStyle.textMarker.font]);
-                symbol.setFont(font);
-                symbol.setColor(Color.fromRgb(markStyle.textMarker.color));
             }else{
                 symbol = new PictureMarkerSymbol(markStyle.point.icon, 32, 32);
             }
@@ -636,7 +629,7 @@ var addFeatureToLocalstorage = function (feature) {
             remark: feature.attributes["remark"],
             type: feature.symbol.type==="textsymbol"?"textsymbol":type,
             coordinates: coordinates,
-            style: feature.attributes["style"]
+            style: feature.symbol.type==="textsymbol"?feature.symbol:feature.attributes["style"]
         };
         if (saveFeature) {
             var existed = false;
@@ -738,6 +731,14 @@ var selectedFunc = function (feature) {
     switch (feature.geometry.type) {
     case "point":
         if(feature.symbol.type==="textsymbol"){
+            removeClass(pointStyleItem, "show");
+            removeClass(lineStyleItem, "show");
+            removeClass(polygonStyleItem, "show");
+            lastDrawFeature = feature;
+            document.getElementById('mark-name').value = feature.attributes['name'];
+            document.getElementById('mark-remark').value = feature.attributes['remark'];
+            openPanelContent(['map-marking-panel', 'map-marking-panel-tip', 'map-mark-edit', 'map-marking-info']);
+            document.getElementById('map-mark-edit-tip').innerHTML = "鼠标左键点击选择标注对象"
             return;
         }
         addClass(pointStyleItem, "show");
@@ -808,7 +809,10 @@ var modifyFunc = function (graphic) {
         editToolbar.on('graphic-move-stop', function (evt) {
             var feature = evt.graphic;
             var style = feature.attributes['style'];
-            markStyle = style;
+            if(feature.symbol.type!="textsymbol")
+            {
+                markStyle = style;
+            }
             addFeatureToLocalstorage(feature)
         })
     })

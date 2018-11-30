@@ -324,7 +324,7 @@ function createStyleButton(){
         "                标绘 <span class=\"caret\"></span>\n" +
         "            </button>\n" +
         "            <ul class=\"dropdown-menu\" role=\"menu\">\n" +
-        "                <li ><a class=\"fa  fa-map-pin\" href=\"#\" id=\"pointPlot\" onclick=\"marking(point)\">&nbsp&nbsp点</a></li>\n" +
+        "                <li ><a class=\"fa  fa-map-pin\" href=\"#\" id=\"pointPlot\" onclick=\"marking(textMarker)\">&nbsp&nbsp点</a></li>\n" +
         "                <li class=\"divider\"></li>\n" +
         "                <li><a class=\"fa fa-ellipsis-h\" href=\"#\" id=\"polylinePlot\" onclick=\"marking(polyline)\">&nbsp&nbsp折线</a></li>\n" +
         "                <li><a class=\"fa fa-ellipsis-h\" href=\"#\" id=\"freeHandPolylinePlot\" onclick=\"marking(freehand_polyline)\">&nbsp&nbsp自由线</a></li>\n" +
