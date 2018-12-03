@@ -302,38 +302,38 @@ input[type="checkbox"]{
     margin-right: 6px;
 }
 
-#color-solution,#color-selected {
-    height: 40px;
-}
+/*#color-solution,#color-selected {*/
+    /*height: 40px;*/
+/*}*/
 
-#chart-selected .select_title img{
-    padding-left: 91.5px;
-}
+/*#chart-selected .select_title img{*/
+    /*padding-left: 91.5px;*/
+/*}*/
 
-.sym-selected .select_content img{
-    margin-top: 6px;
-}
+/*.sym-selected .select_content img{*/
+    /*margin-top: 6px;*/
+/*}*/
 
 /*li横向排列*/
-#chart-selected ul li{
-    margin: 0px;
-    padding: 0px;
-}
+/*#chart-selected ul li{*/
+    /*margin: 0px;*/
+    /*padding: 0px;*/
+/*}*/
 
-#chart-selected ul{
-    display: flex;
-    flex-direction: row;
-    flex-wrap: wrap;
-}
+/*#chart-selected ul{*/
+    /*display: flex;*/
+    /*flex-direction: row;*/
+    /*flex-wrap: wrap;*/
+/*}*/
 
-#chart-selected li {
-    border: 1px solid whitesmoke;
-    width: 50px; /*每个元素的初始化宽度*/
-    text-align: center;
-    margin-top: 10px;
-    margin-bottom: 10px;
-    flex: auto; /*这是关键*/
-}/*li横向排列end*/
+/*#chart-selected li {*/
+    /*border: 1px solid whitesmoke;*/
+    /*width: 50px; !*每个元素的初始化宽度*!*/
+    /*text-align: center;*/
+    /*margin-top: 10px;*/
+    /*margin-bottom: 10px;*/
+    /*flex: auto; !*这是关键*!*/
+/*}!*li横向排列end*!*/
 
 .slider-border{
     margin-top: 10px;

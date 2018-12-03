@@ -103,8 +103,10 @@
     left: -400px;
     top: 150px;
     max-width:373px;
-    max-height:calc(100% - 150px);
-    overflow: auto;
+    max-height:calc(100% - 100px);
+    height: 100%;
+    /*max-height:750px;*/
+    /*overflow: auto;*/
     z-index: 2;
     background-color: #fff;
     transition-property: all;
@@ -146,7 +148,10 @@
     border-radius: 0px 0px 4px 0px;
     box-shadow: 1px 1px 1px #999;
     width: 100%;
-    /*height: 350px;*/
+    /*max-height: calc(100% - 100px);*/
+    height: 100%;
+    overflow: auto;
+    /*max-height: 700px;*/
     padding: 0px 0px 10px 0px;
     transition-property: all;
     transition-duration: 500ms;
