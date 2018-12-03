@@ -17,6 +17,11 @@ var measureLayer = null;
 var drawType;
 var lastDrawFeature;
 var markStyle = {
+    textMarker:{
+        text:'请输入标注',
+        font:'STYLE_NORMAL',
+        color:'rgba(255,0,0,1)'
+    },
     label: {
         fontSize: 12,
         fontColor: 'rgba(170,51,0,1)',
@@ -60,6 +65,7 @@ $(document).ready(function() {
 		"esri/symbols/PictureMarkerSymbol",
 		"esri/Color", 
 		"esri/symbols/TextSymbol",
+        "esri/symbols/Font",
 		"esri/layers/LabelClass",
 		"esri/SpatialReference", 
 		"esri/dijit/PopupTemplate",
@@ -68,7 +74,7 @@ $(document).ready(function() {
 			Map, Scalebar, BasemapToggle,
 			WebMercatorUtils, Measurement, Edit, Dom, FeatureLayer,
 			Draw, Point, Polyline, Polygon, Graphic, SimpleLineSymbol, 
-			SimpleFillSymbol, PictureMarkerSymbol, Color, TextSymbol, 
+			SimpleFillSymbol, PictureMarkerSymbol, Color, TextSymbol,Font,
 			LabelClass, SpatialReference, PopupTemplate
 		) {
 			var scalebar = new Scalebar({
@@ -79,7 +85,10 @@ $(document).ready(function() {
 //				map: map
 //			}, Dom.byId("measurementDiv"));
 //			measurementWidget.startup();
-			editToolbar = new Edit(map);
+            var node = document.getElementById("map-mark-edit")
+			editToolbar = new Edit(map,{
+                textSymbolEditorHolder:node
+            });
 			var statesColor = new Color("#666");
 			var statesLabel = new TextSymbol().setColor(statesColor);
 			statesLabel.font.setSize("14pt");
@@ -253,6 +262,25 @@ $(document).ready(function() {
 							});
 							pointFeatureLayer.add(graphic);
 							break;
+                        case "textsymbol":
+                            geom = new Point(featureObj.coordinates);
+                            symbol = new TextSymbol(featureObj.style);
+                            if(featureObj.name){
+                                symbol.setText(featureObj.name);
+                            }else{
+                                symbol.setText(markStyle.textMarker.text);
+                            }
+                            geom.spatialReference = new SpatialReference(3857);
+                            graphic.setGeometry(geom);
+                            graphic.setSymbol(symbol);
+                            graphic.setAttributes({
+                                "id": featureObj.id,
+                                "style": featureObj.style,
+                                "name": featureObj.name,
+                                'remark': featureObj.remark
+                            });
+                            pointFeatureLayer.add(graphic);
+                            break;
 						case "polyline":
 							geom = new Polyline(featureObj.coordinates);
 							symbol = new SimpleLineSymbol(SimpleLineSymbol.STYLE_SOLID, Color.fromRgb(featureObj.style.line.lineColor), featureObj.style.line.lineWidth);
@@ -296,6 +324,13 @@ var marking  = function (type) {
     var lineStyleItem = document.getElementById('line-style-item');
     var polygonStyleItem = document.getElementById('polygon-style-item');
     switch (type) {
+     case 'TEXT':
+        panelHeadTitle = "绘制字符标注";
+        panelTip = "地图上待标注位置鼠标左键点击地图添加一个字符标注，可填写名称、备注，点击保存生效！";
+        removeClass(pointStyleItem, "show");
+        removeClass(lineStyleItem, "show");
+        removeClass(polygonStyleItem, "show");
+        break;
     case 'POINT':
         panelHeadTitle = "绘制点标注";
         panelTip = "地图上待标注位置鼠标左键点击地图添加一个点标注，可填写名称、备注、图标，点击保存生效！";
@@ -413,9 +448,12 @@ var clearAllMapInteraction = function () {
 var addDrawInteraction = function (type) {
     clearAllMapInteraction();
     if (map && drawTool) {
-        require(["esri/toolbars/draw", "esri/symbols/SimpleLineSymbol", "esri/symbols/SimpleFillSymbol", "esri/symbols/PictureMarkerSymbol", "esri/Color", "esri/graphic", ], function (Draw, SimpleLineSymbol, SimpleFillSymbol, PictureMarkerSymbol, Color, Graphic) {
+        require(["esri/toolbars/draw", "esri/symbols/SimpleLineSymbol", "esri/symbols/SimpleFillSymbol", "esri/symbols/PictureMarkerSymbol", "esri/Color", "esri/graphic", "esri/symbols/TextSymbol","esri/symbols/Font"], function (Draw, SimpleLineSymbol, SimpleFillSymbol, PictureMarkerSymbol, Color, Graphic,TextSymbol,Font) {
             switch (type) {
             case 'POINT':
+                drawTool.activate(Draw.POINT);
+                break;
+            case 'TEXT':
                 drawTool.activate(Draw.POINT);
                 break;
             case 'POLYLINE':
@@ -452,16 +490,31 @@ var addDrawInteraction = function (type) {
                 switch (evt.geometry.type) {
                 case "point":
                 case "multipoint":
-                    symbol = new PictureMarkerSymbol(markStyle.point.icon, 32, 32);
-                    var graphic = new Graphic(evt.geometry, symbol);
-                    graphic.setAttributes({
-                        "id": newId(),
-                        "style": markStyle,
-                        "name": "",
-                        'remark': ''
-                    });
-                    lastDrawFeature = graphic;
-                    pointFeatureLayer.add(graphic);
+                    if(type==='TEXT'){
+                        symbol = new TextSymbol();
+                        symbol.setColor(new Color([230, 0, 0, 1]));
+                        symbol.setText("请输入标注");
+                        var graphic = new Graphic(evt.geometry, symbol);
+                        graphic.setAttributes({
+                            "id": newId(),
+                            "style": markStyle,
+                            "name": "",
+                            'remark': ''
+                        });
+                        lastDrawFeature = graphic;
+                        pointFeatureLayer.add(graphic);
+                    }else{
+                        symbol = new PictureMarkerSymbol(markStyle.point.icon, 32, 32);
+                        var graphic = new Graphic(evt.geometry, symbol);
+                        graphic.setAttributes({
+                            "id": newId(),
+                            "style": markStyle,
+                            "name": "",
+                            'remark': ''
+                        });
+                        lastDrawFeature = graphic;
+                        pointFeatureLayer.add(graphic);
+                    }
                     break;
                 case "polyline":
                     symbol = new SimpleLineSymbol(SimpleLineSymbol.STYLE_SOLID, Color.fromRgb(markStyle.line.lineColor), markStyle.line.lineWidth);
@@ -532,7 +585,7 @@ var openPanelContent = function (idList) {
 
 //将标绘图形缓存到本地
 var addFeatureToLocalstorage = function (feature) {
-    require(["esri/symbols/SimpleLineSymbol", "esri/symbols/SimpleFillSymbol", "esri/symbols/PictureMarkerSymbol", "esri/Color", ], function (SimpleLineSymbol, SimpleFillSymbol, PictureMarkerSymbol, Color) {
+    require(["esri/symbols/SimpleLineSymbol", "esri/symbols/SimpleFillSymbol", "esri/symbols/PictureMarkerSymbol", "esri/Color", "esri/symbols/TextSymbol","esri/symbols/Font"], function (SimpleLineSymbol, SimpleFillSymbol, PictureMarkerSymbol, Color,TextSymbol,Font) {
         var arcgisFeatureCacheList = localstorageGet('arcgisFeatureCacheList');
         if (!arcgisFeatureCacheList) {
             arcgisFeatureCacheList = [];
@@ -546,7 +599,19 @@ var addFeatureToLocalstorage = function (feature) {
         switch (type) {
         case 'point':
             coordinates = [geom.x, geom.y];
-            symbol = new PictureMarkerSymbol(markStyle.point.icon, 32, 32);
+            if(feature.symbol.type==="textsymbol"){
+                if(feature.symbol){
+                    symbol = new TextSymbol(feature.symbol);
+                }
+                if(feature.attributes['name']){
+                    symbol.setText(feature.attributes['name']);
+                }else{
+                    symbol.setText(markStyle.textMarker.text);
+                }
+            }else{
+                symbol = new PictureMarkerSymbol(markStyle.point.icon, 32, 32);
+            }
+
             break;
         case 'polyline':
             coordinates = geom.paths;
@@ -562,9 +627,9 @@ var addFeatureToLocalstorage = function (feature) {
             id: feature.attributes["id"],
             name: feature.attributes["name"],
             remark: feature.attributes["remark"],
-            type: type,
+            type: feature.symbol.type==="textsymbol"?"textsymbol":type,
             coordinates: coordinates,
-            style: feature.attributes["style"]
+            style: feature.symbol.type==="textsymbol"?feature.symbol:feature.attributes["style"]
         };
         if (saveFeature) {
             var existed = false;
@@ -595,7 +660,7 @@ var infoSave = function () {
     lastDrawFeature.attributes['name'] = markName.value;
     lastDrawFeature.attributes['remark'] = markRemark.value;
     lastDrawFeature.attributes['style'] = markStyle;
-    addFeatureToLocalstorage(lastDrawFeature)
+    addFeatureToLocalstorage(lastDrawFeature);
     }
     var obj1 = document.getElementById('map-marking-info');
     removeClass(obj1, "show");
@@ -665,6 +730,17 @@ var selectedFunc = function (feature) {
     var polygonStyleItem = document.getElementById('polygon-style-item');
     switch (feature.geometry.type) {
     case "point":
+        if(feature.symbol.type==="textsymbol"){
+            removeClass(pointStyleItem, "show");
+            removeClass(lineStyleItem, "show");
+            removeClass(polygonStyleItem, "show");
+            lastDrawFeature = feature;
+            document.getElementById('mark-name').value = feature.attributes['name'];
+            document.getElementById('mark-remark').value = feature.attributes['remark'];
+            openPanelContent(['map-marking-panel', 'map-marking-panel-tip', 'map-mark-edit', 'map-marking-info']);
+            document.getElementById('map-mark-edit-tip').innerHTML = "鼠标左键点击选择标注对象"
+            return;
+        }
         addClass(pointStyleItem, "show");
         removeClass(lineStyleItem, "show");
         removeClass(polygonStyleItem, "show");
@@ -722,16 +798,21 @@ var modifyFunc = function (graphic) {
         tool = tool | Edit.EDIT_VERTICES;
         tool = tool | Edit.SCALE;
         tool = tool | Edit.ROTATE;
+        tool = tool | Edit.EDIT_TEXT;
         var options = {
             allowAddVertices: true,
             allowDeleteVertices: true,
-            uniformScaling: true
+            uniformScaling: true,
+            //textSymbolEditorHolder:true
         };
         editToolbar.activate(tool, graphic, options);
         editToolbar.on('graphic-move-stop', function (evt) {
             var feature = evt.graphic;
             var style = feature.attributes['style'];
-            markStyle = style;
+            if(feature.symbol.type!="textsymbol")
+            {
+                markStyle = style;
+            }
             addFeatureToLocalstorage(feature)
         })
     })

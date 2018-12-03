@@ -30,9 +30,9 @@ var getThisPath = [];//当前要素节点的所有父节点（包括自己）
 var textEditFlag = 0; //标识对服务地址要素图层编辑时的一种特殊情况
 var layerNodes =[
     {id:1, pId:0, name:"地理底图", open:true, "nocheck":true,children:[
-            {id:101,name:"矢量图",url:"http://106.124.138.198:8080/OneMapServer/rest/services/XJ_VECTOR/MapServer,http://106.124.138.198:8080/OneMapServer/rest/services/XJ_POI/MapServer",checked:true}
-           /* {id:101, name:"矢量图",url:"http://qk.casm.ac.cn:9090/geowinmap/ds?serviceproviderid=map.cachedtms&serviceid=gettile&tilename=map&y=${row}&x=${col}&z=${level}",checked:true},
-            {id:102, name:"影像图",url:"http://qk.casm.ac.cn:9090/geowinmap/ds?serviceproviderid=map.cachedtms&serviceid=gettile&tilename=sate&y=${row}&x=${col}&z=${level}"}*/
+            /*{id:101,name:"矢量图",url:"http://106.124.138.198:8080/OneMapServer/rest/services/XJ_VECTOR/MapServer,http://106.124.138.198:8080/OneMapServer/rest/services/XJ_POI/MapServer",checked:true}*/
+           {id:101, name:"矢量图",url:"http://qk.casm.ac.cn:9090/geowinmap/ds?serviceproviderid=map.cachedtms&serviceid=gettile&tilename=map&y=${row}&x=${col}&z=${level}",checked:true},
+            {id:102, name:"影像图",url:"http://qk.casm.ac.cn:9090/geowinmap/ds?serviceproviderid=map.cachedtms&serviceid=gettile&tilename=sate&y=${row}&x=${col}&z=${level}"}
         ]},
 
     {id:2, pId:0, name:"专题服务图层",isParent:true, open:true,children:[], "nocheck":true},
@@ -97,25 +97,25 @@ $(document).ready(function() {
                 //配置代理
                 config.defaults.io.proxyUrl = "../esriproxy/";
                 config.defaults.io.alwaysUseProxy = false;
-           /* map.on("load", function (evt) {
-                processResults(testData);
-            });*/
-           baseMap=new Array()
+            map.on("load", function (evt) {
+                //processResults(testData);
+            });
+           /*baseMap=new Array()
            var baseMapUrls=layerNodes[0].children[0].url.split(",");
             $.each(baseMapUrls, function (i) {
                 var url=baseMapUrls[i];
                 baseMap.push(new ArcGISTiledMapServiceLayer(url,{"id":url}));
                 map.addLayer(baseMap[i]);
 
-            });
+            });*/
            //baseMap=new ArcGISTiledMapServiceLayer("http://106.124.138.198:8080/OneMapServer/rest/services/XJ_VECTOR/MapServer");
-           /* baseMap = new WebTiledLayer(
+           baseMap = new WebTiledLayer(
                 //'http://qk.casm.ac.cn:9090/geowinmap/ds?serviceproviderid=map.cachedtms&serviceid=gettile&tilename=map&y=${row}&x=${col}&z=${level}',{id:"baseMap"}
                 'https://${subDomain}.tile.thunderforest.com/cycle/${level}/${col}/${row}.png',{"copyright": 'Maps © <a href="http://www.thunderforest.com">Thunderforest</a>, Data © <a href="http://www.openstreetmap.org/copyright">OpenStreetMap contributors</a>',
                     "id": "OpenCycleMap",
                     "subDomains": ["a", "b", "c"]}
-            );*/
-            //map.addLayer(baseMap);
+            );
+            map.addLayer(baseMap);
             studyAreaLayer=new GraphicsLayer('',{id:"studyAreaLayer",name:"studyAreaLayer"});
             studyAreaLayer.name = "studyAreaLayer";
             map.addLayer(studyAreaLayer);
@@ -1141,9 +1141,9 @@ function addModelLayUI(mapName) {
 
         {id:3, pId:0, name:"要素图层", isParent:true,open:true,children:[], "nocheck":true}*/
         {id:1, pId:0, name:"地理底图", open:true, "nocheck":true,children:[
-                {id:101,name:"矢量图",url:["http://106.124.138.198:8080/OneMapServer/rest/services/XJ_VECTOR/MapServer","http://106.124.138.198:8080/OneMapServer/rest/services/XJ_POI/MapServer"],checked:true}
-                /* {id:101, name:"矢量图",url:"http://qk.casm.ac.cn:9090/geowinmap/ds?serviceproviderid=map.cachedtms&serviceid=gettile&tilename=map&y=${row}&x=${col}&z=${level}",checked:true},
-                 {id:102, name:"影像图",url:"http://qk.casm.ac.cn:9090/geowinmap/ds?serviceproviderid=map.cachedtms&serviceid=gettile&tilename=sate&y=${row}&x=${col}&z=${level}"}*/
+                /*{id:101,name:"矢量图",url:["http://106.124.138.198:8080/OneMapServer/rest/services/XJ_VECTOR/MapServer","http://106.124.138.198:8080/OneMapServer/rest/services/XJ_POI/MapServer"],checked:true}*/
+                {id:101, name:"矢量图",url:"http://qk.casm.ac.cn:9090/geowinmap/ds?serviceproviderid=map.cachedtms&serviceid=gettile&tilename=map&y=${row}&x=${col}&z=${level}",checked:true},
+                 {id:102, name:"影像图",url:"http://qk.casm.ac.cn:9090/geowinmap/ds?serviceproviderid=map.cachedtms&serviceid=gettile&tilename=sate&y=${row}&x=${col}&z=${level}"}
             ]},
 
         {id:2, pId:0, name:"专题服务图层",isParent:true, open:true,children:[], "nocheck":true},

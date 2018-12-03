@@ -9,6 +9,7 @@ var ellipse = 'ELLIPSE';
 var arrow = 'ARROW';
 var triangle ='TRIANGLE';
 var edit = 'EDIT';
+var textMarker = 'TEXT'
 var isPlotIconCreated=false;
 
 //滑动图名图例
