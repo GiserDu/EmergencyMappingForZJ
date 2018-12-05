@@ -9,7 +9,7 @@
 }
 
 .layui-card h6{
-    line-height: 3.1;
+    line-height: 2.8;
 }
 
 .tjPanel{
@@ -72,7 +72,13 @@
 
 #shpLoadConfirmBtn{
     position: absolute;
-    bottom: 241px;
+    bottom: 254px;
+    right: 20px;
+}
+
+#comfirmUserSpDataBtn{
+    position: absolute;
+    bottom: 139px;
     right: 20px;
 }
 
@@ -104,6 +110,15 @@
     line-height: 7px;
     padding-top: 15px;
 }
+
+/*选择统计数据的legend*/
+.Panel2_Legend{
+    text-align:center;
+    width: unset;
+    border-bottom: 0px;
+    margin: unset;
+}
+
 
 .chartSymbolCardbody {
     line-height: 40px;
@@ -139,5 +154,19 @@
     width: 50px;
     height: 50px;
     margin: 5px;
+}
+
+.graduatedColorInverseInput{
+   margin-bottom: -11px;
+}
+
+.userDefineColors{
+    margin-top: 6px;
+    margin-bottom: -11px;
+}
+
+.userDefineColors>label{
+    margin-right: 5px;
+    font-weight: 100;
 }
 
