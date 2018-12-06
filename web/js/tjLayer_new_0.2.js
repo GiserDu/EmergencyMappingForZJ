@@ -5,11 +5,16 @@ var symbolOpacitySliderValue=0;
 var classNumSliderValue=5;
 var modelName;
 
+// 假设用户选中的统计指标是以下数组
+var selectedStatisticIndex=["男生人数","女生人数","老人人数","小孩人数"];
+
 function opentjMenuLayer() {
-    layui.use(['layer','form','element'],function () {
-        var layer = layui.layer;
-        var element = layui.element;
-        var form=layui.form;
+    layui.use(['layer','form','element','colorpicker'],function () {
+        var layer = layui.layer
+            ,element = layui.element
+            ,form=layui.form
+            ,$ = layui.$
+            ,colorpicker = layui.colorpicker;
 
         layerIndex=layer.open({
             type: 1,
@@ -17,7 +22,7 @@ function opentjMenuLayer() {
             shadeClose: false,
             skin:"layui-layer-lan",
             shade: 0,
-            area:['700px','470px'],
+            area:['700px','480px'],
             // area:['600px','370px'],
             content:'<div class="tjPanel">\n' +
             '    <div class="tjPanel-leftBar">\n' +
@@ -34,7 +39,7 @@ function opentjMenuLayer() {
             '        </ul>\n' +
             '    </div>\n' +
             '    <div class="tjPanel-content">\n' +
-            '        <div class="layui-tab">\n' +
+            '        <div class="layui-tab layui-tab-brief">\n' +
             '            <ul class="layui-tab-title">\n' +
             '                <li class="layui-this">载入行政区划</li>\n' +
             '                <li>上传自定义数据</li>\n' +
@@ -57,7 +62,7 @@ function opentjMenuLayer() {
             '                        </div>\n' +
             '                        <div class="layui-form-item">\n' +
             '                            <div class="layui-input-block  admin-form-btn-group">\n' +
-            '                                <button class="layui-btn layui-btn-default admin-form-btn" onclick="getAllSelectedData()">确定</button>\n' +
+            '                                <button class="layui-btn layui-btn-default admin-form-btn" onclick="getSpatialData()">下一步</button>\n' +
             '                            </div>\n' +
             '                        </div>\n' +
             '                    </div>\n' +
@@ -69,19 +74,8 @@ function opentjMenuLayer() {
             '                        <p>点击或拖拽上传，请以压缩文件的形式上传</p>\n' +
             '                    </div>\n' +
             '                    <div>\n' +
-            '                        <button type="button" class="layui-btn" id="shpLoadConfirmBtn">开始上传</button>' +
+            '                        <button type="button" class="layui-btn layui-btn-primary" id="shpLoadConfirmBtn">上传</button>' +
             '                    </div>\n' +
-            // '                    <div class="layui-form-item" style="margin-top: 15px;">' +
-            // '                         <label class="layui-form-label"  style="line-height: 41px;width: 93px;padding: 0">空间标识字段</label>\n' +
-            // '                         <div class="layui-input-block">\n' +
-            // '                                <select name="userDataField">' +
-            // '                                      <option value=" ">名称</option>\n' +
-            // '                                      <option value=" ">长度</option>\n' +
-            // '                                      <option value=" ">面积</option>\n' +
-            // '                                      <option value=" ">自定义</option>'+
-            // '                                </select>' +
-            // '                         </div>\n' +
-            // '                    </div>'+
             '                    </div>'+
             '                </div>\n' +
             '            </div>\n' +
@@ -105,7 +99,17 @@ function opentjMenuLayer() {
                 $(".tjPanel-content").html(html2);
                 opentjPanel2();
                 form.render();
-                form.render('select');
+
+
+                // $(".tjPanel-content").html(html3);
+                // initTjSymbol();
+                // renderSlider();
+                // form.render();
+                //
+                // $("#tjInfoSubmit").bind('click',function () {
+                //     var chartSymbolValues=getchartSymbolValues();
+                //     // console.log(a);
+                // });
 
             } else if(leftMenuName=="selectMappingTemplate") {
 
@@ -116,7 +120,7 @@ function opentjMenuLayer() {
                     $(".tjPanel-content").html(html3);
                     initTjSymbol();
                     renderSlider();
-                    // form.render('select');
+                    form.render();
                     $("#tjInfoSubmit").bind('click',function () {
                         var chartSymbolValues=getchartSymbolValues();
                         // console.log(a);
@@ -129,11 +133,12 @@ function opentjMenuLayer() {
                     form.on('select(graduatedModel)', function(data){
                         modelName=data.value;
                     });
-                    form.render('select');
+                    form.render();
                     $("#tjInfoSubmit").bind('click',function () {
                         var graduatedSymbolValues=getgraduatedSymbolValues();
                         console.log(graduatedSymbolValues);
-                    })
+                    });
+
                 }
             }
         });
@@ -143,7 +148,7 @@ function opentjMenuLayer() {
 
 // 获取用户选择的行政区划
 // 点击确定按钮后执行这个函数，后面可能要用ajax传值给后台
-function getAllSelectedData() {
+function getSpatialData() {
     // 获取名字
     // var selectedNum=$("xm-select").attr('title');
     // console.log(selectedNum);
@@ -160,6 +165,121 @@ function getAllSelectedData() {
         // console.log(adminValue);
         selectedValues[i]=adminValue;
     }
+}
+
+// 省市区县多级联动的渲染
+function multiSelectRender(selectName) {
+    var formSelects = layui.formSelects;
+
+    formSelects.config(selectName, {
+        direction: "down",
+        success: function(id, url, val, result){
+            console.log("success回调: " + url);
+            // console.log(formSelects.config.height);
+        },
+        error: function(id, url, val, err){
+            console.log("err回调: " + url);
+        }
+    });
+
+    formSelects.data(selectName, 'server', {
+        url: 'http://yapi.demo.qunar.com/mock/9813/layui/citys',
+        linkage: true,
+        linkageWidth: 130
+    });
+
+    //监听下拉框的打开
+    formSelects.opened(selectName, function(id){
+        var selectTitleHeight=$(".xm-select-title").height();
+        if (selectTitleHeight>36){
+            var layerHeight=470+(selectTitleHeight-36)+'px';
+            var layerContentHeight=428+(selectTitleHeight-36)+'px';
+        }
+        layer.style(layerIndex, {
+            // width: '600px',
+            height: layerHeight,
+        });
+        $(".layui-layer-content").css("height",layerContentHeight);
+    });
+
+    //监听下拉框的关闭
+    formSelects.closed(selectName, function(id){
+        var layerHeight=470+'px';
+        var layerContentHeight=428+'px';
+        layer.style(layerIndex, {
+            height: layerHeight,
+        });
+        $(".layui-layer-content").css("height",layerContentHeight);
+    });
+
+    formSelects.on(selectName, function(id, vals, val, isAdd, isDisabled){
+        var selectTitleHeight=$(".xm-select-title").height();
+        var optionPanelHeight=$('.xm-select-linkage').height();
+        // 监听面板打开或关闭时的高度变化
+        if(optionPanelHeight!=0 && selectTitleHeight>36){
+            var layerHeight=470+(selectTitleHeight-36)+'px';
+            var layerContentHeight=428+(selectTitleHeight-36)+'px';
+        }else {
+            layerHeight=470+'px';
+            layerContentHeight=428+'px';
+        }
+        layer.style(layerIndex, {
+            // width: '700px',
+            height: layerHeight,
+        });
+        $(".layui-layer-content").css("height",layerContentHeight);
+    }, true);
+}
+
+// 文件上传
+function userLoadSpatialData() {
+    layui.use(['upload','form'], function(){
+        var form=layui.form;
+        var $ = layui.jquery
+            ,upload = layui.upload;
+        var uploadInst= upload.render({
+            elem: '#shpFileUploadControl'
+            ,url: '/upload/'
+            ,auto: false
+            ,accept: 'file' //普通文件
+            ,exts: 'zip|rar' //只允许上传压缩文件
+            ,bindAction: '#shpLoadConfirmBtn'
+            ,done: function(res){
+                console.log(res);
+                // var spatialID= '<div class="layui-form-item" style="margin-top: 15px;">\n' +
+                //     '                  <label class="layui-form-label" style="line-height: 41px;width: 93px;padding: 0">空间标识字段</label>\n' +
+                //     '                  <div class="layui-input-block">\n' +
+                //     '                        <select name="userDataField">\n' +
+                //     '                                 <option value=" ">名称</option>\n' +
+                //     '                                 <option value=" ">长度</option>\n' +
+                //     '                                 <option value=" ">面积</option>\n' +
+                //     '                                 <option value=" ">自定义</option>\n' +
+                //     '                         </select>\n' +
+                //     '                   </div>\n' +
+                //     '            </div>\n' ;
+                // $('#shpLoadConfirmBtn').parent().after(spatialID);
+                // form.render('select');
+            }
+            ,error:function () {
+                var spatialID= '<div class="layui-form-item" style="margin-top: 15px;">\n' +
+                    '                  <label class="layui-form-label" style="line-height: 41px;width: 93px;padding: 0">空间标识字段</label>\n' +
+                    '                  <div class="layui-input-block">\n' +
+                    '                        <select name="userDataField">\n' +
+                    '                                 <option value=" ">名称</option>\n' +
+                    '                                 <option value=" ">长度</option>\n' +
+                    '                                 <option value=" ">面积</option>\n' +
+                    '                                 <option value=" ">自定义</option>\n' +
+                    '                         </select>\n' +
+                    '                   </div>\n' +
+                    '            </div>\n' +
+                    '            <div>\n' +
+                    '                    <button type="button" class="layui-btn" id="comfirmUserSpDataBtn">下一步</button>' +
+                    '            </div>\n';
+                $('#shpLoadConfirmBtn').parent().after(spatialID);
+                form.render('select');
+            }
+        });
+    })
 }
 
 // 初始化色带和图表的选择框
@@ -235,6 +355,16 @@ function initTjSymbol() {
     }
 }
 
+// 用户自定义统计图表的符号
+function userDefineChartColor() {
+    colorpicker.render({
+        elem: '#test3'
+        ,color: 'rgb(68,66,66)'
+        ,format: 'rgb' //默认为 hex
+        ,size:'lg'
+    });
+}
+
 //滑块的渲染
 function renderSlider() {
     layui.use(['slider','form'],function () {
@@ -271,118 +401,6 @@ function renderSlider() {
     })
 }
 
-// 省市区县多级联动的渲染
-function multiSelectRender(selectName) {
-    var formSelects = layui.formSelects;
-
-    formSelects.config(selectName, {
-        direction: "down",
-        success: function(id, url, val, result){
-            console.log("success回调: " + url);
-            // console.log(formSelects.config.height);
-        },
-        error: function(id, url, val, err){
-            console.log("err回调: " + url);
-        }
-    });
-
-    formSelects.data(selectName, 'server', {
-        url: 'http://yapi.demo.qunar.com/mock/9813/layui/citys',
-        linkage: true,
-        linkageWidth: 130
-    });
-
-    //监听下拉框的打开
-    formSelects.opened(selectName, function(id){
-        var selectTitleHeight=$(".xm-select-title").height();
-        if (selectTitleHeight>36){
-            var layerHeight=470+(selectTitleHeight-36)+'px';
-            var layerContentHeight=428+(selectTitleHeight-36)+'px';
-        }
-        layer.style(layerIndex, {
-            // width: '600px',
-            height: layerHeight,
-        });
-        $(".layui-layer-content").css("height",layerContentHeight);
-    });
-
-    //监听下拉框的关闭
-    formSelects.closed(selectName, function(id){
-        var layerHeight=470+'px';
-        var layerContentHeight=428+'px';
-        layer.style(layerIndex, {
-            height: layerHeight,
-        });
-        $(".layui-layer-content").css("height",layerContentHeight);
-    });
-
-    formSelects.on(selectName, function(id, vals, val, isAdd, isDisabled){
-        var selectTitleHeight=$(".xm-select-title").height();
-        var optionPanelHeight=$('.xm-select-linkage').height();
-        // 监听面板打开或关闭时的高度变化
-        if(optionPanelHeight!=0 && selectTitleHeight>36){
-            var layerHeight=470+(selectTitleHeight-36)+'px';
-            var layerContentHeight=428+(selectTitleHeight-36)+'px';
-        }else {
-            layerHeight=470+'px';
-            layerContentHeight=428+'px';
-        }
-        layer.style(layerIndex, {
-            // width: '700px',
-            height: layerHeight,
-        });
-        $(".layui-layer-content").css("height",layerContentHeight);
-    }, true);
-}
-
-function userLoadSpatialData() {
-    // 文件上传
-    layui.use(['upload','form'], function(){
-        var form=layui.form;
-        var $ = layui.jquery
-            ,upload = layui.upload;
-        var uploadInst= upload.render({
-            elem: '#shpFileUploadControl'
-            ,url: '/upload/'
-            ,auto: false
-            ,accept: 'file' //普通文件
-            ,exts: 'zip|rar' //只允许上传压缩文件
-            ,bindAction: '#shpLoadConfirmBtn'
-            ,done: function(res){
-                console.log(res);
-                // var spatialID= '<div class="layui-form-item" style="margin-top: 15px;">\n' +
-                //     '                  <label class="layui-form-label" style="line-height: 41px;width: 93px;padding: 0">空间标识字段</label>\n' +
-                //     '                  <div class="layui-input-block">\n' +
-                //     '                        <select name="userDataField">\n' +
-                //     '                                 <option value=" ">名称</option>\n' +
-                //     '                                 <option value=" ">长度</option>\n' +
-                //     '                                 <option value=" ">面积</option>\n' +
-                //     '                                 <option value=" ">自定义</option>\n' +
-                //     '                         </select>\n' +
-                //     '                   </div>\n' +
-                //     '            </div>\n' ;
-                // $('#shpLoadConfirmBtn').parent().after(spatialID);
-                // form.render('select');
-            }
-            ,error:function () {
-                var spatialID= '<div class="layui-form-item" style="margin-top: 15px;">\n' +
-                    '                  <label class="layui-form-label" style="line-height: 41px;width: 93px;padding: 0">空间标识字段</label>\n' +
-                    '                  <div class="layui-input-block">\n' +
-                    '                        <select name="userDataField">\n' +
-                    '                                 <option value=" ">名称</option>\n' +
-                    '                                 <option value=" ">长度</option>\n' +
-                    '                                 <option value=" ">面积</option>\n' +
-                    '                                 <option value=" ">自定义</option>\n' +
-                    '                         </select>\n' +
-                    '                   </div>\n' +
-                    '            </div>\n' ;
-                $('#shpLoadConfirmBtn').parent().after(spatialID);
-                form.render('select');
-            }
-        });
-    })
-}
-
 // 获得用户选择的有关统计符号的值
 function getchartSymbolValues() {
     var chartID = $("#chart-selected>.select_title>img").attr("src").slice(-10,-4);
@@ -400,159 +418,139 @@ function getgraduatedSymbolValues() {
 
 
 //打开第二个页面
+var tjPanel2 = {"nav":"nav2","tabId":"","tableName":"","fieldId":"","fieldsName":""};
 function opentjPanel2(){
-    layui.use(['tree','table','form'], function(){
-        var tree = layui.tree;
-        var form = layui.form;
-        var createTree = [{ //节点
-            name: '文件夹1'
-            ,children: [{
-                name: '表格11'
-            },{
-                name: '表格12'
-            }]
-        },{
-            name: '文件夹2'
-            ,children: [{
-                name: '文件夹21'
-                ,children: [{
-                    name: '表格211'
-                }]
-            }]
-        }];
-        var tableJson11= [{
-            "id": "10001"
-            ,"username": "杜甫"
-            ,"email": "xianxin@layui.com"
-            ,"sex": "男"
-            ,"city": "浙江杭州"
-            ,"sign": "点击此处，显示更多。当内容超出时，点击单元格会自动显示更多内容。"
-            ,"experience": "116"
-            ,"ip": "192.168.0.8"
-            ,"logins": "108"
-            ,"joinTime": "2016-10-14"
-        }, {
-            "id": "10002"
-            ,"username": "李白"
-            ,"email": "xianxin@layui.com"
-            ,"sex": "男"
-            ,"city": "浙江杭州"
-            ,"sign": "君不见，黄河之水天上来，奔流到海不复回。 君不见，高堂明镜悲白发，朝如青丝暮成雪。 人生得意须尽欢，莫使金樽空对月。 天生我材必有用，千金散尽还复来。 烹羊宰牛且为乐，会须一饮三百杯。 岑夫子，丹丘生，将进酒，杯莫停。 与君歌一曲，请君为我倾耳听。(倾耳听 一作：侧耳听) 钟鼓馔玉不足贵，但愿长醉不复醒。(不足贵 一作：何足贵；不复醒 一作：不愿醒/不用醒) 古来圣贤皆寂寞，惟有饮者留其名。(古来 一作：自古；惟 通：唯) 陈王昔时宴平乐，斗酒十千恣欢谑。 主人何为言少钱，径须沽取对君酌。 五花马，千金裘，呼儿将出换美酒，与尔同销万古愁。"
-            ,"experience": "12"
-            ,"ip": "192.168.0.8"
-            ,"logins": "106"
-            ,"joinTime": "2016-10-14"
-        }, {
-            "id": "10003"
-            ,"username": "王勃"
-            ,"email": "xianxin@layui.com"
-            ,"sex": "男"
-            ,"city": "浙江杭州"
-            ,"sign": "人生恰似一场修行"
-            ,"experience": "65"
-            ,"ip": "192.168.0.8"
-            ,"logins": "106"
-            ,"joinTime": "2016-10-14"
-        }, {
-            "id": "10004"
-            ,"username": "李清照"
-            ,"email": "xianxin@layui.com"
-            ,"sex": "女"
-            ,"city": "浙江杭州"
-            ,"sign": "人生恰似一场修行"
-            ,"experience": "666"
-            ,"ip": "192.168.0.8"
-            ,"logins": "106"
-            ,"joinTime": "2016-10-14"
-        }, {
-            "id": "10005"
-            ,"username": "冰心"
-            ,"email": "xianxin@layui.com"
-            ,"sex": "女"
-            ,"city": "浙江杭州"
-            ,"sign": "人生恰似一场修行"
-            ,"experience": "86"
-            ,"ip": "192.168.0.8"
-            ,"logins": "106"
-            ,"joinTime": "2016-10-14"
-        }];
-        var tableJson12=[{
-            "id":10000,
-            "username":"user-0",
-            "sex":"女",
-            "city":"城市-0",
-            "sign":"签名-0",
-            "experience":255,
-            "logins":24,
-            "wealth":82830700,
-            "classify":"作家",
-            "score":57
-        },{
-            "id":10001,
-            "username":"user-1",
-            "sex":"男",
-            "city":"城市-1",
-            "sign":"签名-1",
-            "experience":884,
-            "logins":58,
-            "wealth":64928690,
-            "classify":"词人",
-            "score":27
-        },{
-            "id":10002,
-            "username":"user-2",
-            "sex":"女",
-            "city":"城市-2",
-            "sign":"签名-2",
-            "experience":650,
-            "logins":77,
-            "wealth":6298078,
-            "classify":"酱油",
-            "score":31
-        }];
-        var tableJson=[[]];
-        $("#treedemo").empty();
-        layui.tree({
-            elem: '#treedemo1,#treedemo2', //传入元素选择器
-            nodes: createTree,
-            click:function (node) {
-                //console.log(node.name);
-                if (node.name=="表格11"){
-                    tableJson=tableJson11;
-                }else if (node.name=="表格12"){
-                    tableJson=tableJson12;
-                }else{
-                    tableJson=[[]];
-                }
-                $("#fieldslist1,#fieldslist2,#fieldslist3").empty();
-                $.each(tableJson[0], function(index,item) {
-                    $("#fieldslist1,#fieldslist2,#fieldslist3").append('<input type="checkbox" name="'+index+'" title="'+index+'" value="'+index+'">');
-                });
-                form.render();
-                //$('#tjPanel2').css("height","700px");
-                //$(".layui-layer-content").css("height","435px");
-                // $.ajax({
-                //     type: 'post',
-                //     url:"",
-                //     async:"false",
-                //     data:{name:""},
-                //     success: function (data) { //返回json结果
-                //         //alert(data);
-                //         //var tablejson = data;
-                //         $.each(data, function(index,item) {
-                //             $.("#fieldslist").append('<input type="checkbox" name="xxx" value="'+item.xx+'" lay-skin="switch">');
-                //         });
-                //         form.render();
-                //     },
-                //     error:function(){
-                //         alert("sorry!")
-                //     }
-                // });
+    layui.use(['element'], function(){
+        var element = layui.element;
+        tableTree();
+        submitFields();
+        element.on('tab(nav2)', function(data){
+            //console.log(this); //当前Tab标题所在的原始DOM元素
+            //console.log(data.index); //得到当前Tab的所在下标
+            //console.log(data.elem); //得到当前的Tab大容器
+            if((data.index+1)==1){
+                tableTree();
+                submitFields();
+            }else if((data.index+1)==2){
+                OtherDatabase();
+            }else if((data.index+1)==3){
+                EXCELupload();
             }
         });
     });
-    OtherDatabase();
-    EXCELupload();
+}
+
+//获取tabletree,并显示表头
+function tableTree(){
+    var type = $(".layui-tab-title").find(".layui-this");
+    //console.log(type.html());
+    var treeName;
+    var treeElement;
+    var createTree = [];
+    var tableFields = {};
+    var fieldslist = [];
+    if(type.html()=="平台数据库"){
+        treeName = "SystemDatabase";
+        treeElement = '#treedemo1';
+        fieldslist = $("#fieldslist1");
+        tjPanel2.tabId = 1;
+    }else if(type.html()=="其他数据库"){
+        treeName = "OtherDatabase";
+        treeElement = '#treedemo2';
+        fieldslist = $("#fieldslist2");
+        tjPanel2.tabId = 2;
+    }else if(type.html()=="上传EXCEL文件"){
+        fieldslist = $("#fieldslist3");
+        tjPanel2.tabId = 3;
+    }
+    $.ajax({//返回tabletree
+        type: 'post',
+        url:"",
+        async:"false",
+        data:{ name :type.html()},
+        success: function (data) { //返回json结果
+            alert(data);
+            createTree = data;
+        },
+        error:function(){
+            alert("sorry!")
+        }
+    });
+    //构造
+    createTree = [{name: '表格1'},{name: '表格2'},{name: '表格3'}];
+    $("#treedemo1,#treedemo2").empty();
+    layui.use(['tree','form'],function(){
+        var tree = layui.tree;
+        var form = layui.form;
+        layui.tree({
+            elem: treeElement, //传入元素选择器
+            nodes: createTree,
+            click:function (node) {
+                //console.log(node.name);
+                tjPanel2.tableName = node.name;
+                $.ajax({
+                    type: 'post',
+                    url:"",
+                    async:"false",
+                    data:{ "tableName":node.name},
+                    success: function (data) { //返回json结果(表头)
+                        fieldslist.empty();
+                        $.each(tableFields, function(index,item) {
+                            fieldslist.append('<input type="checkbox" name="'+item+'" title="'+item+'" value="'+item+'">');
+                        });
+                        form.render();
+                    },
+                    error:function(){
+                        alert("sorry!")
+                    }
+                });
+                //构造
+                var tableFields1 = {"0":"id","1":"username","2":"email","3":"sex","4":"city","5":"sign","6":"experience","7":"ip","8":"logins","9":"joinTime"};
+                var tableFields2 = {"0":"id","1":"username","2":"sex","3":"city","4":"sign","5":"experience","6":"logins","7":"wealth","8":"classify","9":"score"};
+                if (node.name=="表格1"){
+                    tableFields=tableFields1;
+                }else if (node.name=="表格2"){
+                    tableFields=tableFields2;
+                }else{
+                    tableFields={};
+                }
+                fieldslist.empty();
+                $.each(tableFields, function(index,item) {
+                    fieldslist.append('<input type="checkbox" name="'+item+'" title="'+item+'" value="'+item+'">');
+                });
+                form.render();
+            }
+        });
+    })
+}
+
+//提交选择的字段
+function submitFields(){
+    layui.use(['form'],function(){
+        var form = layui.form;
+        form.on('submit(fields)', function (data) {
+            //console.log(data.field.database);
+            layer.alert(JSON.stringify(data.field), {
+                title: '最终的提交信息'
+            });
+            $.ajax({
+                type: 'post',
+                url:"",
+                async:"false",
+                data:data.field,
+                success: function (data) {
+                    //alert(data);
+                    // var tableFields = data;
+                },
+                error:function(){
+                    alert("sorry!")
+                }
+            });
+            tjPanel2.fieldsName = data.field;
+            console.log(tjPanel2);
+            return false;
+        });
+    })
 }
 
 //其他数据库
@@ -560,29 +558,28 @@ function OtherDatabase(){
     layui.use(["form","element"],function () {
         var form = layui.form,
             element = layui.element;
-        form.on('submit(fields)', function (data) {
-            //console.log(data.field.database);
+        //链接数据库
+        form.on('submit(otherdatabase)', function (data) {
             layer.alert(JSON.stringify(data.field), {
                 title: '最终的提交信息'
             });
-            // $.ajax({
-            //     type: 'post',
-            //     url:"",
-            //     async:"false",
-            //     data:data.field,
-            //     success: function (data) { //返回json结果
-            //         //alert(data);
-            //         // var tablejson = data;
-            //     },
-            //     error:function(){
-            //         alert("sorry!")
-            //     }
-            // });
-            return false;
-        });
-        $('#chooseDatabase').click(function(){
+            $.ajax({
+                type: 'post',
+                url:"",
+                async:"false",
+                data:data.field,
+                success: function (data) { //返回tabletree
+                    //alert(data);
+                    // var tableFields = data;
+                },
+                error:function(){
+                    alert("sorry!")
+                }
+            });
             $("#OtherDatabase1").hide();
             $("#OtherDatabase2").removeClass('layui-hide');
+            tableTree();
+            submitFields();
             return false;
         });
         $('#rechooseDatabase').click(function(){
@@ -611,8 +608,15 @@ function EXCELupload(){
                 if(res.code > 0){
                     return layer.msg('上传失败');
                 }
-                //上传成功
+                //上传成功，返回表头
+                fieldslist.empty();
+                $.each(tableFields, function(index,item) {
+                    fieldslist.append('<input type="checkbox" name="'+item+'" title="'+item+'" value="'+item+'">');
+                });
+                form.render();
 
+                //提交选择的字段
+                submitFields();
             }
             ,error: function(){
                 //演示失败状态，并实现重传
@@ -639,7 +643,7 @@ function EXCELupload(){
 
 
 // 选择空间数据的html
-var html1='<div class="layui-tab">\n' +
+var html1='<div class="layui-tab layui-tab-brief">\n' +
     '            <ul class="layui-tab-title">\n' +
     '                <li class="layui-this">载入行政区划</li>\n' +
     '                <li>上传自定义数据</li>\n' +
@@ -663,7 +667,7 @@ var html1='<div class="layui-tab">\n' +
     '                        <div class="layui-form-item">\n' +
     '                            <div class="layui-input-block  admin-form-btn-group">\n' +
     '                                <button class="layui-btn layui-btn-default admin-form-btn"\n' +
-    '                                        onclick="getAllSelectedData()">确定\n' +
+    '                                        onclick="getSpatialData()">下一步\n' +
     '                                </button>\n' +
     '                            </div>\n' +
     '                        </div>\n' +
@@ -696,7 +700,7 @@ var html1='<div class="layui-tab">\n' +
     '        </div>';
 
 //选择统计数据的html
-var html2=' <div class="layui-tab layui-tab-brief">\n' +
+var html2='<div class="layui-tab layui-tab-brief" lay-filter="nav2">\n' +
     '            <ul class="layui-tab-title">\n' +
     '                <li class="layui-this">平台数据库</li>\n' +
     '                <li>其他数据库</li>\n' +
@@ -708,12 +712,12 @@ var html2=' <div class="layui-tab layui-tab-brief">\n' +
     '                        <div class="layui-form-item">\n' +
     '                            <div class="layui-row layui-col-space10">\n' +
     '                                <div class="layui-col-md3">\n' +
-    '                                    <fieldset class="layui-elem-field" style="text-align:center">\n' +
-    '                                        <legend>平台数据库</legend>\n' +
+    '                                    <fieldset class="layui-elem-field">\n' +
+    '                                        <legend class="Panel2_Legend" style="font-size:14px">平台数据库</legend>\n' +
     '                                        <div class="layui-field-box" style="padding: 5px;">\n' +
     '                                            <div class="layui-row layui-col-space10">\n' +
     '                                                <div class="layui-col-md12">\n' +
-    '                                                    <ul id="treedemo1"></ul>\n' +
+    '                                                    <ul class="tabletree" style="text-align:center" id="treedemo1"></ul>\n' +
     '                                                </div>\n' +
     '                                            </div>\n' +
     '                                        </div>\n' +
@@ -721,7 +725,7 @@ var html2=' <div class="layui-tab layui-tab-brief">\n' +
     '                                </div>\n' +
     '                                <div class="layui-col-md9">\n' +
     '                                    <fieldset class="layui-elem-field" style="text-align:center">\n' +
-    '                                        <legend>数据表可选字段</legend>\n' +
+    '                                        <legend class="Panel2_Legend" style="font-size:14px">数据表可选字段</legend>\n' +
     '                                        <form class="layui-form" action="" lay-filter="">\n' +
     '                                            <div class="layui-form-item" id="fieldslist1"></div>\n' +
     '                                            <div class="layui-form-item">\n' +
@@ -762,12 +766,12 @@ var html2=' <div class="layui-tab layui-tab-brief">\n' +
     '                        <div class="layui-form-item">\n' +
     '                            <div class="layui-row layui-col-space10">\n' +
     '                                <div class="layui-col-md3">\n' +
-    '                                    <fieldset class="layui-elem-field" style="text-align:center">\n' +
-    '                                        <legend>其他数据库</legend>\n' +
+    '                                    <fieldset class="layui-elem-field" >\n' +
+    '                                        <legend class="Panel2_Legend" style="font-size:14px">其他数据库</legend>\n' +
     '                                        <div class="layui-field-box" style="padding: 5px;">\n' +
     '                                            <div class="layui-row layui-col-space10">\n' +
     '                                                <div class="layui-col-md12">\n' +
-    '                                                    <ul id="treedemo2"></ul>\n' +
+    '                                                    <ul class="tabletree" style="text-align:center" id="treedemo2"></ul>\n' +
     '                                                </div>\n' +
     '                                            </div>\n' +
     '                                        </div>\n' +
@@ -775,7 +779,7 @@ var html2=' <div class="layui-tab layui-tab-brief">\n' +
     '                                </div>\n' +
     '                                <div class="layui-col-md9">\n' +
     '                                    <fieldset class="layui-elem-field" style="text-align:center">\n' +
-    '                                        <legend>数据表可选字段</legend>\n' +
+    '                                        <legend class="Panel2_Legend" style="font-size:14px">数据表可选字段</legend>\n' +
     '                                        <form class="layui-form" action="" lay-filter="">\n' +
     '                                            <div class="layui-form-item" id="fieldslist2"></div>\n' +
     '                                            <div class="layui-form-item">\n' +
@@ -800,7 +804,7 @@ var html2=' <div class="layui-tab layui-tab-brief">\n' +
     '                        <div class="layui-form-item">\n' +
     '                            <div class="layui-row layui-col-space10">\n' +
     '                                <fieldset class="layui-elem-field" style="text-align:center">\n' +
-    '                                    <legend>Excel表可选字段</legend>\n' +
+    '                                    <legend class="Panel2_Legend" style="font-size:14px">Excel表可选字段</legend>\n' +
     '                                    <form class="layui-form" action="" lay-filter="">\n' +
     '                                        <div class="layui-form-item" id="fieldslist3"></div>\n' +
     '                                        <div class="layui-form-item">\n' +
@@ -840,7 +844,12 @@ var html3='    <fieldset class="layui-elem-field layui-field-title" style="margi
     '                            </div>\n' +
     '                            <ul class="select_content">\n' +
     '                            </ul>\n' +
-    '                        </div>\n' +
+    '                        </div >\n' +
+    // '                        <div id="test3"></div>'+
+    '                        <div class="userDefineColors">' +
+    '                            <label class="selectedStaIndexsLabel">男生人数</label>'+
+    '                            <div id="test3"></div>'+
+    '                        </div>'+
     '                        <h6>符号大小：</h6>\n' +
     '                        <div id="symbolSize"></div>\n' +
     '                        <h6>透明度：</h6>\n' +
@@ -872,6 +881,9 @@ var html4='   <fieldset class="layui-elem-field layui-field-title" style="margin
     '                            <ul class="select_content">\n' +
     '                            </ul>\n' +
     '                        </div>\n' +
+    '                        <div class="graduatedColorInverseInput">'+
+    '                             <input type="checkbox" name="graduatedColorInverse" lay-skin="primary" title="反色" >'+
+    '                        </div>'+
     '                        <h6>分级模型：</h6>\n' +
     '                        <div class="layui-form-item">\n' +
     '                            <select id="model" class="form-control" name="graduatedModel" lay-filter="graduatedModel">\n' +
