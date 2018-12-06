@@ -4,7 +4,9 @@ var symbolSizeSliderValue=0;
 var symbolOpacitySliderValue=0;
 var classNumSliderValue=5;
 
-
+// 制图范围数据的json格式
+var tjPanel1={"tabID":"1","identityField":"value","regionData":"","fileName":""};
+var tjPanel3;
 // 假设用户选中的统计指标是以下数组
 var selectedStatisticIndex=["男生人数","女生人数","老人人数","小孩人数","男生人数","女生人数","老人人数","小孩人数","男生人数","女生人数"];
 
@@ -60,7 +62,7 @@ function opentjMenuLayer() {
             '                        </div>\n' +
             '                        <div class="layui-form-item">\n' +
             '                            <div class="layui-input-block  admin-form-btn-group">\n' +
-            '                                <button class="layui-btn layui-btn-default admin-form-btn" onclick="getSpatialData()">下一步</button>\n' +
+            '                                <button class="layui-btn layui-btn-default admin-form-btn" onclick="constructTjPanel11()">下一步</button>\n' +
             '                            </div>\n' +
             '                        </div>\n' +
             '                    </div>\n' +
@@ -95,20 +97,20 @@ function opentjMenuLayer() {
                 form.render('select');
 
             }else if (leftMenuName=="selectStatistics") {
-                $(".tjPanel-content").html(html2);
-                opentjPanel2();
-                form.render();
-
-                // $(".tjPanel-content").html(html3);
-                // initTjSymbol();
-                // renderSlider();
+                // $(".tjPanel-content").html(html2);
+                // opentjPanel2();
                 // form.render();
-                // userDefineChartColor();
-                // // listenOnChartColorChange();
-                // $("#tjInfoSubmit").bind('click',function () {
-                //     var chartSymbolValues=getchartSymbolValues();
-                //     console.log(chartSymbolValues);
-                // });
+
+                $(".tjPanel-content").html(html3);
+                initTjSymbol();
+                renderSlider();
+                form.render();
+                userDefineChartColor();
+                // listenOnChartColorChange();
+                $("#tjInfoSubmit").bind('click',function () {
+                    var chartSymbolValues=getchartSymbolValues();
+                    console.log(chartSymbolValues);
+                });
 
 
             } else if(leftMenuName=="selectMappingTemplate") {
@@ -156,7 +158,6 @@ function opentjMenuLayer() {
                             }
                         });
                     });
-
                 }
             }
         });
@@ -164,6 +165,43 @@ function opentjMenuLayer() {
     })
 }
 
+
+// 构造载入行政区划事件下的json
+function constructTjPanel11() {
+    // 载入行政区划的选项卡下，获取选中区域的name值
+    var selectedRegionName=$(".xm-select").attr('title');
+    // 获取选中区域的value值
+    var selectedValues=[];
+    var selectedItem=$(".xm-select-label span");
+
+    for (var i=0;i<selectedItem.length;i++){
+        // 根据斜杠个数判断是省、市、区中的哪一级
+        var selectedItemValue=selectedItem[i].getAttribute('value');
+        var valuePart=selectedItemValue.split("/");
+        var adminValue=valuePart[valuePart.length-1];
+        // console.log(adminValue);
+        selectedValues[i]=adminValue;
+    }
+
+    tjPanel1={
+        "tabID":"1",
+        "identityField":"value",
+        "regionDataName":selectedRegionName,
+        "regionDataValue":selectedValues,
+        "fileName":""
+    };
+    console.log(tjPanel1);
+}
+
+// 构造用户上传自定义空间数据事件下的json
+function constructTjPanel12() {
+    // 获得用户选取的空间标识的字段
+    var identityField=$('#userDataField option:selected').val();;
+    var filename=$("#userDataField").find('.layui-upload-choose').html();
+    console.log(identityField);
+    console.log(filename);
+
+}
 // 获取用户选择的行政区划
 // 点击确定按钮后执行这个函数，后面可能要用ajax传值给后台
 function getSpatialData() {
@@ -276,7 +314,7 @@ function userLoadSpatialData() {
                     '                   </div>\n' +
                     '            </div>\n' +
                     '            <div>\n' +
-                    '                    <button type="button" class="layui-btn" id="comfirmUserSpDataBtn">下一步</button>' +
+                    '                    <button type="button" class="layui-btn" id="comfirmUserSpDataBtn" onclick="constructTjPanel12()">下一步</button>' +
                     '            </div>\n';
                 // 先删除原有的select,再添加新的select
                 $('#shpLoadConfirmBtn').parent().nextAll().remove();
@@ -284,24 +322,24 @@ function userLoadSpatialData() {
                 form.render('select');
             }
             ,error:function () {
-                // var spatialID= '<div class="layui-form-item" style="margin-top: 15px;">\n' +
-                //     '                  <label class="layui-form-label" style="line-height: 41px;width: 93px;padding: 0">空间标识字段</label>\n' +
-                //     '                  <div class="layui-input-block">\n' +
-                //     '                        <select name="userDataField" id="userDataField">\n' +
-                //     '                                 <option value=" ">名称</option>\n' +
-                //     '                                 <option value=" ">长度</option>\n' +
-                //     '                                 <option value=" ">面积</option>\n' +
-                //     '                                 <option value=" ">自定义</option>\n' +
-                //     '                         </select>\n' +
-                //     '                   </div>\n' +
-                //     '            </div>\n' +
-                //     '            <div>\n' +
-                //     '                    <button type="button" class="layui-btn" id="comfirmUserSpDataBtn">下一步</button>' +
-                //     '            </div>\n';
-                // // 先删除原有的select,再添加新的select
-                // $('#shpLoadConfirmBtn').parent().nextAll().remove();
-                // $('#shpLoadConfirmBtn').parent().after(spatialID);
-                // form.render('select');
+                var spatialID= '<div class="layui-form-item" style="margin-top: 15px;">\n' +
+                    '                  <label class="layui-form-label" style="line-height: 41px;width: 93px;padding: 0">空间标识字段</label>\n' +
+                    '                  <div class="layui-input-block">\n' +
+                    '                        <select name="userDataField" id="userDataField">\n' +
+                    '                                 <option value="名称 ">名称</option>\n' +
+                    '                                 <option value="长度 ">长度</option>\n' +
+                    '                                 <option value="面积">面积</option>\n' +
+                    '                                 <option value="自定义 ">自定义</option>\n' +
+                    '                         </select>\n' +
+                    '                   </div>\n' +
+                    '            </div>\n' +
+                    '            <div>\n' +
+                    '                    <button type="button" class="layui-btn" id="comfirmUserSpDataBtn" onclick="constructTjPanel12()">下一步</button>' +
+                    '            </div>\n';
+                // 先删除原有的select,再添加新的select
+                $('#shpLoadConfirmBtn').parent().nextAll().remove();
+                $('#shpLoadConfirmBtn').parent().after(spatialID);
+                form.render('select');
             }
         });
     })
@@ -794,7 +832,7 @@ var html1='<div class="layui-tab layui-tab-brief">\n' +
     '                        <div class="layui-form-item">\n' +
     '                            <div class="layui-input-block  admin-form-btn-group">\n' +
     '                                <button class="layui-btn layui-btn-default admin-form-btn"\n' +
-    '                                        onclick="getSpatialData()">下一步\n' +
+    '                                      onclick="constructTjPanel1()">下一步\n' +
     '                                </button>\n' +
     '                            </div>\n' +
     '                        </div>\n' +
