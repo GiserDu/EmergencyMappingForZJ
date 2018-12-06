@@ -607,9 +607,25 @@ function tableTree(){
     //         alert("sorry!")
     //     }
     // });
+    $.ajax({//返回tabletree
+        type: 'post',
+        url:"./servlet/fileUploadServlet",
+        async:"false",
+        data:{ name :type.html()},
+        success: function (data) { //返回json结果
+           alert(data);
+            createTree = $.parseJSON(data).dataEx;
+
+        },
+        error:function(){
+            alert("sorry!")
+        }
+    });
     //构造
     createTree = [{name: '表格1'},{name: '表格2'},{name: '表格3'}];
     $("#treedemo1").empty();
+    //createTree = [{name: '表格1'},{name: '表格2'},{name: '表格3'}];
+    $("#treedemo1,#treedemo2").empty();
     layui.use(['tree','form'],function(){
         var tree = layui.tree;
         var form = layui.form;
@@ -763,7 +779,7 @@ function EXCELupload(){
             ,upload = layui.upload;
         var uploadInst= upload.render({
             elem: '#EXCELupload1'
-            ,url: '/upload/'
+            ,url: './servlet/fileUploadServlet'
             ,auto: false
             ,accept: 'file' //普通文件
             ,exts: 'xlsx|xls' //文件类型
@@ -779,6 +795,15 @@ function EXCELupload(){
                 var tableFields = {"0":"id","1":"username","2":"email","3":"sex","4":"city","5":"sign","6":"experience","7":"ip","8":"logins","9":"joinTime"};
 
                 displayFields($("#fieldslist3"),tableFields);
+                var tableFields=new Array();
+                tableFields=res["tableFields"];//tableFields为指标数组
+
+                //上传成功，返回表头
+                fieldslist.empty();
+                $.each(tableFields, function(index,item) {
+                    fieldslist.append('<input type="checkbox" name="'+item+'" title="'+item+'" value="'+item+'">');
+                });
+                form.render();
 
                 //提交选择的字段
                 submitFields();

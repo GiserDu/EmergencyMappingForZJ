@@ -10,14 +10,31 @@ import java.io.FileInputStream;
 
 //处理并解析excel
 public class ExcelProcess {
+
     private static String regionFieldName;//行政编码字段：默认为第一列
     private static String[] fieldNames;//所有属性字段
+
+    public static String getRegionFieldName() {
+        return regionFieldName;
+    }
+
+    public static void setRegionFieldName(String regionFieldName) {
+        ExcelProcess.regionFieldName = regionFieldName;
+    }
+
+    public static String[] getFieldNames() {
+        return fieldNames;
+    }
+
+    public static void setFieldNames(String[] fieldNames) {
+        ExcelProcess.fieldNames = fieldNames;
+    }
 
     public static void main(String[] args){
 
 
    }
-   private static void doReadExcel(String excelPath){
+   public static void doReadExcel(String excelPath){
        try {
            //String encoding = "GBK";
            //String excelPath="C:\\Users\\Administrator\\Desktop\\国家专项测试\\测试数据\\test.xlsx";
@@ -47,7 +64,7 @@ public class ExcelProcess {
 //               System.out.println("lastRowIndex: "+lastRowIndex);
                //获取第一行值并存入字符串数组
                Row firstRow=sheet.getRow(0);
-               fieldNames=new String[firstRow.getLastCellNum()+1];
+               fieldNames=new String[firstRow.getLastCellNum()];
                for(int cIndex=0;cIndex<firstRow.getLastCellNum();cIndex++){
                    fieldNames[cIndex]=firstRow.getCell(cIndex).toString();
                }
