@@ -2,7 +2,7 @@
 <web-app xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns="http://java.sun.com/xml/ns/javaee" xsi:schemaLocation="http://java.sun.com/xml/ns/javaee http://java.sun.com/xml/ns/javaee/web-app_3_0.xsd" id="WebApp_ID" version="3.0">
     <display-name>geoInfoHB</display-name>
     <welcome-file-list>
-        <welcome-file>index.html</welcome-file>
+        <welcome-file>interactiveMapping.html</welcome-file>
     </welcome-file-list>
 
     <servlet>
@@ -82,9 +82,10 @@
         <servlet-class>telecarto.geoinfo.servlets.GetAdministrativeRegion</servlet-class>
     </servlet>
 
-
-
-
+    <servlet>
+        <servlet-name>fileUploadServlet</servlet-name>
+        <servlet-class>telecarto.geoinfo.servlets.fileUploadServlet</servlet-class>
+    </servlet>
 
 
     <servlet-mapping>
@@ -142,5 +143,9 @@
     <servlet-mapping>
         <servlet-name>GetTemplateLayer</servlet-name>
         <url-pattern>/servlet/GetTemplateLayer</url-pattern>
+    </servlet-mapping>
+    <servlet-mapping>
+        <servlet-name>fileUploadServlet</servlet-name>
+        <url-pattern>/servlet/fileUploadServlet</url-pattern>
     </servlet-mapping>
 </web-app>

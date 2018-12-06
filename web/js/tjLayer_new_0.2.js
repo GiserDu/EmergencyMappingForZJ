@@ -239,26 +239,37 @@ function userLoadSpatialData() {
             ,upload = layui.upload;
         var uploadInst= upload.render({
             elem: '#shpFileUploadControl'
-            ,url: '/upload/'
+            ,url: './servlet/fileUploadServlet'
             ,auto: false
             ,accept: 'file' //普通文件
             ,exts: 'zip|rar' //只允许上传压缩文件
             ,bindAction: '#shpLoadConfirmBtn'
             ,done: function(res){
                 console.log(res);
-                // var spatialID= '<div class="layui-form-item" style="margin-top: 15px;">\n' +
-                //     '                  <label class="layui-form-label" style="line-height: 41px;width: 93px;padding: 0">空间标识字段</label>\n' +
-                //     '                  <div class="layui-input-block">\n' +
-                //     '                        <select name="userDataField">\n' +
-                //     '                                 <option value=" ">名称</option>\n' +
-                //     '                                 <option value=" ">长度</option>\n' +
-                //     '                                 <option value=" ">面积</option>\n' +
-                //     '                                 <option value=" ">自定义</option>\n' +
-                //     '                         </select>\n' +
-                //     '                   </div>\n' +
-                //     '            </div>\n' ;
-                // $('#shpLoadConfirmBtn').parent().after(spatialID);
-                // form.render('select');
+                alert(res["message"]+":"+res["saveFilePath"]);
+                console.log(res["geoJsonURL"]);
+                // alert(res["fieldsName"]);
+
+                var geojsonUrl=res["geoJsonURL"];
+                addGeojsonLayer(geojsonUrl);
+                var fieldNames= new Array();
+                fieldNames=res["fieldsName"].split(",");
+                var optionHtml="";
+                for (var fieldNum=0;fieldNum<fieldNames.length;fieldNum++){
+                    optionHtml=optionHtml+"<option value=\" \">"+fieldNames[fieldNum]+"</option>"
+                }
+
+
+                var spatialID= '<div class="layui-form-item" style="margin-top: 15px;">\n' +
+                    '                  <label class="layui-form-label" style="line-height: 41px;width: 93px;padding: 0">空间标识字段</label>\n' +
+                    '                  <div class="layui-input-block">\n' +
+                    '                        <select name="userDataField">\n' +
+                                                optionHtml   +
+                    '                         </select>\n' +
+                    '                   </div>\n' +
+                    '            </div>\n' ;
+                $('#shpLoadConfirmBtn').parent().after(spatialID);
+                form.render('select');
             }
             ,error:function () {
                 var spatialID= '<div class="layui-form-item" style="margin-top: 15px;">\n' +
@@ -469,7 +480,7 @@ function tableTree(){
         async:"false",
         data:{ name :type.html()},
         success: function (data) { //返回json结果
-            alert(data);
+           // alert(data);
             createTree = data;
         },
         error:function(){
@@ -640,7 +651,35 @@ function EXCELupload(){
     });
 
 }
+//基于geojson增加图层
+function addGeojsonLayer(geojsonUrl) {
+    require([
+            "esri/layers/geojsonlayer",
+        ],
+        function ( GeoJsonLayer) {
+            //判断是否有geojson图层，有的话删掉
 
+            if (map.getLayer("geojsonLayerID")){
+                map.removeLayer(map.getLayer("geojsonLayerID"))
+            }
+
+            addGeoJsonLayer(geojsonUrl);
+
+            function addGeoJsonLayer(url) {
+                // 创建图层
+                var geoJsonLayer2 = new GeoJsonLayer({
+                    id:"geojsonLayerID",
+                    url: url
+                });
+                // 缩放至图层
+                geoJsonLayer2.on("update-end", function (e) {
+                    map.setExtent(e.target.extent.expand(1.2));
+                });
+                // 添加到地图
+                map.addLayer(geoJsonLayer2);
+            }
+        });
+}
 
 // 选择空间数据的html
 var html1='<div class="layui-tab layui-tab-brief">\n' +
