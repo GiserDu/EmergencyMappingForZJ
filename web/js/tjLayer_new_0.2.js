@@ -476,25 +476,26 @@ function tableTree(){
     }
     $.ajax({//返回tabletree
         type: 'post',
-        url:"",
+        url:"./servlet/fileUploadServlet",
         async:"false",
         data:{ name :type.html()},
         success: function (data) { //返回json结果
-           // alert(data);
-            createTree = data;
+           alert(data);
+            createTree = $.parseJSON(data).dataEx;
+
         },
         error:function(){
             alert("sorry!")
         }
     });
     //构造
-    createTree = [{name: '表格1'},{name: '表格2'},{name: '表格3'}];
+    //createTree = [{name: '表格1'},{name: '表格2'},{name: '表格3'}];
     $("#treedemo1,#treedemo2").empty();
     layui.use(['tree','form'],function(){
         var tree = layui.tree;
         var form = layui.form;
         layui.tree({
-            elem: treeElement, //传入元素选择器
+            elem: '#treedemo1', //传入元素选择器
             nodes: createTree,
             click:function (node) {
                 //console.log(node.name);
@@ -608,7 +609,7 @@ function EXCELupload(){
             ,upload = layui.upload;
         var uploadInst= upload.render({
             elem: '#EXCELupload1'
-            ,url: '/upload/'
+            ,url: './servlet/fileUploadServlet'
             ,auto: false
             ,accept: 'file' //普通文件
             ,exts: 'xlsx|xls' //文件类型
@@ -619,6 +620,9 @@ function EXCELupload(){
                 if(res.code > 0){
                     return layer.msg('上传失败');
                 }
+                var tableFields=new Array();
+                tableFields=res["tableFields"];//tableFields为指标数组
+
                 //上传成功，返回表头
                 fieldslist.empty();
                 $.each(tableFields, function(index,item) {

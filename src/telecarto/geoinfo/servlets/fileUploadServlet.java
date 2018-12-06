@@ -1,7 +1,9 @@
 package telecarto.geoinfo.servlets;
 
+import com.zz.util.ExcelProcess;
 import com.zz.util.ZipAndRarUtil;
 import com.zz.util.shpToGeojson;
+import net.sf.json.JSONArray;
 import net.sf.json.JSONObject;
 import org.apache.commons.fileupload.FileItem;
 import org.apache.commons.fileupload.FileUploadBase;
@@ -73,7 +75,12 @@ public class fileUploadServlet extends HttpServlet {
             //3、判断提交上来的数据是否是上传表单的数据
             if(!ServletFileUpload.isMultipartContent(request)){
                 //按照传统方式获取数据
-
+                message.put("dataType","正常表单数据");
+                String dataEx="[{name: '表格1'},{name: '表格2'},{name: '表格3'}]";
+                message.put("dataEx",dataEx);
+                PrintWriter writer = response.getWriter();
+                writer.print(message);
+                writer.close();
                 return;
             }
 
@@ -160,6 +167,11 @@ public class fileUploadServlet extends HttpServlet {
             compressProcess(message,request);
         }else if (type.equals("xls") || type.equals("xlsx")){
 
+            ExcelProcess.doReadExcel(saveFilePath);
+            message.put("tableFields",ExcelProcess.getFieldNames());
+//            JSONArray jsonObject = JSONArray.fromObject(ExcelProcess.getFieldNames());
+//            String jsonStr = jsonObject.toString();
+//            message.put("tableFields",jsonStr);
         }else {
             System.out.print("不支持的数据格式");
         }
