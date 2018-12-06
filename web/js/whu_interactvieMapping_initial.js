@@ -46,7 +46,7 @@ var nameChanged ;
 var buttonChanged;//记录要素编辑时，有没有点击button改变要素
 var alertFlag = 0; //是否第一次弹出模板选择layer
 var layerIndex;
-var typeFlag; //记录当前打开的是模板还是空白制图
+var typeFlag; //记录当前打开的是模板还是空白制图 0:模板；1：空白
 var layerCloseFlag = 0; //是否选择了模板或新建了空白模板
 var templateFlag = 0; //是否打开过模板layer
 var blankFlag = 0; //是否打开过空白制图layer
@@ -800,13 +800,24 @@ function doMap() {
             shade: 0,
             resize: true,
             maxmin:true,
-            area: ['250', '350px'],
+            area: ['250', '400px'],
             // btn: ['编辑图层'],
             closeBtn:0,
-            content:$('#doMapTree'),
+            content:
+                $('#complexLayer'),
             yes: function(index, layero) {//确定后执行回调
 
             }});
+    });
+    layui.use('element', function(){
+        var element = layui.element;
+        //切换Tab到图层编辑时刷新
+        element.on('tab(test1)', function(data){
+            console.log(data);
+            if (data.index == 1){
+                layerEdit();
+            }
+        });
     });
 }
 
@@ -1165,7 +1176,7 @@ function addModelLayUI(mapName) {
 
 
     doMapping_Template(layerNodes_Model)
-    function doMapping_Template(layerNodes_InFunc) {
+    function doMapping_Template(layerNodes_Model) {
         var setting = {
             check: {
                 enable: true
@@ -1530,16 +1541,16 @@ function addModelLayUI(mapName) {
                                     console.log(treeNode);
 
                                     var nodeIndex = treeNode.getIndex();
-                                    if (layerNodes_InFunc[2].children[nodeIndex]) {
-                                        layerNodes_InFunc[2].children[nodeIndex].lastUrl = treeNode.url;
+                                    if (layerNodes_Model[2].children[nodeIndex]) {
+                                        layerNodes_Model[2].children[nodeIndex].lastUrl = treeNode.url;
                                         treeNode.lastUrl = treeNode.url;
                                         //记录数据源的开源方式
-                                        layerNodes_InFunc[2].children[nodeIndex].textLayerChecked = textLayerChecked;
-                                        layerNodes_InFunc[2].children[nodeIndex].buttonLayerChecked = buttonLayerChecked;
-                                        layerNodes_InFunc[2].children[nodeIndex].textLayerDisabled = textLayerDisabled;
-                                        layerNodes_InFunc[2].children[nodeIndex].buttonLayerDisabled = buttonLayerDisabled;
-                                        layerNodes_InFunc[2].children[nodeIndex].name = $("#editFLName").val();
-                                        layerNodes_InFunc[2].children[nodeIndex].url = $("#editFLAds").val();
+                                        layerNodes_Model[2].children[nodeIndex].textLayerChecked = textLayerChecked;
+                                        layerNodes_Model[2].children[nodeIndex].buttonLayerChecked = buttonLayerChecked;
+                                        layerNodes_Model[2].children[nodeIndex].textLayerDisabled = textLayerDisabled;
+                                        layerNodes_Model[2].children[nodeIndex].buttonLayerDisabled = buttonLayerDisabled;
+                                        layerNodes_Model[2].children[nodeIndex].name = $("#editFLName").val();
+                                        layerNodes_Model[2].children[nodeIndex].url = $("#editFLAds").val();
                                     }
                                     treeNode.name = $("#editFLName").val();
                                     treeNode.url = $("#editFLAds").val();
@@ -1741,7 +1752,7 @@ function addModelLayUI(mapName) {
               return confirm("确认删除 图层 -- " + treeNode.name + " 吗？");*/
         }
         // if(doMapIndex_Template==0){
-        layerNodesObj_Template=$.fn.zTree.init($("#doMapTree_Template"), setting, layerNodes_InFunc);
+        layerNodesObj_Template=$.fn.zTree.init($("#doMapTree_Template"), setting, layerNodes_Model);
 
         // doMapIndex_Template=1;
         // }
@@ -1759,9 +1770,9 @@ function addModelLayUI(mapName) {
             resize: true,
             maxmin:true,
             closeBtn:0,
-            area: ['250', '350px'],
+            area: ['250', '400px'],
             // btn: ['编辑图层'],
-            content: $('#doMapTree_Template'),
+            content: $('#complexLayer_Template'),
             yes: function(index, layero) {//确定后执行回调
 
             },
@@ -1774,7 +1785,16 @@ function addModelLayUI(mapName) {
             }
         });
     });
-
+    layui.use('element', function(){
+        var element = layui.element;
+        //同空白模板
+        element.on('tab(test2)', function(data){
+            console.log(data);
+            if (data.index == 1){
+                layerEdit();
+            }
+        });
+    });
 }
 
 //空白模板制图按钮
@@ -1928,7 +1948,7 @@ function layerEdit() {
                 var newLayerIndex = treeNodes[0].getParentNode().children.length - nodeIndex - 1;
                 map.reorderLayer(thisLayer, newLayerIndex);
             }
-            else {
+            else if (baseMap.length){
                 if (treeNodes[0].name == "地理底图"){ //暂未实现底图节点的移动
                     var nodeIndex = treeNodes[0].getIndex();
                     var theseLayers = new Array();
@@ -1985,7 +2005,11 @@ function layerEdit() {
                     }
                 }
                 else {
-                    var zTreeObj = $.fn.zTree.getZTreeObj("layerTree");
+                    var zTreeObj;
+                    if (typeFlag == 1)
+                        zTreeObj = $.fn.zTree.getZTreeObj("layerTree");
+                    else
+                        zTreeObj = $.fn.zTree.getZTreeObj("layerTree_Template");
                     var baseMapNode2 = zTreeObj.getNodeByParam("name", "地理底图", null);
                     console.log(baseMapNode1Index);
                     console.log(baseMapNode2.getIndex());
@@ -2010,6 +2034,13 @@ function layerEdit() {
                     }
                     baseMapNode1Index = baseMapNode2.getIndex();
                 }
+            }
+            else{
+                console.log(targetNode.name);
+                var nodeIndex = treeNodes[0].getIndex();
+                var thisLayer = map.getLayer(treeNodes[0].mapId);
+                var newLayerIndex = treeNodes[0].getParentNode().children.length - nodeIndex - 1;
+                map.reorderLayer(thisLayer, newLayerIndex);
             }
         }
 
@@ -2136,27 +2167,30 @@ function layerEdit() {
         {name: "图层", pid: 2, isParent: true, open: true, children: featureLayerNodes}
     ]
 
-    layui.use('layer', function () {
-        var layer1 = layui.layer;
-        layer1.open({
-            title: '图层编辑',
-            skin: "layui-layer-lan",
-            type: 1,
-            shade: 0,
-            resize: false,
-            area: ["200px","400px"],
-            btn: ['刷新'],
-            content: "<div id='layerEdit'>" +
-            "<p style='padding: 6px'>在下方拖动图层以改变叠放顺序，点击图层以设置其透明度:</p>" +
-            "<p><div id='layerTree' class='ztree' style='padding: 6px;'></div></p></div>",
-            // content: $('#layerTree'),
-            yes: function(index, layero) {
-                layerEdit();
-                layer.close(layer.index);
-            }
-        });
-    });
-    layerObj = $.fn.zTree.init($("#layerTree"), setting, layerTreeData);
+    // layui.use('layer', function () {
+    //     var layer1 = layui.layer;
+    //     layer1.open({
+    //         title: '图层编辑',
+    //         skin: "layui-layer-lan",
+    //         type: 1,
+    //         shade: 0,
+    //         resize: false,
+    //         area: ["200px","400px"],
+    //         btn: ['刷新'],
+    //         content: "<div id='layerEdit'>" +
+    //         "<p style='padding: 6px'>在下方拖动图层以改变叠放顺序，点击图层以设置其透明度:</p>" +
+    //         "<p><div id='layerTree' class='ztree' style='padding: 6px;'></div></p></div>",
+    //         // content: $('#layerTree'),
+    //         yes: function(index, layero) {
+    //             layerEdit();
+    //             layer.close(layer.index);
+    //         }
+    //     });
+    // });
+    if (typeFlag == 1)
+        layerObj = $.fn.zTree.init($("#layerTree"), setting, layerTreeData);
+    else
+        layerObj = $.fn.zTree.init($("#layerTree_Template"), setting, layerTreeData);
     baseMapNode1 = layerObj.getNodeByParam("name", "地理底图", null);
     baseMapNode1Index = baseMapNode1.getIndex();
 }

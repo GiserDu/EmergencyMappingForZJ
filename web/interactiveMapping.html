@@ -46,8 +46,28 @@
     <div id="administrativeRegion">
 
     </div>
-    <div id="doMapTree" class="ztree"></div>
-    <div id="doMapTree_Template" class="ztree"></div>
+    <!--<div id="doMapTree" class="ztree"></div>-->
+    <div class='layui-tab layui-tab-brief' lay-filter="test1" id="complexLayer" style='margin-top: 0px'>
+    <ul class='layui-tab-title'>
+        <li class='layui-this' >数据源</li>
+        <li id="li2">图层设置</li>
+        </ul>
+    <div class='layui-tab-content'>
+        <div class='layui-tab-item layui-show'><div id='doMapTree' class='ztree'></div></div>
+        <div class='layui-tab-item'><div id='layerTree' class='ztree'></div></div>
+        </div>
+    </div>
+    <!--<div id="doMapTree_Template" class="ztree"></div>-->
+    <div class='layui-tab layui-tab-brief' lay-filter="test2" id="complexLayer_Template" style='margin-top: 0px'>
+        <ul class='layui-tab-title'>
+            <li class='layui-this' >数据源</li>
+            <li id="li2_Template">图层设置</li>
+        </ul>
+        <div class='layui-tab-content'>
+            <div class='layui-tab-item layui-show'><div id='doMapTree_Template' class='ztree'></div></div>
+            <div class='layui-tab-item'><div id='layerTree_Template' class='ztree'></div></div>
+        </div>
+    </div>
     <div id="treeContent" class="ztree"></div>
     <div id="toolsMenu" >
         <div class="btn-group">
@@ -93,7 +113,7 @@
             </ul>
         </div>
             <button id="templateMap" type="button" class="btn btn-default">制图模板</button>
-            <button id="mapLayerOrder" type="button" class="btn btn-default" onclick="layerEdit()">图层排序</button>
+            <!--<button id="mapLayerOrder" type="button" class="btn btn-default" onclick="layerEdit()">图层排序</button>-->
         </div>
         <a id="backHome" href="index.html" type="button" class="btn btn-default  fa  fa-home"></a>
     </div>
@@ -224,6 +244,8 @@
 <!--<script src="js/layui/layui.js"></script>-->
 <script src="js/bootstrap-select.js"></script>
 <script src="js/whu_administrativeRegionSelection.js"></script>
+<script src="js/terraformer.js"></script>
+<script src="js/terraformer-arcgis-parser.js"></script>
 <!--<script src="js/whu_statisticalInteractiveMapping.js"></script>-->
 
 
