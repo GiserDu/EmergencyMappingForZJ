@@ -1,3 +1,7 @@
+body .tjLayerContent .layui-layer-content{
+    overflow: hidden;
+}
+
 /*统计图层面板的样式*/
 .layui-upload-choose{
     position: absolute;
@@ -47,6 +51,7 @@
     width:-webkit-calc(100% - 125px);/*减号前后要有空格，否则无效，减去的宽度必须计算清楚*/
     height: 100%;
     /*overflow-x: hidden;*/
+    overflow-y: auto;
 }
 
 .tjPanel-content .layui-tab-title{
@@ -160,13 +165,23 @@
    margin-bottom: -11px;
 }
 
+.layui-form-select dl{
+    z-index: 1500;
+}
+
 .userDefineColors{
     margin-top: 6px;
-    margin-bottom: -11px;
+    margin-bottom: 2px;
+    padding: 6px 19px 0px 19px;
+    border: 1px solid #aac0a9;
 }
 
 .userDefineColors>label{
     margin-right: 5px;
     font-weight: 100;
+}
+
+.layui-colorpicker{
+    border: none;
 }
 
