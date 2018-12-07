@@ -154,6 +154,10 @@ body .tjLayerContent .layui-layer-content{
 
 }
 
+#color-selected>.select_content{
+    width: 95%;
+}
+
 #chart-selected>.select_content>li{
     float: left;
     width: 50px;
