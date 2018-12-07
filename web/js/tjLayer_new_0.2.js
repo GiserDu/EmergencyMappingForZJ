@@ -1,17 +1,20 @@
 var layerIndex;
-var selectedIndexNum;
 var symbolSizeSliderValue=0;
 var symbolOpacitySliderValue=0;
 var classNumSliderValue=5;
+
 var userLoadSpfilename;  //自定义上传空间数据的文件名
 
+
+var allTjLayerContent={};
 // 制图范围数据的json格式
-var tjPanel1={"tabID":"1","identityField":"value","regionData":"","fileName":""};
+// var tjPanel1={"tabID":"1","identityField":"value","regionData":"","fileName":""};
+var tjPanel1={};
+var tjPanel2 = {"nav":"nav2","tabId":"1","dataAddress":"","tableName":"","spatialId":"","fieldsName":{},"fieldsNum":""};
 //tjPanel3中有一个key是type，1表示统计图表，2表示分级符号
 var tjPanel3={};
 
-// 假设用户选中的统计指标是以下数组
-var selectedStatisticIndex=["男生人数","女生人数","老人人数","小孩人数","男生人数","女生人数","老人人数","小孩人数","男生人数","女生人数"];
+
 
 function opentjMenuLayer() {
     layui.use(['layer','form','element'],function () {
@@ -65,7 +68,7 @@ function opentjMenuLayer() {
             '                        </div>\n' +
             '                        <div class="layui-form-item">\n' +
             '                            <div class="layui-input-block  admin-form-btn-group">\n' +
-            '                                <button class="layui-btn layui-btn-default admin-form-btn" onclick="constructTjJson11">下一步</button>\n' +
+            '                                <button class="layui-btn layui-btn-default admin-form-btn" onclick="constructTjJson11()">下一步</button>\n' +
             '                            </div>\n' +
             '                        </div>\n' +
             '                    </div>\n' +
@@ -91,9 +94,13 @@ function opentjMenuLayer() {
         userLoadSpatialData();
 
         element.on('nav(navDemo)', function(elem){
+            console.log(elem);
             var leftMenuName=elem.attr('name');
+            var selectedIndexNum;
+
             if(leftMenuName=="selectMappingRange"){
                 $(".tjPanel-content").html(html1);
+
                 // 省、市、区联动选择框的重新渲染
                 multiSelectRender('selectRegion');
                 userLoadSpatialData();
@@ -104,59 +111,63 @@ function opentjMenuLayer() {
                 opentjPanel2();
                 form.render();
 
-                // $(".tjPanel-content").html(html3);
-                // initTjSymbol();
-                // renderSlider();
-                // form.render();
-                // userDefineChartColor();
-
-
-
             } else if(leftMenuName=="selectMappingTemplate") {
+
+                selectedIndexNum=tjPanel2.fieldsNum;
 
                 if (selectedIndexNum==0){
                     alert('请选择统计指标');
 
                 } else if(selectedIndexNum==1){
+                    $(".tjPanel-content").html(html4);
+                    initTjSymbol();
+                    renderSlider();
+                    form.render();
+
+                    clickAndLoadAllInfo();
+
+                    // $("#tjInfoSubmit").bind('click',function () {
+                    //     constructTjJson3();
+                    //     layer.open({
+                    //         type: 0,
+                    //         title:"统计图层名称",
+                    //         skin:"layui-layer-lan",
+                    //         content:' <div style="margin-left:-24px">\n' +
+                    //         '             <label class="layui-form-label">图层名</label>\n' +
+                    //         '             <div class="layui-input-block" style="margin-left: 88px">\n' +
+                    //         '                  <input type="text" name="tjLayerName" lay-verify="required" placeholder="请输入统计图层名称" autocomplete="off" class="layui-input">\n' +
+                    //         '             </div>\n' +
+                    //         '          </div>',
+                    //         yes:function (index,layero) {
+                    //             console.log("OK");
+                    //
+                    //             var tjLayerName=$("input[ name='tjLayerName' ]").val();
+                    //
+                    //             if(tjLayerName==""){
+                    //                 alert("请输入名称");
+                    //             }
+                    //
+                    //             allTjLayerContent={
+                    //                 "name":tjLayerName,
+                    //                 "content":{
+                    //                     "spatialdata":tjPanel1,
+                    //                     "statisticdata":tjPanel2,
+                    //                     "cartographydata":tjPanel3
+                    //                 }
+                    //             }
+                    //             console.log( allTjLayerContent);
+                    //         }
+                    //     });
+                    // });
+
+                }else {
+
                     $(".tjPanel-content").html(html3);
                     initTjSymbol();
                     renderSlider();
                     form.render();
                     userDefineChartColor();
-                    // $("#tjInfoSubmit").bind('click',function () {
-                    //     var chartSymbolValues=getchartSymbolValues();
-                    //     console.log(chartSymbolValues);
-                    // });
 
-                }else {
-                    $(".tjPanel-content").html(html4);
-                    initTjSymbol();
-                    renderSlider();
-                    form.render();
-                    // $("#tjInfoSubmit").bind('click',function () {
-                    //     var graduatedSymbolValues=getgraduatedSymbolValues();
-                    //     console.log(graduatedSymbolValues);
-                    // });
-                    $("#tjInfoSubmit").bind('click',function () {
-                        constructTjJson3();
-                        layer.open({
-                            type: 0,
-                            title:"统计图层名称",
-                            skin:"layui-layer-lan",
-                            content:' <div style="margin-left:-24px">\n' +
-                            '             <label class="layui-form-label">图层名</label>\n' +
-                            '             <div class="layui-input-block" style="margin-left: 88px">\n' +
-                            '                  <input type="text" name="username" lay-verify="required" placeholder="请输入统计图层名称" autocomplete="off" class="layui-input">\n' +
-                            '             </div>\n' +
-                            '          </div>',
-                            yes:function (index,layero) {
-                                alert("OK");
-                                console.log(layero);
-                                // layer.close(index);
-                                // layer.close(layerIndex);
-                            }
-                        });
-                    });
                 }
             }
         });
@@ -213,22 +224,6 @@ function constructTjJson3() {
     if(selectedIndexNum==null || selectedIndexNum==0){
         alert("您还未选择用于制图的统计指标");
     } else if(selectedIndexNum==1){
-        // -----获得用户选择的有关统计符号的值-----
-        var chartID = $("#chart-selected>.select_title>img").attr("src").slice(-10,-4);
-        var colors=[];
-        // 获得所有颜色选择器
-        var chartIndexColorpick=$(".userDefineColors").find('.chartColorPicker');
-        for(var i=0;i<chartIndexColorpick.length;i++){
-            colors[i]=$(".userDefineColors").find('.chartColorPicker').find('.layui-colorpicker-trigger-span').css("background-color");
-        }
-        tjPanel3={
-            "type":"1",
-            "chartID":chartID,
-            "colors":colors,
-            "symbolSizeSliderValue":symbolOpacitySliderValue,
-            "symbolOpacitySliderValue":symbolOpacitySliderValue
-        }
-    } else if(selectedIndexNum>1){
         // -----获得用户选择的有关分级符号的值-----
         var color1=$("#color-selected>.select_title>img").attr("color1");
         var color2=$("#color-selected>.select_title>img").attr("color2");
@@ -248,7 +243,61 @@ function constructTjJson3() {
             "modelName":modelName,
             "symbolOpacitySliderValue":symbolOpacitySliderValue
         }
+    } else if(selectedIndexNum>1){
+        // -----获得用户选择的有关统计符号的值-----
+        var chartID = $("#chart-selected>.select_title>img").attr("src").slice(-10,-4);
+        var colors=[];
+        // 获得所有颜色选择器
+        var chartIndexColorpick=$(".userDefineColors").find('.chartColorPicker');
+        for(var i=0;i<chartIndexColorpick.length;i++){
+            colors[i]=$(".userDefineColors").find('.chartColorPicker').find('.layui-colorpicker-trigger-span').css("background-color");
+        }
+        tjPanel3={
+            "type":"1",
+            "chartID":chartID,
+            "colors":colors,
+            "symbolSizeSliderValue":symbolOpacitySliderValue,
+            "symbolOpacitySliderValue":symbolOpacitySliderValue
+        }
     }
+
+    console.log(tjPanel3);
+}
+
+function clickAndLoadAllInfo() {
+    $("#tjInfoSubmit").bind('click',function () {
+        constructTjJson3();
+        layer.open({
+            type: 0,
+            title:"统计图层名称",
+            skin:"layui-layer-lan",
+            content:' <div style="margin-left:-24px">\n' +
+            '             <label class="layui-form-label">图层名</label>\n' +
+            '             <div class="layui-input-block" style="margin-left: 88px">\n' +
+            '                  <input type="text" name="tjLayerName" lay-verify="required" placeholder="请输入统计图层名称" autocomplete="off" class="layui-input">\n' +
+            '             </div>\n' +
+            '          </div>',
+            yes:function (index,layero) {
+                console.log("OK");
+
+                var tjLayerName=$("input[ name='tjLayerName' ]").val();
+
+                if(tjLayerName==""){
+                    alert("请输入名称");
+                }
+
+                allTjLayerContent={
+                    "name":tjLayerName,
+                    "content":{
+                        "spatialdata":tjPanel1,
+                        "statisticdata":tjPanel2,
+                        "cartographydata":tjPanel3
+                    }
+                }
+                console.log( allTjLayerContent);
+            }
+        });
+    });
 }
 
 // 省市区县多级联动的渲染
@@ -317,9 +366,11 @@ function multiSelectRender(selectName) {
 
 // 文件上传
 function userLoadSpatialData() {
-    layui.use(['upload','form'], function(){
-        var form=layui.form;
-        var $ = layui.jquery
+    layui.use(['upload','form','layer'], function(){
+        var index;
+        var form=layui.form
+            ,$ = layui.jquery
+            ,layer=layui.layer
             ,upload = layui.upload;
         var uploadInst= upload.render({
             elem: '#shpFileUploadControl'
@@ -329,15 +380,20 @@ function userLoadSpatialData() {
             ,exts: 'zip|rar' //只允许上传压缩文件
             ,bindAction: '#shpLoadConfirmBtn'
             ,choose:function (obj) {
-                var files = this.files = obj.pushFile(); //将每次选择的文件追加到文件队列
                 obj.preview(function (index, file, result) {
                     userLoadSpfilename=file.name;
+                    var fileNameSpan="<span class=\"layui-inline layui-upload-choose\">"+userLoadSpfilename+"</span>";
+                    $("#userDataField").find('input').after(fileNameSpan);
                     // console.log(file.name); //得到文件对象
                 })
+            }
+            ,before: function(obj){ //obj参数包含的信息，跟 choose回调完全一致，可参见上文。
+                index=layer.load(); //上传loading
             }
             ,done: function(res){
                 console.log(res);
                 alert(res["message"]+":"+res["saveFilePath"]);
+                layer.close(index);
                 console.log(res["geoJsonURL"]);
                 // alert(res["fieldsName"]);
 
@@ -366,24 +422,7 @@ function userLoadSpatialData() {
                 form.render('select');
             }
             ,error:function () {
-                // var spatialID= '<div class="layui-form-item" style="margin-top: 15px;">\n' +
-                //     '                  <label class="layui-form-label" style="line-height: 41px;width: 93px;padding: 0">空间标识字段</label>\n' +
-                //     '                  <div class="layui-input-block">\n' +
-                //     '                        <select name="userDataField" id="userDataField">\n' +
-                //     '                                 <option value="名称 ">名称</option>\n' +
-                //     '                                 <option value="长度 ">长度</option>\n' +
-                //     '                                 <option value="面积">面积</option>\n' +
-                //     '                                 <option value="自定义 ">自定义</option>\n' +
-                //     '                         </select>\n' +
-                //     '                   </div>\n' +
-                //     '            </div>\n' +
-                //     '            <div>\n' +
-                //     '                    <button type="button" class="layui-btn" id="comfirmUserSpDataBtn" onclick="constructTjJson12()">下一步</button>' +
-                //     '            </div>\n';
-                // // 先删除原有的select,再添加新的select
-                // $('#shpLoadConfirmBtn').parent().nextAll().remove();
-                // $('#shpLoadConfirmBtn').parent().after(spatialID);
-                // form.render('select');
+                layer.close(index);
             }
         });
     })
@@ -468,19 +507,25 @@ function initTjSymbol() {
 function userDefineChartColor() {
 
     var defaultColorTable=['#ED1B24','#262164','#F2F101','#21B24B','#92278F','#F18C24','#FFE375','#ABE94A','#FBA723','#D8350C'];
-    layui.use(['form','colorpicker'],function () {
+    var selectedStatisticIndex=tjPanel2.fieldsName;
+    var length=0;
+    for(var a in selectedStatisticIndex){
+        length++;
+    }
+    console.log(length);
 
-        var form=layui.form
-            ,$ = layui.$
+    layui.use('colorpicker',function () {
+
+        var $ = layui.$
             ,colorpicker = layui.colorpicker;
 
         $('.userDefineColors').empty();
 
-        for(var i=0;i<selectedStatisticIndex.length;i++){
+        for(var i=0;i<length;i++){
             // 根据用户选中的指标数量动态生成颜色选择器
 
-            var indexColorDiv= '<label class="selectedStaIndexsLabel">'+selectedStatisticIndex[i]+'</label>'+
-                '               <div id="color'+i+'" class="chartColorPicker" style="margin-right: 20px"></div>';
+            var indexColorDiv= '<div class=" chartColorPickerDIV"><label class="selectedStaIndexsLabel">'+selectedStatisticIndex[i+1]+'</label>'+
+                '               <div id="color'+i+'" class="chartColorPicker" style="margin-right: 20px"></div></div>';
             $('.userDefineColors').append(indexColorDiv);
 
             var colorPickId='#color'+i;
@@ -593,7 +638,6 @@ function getgraduatedSymbolValues() {
 
 
 //打开第二个页面
-var tjPanel2 = {"nav":"nav2","tabId":"1","dataAddress":"","tableName":"","spatialId":"","fieldsName":{},"fieldsNum":""};
 function opentjPanel2(){
     layui.use(['element'], function(){
         var element = layui.element;
@@ -621,7 +665,7 @@ function opentjPanel2(){
 
 //显示tabletree
 function tableTree(){
-    var type = $(".layui-tab-title").find(".layui-this");
+    var type = $(".tjPanel-content").find(".layui-tab-title").find(".layui-this");
     //console.log(type.html());
     var treeName;
     var treeElement;

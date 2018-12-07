@@ -174,6 +174,7 @@ body .tjLayerContent .layui-layer-content{
     margin-bottom: 2px;
     padding: 6px 19px 0px 19px;
     border: 1px solid #aac0a9;
+    width: 100%;
 }
 
 .userDefineColors>label{
@@ -183,5 +184,14 @@ body .tjLayerContent .layui-layer-content{
 
 .layui-colorpicker{
     border: none;
+}
+
+.chartColorPickerDIV{
+    /*float: left;*/
+    display: inline-block; /* 如需支持IE8以下版本，用浮动来做 */
+    width: calc(30%); /* 此处运用了一个css3的表达式，将div三等分，IE8及以上可以支持，当然也可以根据需要设置固定值 */
+    width: -webkit-calc(30%);
+    width: -moz-calc(30%);
+    text-align: right;
 }
 
