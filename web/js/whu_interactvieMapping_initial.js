@@ -28,11 +28,14 @@ var nodePath; //存储节点的路径
 var getThisTheme;
 var getThisPath = [];//当前要素节点的所有父节点（包括自己）
 var textEditFlag = 0; //标识对服务地址要素图层编辑时的一种特殊情况
+//图层目录树结构，底图图层可包含多个服务，用逗号隔开，需要声明服务类型：WebTiledLayer，ArcGISDynamicMapServiceLayer，ArcGISTiledMapServiceLayer
 var layerNodes =[
     {id:1, pId:0, name:"地理底图", open:true, "nocheck":true,children:[
-            /*{id:101,name:"矢量图",url:"http://106.124.138.198:8080/OneMapServer/rest/services/XJ_VECTOR/MapServer,http://106.124.138.198:8080/OneMapServer/rest/services/XJ_POI/MapServer",checked:true}*/
-           {id:101, name:"矢量图",url:"http://qk.casm.ac.cn:9090/geowinmap/ds?serviceproviderid=map.cachedtms&serviceid=gettile&tilename=map&y=${row}&x=${col}&z=${level}",checked:true},
-            {id:102, name:"影像图",url:"http://qk.casm.ac.cn:9090/geowinmap/ds?serviceproviderid=map.cachedtms&serviceid=gettile&tilename=sate&y=${row}&x=${col}&z=${level}"}
+            {id:102, name:"矢量图",url:"http://t0.tianditu.cn/vec_w/wmts?SERVICE=WMTS&REQUEST=GetTile&VERSION=1.0.0&LAYER=vec&STYLE=default&TILEMATRIXSET=w&FORMAT=tiles&TILECOL=${col}&TILEROW=${row}&TILEMATRIX=${level},http://t2.tianditu.cn/cva_w/wmts?SERVICE=WMTS&REQUEST=GetTile&VERSION=1.0.0&LAYER=cva&STYLE=default&TILEMATRIXSET=w&FORMAT=tiles&TILECOL=${col}&TILEROW=${row}&TILEMATRIX=${level}",mapType:"WebTiledLayer",checked:true},
+            {id:102, name:"影像图",url:"http://t6.tianditu.gov.cn/DataServer?T=img_w&x=${col}&y=${row}&l=${level},http://t2.tianditu.cn/cva_w/wmts?SERVICE=WMTS&REQUEST=GetTile&VERSION=1.0.0&LAYER=cva&STYLE=default&TILEMATRIXSET=w&FORMAT=tiles&TILECOL=${col}&TILEROW=${row}&TILEMATRIX=${level}",mapType:"WebTiledLayer"},
+               /*{id:101,name:"新疆矢量图",url:"http://106.124.138.198:8080/OneMapServer/rest/services/XJ_VECTOR/MapServer,http://106.124.138.198:8080/OneMapServer/rest/services/XJ_POI/MapServer",checked:true}*/
+          // {id:101, name:"专项矢量图",url:"http://qk.casm.ac.cn:9090/geowinmap/ds?serviceproviderid=map.cachedtms&serviceid=gettile&tilename=map&y=${row}&x=${col}&z=${level}",mapType:"WebTiledLayer"},
+            //{id:102, name:"专项影像图",url:"http://qk.casm.ac.cn:9090/geowinmap/ds?serviceproviderid=map.cachedtms&serviceid=gettile&tilename=sate&y=${row}&x=${col}&z=${level}",mapType:"WebTiledLayer"}
         ]},
 
     {id:2, pId:0, name:"专题服务图层",isParent:true, open:true,children:[], "nocheck":true},
@@ -87,35 +90,58 @@ $(document).ready(function() {
 
 
     function initMap() {
-        require(["esri/map","esri/config","esri/layers/WebTiledLayer","esri/layers/ArcGISDynamicMapServiceLayer","esri/layers/ArcGISTiledMapServiceLayer","esri/layers/GraphicsLayer"],function (Map,config,WebTiledLayer,ArcGISDynamicMapServiceLayer,ArcGISTiledMapServiceLayer,GraphicsLayer) {
+        require(["esri/layers/TileInfo","esri/map","esri/config","esri/layers/WebTiledLayer","esri/layers/ArcGISDynamicMapServiceLayer","esri/layers/ArcGISTiledMapServiceLayer","esri/layers/GraphicsLayer"],function (TileInfo,Map,config,WebTiledLayer,ArcGISDynamicMapServiceLayer,ArcGISTiledMapServiceLayer,GraphicsLayer) {
             map = new Map("mapContainer", {
                 //basemap:"dark-gray-vector",
                 center: [104,35],
                 zoom: 5
             });
 
-                //配置代理
+               /* //配置代理
                 config.defaults.io.proxyUrl = "../esriproxy/";
-                config.defaults.io.alwaysUseProxy = false;
+                config.defaults.io.alwaysUseProxy = false;*/
             map.on("load", function (evt) {
                 //processResults(testData);
             });
-           /*baseMap=new Array()
+           baseMap=new Array();
            var baseMapUrls=layerNodes[0].children[0].url.split(",");
+           var baseMapType=layerNodes[0].children[0].mapType;
             $.each(baseMapUrls, function (i) {
                 var url=baseMapUrls[i];
-                baseMap.push(new ArcGISTiledMapServiceLayer(url,{"id":url}));
+                switch (baseMapType){
+                    case "WebTiledLayer":
+                        baseMap.push(new WebTiledLayer(url,{"id":url
+        }));
+        break;
+                    case "ArcGISDynamicMapServiceLayer":
+                        baseMap.push(new ArcGISDynamicMapServiceLayer(url,{"id":url}));
+                        break;
+                    case "ArcGISTiledMapServiceLayer":
+                        baseMap.push(new ArcGISTiledMapServiceLayer(url,{"id":url}));
+                        break;
+
+                }
                 map.addLayer(baseMap[i]);
 
-            });*/
+            });
+            require(['esri/geometry/Point'],function(EsriPoint){
+                map.centerAndZoom(new EsriPoint({
+                    x: 120.33999,
+                    y: 29.231858,
+                    spatialReference: {
+                        wkid: 4326
+                    }
+                }), 6)
+            });
+
            //baseMap=new ArcGISTiledMapServiceLayer("http://106.124.138.198:8080/OneMapServer/rest/services/XJ_VECTOR/MapServer");
-           baseMap = new WebTiledLayer(
+           /*baseMap = new WebTiledLayer(
                 //'http://qk.casm.ac.cn:9090/geowinmap/ds?serviceproviderid=map.cachedtms&serviceid=gettile&tilename=map&y=${row}&x=${col}&z=${level}',{id:"baseMap"}
                 'https://${subDomain}.tile.thunderforest.com/cycle/${level}/${col}/${row}.png',{"copyright": 'Maps © <a href="http://www.thunderforest.com">Thunderforest</a>, Data © <a href="http://www.openstreetmap.org/copyright">OpenStreetMap contributors</a>',
                     "id": "OpenCycleMap",
                     "subDomains": ["a", "b", "c"]}
-            );
-            map.addLayer(baseMap);
+            );*/
+           // map.addLayer(baseMap);
             studyAreaLayer=new GraphicsLayer('',{id:"studyAreaLayer",name:"studyAreaLayer"});
             studyAreaLayer.name = "studyAreaLayer";
             map.addLayer(studyAreaLayer);
@@ -245,7 +271,7 @@ function doMap() {
             callback: {
                 beforeCheck: function (treeId,treeNode) {
                     layerOncheck("doMapTree",treeNode);
-                },//勾选前回调，用于加载图层
+                 },//勾选前回调，用于加载图层
                 beforeRemove: beforeRemove,//移除前回调
                 beforeRename: beforeRename//修改名字之前回调
             }
@@ -292,17 +318,25 @@ function doMap() {
                                     ], function (ArcGISDynamicMapServiceLayer, InfoTemplate, PopupTemplate)
                                     {
                                         var infoTemplate = new InfoTemplate("${NAME}", "${*}");
-
+                                        //判断专题服务是图层还是地图
                                         var serviceUrl = $("#newSLAds").val();
-                                        var serviceUrlstr=serviceUrl.substring(0,serviceUrl.lastIndexOf("/"));
+                                        var serviceUrlstr=serviceUrl;
+                                        if(serviceUrl.substr(-9)!="MapServer"){
+                                            serviceUrlstr=serviceUrl.substring(0,serviceUrl.lastIndexOf("/"));
+                                        }
+
                                         try{
                                             var layer = new ArcGISDynamicMapServiceLayer(serviceUrlstr,{id:$("#newSLName").val()+"_"+$("#newSLAds").val()});
                                         }catch (e) {
                                             alert("服务地址有误！")
                                             return false;
                                         }
-                                        var showindex=serviceUrl.substring(serviceUrl.lastIndexOf("/")+1,serviceUrl.length);
-                                        layer.setVisibleLayers([showindex]);
+                                        //如果是图层，则只显示这个图层
+                                        if(serviceUrl.substr(-9)!="MapServer"){
+                                            var showindex=serviceUrl.substring(serviceUrl.lastIndexOf("/")+1,serviceUrl.length);
+                                            layer.setVisibleLayers([showindex]);
+                                        }
+
 
                                         //var layer = new ArcGISDynamicMapServiceLayer(serviceUrl,{id: $("#newSLName").val()+"_"+$("#newSLAds").val()});
                                         ServerLayerArr.push(layer);
@@ -462,6 +496,12 @@ function doMap() {
                                         return;
                                     }
                                     //treeNode.name=$("#editBLAds").val();
+                                    $.each(baseMap,function (i) {
+                                        if(treeNode.url.indexOf(baseMap[i].url)!=-1){
+                                            map.removeLayer(baseMap[i]);
+                                        }
+                
+                                    });
                                     treeNode.url=$("#editBLAds").val();
                                     var treeObj = $.fn.zTree.getZTreeObj("doMapTree");
                                     treeObj.updateNode(treeNode);
@@ -472,11 +512,11 @@ function doMap() {
                                     });
 
                                     require(["esri/layers/ArcGISTiledMapServiceLayer"],function (ArcGISTiledMapServiceLayer) {
-                                        $.each(baseMap,function (i) {
+                                       /*  $.each(baseMap,function (i) {
                                             map.removeLayer(baseMap[i]);
-                                        });
+                                        }); */
                                         baseMap=new Array();
-                                        var urls= $("#editBLAds").val().split(",")
+                                        var urls= $("#editBLAds").val().split(",");
                                         $.each(urls, function (i) {
                                             var url=urls[i];
                                             baseMap.push(new ArcGISTiledMapServiceLayer(url,{"id":url}));
@@ -1057,9 +1097,32 @@ function sweetAlert1(mapName) {
             map.addLayer(polygonFeatureLayer);
             map.addLayer(polylineFeatureLayer);
             map.addLayer(pointFeatureLayer);
-            $.each(baseMap,function (i) {
+           /*  $.each(baseMap,function (i) {
                 map.addLayer(baseMap[i]);
-            });
+            }); */
+            require(["esri/layers/WebTiledLayer","esri/layers/ArcGISDynamicMapServiceLayer","esri/layers/ArcGISTiledMapServiceLayer"],function (WebTiledLayer,ArcGISDynamicMapServiceLayer,ArcGISTiledMapServiceLayer) {
+              
+               baseMap=new Array();
+               var baseMapUrls=layerNodes[0].children[0].url.split(",");
+               var baseMapType=layerNodes[0].children[0].mapType;
+                $.each(baseMapUrls, function (i) {
+                    var url=baseMapUrls[i];
+                    switch (baseMapType){
+                        case "WebTiledLayer":
+                            baseMap.push(new WebTiledLayer(url,{"id":url
+            }));
+            break;
+                        case "ArcGISDynamicMapServiceLayer":
+                            baseMap.push(new ArcGISDynamicMapServiceLayer(url,{"id":url}));
+                            break;
+                        case "ArcGISTiledMapServiceLayer":
+                            baseMap.push(new ArcGISTiledMapServiceLayer(url,{"id":url}));
+                            break;
+    
+                    }
+                    map.addLayer(baseMap[i]);
+    
+                });});
             addModelLayUI(mapName);
             if (templateFlag == 0)
                 templateClassNo = layer.index;
@@ -1143,24 +1206,19 @@ function addModelLayUI(mapName) {
     //修改底图节点_暂时不用
 
     var layerNodes_Model=[
-        /*{id:1, pId:0, name:"地理底图", open:true, "nocheck":true,children:[
-                {id:101, name:"矢量图",url:"http://qk.casm.ac.cn:9090/geowinmap/ds?serviceproviderid=map.cachedtms&serviceid=gettile&tilename=map&y=${row}&x=${col}&z=${level}",checked:true},
-                {id:102, name:"影像图",url:"http://qk.casm.ac.cn:9090/geowinmap/ds?serviceproviderid=map.cachedtms&serviceid=gettile&tilename=sate&y=${row}&x=${col}&z=${level}"}
-            ]},
-
-        {id:2, pId:0, name:"专题服务图层",isParent:true, open:true,children:[], "nocheck":true},
-
-        {id:3, pId:0, name:"要素图层", isParent:true,open:true,children:[], "nocheck":true}*/
         {id:1, pId:0, name:"地理底图", open:true, "nocheck":true,children:[
-                /*{id:101,name:"矢量图",url:["http://106.124.138.198:8080/OneMapServer/rest/services/XJ_VECTOR/MapServer","http://106.124.138.198:8080/OneMapServer/rest/services/XJ_POI/MapServer"],checked:true}*/
-                {id:101, name:"矢量图",url:"http://qk.casm.ac.cn:9090/geowinmap/ds?serviceproviderid=map.cachedtms&serviceid=gettile&tilename=map&y=${row}&x=${col}&z=${level}",checked:true},
-                 {id:102, name:"影像图",url:"http://qk.casm.ac.cn:9090/geowinmap/ds?serviceproviderid=map.cachedtms&serviceid=gettile&tilename=sate&y=${row}&x=${col}&z=${level}"}
+                {id:102, name:"矢量图",url:"http://t0.tianditu.cn/vec_w/wmts?SERVICE=WMTS&REQUEST=GetTile&VERSION=1.0.0&LAYER=vec&STYLE=default&TILEMATRIXSET=w&FORMAT=tiles&TILECOL=${col}&TILEROW=${row}&TILEMATRIX=${level},http://t2.tianditu.cn/cva_w/wmts?SERVICE=WMTS&REQUEST=GetTile&VERSION=1.0.0&LAYER=cva&STYLE=default&TILEMATRIXSET=w&FORMAT=tiles&TILECOL=${col}&TILEROW=${row}&TILEMATRIX=${level}",mapType:"WebTiledLayer",checked:true},
+                {id:102, name:"影像图",url:"http://t6.tianditu.gov.cn/DataServer?T=img_w&x=${col}&y=${row}&l=${level},http://t2.tianditu.cn/cva_w/wmts?SERVICE=WMTS&REQUEST=GetTile&VERSION=1.0.0&LAYER=cva&STYLE=default&TILEMATRIXSET=w&FORMAT=tiles&TILECOL=${col}&TILEROW=${row}&TILEMATRIX=${level}",mapType:"WebTiledLayer"},
+                   /*{id:101,name:"新疆矢量图",url:"http://106.124.138.198:8080/OneMapServer/rest/services/XJ_VECTOR/MapServer,http://106.124.138.198:8080/OneMapServer/rest/services/XJ_POI/MapServer",checked:true}*/
+              // {id:101, name:"专项矢量图",url:"http://qk.casm.ac.cn:9090/geowinmap/ds?serviceproviderid=map.cachedtms&serviceid=gettile&tilename=map&y=${row}&x=${col}&z=${level}",mapType:"WebTiledLayer"},
+                //{id:102, name:"专项影像图",url:"http://qk.casm.ac.cn:9090/geowinmap/ds?serviceproviderid=map.cachedtms&serviceid=gettile&tilename=sate&y=${row}&x=${col}&z=${level}",mapType:"WebTiledLayer"}
             ]},
-
+    
         {id:2, pId:0, name:"专题服务图层",isParent:true, open:true,children:[], "nocheck":true},
-
-        {id:3, pId:0, name:"要素图层", isParent:true,open:true,children:[], "nocheck":true}
-
+    
+        {id:3, pId:0, name:"要素图层", isParent:true,open:true,children:[], "nocheck":true},
+        {id:4, pId:0, name:"统计图层", isParent:true,open:true,children:[], "nocheck":true}
+    
     ];
 
     /*增加专题服务图层节点*/
@@ -1245,16 +1303,23 @@ function addModelLayUI(mapName) {
                                         "esri/InfoTemplate", "esri/dijit/PopupTemplate"
                                     ], function (ArcGISDynamicMapServiceLayer, InfoTemplate, PopupTemplate) {
                                         var infoTemplate = new InfoTemplate("${NAME}", "${*}");
+                                        //判断专题服务是图层还是地图
                                         var serviceUrl = $("#newSLAds").val();
-                                        var serviceUrlstr=serviceUrl.substring(0,serviceUrl.lastIndexOf("/"));
+                                        var serviceUrlstr=serviceUrl;
+                                        if(serviceUrl.substr(-9)!="MapServer"){
+                                            serviceUrlstr=serviceUrl.substring(0,serviceUrl.lastIndexOf("/"));
+                                        }
                                         try{
                                             var layer = new ArcGISDynamicMapServiceLayer(serviceUrlstr,{id:$("#newSLName").val()+"_"+$("#newSLAds").val()});
                                         }catch (e) {
                                             alert("服务地址有误！")
                                             return false;
                                         }
-                                        var showindex=serviceUrl.substring(serviceUrl.lastIndexOf("/")+1,serviceUrl.length);
-                                        layer.setVisibleLayers([showindex]);
+                                        //如果是图层，则只显示这个图层
+                                        if(serviceUrl.substr(-9)!="MapServer"){
+                                            var showindex=serviceUrl.substring(serviceUrl.lastIndexOf("/")+1,serviceUrl.length);
+                                            layer.setVisibleLayers([showindex]);
+                                        }
 
                                         //var layer = new ArcGISDynamicMapServiceLayer(serviceUrl,{id: $("#newSLName").val()+"_"+$("#newSLAds").val()});
                                         ServerLayerArr.push(layer);
@@ -1408,6 +1473,12 @@ function addModelLayUI(mapName) {
                                         return;
                                     }
                                     //treeNode.name=$("#editBLAds").val();
+                                    $.each(baseMap,function (i) {
+                                        if(treeNode.url.indexOf(baseMap[i].url)!=-1){
+                                            map.removeLayer(baseMap[i]);
+                                        }
+                
+                                    });
                                     treeNode.url=$("#editBLAds").val();
                                     var treeObj = $.fn.zTree.getZTreeObj("doMapTree_Template");
                                     treeObj.updateNode(treeNode);
@@ -1422,9 +1493,9 @@ function addModelLayUI(mapName) {
                                         map.getLayer("baseMap").refresh();
                                     }*/
                                     require(["esri/layers/ArcGISTiledMapServiceLayer"],function (ArcGISTiledMapServiceLayer) {
-                                        $.each(baseMap,function (i) {
+                                       /*  $.each(baseMap,function (i) {
                                             map.removeLayer(baseMap[i]);
-                                        });
+                                        }); */
                                         baseMap=new Array();
                                         var urls= $("#editBLAds").val().split(",")
                                         $.each(urls, function (i) {
@@ -1835,9 +1906,32 @@ function blank_btnClick() {
             // }
             map.removeAllLayers();
 
-            $.each(baseMap,function (i) {
+            /* $.each(baseMap,function (i) {
                 map.addLayer(baseMap[i]);
-            });
+            }); */
+            require(["esri/layers/WebTiledLayer","esri/layers/ArcGISDynamicMapServiceLayer","esri/layers/ArcGISTiledMapServiceLayer"],function (WebTiledLayer,ArcGISDynamicMapServiceLayer,ArcGISTiledMapServiceLayer) {
+              
+                baseMap=new Array();
+                var baseMapUrls=layerNodes[0].children[0].url.split(",");
+                var baseMapType=layerNodes[0].children[0].mapType;
+                 $.each(baseMapUrls, function (i) {
+                     var url=baseMapUrls[i];
+                     switch (baseMapType){
+                         case "WebTiledLayer":
+                             baseMap.push(new WebTiledLayer(url,{"id":url
+             }));
+             break;
+                         case "ArcGISDynamicMapServiceLayer":
+                             baseMap.push(new ArcGISDynamicMapServiceLayer(url,{"id":url}));
+                             break;
+                         case "ArcGISTiledMapServiceLayer":
+                             baseMap.push(new ArcGISTiledMapServiceLayer(url,{"id":url}));
+                             break;
+     
+                     }
+                     map.addLayer(baseMap[i]);
+     
+                 });});
             //清空之前交互制图中添加的图层节点
             var treeObj = $.fn.zTree.getZTreeObj("doMapTree");
             if (treeObj){
@@ -2258,10 +2352,28 @@ function layerOncheck(treeId, treeNode) {
             //地理底图
             if(treeNode.checked){
                 $.each(baseMap,function (i) {
-                    map.removeLayer(baseMap[i]);
+                    if(treeNode.url.indexOf(baseMap[i].url)!=-1){
+                        map.removeLayer(baseMap[i]);
+                    }
+
                 });
 
             }else {
+               //控制底图只能显示一个
+                var treeObj = $.fn.zTree.getZTreeObj(treeId);
+                var mateNote=treeNode.getParentNode().children;
+                for(var i=0;i<mateNote.length;i++){
+                    if(mateNote[i].checked){
+
+                        $.each(baseMap,function (j) {
+                            if(mateNote[i].url.indexOf(baseMap[j].url)!=-1){
+                                map.removeLayer(baseMap[j]);
+                            }
+
+                        });
+                        treeObj.checkNode(mateNote[i], false, true);
+                    }
+                }
                 require(["esri/layers/WebTiledLayer","esri/layers/ArcGISDynamicMapServiceLayer","esri/layers/ArcGISTiledMapServiceLayer"],function (WebTiledLayer,ArcGISDynamicMapServiceLayer,ArcGISTiledMapServiceLayer) {
                     var mate=treeNode.getParentNode().children;
                     for (var  i = 0; i < mate.length; i++) {
@@ -2271,16 +2383,33 @@ function layerOncheck(treeId, treeNode) {
                         treeObj.checkNode(mate[i], false, true);
                     }
                     $.each(baseMap,function (i) {
-                        map.removeLayer(baseMap[i]);
+                        if(treeNode.url.indexOf(baseMap[i].url)!=-1){
+                            map.removeLayer(baseMap[i]);
+                        }
+
                     });
                     baseMap=new Array();
                     var urls=treeNode.url.split(",");
+                var baseMapType=treeNode.mapType;
                     $.each( urls, function (i) {
                         var url=urls[i];
-                        baseMap.push(new ArcGISTiledMapServiceLayer(url,{"id":url}));
+                        switch (baseMapType){
+                            case "WebTiledLayer":
+                                baseMap.push(new WebTiledLayer(url,{"id":url
+                                }));
+                                break;
+                            case "ArcGISDynamicMapServiceLayer":
+                                baseMap.push(new ArcGISDynamicMapServiceLayer(url,{"id":url}));
+                                break;
+                            case "ArcGISTiledMapServiceLayer":
+                                baseMap.push(new ArcGISTiledMapServiceLayer(url,{"id":url}));
+                                break;
+
+                        }
                         map.addLayer(baseMap[i]);
 
                     });
+
                     $.each(baseMap,function (i) {
                         map.reorderLayer(baseMap[i],i);
                     });
@@ -2315,15 +2444,23 @@ function layerOncheck(treeId, treeNode) {
                     }
 
                     var serviceUrl = treeNode.url;
-                    var serviceUrlstr=serviceUrl.substring(0,serviceUrl.lastIndexOf("/"));
+                    //判断专题服务是图层还是地图
+
+                    var serviceUrlstr=serviceUrl;
+                    if(serviceUrl.substr(-9)!="MapServer"){
+                        serviceUrlstr=serviceUrl.substring(0,serviceUrl.lastIndexOf("/"));
+                    }
                     try{
                         var layer = new ArcGISDynamicMapServiceLayer(serviceUrlstr,{id:serviceUrl});
                     }catch (e) {
                         alert("服务地址有误！")
                         return false;
                     }
-                    var showindex=serviceUrl.substring(serviceUrl.lastIndexOf("/")+1,serviceUrl.length);
-                    layer.setVisibleLayers([showindex]);
+                    //如果是图层，则只显示这个图层
+                    if(serviceUrl.substr(-9)!="MapServer"){
+                        var showindex=serviceUrl.substring(serviceUrl.lastIndexOf("/")+1,serviceUrl.length);
+                        layer.setVisibleLayers([showindex]);
+                    }
                     map.addLayer(layer);
                     /*//var layer = new ArcGISDynamicMapServiceLayer(serviceUrl,{id: $("#newSLName").val()+"_"+$("#newSLAds").val()});
                     ServerLayerArr.push(layer);*/
@@ -2639,7 +2776,10 @@ function layerOncheck_Template(treeId, treeNode) {
             //地理底图
             if(treeNode.checked){
                 $.each(baseMap,function (i) {
-                    map.removeLayer(baseMap[i]);
+                    if(treeNode.url.indexOf(baseMap[i].url)!=-1){
+                        map.removeLayer(baseMap[i]);
+                    }
+
                 });
             }else {
                 require(["esri/layers/WebTiledLayer","esri/layers/ArcGISDynamicMapServiceLayer","esri/layers/ArcGISTiledMapServiceLayer"],function (WebTiledLayer,ArcGISDynamicMapServiceLayer,ArcGISTiledMapServiceLayer) {
@@ -2657,7 +2797,10 @@ function layerOncheck_Template(treeId, treeNode) {
                     map.addLayer(baseMap)
                     map.reorderLayer(baseMap,1);*/
                     $.each(baseMap,function (i) {
-                        map.removeLayer(baseMap[i]);
+                        if(treeNode.url.indexOf(baseMap[i].url)!=-1){
+                            map.removeLayer(baseMap[i]);
+                        }
+
                     });
                     baseMap=new Array();
                     var urls=treeNode.url.split(",");
