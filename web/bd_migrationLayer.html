@@ -102,6 +102,11 @@
                     exts: 'json|geojson', //只允许上传压缩文件
                     // bindAction: '#shpLoadConfirmBtn',
                     done: function(res){
+                        // 如果图层不为空，清空图层
+                        if(migrationLayer!=undefined){
+//                          map.removeLayer(migrationLayer);
+                            migrationLayer.destroy();
+                        }
                         console.log(res);
                         var dataUrl = res.saveFilePath;
                         // 添加流图图层
@@ -170,10 +175,6 @@
             migrationLayer.pause();
         }
         function openLayui() {
-            if(migrationLayer!=undefined){
-//                map.removeLayer(migrationLayer);
-                migrationLayer.destroy();
-            }
             initUploadUI();
         }
     </script>

@@ -57,8 +57,8 @@ layui.use(['layer','upload'], function(){
         done: function(res){
             console.log(res);
             swal({
-                title: "上传成功",
-                text: "可视化数据上传成功!",
+                title: "数据上传成功",
+                text: "请在图层控件中选择查看！",
                 // type: "success",
                 imageUrl:"image/success.png",
                 imageWidth:40,
