@@ -87,6 +87,7 @@ function print(){
 		};
 		template.format = format;
 		template.layout = layoutID;
+		// template.layout ='A4 Landscape';
 		// template.preserveScale = true;
 		// template.outScale = outScale;
 
