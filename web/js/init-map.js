@@ -55,3 +55,13 @@ zjVecTileLablayer.addDataSource(dataSource);
 
 var zj_vecTileGroup = L.layerGroup([zjVecTilelayer,zjVecTileLablayer]);
 map.addLayer(zj_vecTileGroup);
+
+// 添加打印控件
+var printer = L.easyPrint({
+	tileLayer: imgLayerGroup,
+	sizeModes: ['Current'],
+	// sizeModes: ['Current', 'A4Landscape', 'A4Portrait'],
+	filename: 'myMap',
+	exportOnly: true,
+	hideControlContainer: true
+}).addTo(map);

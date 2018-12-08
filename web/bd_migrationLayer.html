@@ -9,30 +9,6 @@
     <link href="js/layui/css/layui.css" rel="stylesheet">
     <!-- 上传弹出框样式引用 -->
     <link href="css/bigdata_upload.css" rel="stylesheet">
-    <!--<style>-->
-    <!--html,body{-->
-        <!--margin: 0;-->
-        <!--padding: 0;-->
-    <!--}-->
-    <!--#map{-->
-        <!--position: absolute;-->
-        <!--height: 100%;-->
-        <!--width: 100%;-->
-    <!--}-->
-    <!--#event{-->
-        <!--position: absolute;-->
-        <!--top: 50px;-->
-        <!--right: 600px;-->
-        <!--height: 100px;-->
-        <!--width: 400px;-->
-        <!--z-index: 10000;-->
-    <!--}-->
-    <!--.btn{-->
-        <!--border-color:gray;-->
-        <!--border-width: 2px;-->
-        <!--background-color:white;-->
-   <!--}-->
-    <!--</style>-->
 </head>
 
 <body>
@@ -49,14 +25,6 @@
             </button>
         </div>
     </div>
-    <!-- <div id='event'>
-        <input type="button" value="setData" class="btn" onclick="setData()">
-        <input type="button" value="hide" class="btn" onclick="hide()">
-        <input type="button" value="show" class="btn" onclick="show()">
-        <input type="button" value="pause" class="btn" onclick="pause()">
-        <input type="button" value="play" class="btn" onclick="play()">
-        <input type="button" value="destroy" class="btn" onclick="destroy()">
-    </div> -->
 
     <script src="js/leaflet.js"></script>
     <!-- 矢量瓦片所需js资源 -->
@@ -65,10 +33,14 @@
     <script src='dist/leaflet.migrationLayer-src.js'></script>
     <!-- layui引用 -->
     <script src="js/layui/layui.js"></script>
+    <!-- 打印所需js资源 -->
+    <script src="dist/leaflet-print.js"></script>
     <!-- 地图初始化 -->
     <script src='js/init-map.js'></script>
 
+
     <script>
+
         var migData,migrationLayer;
         initUploadUI();
         function initUploadUI() {
