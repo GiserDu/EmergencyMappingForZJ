@@ -10,7 +10,7 @@ var allTjLayerContent={};
 // 制图范围数据的json格式
 // var tjPanel1={"tabID":"1","identityField":"value","regionData":"","fileName":""};
 var tjPanel1={};
-var tjPanel2 = {"nav":"nav2","tabId":"1","dataAddress":"","tableName":"","spatialId":"","fieldsName":{},"fieldsNum":""};
+var tjPanel2 = {"tabId":"1","dataAddress":"","tableName":"","spatialId":"","fieldsName":{},"fieldsNum":""};
 //tjPanel3中有一个key是type，1表示统计图表，2表示分级符号
 var tjPanel3={};
 
@@ -82,7 +82,14 @@ function opentjMenuLayer() {
                     $("#tjPanel-content3").hide();
                     $("#tjPanel-content4").show();
 
-                    initTjSymbol();
+                    var isSymbolLoaded=$("#tjPanel-content4").attr("isloaded");
+                    if (isSymbolLoaded=="false") {
+                        initTjGraduatedSymbol();
+                        $("#tjPanel-content4").attr("isloaded","true");
+                    };
+                    listenOnSymbolTitleClick();
+
+                    // initTjGraduatedSymbol();
                     renderSlider();
                     form.render();
 
@@ -90,14 +97,20 @@ function opentjMenuLayer() {
 
 
                 }else {
-
                     // $(".tjPanel-content").html(html3);
                     $("#tjPanel-content1").hide();
                     $("#tjPanel-content2").hide();
                     $("#tjPanel-content3").show();
                     $("#tjPanel-content4").hide();
 
-                    initTjSymbol();
+                    var isSymbolLoaded=$("#tjPanel-content3").attr("isloaded");
+                    if (isSymbolLoaded=="false") {
+                        initTjChartSymbol();
+                        $("#tjPanel-content3").attr("isloaded","true");
+                    };
+                    listenOnSymbolTitleClick();
+
+                    // initTjChartSymbol();
                     renderSlider();
                     form.render();
                     userDefineChartColor();
@@ -106,7 +119,7 @@ function opentjMenuLayer() {
                 }
             }
         });
-        element.render('nav');
+        // element.render('nav');
     })
 }
 
@@ -169,12 +182,12 @@ function constructTjJson3() {
             color1=color2;
             color2=tmp;
         };
+        var colors=getColorbar(classNumSliderValue,color1,color2);
         var modelName=$('#model option:selected').val();
         tjPanel3={
             "type":"2",
             "classNumSliderValue":classNumSliderValue,
-            "color1":color1,
-            "color2":color2,
+            "colors":colors,
             "modelName":modelName,
             "symbolOpacitySliderValue":symbolOpacitySliderValue
         }
@@ -185,7 +198,7 @@ function constructTjJson3() {
         // 获得所有颜色选择器
         var chartIndexColorpick=$(".userDefineColors").find('.chartColorPicker');
         for(var i=0;i<chartIndexColorpick.length;i++){
-            colors[i]=$(".userDefineColors").find('.chartColorPicker').find('.layui-colorpicker-trigger-span').css("background-color");
+            colors[i]=$(".userDefineColors").find('.chartColorPicker').find('.layui-colorpicker-trigger-span')[i].style.backgroundColor;
         }
         tjPanel3={
             "type":"1",
@@ -223,11 +236,9 @@ function clickAndLoadAllInfo() {
 
                 allTjLayerContent={
                     "name":tjLayerName,
-                    "content":{
-                        "spatialdata":tjPanel1,
-                        "statisticdata":tjPanel2,
-                        "cartographydata":tjPanel3
-                    }
+                    "spatialdata":tjPanel1,
+                    "statisticdata":tjPanel2,
+                    "cartographydata":tjPanel3
                 }
                 console.log( allTjLayerContent);
                 layer.close(index);
@@ -365,62 +376,16 @@ function userLoadSpatialData() {
     })
 }
 
-// 初始化色带和图表的选择框
-function initTjSymbol() {
-
-    $(".sym-selected").each(function(e){
-        var That = $(this);
-        var width=$('.select_title').width();
-        $(".select_content").css('width',width);
-        That.find(".select_title").on({
-            click:function(){
-                var state=That.find(".select_content").css("display");
-                if (state=="flex"||state=="block"){
-                    That.find(".select_content").hide();
-                } else if (state=="none"){
-                    That.find(".select_content").show();
-                };
-                // 一个下拉列表打开时，其他下拉列表关闭
-                $(".sym-selected").not(That).find(".select_content").hide();
-            }
-        });
-
-    });
-
-    $(".sym-selected").on('click', '.select_content li', function(event) {
-        $(this).parent().parent().find('.select_title').html($(this).html());
-        $(this).parent().hide();
-    });
-
+// 初始化统计符号图片和颜色的的选择框
+function initTjChartSymbol() {
+    var width=$('.select_title').width();
+    $(".select_content").css('width',width);
     var iconArray=['010101','010102','010103','010104','010105','010106','010107','010108','010109','010111','010201','010202','010203','010204','020101','020102','020103','020104','020202','020203'];
     selecterInit(iconArray);
 
     var solutionArray=['--请选择--','黄红色系','蓝色色系','红色色系','黄绿色系','黄棕色系','青黄色系'];
     colorSolutionInit(solutionArray);
 
-    var colorArray = {
-        "1" : [ "#FFFDB1", "#C9513D" ],
-        "2" : [ "#e5f3fc", "#0083BA" ],
-        "3" : [ "#fcebf1", "#9E2B65" ],
-        "4" : [ "#fffee2", "#00935B" ],
-        "5" : [ "#fefdbd", "#ABA71A" ],
-        "6" : [ "#7393a2", "#f0c897" ],
-        "7" : [ "#eecca6", "#bcca99" ],
-        "8" : [ "#FFFEE3", "#9f5f3b" ],
-        "9" : [ "#fcebf1", "#6c5394" ],
-        "10" : [ "#edf6f1", "#558881" ]
-    };
-    colorSelecterInit(colorArray);
-
-    function colorSelecterInit(e) {
-        $("#color-selected").find('.select_content').html('');
-        for ( var k in e) {
-            $("#color-selected").find('.select_content').append(
-                '<li><img   color1="'
-                + e[k][0] + '" color2="' + e[k][1]
-                + '" src="./assets/imgs/gradeIcon/9/' + k + '.jpg"></li>');
-        }
-    }
 
     function colorSolutionInit(e) {
         $("#color-solution").find('.select_content').html('');
@@ -440,10 +405,76 @@ function initTjSymbol() {
     }
 }
 
+// 初始化分级符号色带的选择框
+function initTjGraduatedSymbol() {
+    var width=$('#color-selected').outerWidth(true);
+    $(".select_content").css('width',width);
+
+    var colorArray = {
+        "1" : [ "#FFFDB1", "#C9513D" ],
+        "2" : [ "#e5f3fc", "#0083BA" ],
+        "3" : [ "#fcebf1", "#9E2B65" ],
+        "4" : [ "#fffee2", "#00935B" ],
+        "5" : [ "#fefdbd", "#ABA71A" ],
+        "6" : [ "#7393a2", "#f0c897" ],
+        "7" : [ "#eecca6", "#bcca99" ],
+        "8" : [ "#FFFEE3", "#9f5f3b" ],
+        "9" : [ "#fcebf1", "#6c5394" ],
+        "10" : [ "#edf6f1", "#558881" ]
+    };
+    colorSelecterInit(colorArray);
+
+    function colorSelecterInit(e) {
+        $("#color-selected").find('.select_content').html('');
+        for ( var k in e) {
+            $("#color-selected").find('.select_content').append(
+                '<li><img style="width:100%;"  color1="'
+                + e[k][0] + '" color2="' + e[k][1]
+                + '" src="./assets/imgs/gradeIcon/9/' + k + '.jpg"></li>');
+        }
+    }
+}
+
+// 监听符号下拉列表的选择
+function listenOnSymbolTitleClick() {
+    $(".sym-selected").each(function(e){
+        var That = $(this);
+        // var width=$('.select_title').width();
+        // $(".select_content").css('width',width);
+
+        That.find(".select_title").off('click').on('click',function(){
+            var state=That.find(".select_content").css("display");
+            if (state=="flex"||state=="block"){
+                That.find(".select_content").hide();
+            } else if (state=="none"){
+                That.find(".select_content").show();
+            };
+            // 一个下拉列表打开时，其他下拉列表关闭
+            $(".sym-selected").not(That).find(".select_content").hide();
+        });
+
+
+
+    });
+
+    $(".sym-selected").on('click', '.select_content li', function(event) {
+        $(this).parent().parent().find('.select_title').html($(this).html());
+        $(this).parent().hide();
+    });
+}
+
 // 用户自定义统计图表的符号
 function userDefineChartColor() {
-
-    var defaultColorTable=['#ED1B24','#262164','#F2F101','#21B24B','#92278F','#F18C24','#FFE375','#ABE94A','#FBA723','#D8350C'];
+    var defaultColorTable=[];
+    var currentColorName=$("#color-solution").find('img').attr('name');
+    for (var key in colorTable){
+        if(currentColorName==key){
+            for (var newkey in colorTable[key]) {
+                defaultColorTable.push(colorTable[key][newkey]);
+            }
+        }
+    }
+    // var defaultColorTable=['#ED1B24','#262164','#F2F101','#21B24B','#92278F','#F18C24','#FFE375','#ABE94A','#FBA723','#D8350C'];
     var selectedStatisticIndex=tjPanel2.fieldsName;
     var length=0;
     for(var a in selectedStatisticIndex){
@@ -552,12 +583,37 @@ function renderSlider() {
     })
 }
 
+/**
+ * 重新计算颜色的函数
+ */
+//输出为RGBA格式
+function getColorbar(customNum,colorLow,colorHigh){
+    var rl = parseInt(colorLow.substr(1,2),16);
+    var gl = parseInt(colorLow.substr(3,2),16);
+    var bl = parseInt(colorLow.substr(5,2),16);
+    var rh = parseInt(colorHigh.substr(1,2),16);
+    var gh = parseInt(colorHigh.substr(3,2),16);
+    var bh = parseInt(colorHigh.substr(5,2),16);
+
+    var rmax = (rl+rh)>255?255:(rl+rh);
+    var gmax = (gl+gh)>255?255:(gl+gh);
+    var bmax = (bl+bh)>255?255:(bl+bh);
+    var colors = [];
+    for(var i=0;i<customNum;i++){
+        var r = rl + (2*rmax-rl-rh)*i/(customNum<2?1:(customNum-1));
+        var g = gl + (2*gmax-gl-gh)*i/(customNum<2?1:(customNum-1));
+        var b = bl + (2*bmax-bl-bh)*i/(customNum<2?1:(customNum-1));
+        colors.push("rgba("+parseInt(r>rmax?2*rmax-r:r)+", "+parseInt(g>gmax?2*gmax-g:g)+", "+parseInt(b>bmax?2*bmax-b:b)+","+1+")")
+    }
+    return colors;
+}
+
 
 //打开第二个页面
 function opentjPanel2(){
     layui.use(['element'], function(){
         var element = layui.element;
-        tableTree();
+        getTableTree();
         submitFields();
         element.on('tab(nav2)', function(data){
             //console.log(this); //当前Tab标题所在的原始DOM元素
@@ -565,7 +621,7 @@ function opentjPanel2(){
             //console.log(data.elem); //得到当前的Tab大容器
             if((data.index+1)==1){
                 tjPanel2.tabId = 1;
-                tableTree();
+                getTableTree();
                 submitFields();
             }else if((data.index+1)==2){
                 tjPanel2.tabId = 2;
@@ -579,8 +635,8 @@ function opentjPanel2(){
     });
 }
 
-//显示tabletree
-function tableTree(){
+//获取tabletree
+function getTableTree(){
     var treeName;
     var treeElement;
     var createTree = [];
@@ -597,71 +653,63 @@ function tableTree(){
     }else if(tjPanel2.tabId == 3){
         fieldslist = $("#fieldslist3");
     }
-    // $.ajax({//返回tabletree
-    //     type: 'post',
-    //     url:"./servlet/fileUploadServlet",
-    //     dataType:"json",
-    //     async:"false",
-    //     data:{ "name":tjPanel2.tabId },
-    //     success: function (data) { //返回json结果
-    //         //alert(data);
-    //         createTree =data.dataEx;
-    //     },
-    //     error:function(){
-    //         alert("sorry!")
-    //     }
-    // });
+    $.ajax({//返回tabletree
+        type: 'post',
+        url:"./servlet/fileUploadServlet",
+        dataType:"json",
+        async:"false",
+        data:{ "inputType":"localDatabase"},
+        success: function (data) { //返回json结果
+            //alert(data);
+            createTree =data.dataEx;
+            displayTableTree(treeElement,createTree);
+        },
+        error:function(){
+            alert("sorry!")
+        }
+    });
     //构造
     //createTree = [{name: '表格1'},{name: '表格2'},{name: '表格3'}];
-    $("#treedemo1").empty();
+
+}
+
+//渲染tabletree，并监听
+function displayTableTree(treeElement,createTree){
+    $(treeElement).empty();
     layui.use(['tree','form'],function(){
         var tree = layui.tree;
         var form = layui.form;
-        $.ajax({//返回tabletree
-            type: 'post',
-            url:"./servlet/fileUploadServlet",
-            dataType:"json",
-            async:"false",
-            data:{ "name":tjPanel2.tabId },
-            success: function (data) { //返回json结果
-                //alert(data);
-                createTree =data.dataEx;
-                layui.tree({
-                    elem: '#treedemo1', //传入元素选择器
-                    nodes: createTree,
-                    click:function (node) {
-                        //console.log(node.name);
-                        tjPanel2.tableName = node.name;
-                        // $.ajax({
-                        //     type: 'post',
-                        //     url:"",
-                        //     async:"false",
-                        //     data:{ "tableName":node.name},
-                        //     success: function (data) { //返回json结果(表头)
-                        //         //tableFields = JSON.parse(data);
-                        //         //tableFields = $.parseJSON(data);
-                        //         displayFields(fieldslist,tableFields);
-                        //     },
-                        //     error:function(){
-                        //         alert("sorry!")
-                        //     }
-                        // });
-                        //构造
-                        var tableFields1 = {"0":"id","1":"username","2":"email","3":"sex","4":"city","5":"sign","6":"experience","7":"ip","8":"logins","9":"joinTime"};
-                        var tableFields2 = {"0":"id","1":"username","2":"sex","3":"city","4":"sign","5":"experience","6":"logins","7":"wealth","8":"classify","9":"score"};
-                        if (node.name=="表格1"){
-                            tableFields=tableFields1;
-                        }else if (node.name=="表格2"){
-                            tableFields=tableFields2;
-                        }else{
-                            tableFields={};
-                        }
-                        displayFields($("#fieldslist1"),tableFields);
-                    }
-                });
-            },
-            error:function(){
-                alert("sorry!")
+        layui.tree({
+            elem: treeElement, //传入元素选择器
+            nodes: createTree,
+            click:function (node) {
+                //console.log(node.name);
+                tjPanel2.tableName = node.name;
+                // $.ajax({
+                //     type: 'post',
+                //     url:"",
+                //     async:"false",
+                //     data:{"tableName":node.name,"inputType":"dataFromLocalDb"},
+                //     success: function (data) { //返回json结果(表头)
+                //         //tableFields = JSON.parse(data);
+                //         //tableFields = $.parseJSON(data);
+                //         displayFields(fieldslist,tableFields);
+                //     },
+                //     error:function(){
+                //         alert("sorry!")
+                //     }
+                // });
+                //构造
+                var tableFields1 = {"0":"id","1":"username","2":"email","3":"sex","4":"city","5":"sign","6":"experience","7":"ip","8":"logins","9":"joinTime"};
+                var tableFields2 = {"0":"id","1":"username","2":"sex","3":"city","4":"sign","5":"experience","6":"logins","7":"wealth","8":"classify","9":"score"};
+                if (node.name=="表格1"){
+                    tableFields=tableFields1;
+                }else if (node.name=="表格2"){
+                    tableFields=tableFields2;
+                }else{
+                    tableFields={};
+                }
+                displayFields($("#fieldslist1"),tableFields);
             }
         });
     })
@@ -799,6 +847,9 @@ function EXCELupload(){
                 }
                 //上传成功，渲染字段
                 var tableFields=new Array();
+
+                tjPanel2.tableName = $(".layui-inline.layui-upload-choose").html();
+
                 tableFields=res["tableFields"];//tableFields为指标数组
                 //构造
                 var tableFields = {"0":"id","1":"username","2":"email","3":"sex","4":"city","5":"sign","6":"experience","7":"ip","8":"logins","9":"joinTime"};

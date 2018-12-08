@@ -148,15 +148,13 @@ body .tjLayerContent .layui-layer-content{
     z-index:1200;
     position: absolute;
     height: 200px;
+    width: 100%;
     overflow-x: hidden;
     overflow-y:scroll;
     background-color: whitesmoke;
 
 }
 
-#color-selected>.select_content{
-    width: 95%;
-}
 
 #chart-selected>.select_content>li{
     float: left;
