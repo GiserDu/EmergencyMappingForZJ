@@ -154,7 +154,7 @@ layui.use(['layer','upload','slider'], function(){
 	slider.render({
 		elem: '#sliderSpeed'
 		,min: 0 //最小值
-		,max: 10 //最大值
+		,max: 20 //最大值
 		,value:2
 		,step: 0.5
 		,change: function(value){
