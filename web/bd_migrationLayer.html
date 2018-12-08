@@ -1,0 +1,183 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <title>大数据流可视化</title>
+    <link rel="stylesheet" href="css/leaflet.css" />
+    <!-- layui引用 -->
+    <link href="js/layui/css/layui.css" rel="stylesheet">
+    <!-- 上传弹出框样式引用 -->
+    <link href="css/bigdata_upload.css" rel="stylesheet">
+    <!--<style>-->
+    <!--html,body{-->
+        <!--margin: 0;-->
+        <!--padding: 0;-->
+    <!--}-->
+    <!--#map{-->
+        <!--position: absolute;-->
+        <!--height: 100%;-->
+        <!--width: 100%;-->
+    <!--}-->
+    <!--#event{-->
+        <!--position: absolute;-->
+        <!--top: 50px;-->
+        <!--right: 600px;-->
+        <!--height: 100px;-->
+        <!--width: 400px;-->
+        <!--z-index: 10000;-->
+    <!--}-->
+    <!--.btn{-->
+        <!--border-color:gray;-->
+        <!--border-width: 2px;-->
+        <!--background-color:white;-->
+   <!--}-->
+    <!--</style>-->
+</head>
+
+<body>
+    <div id="map">
+        <div class="layui-btn-group">
+            <button class="layui-btn layui-btn-primary" onclick="play()">
+                <i class="layui-icon layui-icon-play" style="font-size: 25px;"></i>
+            </button>
+            <button class="layui-btn layui-btn-primary" onclick="pause()">
+                <i class="layui-icon layui-icon-pause" style="font-size: 25px;"></i>
+            </button>
+            <button class="layui-btn layui-btn-primary" onclick="openLayui()">
+                <i class="layui-icon layui-icon-add-circle" style="font-size: 25px;"></i>
+            </button>
+        </div>
+    </div>
+    <!-- <div id='event'>
+        <input type="button" value="setData" class="btn" onclick="setData()">
+        <input type="button" value="hide" class="btn" onclick="hide()">
+        <input type="button" value="show" class="btn" onclick="show()">
+        <input type="button" value="pause" class="btn" onclick="pause()">
+        <input type="button" value="play" class="btn" onclick="play()">
+        <input type="button" value="destroy" class="btn" onclick="destroy()">
+    </div> -->
+
+    <script src="js/leaflet.js"></script>
+    <!-- 矢量瓦片所需js资源 -->
+    <script src="js/CustomWebSDK.js"></script>
+    <!-- 流图所需js资源 -->
+    <script src='dist/leaflet.migrationLayer-src.js'></script>
+    <!-- layui引用 -->
+    <script src="js/layui/layui.js"></script>
+    <!-- 地图初始化 -->
+    <script src='js/init-map.js'></script>
+
+    <script>
+        var migData,migrationLayer;
+        initUploadUI();
+        function initUploadUI() {
+            layui.use(['layer','upload'], function(){
+                var $ = layui.jquery, layer=layui.layer, upload = layui.upload;
+                layer.open({
+                    type: 1,
+                    title: ['上传可视化数据'],
+                    shadeClose: false,
+                    skin:"layui-layer-lan",
+                    shade: 0,
+                    area:['400px','300px'],
+                    // area:['600px','370px'],
+                    content:
+                    '<div class="layui-form" lay-filter="userDataField" id="userDataField">'+
+                    '<div id="shpFileUploadControl" class="layui-upload-drag">\n' +
+                    '<i class="layui-icon layui-icon-upload-drag"></i>\n' +
+                    '<p>点击或拖拽上传文件</p>\n' +
+                    '</div>\n' +
+                    // '<div>\n' +
+                    // '<button type="button" class="layui-btn layui-btn-primary" id="shpLoadConfirmBtn">上传</button>' +
+                    // '</div>\n' +
+                    '</div>'
+                });
+                //拖拽上传
+                upload.render({
+                    elem: '#shpFileUploadControl',
+                    url: './servlet/fileUploadServlet',
+                    auto: true,
+                    accept: 'file', //普通文件
+                    exts: 'json|geojson', //只允许上传压缩文件
+                    // bindAction: '#shpLoadConfirmBtn',
+                    done: function(res){
+                        // 如果图层不为空，清空图层
+                        if(migrationLayer!=undefined){
+//                          map.removeLayer(migrationLayer);
+                            migrationLayer.destroy();
+                        }
+                        console.log(res);
+                        var dataUrl = res.saveFilePath;
+                        // 添加流图图层
+                        fetch(dataUrl).then(response=>response.json())
+                        .then(data=>{
+                            migData = data;
+                        // var data2=[{"from":[-73.875523,40.781063],"to":[-80.247887,25.792296],"labels":["New York","Maima"],"color":"#05ffd9"},{"from":[-73.875523,40.781063],"to":[120.200844,30.256571],"labels":[null,"Los Angeles"],"color":"#00ccff"},{"from":[-73.875523,40.781063],"to":[-87.724088,41.917846],"labels":[null,"Chicago"],"color":"#ffc726"},{"from":[-73.875523,40.781063],"to":[-71.058437,42.35902],"labels":[null,"Boston"],"color":"#e9ff20"},{"from":[-73.875523,40.781063],"to":[-75.683057,45.42172],"labels":[null,"Ottawa"],"color":"#99ff1b"}];
+
+                        migData = migData.map(item => { return {...item, value: parseInt(Math.random()*30)}});
+                        // data2 = data2.map(item => { return {...item, value: 20}});
+
+                        migrationLayer = new L.migrationLayer({
+                                    map: map,
+                                    data: migData,
+                                    pulseRadius:30,
+                                    pulseBorderWidth:3,
+                                    arcWidth:2,
+                                    arcLabel:true,
+                                    arcLabelFont:'10px sans-serif',
+                                    maxWidth:15
+                                }
+                        );
+                        migrationLayer.addTo(map);
+                        });
+                        // 上传完毕后自动关闭上传窗口
+                        layer.close(layer.index);
+                    }
+                });
+            })
+        }
+
+
+        // 图层控制控件
+        var layercontrol = L.control.layers(
+            {
+                "天地图影像底图":imgLayerGroup,
+                "天地图矢量底图":vecLayerGroup,
+            },{
+                "浙江省矢量瓦片":zj_vecTileGroup,
+            }
+        ).addTo(map);
+
+//         // 添加点击获取坐标信息
+//        var mypop = L.popup();
+//        map.on('click', function(e) {
+//            var content = '你临幸了这个点：<br>';
+//            content += e.latlng.toString();
+//            mypop.setLatLng(e.latlng)
+//                .setContent(content)
+//                .openOn(map);
+//        });
+
+        function setData(){
+            migrationLayer.setData(data2);
+        }
+        function hide(){
+            migrationLayer.hide();
+        }
+        function show(){
+            migrationLayer.show();
+        }
+        function play(){
+            migrationLayer.play();
+        }
+        function pause(){
+            migrationLayer.pause();
+        }
+        function openLayui() {
+            initUploadUI();
+        }
+    </script>
+</body>
+
+</html>

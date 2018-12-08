@@ -137,8 +137,14 @@ public class fileUploadServlet extends HttpServlet {
                     out.close();
                     //删除处理文件上传时生成的临时文件
                     item.delete();
+                    String relativeJsonPath = "http://" + request.getServerName() //服务器地址
+                            + ":"
+                            + request.getServerPort()		 //端口号
+                            + request.getContextPath()     //项目名称
+                            + saveFilePath.substring(saveFilePath.lastIndexOf("\\uploadFile"));
+
                     message.put("message","文件上传成功！") ;
-                    message.put("saveFilePath",saveFilePath);
+                    message.put("saveFilePath",relativeJsonPath);
                 }
             }
         }catch (FileUploadBase.FileSizeLimitExceededException e) {

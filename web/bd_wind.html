@@ -1,0 +1,53 @@
+<!doctype html>
+<html>
+<head>
+	<title>大数据场可视化</title>
+	<meta charset="utf-8">
+</head>
+<body>
+
+<div id="map">
+	<div class="layui-btn-group">
+		<i class="layui-icon layui-icon-set-fill" style="font-size: 20px; background:whitesmoke; border-radius: 5px" id="opt-btn" isClick="false"></i>
+		<!--<button class="layui-btn layui-btn-primary layui-btn-sm" id="opt-btn" isClick="false">-->
+			<!--<i class="layui-icon layui-icon-set-fill" style="font-size: 25px;"></i>-->
+		<!--</button>-->
+	</div>
+</div>
+<div class="optsDiv">
+	<fieldset class="layui-elem-field layui-field-title" style="margin-top: 10px;">
+		<legend>风场最小值</legend>
+	</fieldset>
+	<div id="sliderMinValue" class="demo-slider"></div>
+	<fieldset class="layui-elem-field layui-field-title" style="margin-top: 10px;">
+		<legend>风场最大值</legend>
+	</fieldset>
+	<div id="sliderMaxValue" class="demo-slider"></div>
+	<fieldset class="layui-elem-field layui-field-title" style="margin-top: 10px;">
+		<legend>运动速度</legend>
+	</fieldset>
+	<div id="sliderSpeed" class="demo-slider"></div>
+</div>
+
+<!--vendor-->
+<script src="js/jquery-3.1.0.min.js"></script>
+<link rel="stylesheet" href="css/leaflet.css">
+<link href="js/layui/css/layui.css" rel="stylesheet">
+<script src="js/leaflet.js"></script>
+
+<!--leaflet-velocity-->
+<link rel="stylesheet" href="dist/leaflet-velocity.css" />
+<script src="dist/leaflet-velocity.js"></script>
+
+<!--demo-->
+<link rel="stylesheet" href="css/wind_demo.css" />
+<!-- 矢量瓦片所需js资源 -->
+<script src="js/CustomWebSDK.js"></script>
+<!-- layui引用 -->
+<script src="js/layui/layui.js"></script>
+<!-- 地图初始化 -->
+<!-- <script src='js/init-map.js'></script> -->
+<script src="js/wind_demo.js"></script>
+
+</body>
+</html>

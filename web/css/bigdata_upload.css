@@ -1,0 +1,28 @@
+html, body {
+	height: 100%;
+	margin: 0;
+	padding: 0;
+	overflow: hidden;
+}
+#map {
+	width: 100%;
+	height: 100%;
+}
+#userDataField{
+	width: 72%;
+	height: 75%;
+}
+#shpFileUploadControl{
+	width: 100%;
+	height: 100%;
+	margin: 30px;
+	padding: 0 25px;
+}
+
+.layui-btn-group{
+	bottom: 5px;
+	left: 5px;
+	border-radius: 5px;
+	position: absolute;
+	z-index: 999;
+}

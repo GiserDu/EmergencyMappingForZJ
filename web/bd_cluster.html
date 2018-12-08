@@ -1,0 +1,129 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<title>点聚合</title>
+	<meta charset="utf-8" />
+	<meta name="viewport" content="width=device-width, initial-scale=1.0">
+	<link rel="stylesheet" href="css/leaflet.css"/>
+	<link rel="stylesheet" href="css/screen.css" />
+	<link rel="stylesheet" href="css/MarkerCluster.css" />
+	<link rel="stylesheet" href="css/MarkerCluster.Default.css" />
+	<!-- layui引用 -->
+	<link href="js/layui/css/layui.css" rel="stylesheet">
+	<!-- 上传弹出框样式引用 -->
+	<link href="css/bigdata_upload.css" rel="stylesheet">
+	<!--<style>-->
+		<!--html, body {-->
+			<!--height: 100%;-->
+			<!--margin: 0;-->
+			<!--overflow: hidden;-->
+		<!--}-->
+		<!--#map {-->
+			<!--width: 100%;-->
+			<!--height: 100%;-->
+		<!--}-->
+		<!--#userDataField{-->
+			<!--width: 72%;-->
+			<!--height: 75%;-->
+		<!--}-->
+		<!--#shpFileUploadControl{-->
+			<!--width: 100%;-->
+			<!--height: 100%;-->
+			<!--margin: 30px;-->
+			<!--padding: 0 25px;-->
+		<!--}-->
+	<!--</style>-->
+</head>
+<body>
+	<div id="map"></div>
+	<script src="js/leaflet.js"></script>
+	<!-- 矢量瓦片所需js资源 -->
+	<script src="js/CustomWebSDK.js"></script>
+	<!-- 点聚合所需js资源 -->
+	<script src="dist/leaflet.markercluster-src.js"></script>
+	<!-- layui引用 -->
+	<script src="js/layui/layui.js"></script>
+	<!-- 地图初始化 -->
+	<script src='js/init-map.js'></script>
+
+	<script>
+		var geoJsonData,geoJsonLayer,markers;
+		layui.use(['layer','upload'], function(){
+			var $ = layui.jquery, layer=layui.layer, upload = layui.upload;
+			layer.open({
+				type: 1,
+				title: ['上传可视化数据'],
+				shadeClose: false,
+				skin:"layui-layer-lan",
+				shade: 0,
+				area:['400px','300px'],
+				// area:['600px','370px'],
+				content:
+					'<div class="layui-form" lay-filter="userDataField" id="userDataField">'+
+					'<div id="shpFileUploadControl" class="layui-upload-drag">\n' +
+					'<i class="layui-icon layui-icon-upload-drag"></i>\n' +
+					'<p>点击或拖拽上传文件</p>\n' +
+					'</div>\n' +
+					// '<div>\n' +
+					// '<button type="button" class="layui-btn layui-btn-primary" id="shpLoadConfirmBtn">上传</button>' +
+					// '</div>\n' +
+					'</div>'
+			});
+			//拖拽上传
+			upload.render({
+				elem: '#shpFileUploadControl',
+				url: './servlet/fileUploadServlet',
+				auto: true,
+				accept: 'file', //普通文件
+				exts: 'json|geojson', //只允许上传压缩文件
+				// bindAction: '#shpLoadConfirmBtn',
+				done: function(res){
+					console.log(res);
+					var dataUrl = res.saveFilePath;
+					// 添加点聚合图层
+					fetch(dataUrl).then(response=>response.json()).
+					then(json=>{
+						geoJsonData = json.features;
+						markers = L.markerClusterGroup({
+							spiderfyShapePositions: function(count, centerPt) {
+								var distanceFromCenter = 35,
+										markerDistance = 45,
+										lineLength = markerDistance * (count - 1),
+										lineStart = centerPt.y - lineLength / 2,
+										res = [],
+										i;
+								res.length = count;
+								for (i = count - 1; i >= 0; i--) {
+									res[i] = new Point(centerPt.x + distanceFromCenter, lineStart + markerDistance * i);
+								}
+								return res;
+							}
+						});
+						geoJsonLayer = L.geoJson(geoJsonData, {
+							onEachFeature: function (feature, layer) {
+								layer.bindPopup(feature.properties.HSSTNM);
+							}
+						});
+						markers.addLayer(geoJsonLayer);
+						map.addLayer(markers);
+						map.fitBounds(markers.getBounds());
+						// 上传完毕后自动关闭上传窗口
+						layer.close(layer.index);
+					});
+				}
+			});
+
+		});
+
+		// 图层控制控件
+		var layercontrol = L.control.layers(
+			{
+				"天地图影像底图":imgLayerGroup,
+				"天地图矢量底图":vecLayerGroup,
+			},{
+				"浙江省矢量瓦片":zj_vecTileGroup,
+			}
+		).addTo(map);
+	</script>
+</body>
+</html>

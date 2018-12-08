@@ -1,0 +1,123 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>热力图</title>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="shortcut icon" type="image/x-icon" href="docs/images/favicon.ico" />
+    <link rel="stylesheet" href="css/leaflet.css" />
+    <!-- layui引用 -->
+    <link href="js/layui/css/layui.css" rel="stylesheet">
+    <!-- 上传弹出框样式引用 -->
+    <link href="css/bigdata_upload.css" rel="stylesheet">
+    <!--<style>-->
+        <!--html, body {-->
+            <!--height: 100%;-->
+            <!--margin: 0;-->
+            <!--overflow: hidden;-->
+        <!--}-->
+        <!--#map {-->
+            <!--width: 100%;-->
+            <!--height: 100%;-->
+        <!--}-->
+    <!--</style>-->
+</head>
+<body>
+<div id='map'></div>
+    <script type="text/javascript" src="js/leaflet.js"></script>
+    <!-- 矢量瓦片所需js资源 -->
+    <script src="js/CustomWebSDK.js"></script>
+    <!-- 热力图所需js资源 -->
+    <script src="dist/leaflet-heat.js"></script>
+    <!-- layui引用 -->
+    <script src="js/layui/layui.js"></script>
+    <!-- 地图初始化 -->
+    <script src='js/init-map.js'></script>
+    <script>
+        var heapMapSource,heapmapOptions,heatLayer;
+        layui.use(['layer','upload'], function(){
+            var $ = layui.jquery, layer=layui.layer, upload = layui.upload;
+            layer.open({
+                type: 1,
+                title: ['上传可视化数据'],
+                shadeClose: false,
+                skin:"layui-layer-lan",
+                shade: 0,
+                area:['400px','300px'],
+                // area:['600px','370px'],
+                content:
+                '<div class="layui-form" lay-filter="userDataField" id="userDataField">'+
+                '<div id="shpFileUploadControl" class="layui-upload-drag">\n' +
+                '<i class="layui-icon layui-icon-upload-drag"></i>\n' +
+                '<p>点击或拖拽上传文件</p>\n' +
+                '</div>\n' +
+                // '<div>\n' +
+                // '<button type="button" class="layui-btn layui-btn-primary" id="shpLoadConfirmBtn">上传</button>' +
+                // '</div>\n' +
+                '</div>'
+            });
+            //拖拽上传
+            upload.render({
+                elem: '#shpFileUploadControl',
+                url: './servlet/fileUploadServlet',
+                auto: true,
+                accept: 'file', //普通文件
+                exts: 'json|geojson', //只允许上传压缩文件
+                // bindAction: '#shpLoadConfirmBtn',
+                done: function(res){
+                    console.log(res);
+                    var dataUrl = res.saveFilePath;
+                    // 添加热力图图层
+                    heapmapOptions = {
+                        minOpacity:0,
+                        maxZoom: 15,
+                        max:0.8,
+                        radius:20,
+                        blur:25,
+                        // gradient:{0.2:'green', 0.4: 'lime', 0.6: 'yellow', 0.8: 'orange', 1: 'red'}
+                    };
+//                    var heapMapSource,heatLayer;
+                    fetch(dataUrl).then(response=>response.json())
+                    .then(json=>{
+                        heapMapSource = json.features;
+                        heapMapSource = heapMapSource.map(function (p) { return [p.geometry.coordinates[1],p.geometry.coordinates[0]]; });
+                        heatLayer = L.heatLayer(heapMapSource,heapmapOptions).addTo(map);
+                    });
+                    // 上传完毕后自动关闭上传窗口
+                    layer.close(layer.index);
+                }
+            });
+
+        });
+
+
+        // 图层控制控件
+        var layercontrol = L.control.layers(
+            {
+                "天地图影像底图":imgLayerGroup,
+                "天地图矢量底图":vecLayerGroup,
+            },{
+                "浙江省矢量瓦片":zj_vecTileGroup,
+            }
+        ).addTo(map);
+
+        // 添加点击获取坐标信息
+        var mypop = L.popup();
+        map.on('click', function(e) {
+            var content = '你临幸了这个点：<br>';
+            content += e.latlng.toString();
+            mypop.setLatLng(e.latlng)
+                .setContent(content)
+                .openOn(map);
+            // heatLayer.setOptions({
+            //     minOpacity:0.1,
+            //     maxZoom: 15,
+            //     max:0.85,
+            //     radius:20,
+            //     blur:15,
+            //     gradient:{0.2:'green', 0.4: 'lime', 0.6: 'yellow', 0.8: 'orange', 1: 'red'}
+            // });
+        });
+</script>
+</body>
+</html>
