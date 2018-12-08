@@ -8,16 +8,25 @@
 
 <div id="map">
 	<div class="layui-btn-group">
-		<button class="layui-btn layui-btn-primary layui-btn-sm" id="opt-btn">
-			<i class="layui-icon layui-icon-set-fill" style="font-size: 25px;"></i>
-		</button>
-		<!--<button class="layui-btn layui-btn-primary" onclick="pause()">-->
-			<!--<i class="layui-icon layui-icon-pause" style="font-size: 25px;"></i>-->
-		<!--</button>-->
-		<!--<button class="layui-btn layui-btn-primary" onclick="changeOpt()">-->
-			<!--<i class="layui-icon layui-icon-add-circle" style="font-size: 25px;"></i>-->
+		<i class="layui-icon layui-icon-set-fill" style="font-size: 20px; background:whitesmoke; border-radius: 5px" id="opt-btn" isClick="false"></i>
+		<!--<button class="layui-btn layui-btn-primary layui-btn-sm" id="opt-btn" isClick="false">-->
+			<!--<i class="layui-icon layui-icon-set-fill" style="font-size: 25px;"></i>-->
 		<!--</button>-->
 	</div>
+</div>
+<div class="optsDiv">
+	<fieldset class="layui-elem-field layui-field-title" style="margin-top: 10px;">
+		<legend>风场最小值</legend>
+	</fieldset>
+	<div id="sliderMinValue" class="demo-slider"></div>
+	<fieldset class="layui-elem-field layui-field-title" style="margin-top: 10px;">
+		<legend>风场最大值</legend>
+	</fieldset>
+	<div id="sliderMaxValue" class="demo-slider"></div>
+	<fieldset class="layui-elem-field layui-field-title" style="margin-top: 10px;">
+		<legend>运动速度</legend>
+	</fieldset>
+	<div id="sliderSpeed" class="demo-slider"></div>
 </div>
 
 <!--vendor-->

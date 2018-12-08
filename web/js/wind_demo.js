@@ -38,6 +38,9 @@ var velocityLayer,dataSource;
 function changeOpt() {
 	if(dataSource!=undefined){
 		map.removeLayer(velocityLayer);
+		var minVelocity = $("#sliderMinValue .layui-slider-tips").text();
+		var maxVelocity = $("#sliderMaxValue .layui-slider-tips").text();
+		var velocityScale = $("#sliderSpeed .layui-slider-tips").text()*0.01;
 		velocityLayer = L.velocityLayer({
 			displayValues: true,
 			displayOptions: {
@@ -47,19 +50,64 @@ function changeOpt() {
 			},
 			data: dataSource,
 			// OPTIONAL
-			minVelocity: 0,          // used to align color scale
-			maxVelocity: 8,         // used to align color scale
-			velocityScale: 0.05,    // modifier for particle animations, arbitrarily defaults to 0.005
+			minVelocity: minVelocity,          // used to align color scale
+			maxVelocity: maxVelocity,         // used to align color scale
+			velocityScale: velocityScale,    // modifier for particle animations, arbitrarily defaults to 0.005
 			// colorScale: []
 			// var defaulColorScale = ["rgb(36,104, 180)", "rgb(60,157, 194)", "rgb(128,205,193 )", "rgb(151,218,168 )", "rgb(198,231,181)", "rgb(238,247,217)", "rgb(255,238,159)", "rgb(252,217,125)", "rgb(255,182,100)", "rgb(252,150,75)", "rgb(250,112,52)", "rgb(245,64,32)", "rgb(237,45,28)", "rgb(220,24,32)", "rgb(180,0,35)"];
 		});
 		velocityLayer.addTo(map);
 	}
-
 }
 
-layui.use(['layer','upload'], function(){
-	var $ = layui.jquery, layer=layui.layer, upload = layui.upload;
+// var isClickOpt = false;
+
+$("#opt-btn").click(function () {
+	if($("#opt-btn").attr('isClick')=="false"){
+		$(".optsDiv").css("display","block");
+		$(".optsDiv").animate({bottom:"30px"},500);
+		$("#opt-btn").attr('isClick',"true");
+	}else {
+		$(".optsDiv").animate({bottom:"0px"},500);
+		$(".optsDiv").css("display","none");
+		$("#opt-btn").attr('isClick',"false");
+	}
+});
+
+// $("#sliderMinValue .layui-slider").change(function () {
+// 	if(dataSource!=undefined){
+// 		changeOpt();
+// 	}
+// });
+//
+// $("#sliderMaxValue").on({
+// 	keyup : function() {
+// 		if(dataSource!=undefined){
+// 			changeOpt();
+// 		}
+// 	},
+// 	slideStop:function () {
+// 		if(dataSource!=undefined){
+// 			changeOpt();
+// 		}
+// 	}
+// });
+//
+// $("#sliderSpeed").on({
+// 	keyup : function() {
+// 		if(dataSource!=undefined){
+// 			changeOpt();
+// 		}
+// 	},
+// 	slideStop:function () {
+// 		if(dataSource!=undefined){
+// 			changeOpt();
+// 		}
+// 	}
+// });
+
+layui.use(['layer','upload','slider'], function(){
+	var $ = layui.jquery, layer=layui.layer, upload = layui.upload,slider = layui.slider;
 	layer.open({
 		type: 1,
 		title: ['上传可视化数据'],
@@ -76,7 +124,49 @@ layui.use(['layer','upload'], function(){
 		'</div>\n' +
 		'</div>'
 	});
-	//拖拽上传
+
+	// 设置滑块的值域范围
+	slider.render({
+		elem: '#sliderMinValue'
+		,min: 0 //最小值
+		,max: 15 //最大值
+		,value:0
+		,change: function(value){
+			console.log(value); //动态获取滑块数值
+			if(dataSource!=undefined){
+				changeOpt();
+			}
+		}
+	});
+	slider.render({
+		elem: '#sliderMaxValue'
+		,min: 0 //最小值
+		,max: 15 //最大值
+		,value:8
+		,change: function(value){
+			console.log(value); //动态获取滑块数值
+			if(dataSource!=undefined){
+				changeOpt();
+			}
+		}
+	});
+
+	slider.render({
+		elem: '#sliderSpeed'
+		,min: 0 //最小值
+		,max: 10 //最大值
+		,value:2
+		,step: 0.5
+		,change: function(value){
+			console.log(value); //动态获取滑块数值
+			if(dataSource!=undefined){
+				changeOpt();
+			}
+		}
+	});
+
+
+	// 拖拽上传
 	upload.render({
 		elem: '#shpFileUploadControl',
 		url: './servlet/fileUploadServlet',
