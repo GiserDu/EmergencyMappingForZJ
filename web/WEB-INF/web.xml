@@ -83,8 +83,16 @@
     </servlet>
 
     <servlet>
-        <servlet-name>fileUploadServlet</servlet-name>
-        <servlet-class>telecarto.geoinfo.servlets.fileUploadServlet</servlet-class>
+    <servlet-name>fileUploadServlet</servlet-name>
+    <servlet-class>telecarto.geoinfo.servlets.fileUploadServlet</servlet-class>
+    </servlet>
+    <servlet>
+        <servlet-name>chartLayerFromAPIServlet</servlet-name>
+        <servlet-class>com.zz.servlet.chartLayerFromAPIServlet</servlet-class>
+    </servlet>
+    <servlet>
+        <servlet-name>ClassLayerServletForZJ</servlet-name>
+        <servlet-class>com.zz.servlet.ClassLayerServletForZJ</servlet-class>
     </servlet>
 
 
@@ -148,4 +156,13 @@
         <servlet-name>fileUploadServlet</servlet-name>
         <url-pattern>/servlet/fileUploadServlet</url-pattern>
     </servlet-mapping>
+    <servlet-mapping>
+        <servlet-name>chartLayerFromAPIServlet</servlet-name>
+        <url-pattern>/servlet/chartLayerFromAPIServlet</url-pattern>
+    </servlet-mapping>
+    <servlet-mapping>
+        <servlet-name>ClassLayerServletForZJ</servlet-name>
+        <url-pattern>/servlet/ClassLayerServletForZJ</url-pattern>
+    </servlet-mapping>
+
 </web-app>

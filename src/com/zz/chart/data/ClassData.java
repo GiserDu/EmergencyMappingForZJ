@@ -14,7 +14,7 @@ public class ClassData {
     public ClassData(){
 
     }
-    public ClassData(String code,String name,String geometry,String region_x,String region_y,String data){
+    public ClassData(String name,String code,String region_x,String region_y,String geometry,String data){
         this.rgn_code = code;
         this.rgn_name = name;
         this.geometry = geometry;

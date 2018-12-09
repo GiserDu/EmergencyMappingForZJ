@@ -94,15 +94,13 @@ public class ClassLayerServlet extends HttpServlet {
             }
             resultSet2 = mysql.query(sql);
             ArrayList<ClassData> classList = new ArrayList<>();
-//            resultSet2.last(); //移到最后一行
-//            int rowCount = resultSet2.getRow();//得到当前行号，也就是记录数
-//            resultSet2.beforeFirst();//把指针再移到初始化的位置
-//            int i =0;
-            while (resultSet2.next()) {
-                ClassData classData = new ClassData(resultSet2.getString(1),resultSet2.getString(2),
-                        resultSet2.getString(3),resultSet2.getString(4),resultSet2.getString(5),resultSet2.getString(6));
-                classList.add(classData);
-			}
+
+
+//            while (resultSet2.next()) {
+//                ClassData classData = new ClassData(resultSet2.getString(1),
+//                        resultSet2.getString(3),resultSet2.getString(4),resultSet2.getString(5),resultSet2.getString(6));
+//                classList.add(classData);
+//			}
 			double maxValue =  Double.parseDouble(classList.get(0).getData());
 			double minValue = Double.parseDouble(classList.get(0).getData());
             for (int i=0;i<classList.size();i++){
