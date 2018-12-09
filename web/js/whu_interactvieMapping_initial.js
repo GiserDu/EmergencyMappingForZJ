@@ -445,22 +445,72 @@ function doMap() {
                             });
                         });
                     }
-                    if(treeNode.id==4){
-                        opentjMenuLayer();
-                        // layui.use('layer', function(){
-                        //     var layer = layui.layer;
-                        //     layer.open({
-                        //         title: '添加统计图层',
-                        //         skin: "layui-layer-lan",
-                        //         type: 0,
-                        //         shade: 0,
-                        //         content:$('#test'),
-                        //         yes:function(index, layero){
-                        //             //do something
-                        //             layer.close(index); //如果设定了yes回调，需进行手工关闭
-                        //         }
-                        //     });
-                        // });
+                    if(treeNode.id==4){//针对统计图层的添加事件
+                        layui.use('layer', function() {
+                            var layer = layui.layer;
+                            layerIndex = layer.open({
+                                type: 1,
+                                title: ['添加统计图层'],
+                                shadeClose: false,
+                                skin: "layui-layer-lan tjLayerContent",
+                                shade: 0,
+                                area: ['700px', '480px'],
+                                // area:['600px','370px'],
+                                // content: $('#tjPanel'),
+                                content:originalTjLayerContent,
+                                success: function(layero,index){
+                                    //do something
+                                    opentjMenuLayer();
+                                    // var newNode={name:$("#newFLName").val(),url:$("#newFLAds").val()};
+
+                                    $(".tjInfoSubmit").bind('click',function () {
+                                        var tjLayertest=$("#tjPanel").html();
+                                        constructTjJson3();
+                                        var index=layer.open({
+                                            type: 0,
+                                            title:"统计图层名称",
+                                            skin:"layui-layer-lan",
+                                            content:' <div style="margin-left:-24px">\n' +
+                                            '             <label class="layui-form-label">图层名</label>\n' +
+                                            '             <div class="layui-input-block" style="margin-left: 88px">\n' +
+                                            '                  <input type="text" id="newSLName" name="tjLayerName" lay-verify="required" placeholder="请输入统计图层名称" autocomplete="off" class="layui-input">\n' +
+                                            '             </div>\n' +
+                                            '          </div>',
+                                            yes:function (index,layero) {
+                                                console.log("OK");
+
+                                                var tjLayerName=$("input[ name='tjLayerName' ]").val();
+
+                                                if(tjLayerName==""){
+                                                    alert("请输入名称");
+                                                }
+
+                                                if (tjLayerName != "") {
+                                                    var newNode = {name: tjLayerName, url: "123", dom: tjLayertest};
+                                                    layerNodes[3].children.push(newNode);
+                                                    var treeObj = $.fn.zTree.getZTreeObj("doMapTree");
+                                                    treeObj.addNodes(treeNode, -1, newNode);
+                                                }
+
+                                                allTjLayerContent={
+                                                    "name":tjLayerName,
+                                                    "spatialdata":tjPanel1,
+                                                    "statisticdata":tjPanel2,
+                                                    "cartographydata":tjPanel3
+                                                }
+                                                console.log( allTjLayerContent);
+
+                                                // tjLayertest="layui-layer"+index;
+                                                // tjLayertest=$("#tjPanel").html();
+
+                                                layer.close(index);
+                                                layer.close(layerIndex);
+                                            }
+                                        });
+                                    });
+                                },
+                            });
+                        });
                     }
                 });
             }
@@ -746,6 +796,67 @@ function doMap() {
                             });
                         });
                     }
+                    //编辑统计服务图层
+                    if(treeNode.getParentNode().id==4){//如果是统计服务
+                        layui.use('layer', function () {
+                            var layer = layui.layer;
+                            layerIndex = layer.open({
+                                type: 1,
+                                title: ['编辑统计服务'],
+                                shadeClose: false,
+                                skin: "layui-layer-lan tjLayerContent",
+                                shade: 0,
+                                area: ['700px', '480px'],
+                                // content:layerNodes[3].children[0].dom,
+                                content:treeNode.dom,
+                                success: function(layero,index){
+                                    //do something
+                                    modifytjMenuLayer();
+                                    // var newNode={name:$("#newFLName").val(),url:$("#newFLAds").val()};
+
+                                    $(".tjInfoSubmit").bind('click',function () {
+                                        constructTjJson3();
+                                        var index=layer.open({
+                                            type: 0,
+                                            title:"统计图层名称",
+                                            skin:"layui-layer-lan",
+                                            content:' <div style="margin-left:-24px">\n' +
+                                            '             <label class="layui-form-label">图层名</label>\n' +
+                                            '             <div class="layui-input-block" style="margin-left: 88px">\n' +
+                                            '                  <input type="text" id="newSLName" name="tjLayerName" lay-verify="required" placeholder="请输入统计图层名称" autocomplete="off" class="layui-input">\n' +
+                                            '             </div>\n' +
+                                            '          </div>',
+                                            yes:function (index,layero) {
+                                                console.log("OK");
+
+                                                var tjLayerName=$("input[ name='tjLayerName' ]").val();
+
+                                                if(tjLayerName==""){
+                                                    alert("请输入名称");
+                                                }
+
+                                                if (tjLayerName != "") {
+                                                    treeNode.name = tjLayerName;
+                                                    treeNode.checked=false;
+                                                    var treeObj = $.fn.zTree.getZTreeObj("doMapTree");
+                                                    treeObj.updateNode(treeNode);
+                                                }
+                                                allTjLayerContent={
+                                                    "name":tjLayerName,
+                                                    "spatialdata":tjPanel1,
+                                                    "statisticdata":tjPanel2,
+                                                    "cartographydata":tjPanel3
+                                                }
+                                                console.log( allTjLayerContent);
+                                                layer.close(index);
+                                                layer.close(layerIndex);
+                                            }
+                                        });
+                                    });
+                                },
+                            });
+                        });
+                    }
                 });
                 if(treeNode.getParentNode().id!=1){
                     var btn1 = $("#doMapRemove_"+treeNode.id);
@@ -755,6 +866,7 @@ function doMap() {
                         if(!confirm("确认删除 节点 -- " + treeNode.name + " 吗？")){
                             return;
                         }
+                        //删除专题服务图层
                         if(treeNode.getParentNode().id==2){//如果是专题服务
                             var treeObj = $.fn.zTree.getZTreeObj("doMapTree");
                             treeObj.removeNode(treeNode,true);
@@ -767,6 +879,27 @@ function doMap() {
                         }
                         //删除要素服务图层
                         if(treeNode.getParentNode().id==3){//如果是要素服务
+                            var treeObj = $.fn.zTree.getZTreeObj("doMapTree");
+                            treeObj.removeNode(treeNode,true);
+                            treeNode.getParentNode().isParent=true;
+                            treeObj.refresh();
+                            //删除节点时将地图上的图层也删去
+                            if (treeNode.textLayerChecked == "checked"){
+                                if(map&&(map.getLayer(treeNode.url))){
+                                    var thisLayer = map.getLayer(treeNode.url);
+                                    map.removeLayer(thisLayer);
+                                }
+                            }
+                            else if (treeNode.buttonLayerChecked == "checked"){
+                                var layerNow2 = map.getLayer(treeNode["nodePath"][treeNode["nodePath"].length-1].id);
+                                if(layerNow2){
+                                    map.removeLayer(layerNow2);
+                                }
+                            }
+
+                        }
+                        //删除统计服务图层
+                        if(treeNode.getParentNode().id==4){//如果是统计服务
                             var treeObj = $.fn.zTree.getZTreeObj("doMapTree");
                             treeObj.removeNode(treeNode,true);
                             treeNode.getParentNode().isParent=true;

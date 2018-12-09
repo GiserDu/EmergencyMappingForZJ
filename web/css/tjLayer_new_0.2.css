@@ -48,7 +48,7 @@ body .tjLayerContent .layui-layer-content{
     box-sizing: border-box;
     display:inline-block;
     vertical-align: top;
-    width:-webkit-calc(100% - 125px);/*减号前后要有空格，否则无效，减去的宽度必须计算清楚*/
+    width:-webkit-calc(100% - 130px);/*减号前后要有空格，否则无效，减去的宽度必须计算清楚*/
     height: 100%;
     /*overflow-x: hidden;*/
     overflow-y: auto;
