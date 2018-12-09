@@ -1,5 +1,6 @@
 package com.zz.chart.chartstyle;
 
+import com.zz.chart.data.IndicatorData;
 import com.zz.util.JUtil;
 
 /**
@@ -71,8 +72,33 @@ public class ChartDataPara {
 		this.setDomainAxisUnit("年");
 	}
 
-	
-	
+
+	public void initialAsAPI(IndicatorData[] indicatorDatas){
+//		String[] temp = themeData.split(",");
+//		String[] years = yearString.split(",");
+//		//		String table = temp[0];//表名
+//		String[] fn = new String[temp.length-1];
+//		String[] fu = new String[temp.length-1];
+//		String tempSource=null;
+//		for (int i = 0; i < temp.length-1; i++) {
+//			String cnNameAndUnit = null;
+//			cnNameAndUnit = JUtil.getCnNameAndUnit(temp[i+1]);
+//			fn[i] = cnNameAndUnit.split(",")[0];
+//			fu[i] = cnNameAndUnit.split(",")[1];
+//			tempSource = cnNameAndUnit.split(",")[2];
+//		}
+		String[] fn=indicatorDatas[0].getNames();
+		String[] fu={""};
+		String tempSource=null;
+		String[] years=null;
+		this.setFieldName(fn); //指标名
+		this.setFieldUnits(fu);//单位
+		this.setFieldSource(tempSource);//单位
+		this.setDomainAxis(years);
+		this.setDomainAxisUnit("年");
+	}
+
+
 	public String[] getDomainAxis() {
 		return domainAxis;
 	}

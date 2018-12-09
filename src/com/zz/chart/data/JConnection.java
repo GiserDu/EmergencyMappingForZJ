@@ -23,7 +23,8 @@ public class JConnection {
 	public JConnection() {
 		
 	    try
-	    {	String configpath = JUtil.GetWebInfPath()+"/prop/dbconpara.properties";
+	    {
+	    	String configpath = JUtil.GetWebInfPath()+"/prop/dbconpara.properties";
 	    	InputStream ips = new FileInputStream(configpath);
 	    	Properties pro = new Properties();
 	    	pro.load(ips);

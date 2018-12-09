@@ -30,7 +30,15 @@ var img_boundary = L.tileLayer("http://t{s}.tianditu.cn/ibo_w/wmts?service=wmts&
 var imgLayerGroup = L.layerGroup([img,img_lab,img_boundary]);
 map.addLayer(imgLayerGroup);
 
-
+// 添加打印控件
+var printer = L.easyPrint({
+	tileLayer: imgLayerGroup,
+	sizeModes: ['Current'],
+	// sizeModes: ['Current', 'A4Landscape', 'A4Portrait'],
+	filename: 'myMap',
+	exportOnly: true,
+	hideControlContainer: true
+}).addTo(map);
 
 // 添加风场图
 var velocityLayer,dataSource;

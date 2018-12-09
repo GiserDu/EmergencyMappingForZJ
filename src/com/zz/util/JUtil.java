@@ -8,19 +8,26 @@ import com.zz.chart.data.JConnection;
 import com.zz.chart.data.ReadRegionData;
 import com.zz.chart.data.ReadThematicData;
 import jxl.read.biff.BiffException;
+import net.sf.json.JSONObject;
+import telecarto.data.util.*;
 
 import java.awt.*;
 import java.awt.geom.Rectangle2D;
 import java.awt.image.BufferedImage;
+import java.io.BufferedReader;
 import java.io.IOException;
+import java.io.InputStreamReader;
 import java.io.UnsupportedEncodingException;
+import java.net.HttpURLConnection;
+import java.net.URL;
+import java.net.URLEncoder;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.HashMap;
-
+import java.util.Map;
 
 
 public class JUtil {
@@ -55,6 +62,291 @@ public class JUtil {
 		}
 		return index;
 	}
+	//输入url，返回解析的字符串
+	public static String getResultStrFromAPI(String apiUrl){
+		String resultString = "";
+		try{
+//			String resultString="{" +
+//					"  \"type\": \"FeatureCollection\"," +
+//					"  \"features\": [" +
+//					"    {" +
+//					"      \"type\": \"Feature\"," +
+//					"      \"geometry\": {" +
+//					"        \"type\": \"Point\"," +
+//					"        \"coordinates\": [" +
+//					"          119.52814," +
+//					"          29.879936" +
+//					"        ]" +
+//					"      }," +
+//					"      \"properties\": {" +
+//					"        \"市\": \"杭州市\"," +
+//					"        \"隐患点\": 781.3," +
+//					"        \"避让搬迁\": 115," +
+//					"        \"工程治理\": 218" +
+//					"      }" +
+//					"    }," +
+//					"    {" +
+//					"      \"type\": \"Feature\"," +
+//					"      \"geometry\": {" +
+//					"        \"type\": \"Point\"," +
+//					"        \"coordinates\": [" +
+//					"          121.565296," +
+//					"          29.658292" +
+//					"        ]" +
+//					"      }," +
+//					"      \"properties\": {" +
+//					"        \"市\": \"宁波市\"," +
+//					"        \"隐患点\": 276," +
+//					"        \"避让搬迁\": 43," +
+//					"        \"工程治理\": 37" +
+//					"      }" +
+//					"    }," +
+//					"    {" +
+//					"      \"type\": \"Feature\"," +
+//					"      \"geometry\": {" +
+//					"        \"type\": \"Point\"," +
+//					"        \"coordinates\": [" +
+//					"          120.438594," +
+//					"          27.882016" +
+//					"        ]" +
+//					"      }," +
+//					"      \"properties\": {" +
+//					"        \"市\": \"温州市\"," +
+//					"        \"隐患点\": 1545," +
+//					"        \"避让搬迁\": 290," +
+//					"        \"工程治理\": 258" +
+//					"      }" +
+//					"    }," +
+//					"    {" +
+//					"      \"type\": \"Feature\"," +
+//					"      \"geometry\": {" +
+//					"        \"type\": \"Point\"," +
+//					"        \"coordinates\": [" +
+//					"          119.859578," +
+//					"          30.780919" +
+//					"        ]" +
+//					"      }," +
+//					"      \"properties\": {" +
+//					"        \"市\": \"湖州市\"," +
+//					"        \"隐患点\": 160," +
+//					"        \"避让搬迁\": 45," +
+//					"        \"工程治理\": 62" +
+//					"      }" +
+//					"    }," +
+//					"    {" +
+//					"      \"type\": \"Feature\"," +
+//					"      \"geometry\": {" +
+//					"        \"type\": \"Point\"," +
+//					"        \"coordinates\": [" +
+//					"          120.556913," +
+//					"          29.7612356" +
+//					"        ]" +
+//					"      }," +
+//					"      \"properties\": {" +
+//					"        \"市\": \"绍兴市\"," +
+//					"        \"隐患点\": 289," +
+//					"        \"避让搬迁\": 63," +
+//					"        \"工程治理\": 218" +
+//					"      }" +
+//					"    }," +
+//					"    {" +
+//					"      \"type\": \"Feature\"," +
+//					"      \"geometry\": {" +
+//					"        \"type\": \"Point\"," +
+//					"        \"coordinates\": [" +
+//					"          119.9997208," +
+//					"          29.1041079" +
+//					"        ]" +
+//					"      }," +
+//					"      \"properties\": {" +
+//					"        \"市\": \"金华市\"," +
+//					"        \"隐患点\": 643," +
+//					"        \"避让搬迁\": 70," +
+//					"        \"工程治理\": 97" +
+//					"      }" +
+//					"    }," +
+//					"    {" +
+//					"      \"type\": \"Feature\"," +
+//					"      \"geometry\": {" +
+//					"        \"type\": \"Point\"," +
+//					"        \"coordinates\": [" +
+//					"          118.6833012," +
+//					"          28.8731117" +
+//					"        ]" +
+//					"      }," +
+//					"      \"properties\": {" +
+//					"        \"市\": \"衢州市\"," +
+//					"        \"隐患点\": 616," +
+//					"        \"避让搬迁\": 141," +
+//					"        \"工程治理\": 102" +
+//					"      }" +
+//					"    }," +
+//					"    {" +
+//					"      \"type\": \"Feature\"," +
+//					"      \"geometry\": {" +
+//					"        \"type\": \"Point\"," +
+//					"        \"coordinates\": [" +
+//					"          122.225178," +
+//					"          30.238917" +
+//					"        ]" +
+//					"      }," +
+//					"      \"properties\": {" +
+//					"        \"市\": \"舟山市\"," +
+//					"        \"隐患点\": 220," +
+//					"        \"避让搬迁\": 0," +
+//					"        \"工程治理\": 0" +
+//					"      }" +
+//					"    }," +
+//					"    {" +
+//					"      \"type\": \"Feature\"," +
+//					"      \"geometry\": {" +
+//					"        \"type\": \"Point\"," +
+//					"        \"coordinates\": [" +
+//					"          121.1135732," +
+//					"          28.683662" +
+//					"        ]" +
+//					"      }," +
+//					"      \"properties\": {" +
+//					"        \"市\": \"台州市\"," +
+//					"        \"隐患点\": 330," +
+//					"        \"避让搬迁\": 51," +
+//					"        \"工程治理\": 141" +
+//					"      }" +
+//					"    }," +
+//					"    {" +
+//					"      \"type\": \"Feature\"," +
+//					"      \"geometry\": {" +
+//					"        \"type\": \"Point\"," +
+//					"        \"coordinates\": [" +
+//					"          119.5667332," +
+//					"          28.1894542" +
+//					"        ]" +
+//					"      }," +
+//					"      \"properties\": {" +
+//					"        \"市\": \"丽水市\"," +
+//					"        \"隐患点\": 894," +
+//					"        \"避让搬迁\": 191," +
+//					"        \"工程治理\": 70" +
+//					"      }" +
+//					"    }" +
+//					"  ]" +
+//					"}";
+			String str = URLEncoder.encode("汇总-按市统计","utf-8");
+			URL url = new URL("http://115.236.34.34:8668/api/v1/datasets/dizai/"+str+"?year=2017&month=9");
+			//URL url = new URL("http://www.baidu.com");
+			HttpURLConnection urlConnection = (HttpURLConnection) url.openConnection();
+			urlConnection.setRequestMethod("GET");
+			urlConnection.setRequestProperty("User-Agent", "Mozilla/4.0 (compatible; MSIE 5.0; Windows NT; DigExt)");
+			urlConnection.setRequestProperty("ContentType","application/json;charset=utf-8");
+			// System.out.println(urlConnection.getInputStream());
+			BufferedReader in = new BufferedReader(
+					new InputStreamReader(urlConnection.getInputStream(),"UTF-8"));
+
+			String lines;
+			while((lines = in.readLine()) != null)
+			{
+				//lines = new String(lines.getBytes());
+				resultString += lines;
+			}
+			System.out.println(resultString);
+
+		}catch( Exception e)
+		{
+			e.printStackTrace();
+		}
+		return resultString;
+	};
+	/**通过API获得指标数据
+	 *param: resultStr 输入的json字符串
+	 *return: indicatorDatas 指标数组
+	 */
+	public static IndicatorData[] getIndicatorDataFromAPi(String resultStr){
+		System.out.println("1");
+
+		Map<String, Class> classMap = new HashMap<String, Class>();
+		classMap.put("features", FeaturesFromAPI.class);
+
+		JSONObject jsonObject = JSONObject.fromObject(resultStr);
+
+		//转为对象时，如果是list或map等需要添加类映射，即指定list或map中的对象类
+		DataFromAPi dataFromAPi = (DataFromAPi) JSONObject.toBean(jsonObject, DataFromAPi.class,classMap);
+		System.out.println(dataFromAPi);
+		//构建indicatorData数组， IndicatorData包括三个属性，
+		// 即单个要素的自变量domainAxis：2016，指标名称数组names[],指标值数组[]；
+
+		ArrayList<IndicatorData> featArrList = new ArrayList<IndicatorData>();//新建要素属性指标数据动态数组
+		//遍历dataFromAPi进行要素属性数据读取
+		ArrayList<FeaturesFromAPI> featList=dataFromAPi.getFeatures();
+		//遍历dataFromAPi进行要素空间坐标数据读取,二维数组存储坐标，第一个经度，第二个纬度。
+		double[][] coordinateXY=new double[featList.size()][2];
+		for(int i=0;i<featList.size();i++)	{
+			HashMap<String, String> map = (HashMap<String, String>) featList.get(i).getProperties();
+			ArrayList<String> proName=new ArrayList<String>();
+			ArrayList<Double> proValue=new ArrayList<Double>();
+			coordinateXY[i]=featList.get(i).getGeometry().getCoordinates();
+			String regionName=null;
+			for (Map.Entry<String, String> entry : map.entrySet()) {
+				if (!entry.getKey().equals("市")){
+					proName.add(entry.getKey()) ;
+					//String value=entry.getValue().toString();
+					proValue.add(Double.parseDouble(String.valueOf(entry.getValue())) ) ;
+				}
+				else {
+					regionName=entry.getValue();
+				}
+			}
+			proName.trimToSize();
+			proValue.trimToSize();
+
+			String[] nameStrs = (String[] )proName.toArray(new String[proName.size()]);
+
+			//Double动态数组转为double数组
+			double[] valueDbls=new double[proValue.size()];
+			for(int j=0;j<proValue.size();j++){
+				valueDbls[j] = proValue.get(j).doubleValue();
+			}
+
+			IndicatorData indicatorData = new IndicatorData(regionName, nameStrs, valueDbls);
+			System.out.println(featList.get(i));
+			featArrList.add(indicatorData);
+		}
+		//
+
+		IndicatorData[] indicatorDatas = (IndicatorData[])featArrList.toArray(new IndicatorData[1]);
+		//IndicatorData indicatorData = new IndicatorData(year, dataNameStrings, value);
+		Map<IndicatorData[],double[][]> indiAndXY =new HashMap<>();
+		indiAndXY.put(indicatorDatas,coordinateXY);
+
+		return indicatorDatas;
+	}
+
+
+	/**通过API获得坐标XY数据
+	 *param: resultStr 输入的json字符串
+	 *return: coordinateXY double二维数组
+	 */
+	public static double[][] getXYFromAPi(String resultStr){
+
+		Map<String, Class> classMap = new HashMap<String, Class>();
+		classMap.put("features", FeaturesFromAPI.class);
+
+		JSONObject jsonObject = JSONObject.fromObject(resultStr);
+
+		//转为对象时，如果是list或map等需要添加类映射，即指定list或map中的对象类
+		DataFromAPi dataFromAPi = (DataFromAPi) JSONObject.toBean(jsonObject, DataFromAPi.class,classMap);
+
+		//遍历dataFromAPi进行要素属性数据读取
+		ArrayList<FeaturesFromAPI> featList=dataFromAPi.getFeatures();
+		//遍历dataFromAPi进行要素空间坐标数据读取,二维数组存储坐标，第一个经度，第二个纬度。
+		double[][] coordinateXY=new double[featList.size()][2];
+		for(int i=0;i<featList.size();i++)	{
+			HashMap<String, String> map = (HashMap<String, String>) featList.get(i).getProperties();
+			coordinateXY[i]=featList.get(i).getGeometry().getCoordinates();
+		}
+
+		return coordinateXY;
+	}
+
 
 	/**
 	 * com.ny.mapç¨ è²å½©è½¬æ¢æ¹æ³,è½¬æ¢ærgbæ°ç»æ¨¡å¼
@@ -100,8 +392,7 @@ public class JUtil {
 	 * @return
 	 */
 	public static String GetWebInfPath() {
-		String path = new JUtil().getClass().getClassLoader().getResource("")
-				.getPath();
+		String path = new JUtil().getClass().getClassLoader().getResource("").getPath();
 		path = path.replace("classes","");
 		path = path.replace("%20", " ");// é¤ç©ºæ ¼
 		return path;
@@ -232,7 +523,7 @@ public class JUtil {
 	 * @return
 	 * @throws SQLException 
 	 */
-	public static IndicatorData[] getIndicatorData(String thematicData,ChartDataPara chartDataPara,String regionParam,String year)
+	public static IndicatorData[] getIndicatorData(String thematicData, ChartDataPara chartDataPara, String regionParam, String year)
 	{
 		ArrayList<IndicatorData> list = new ArrayList<IndicatorData>();
 		ReadThematicData rThematicData = new ReadThematicData(thematicData,regionParam,year); //读取专题数据数据的类
@@ -429,7 +720,7 @@ public class JUtil {
 	}
 
 	public static HashMap<String, Color> getColorMap(int num,Color[] modelColor, 
-			int modelGrade, int b,String gradeDataString) throws BiffException, IOException	
+			int modelGrade, int b,String gradeDataString) throws BiffException, IOException
 	{
 		HashMap<String, Color> hashMap = new HashMap<String, Color>();
 		ReadRegionData regionData = new ReadRegionData();
@@ -574,10 +865,10 @@ public class JUtil {
 		return fillColor;
 	}
 	
-	public static ArrayList<LegendType> getLegendData(int num,Color[] modelColor, 
-			int modelGrade, int b,String gradeDataString) throws BiffException, IOException
+	public static ArrayList<LegendType> getLegendData(int num, Color[] modelColor,
+                                                      int modelGrade, int b, String gradeDataString) throws BiffException, IOException
 	{
-		ArrayList<LegendType> legendList = new ArrayList<LegendType>(); 
+		ArrayList<LegendType> legendList = new ArrayList<LegendType>();
 		double[] value = getValue(gradeDataString);
 //		Color[] fillColor = getColor(value, modelColor, modelGrade, num, b);
 		int[] boundary = null;
@@ -600,7 +891,7 @@ public class JUtil {
 		case 8:
 			boundary = ModelPrim.modelD1(value, num);
 		default:
-			boundary = ModelPrim.modelA1(value, num);	
+			boundary = ModelPrim.modelA1(value, num);
 		}
 		
 		Color[] fillColor = new Color[boundary.length - 1];
