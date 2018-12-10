@@ -1574,7 +1574,7 @@ var originalTjLayerContent='<div class="tjPanel" id="tjPanel">\n' +
     '                        </form>\n' +
     '                    </div>\n' +
     '                    <div class="layui-tab-item">\n' +
-    '                        <div class="layui-form">\n' +
+    '                        <form class="layui-form">\n' +
     '                            <div class="layui-upload-drag" style="margin-bottom: 10px;" id="EXCELupload1">\n' +
     '                                <i class="layui-icon layui-icon-upload-drag"></i>\n' +
     '                                <p id="fileName">点击上传，或将文件拖拽到此处</p>\n' +
@@ -1582,6 +1582,8 @@ var originalTjLayerContent='<div class="tjPanel" id="tjPanel">\n' +
     '                            <div>\n' +
     '                                <button id="EXCELupload" type="button" class="layui-btn layui-input-inline" style="bottom: 260px;right: 20px;position: absolute;">开始上传</button>\n' +
     '                            </div>\n' +
+    '                        </form>\n'+
+    '                        <form class="layui-form">\n' +
     '                            <div class="layui-form-item">\n' +
     '                                <div class="layui-row layui-col-space10">\n' +
     '                                    <fieldset class="layui-elem-field" style="text-align:center">\n' +
@@ -1602,7 +1604,7 @@ var originalTjLayerContent='<div class="tjPanel" id="tjPanel">\n' +
     '                                    </fieldset>\n' +
     '                                </div>\n' +
     '                            </div>\n' +
-    '                        </div>\n' +
+    '                        </form>\n' +
     '                    </div>\n' +
     '                </div>\n' +
     '            </div>\n' +
