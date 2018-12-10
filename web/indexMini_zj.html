@@ -1,0 +1,166 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+  <head>
+    <meta name="generator"
+    content="HTML Tidy for HTML5 (experimental) for Windows https://github.com/w3c/tidy-html5/tree/c63cc39" />
+    <meta charset="utf-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="keywords" content="应急,灾害,快速制图" />
+    <meta name="description" content="" />
+    <title>应急自适应快速制图</title>
+    <link href="css/reset.css" rel="stylesheet" />
+    <link href="css/whu_index.css" rel="stylesheet" />
+	<link rel="stylesheet" href="./css/bootstrap.min.css">
+    <link href="js/layui/css/layui.css" rel="stylesheet">
+	<script src="./js/jquery-3.2.1.js"></script>
+	<script src="./js/bootstrap.min.js"></script>
+	  <script src="js/layui/layui.js"></script>
+	<style>
+		body{
+			height: 450px;
+		}
+		table div{
+		margin-top: 5%;
+		}
+		@media (min-width: 400px){
+		.navbar-collapse.collapse {
+		display: block!important;
+		height: auto!important;
+		padding-bottom: 0;
+		overflow: visible!important;
+		}
+		}
+		table{
+			height: 80%;margin-top: 20px;
+			}
+		#myTabContent {
+			height: 100%;
+			margin-top: -17px
+
+		}
+		#main {
+			background: #ddd;
+
+		}
+		#main nav{
+			background-color:#337ab7;
+		}
+
+		.flex-container{
+			display: -webkit-flex;
+			display: flex;
+			flex-wrap: wrap;
+			height: 94%;
+
+		}
+		.flex-item{
+			width: 29%;
+			height: 37%;
+			/* margin: auto; */
+			margin-left: auto;
+			margin-right: auto;
+			margin-top: 15px;
+			background-size: cover;
+			text-align: center;
+			color: black;
+			font-size: 20px;
+
+		}
+		.flex-item:hover{
+			box-shadow: rgb(233, 233, 233) 0px 0px 30px;
+		}
+		.nav-tabs>li.active>a:hover{
+			color: white;
+		}
+		.btn-info{
+			font-size: 17px;
+			margin-top: 160px;
+			height: 34px;
+		}
+		.blank_btn{
+			margin-left: 241px;
+
+			margin-top: -3px;
+			background-color: #337ab7;
+		}
+		
+	</style>
+
+  </head>
+  <body>
+  <div id="main" style="padding:0px;">
+
+	<div id="myTabContent"   class="tab-content">
+
+		
+		<div class="tab-pane fade in active" style="height:100%"id="emMapping">
+			<div class="flex-container">
+			  <div class="flex-item"style="background-image:url(./image/ZJMidReg010101.jpg)" >
+				<button class="btn btn-info" href="#">饼状统计图</button>
+			</div>
+				<div class="flex-item"style="background-image:url(./image/ZJMidReg010102.jpg)">
+					<button class="btn btn-info" href="#">分级饼状统计图</button>
+				</div>
+				<div class="flex-item"style="background-image:url(./image/ZJMidReg010103.jpg)">
+					<button class="btn btn-info" href="#" >分级图</button>
+				</div>
+				<div class="flex-item"style="background-image:url(./image/ZJMidReg010104.jpg)" >
+					<button class="btn btn-info" href="#">分级柱状统计图</button>
+				</div>
+				<div class="flex-item"style="background-image:url(./image/ZJMidReg010105.jpg)">
+					<button class="btn btn-info" href="#">要素分布图</button>
+				</div>
+				<div class="flex-item"style="background-image:url(./image/ZJMidReg010106.jpg)">
+					<button class="btn btn-info" href="#" >柱状统计图</button>
+				</div>
+			</div>
+		</div>
+	</div>
+	  <hr style="height:1px;border:none;border-top:1px solid #555555; margin-top: -25px;" />
+	  <button type="button" class="btn btn-primary blank_btn" onclick="blank_btnClick()">新建空白模板</button>
+  </div>
+
+  <script src="js/whu_index.js"></script>
+  <script>
+  $(document).ready(function(){
+		$("a").css("color","black");
+		$(".active>a").css("color","#337ab7");
+		 $("a").mouseenter(function(){
+			
+			$("a").css("color","black");
+			$(this).css("color","#337ab7");
+			$(".active>a").css("color","#337ab7");
+		});
+		$("a").mouseleave(function(){
+			
+			$("a").css("color","black");
+			
+			$(".active>a").css("color","#337ab7");
+		});
+		
+		$(".btn-info").click(function(){
+			localStorage.setItem("disaster_status","灾中");
+            localStorage.setItem("disaster_type","transport");
+            localStorage.setItem("regionParam","1");
+            localStorage.setItem("template_map",this.innerText);
+            localStorage.setItem("template_scale","区域");
+            localStorage.setItem("template_theme","应急信息");
+            localStorage.setItem("templateHome", "0");
+
+            if(self!=top){
+                //关闭子窗口并弹出新的layUI
+//				parent.layer.close(parent.layer.index);
+                var index=parent.layer.getFrameIndex(window.name);
+                parent.layer.close(index);
+                parent.sweetAlert1(this.innerText);
+            }
+            else{
+                window.location.href='Mapping.html';
+            }
+		});
+	});
+	 
+  </script>
+</body>
+</html>

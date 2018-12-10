@@ -160,7 +160,7 @@ $(document).ready(function() {
             resize: false,
             area: ["600px","500px"],
             // btn: ['按钮1','按钮2','按钮3'],
-            content: 'indexMini.html',
+            content: 'indexMini_zj.html',
             success: function (layero, index) {
                 $("#layui-layer-iframe1").css("height",'456px');
             },
@@ -2451,7 +2451,7 @@ $("#templateMap").click(function () {
             resize: false,
             area: ["600px","500px"],
             // btn: ['按钮1','按钮2','按钮3'],
-            content: 'indexMini.html',
+            content: 'indexMini_zj.html',
             yes: function(index, layero) {//确定后执行回调
 
             }
