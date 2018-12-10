@@ -1,9 +1,11 @@
 package com.zz.chart.data;
 import com.zz.util.JUtil;
+import telecarto.geoinfo.db.MysqlAccessBean;
 
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
+import java.util.ArrayList;
 import java.util.HashMap;
 
 
@@ -167,6 +169,54 @@ public class ReadThematicData {
 
 		jConnection.close();
 	}
+
+//	//浙江专属
+//public ReadThematicData(String tableName,String[] fieldsName,String regionParam) {
+//	//fieldsName 指标名称数组
+//	;//数据库 表的名称 以及要查询的指标的名称
+//	//返回fields 数组,对应的值数组
+//
+//	String sql = "SELECT" +
+//			"*" +
+//			"FROM\n" +
+//			"\tregion_info\n" +
+//			"LEFT JOIN " + tableName +
+//			" ON region_info.citycode=" + tableName + ".`code`" +
+//			"WHERE" +
+//			"\tregion_info.class =" + regionParam;
+//	ResultSet resultSet2;
+//	MysqlAccessBean mysql = new MysqlAccessBean();
+//	try {
+//		resultSet2 = mysql.query(sql);
+//
+//		ArrayList<IndicatorData> indicatorList = new ArrayList<IndicatorData>();
+//		ArrayList<String> regionCodeList = new ArrayList<String>();
+//		//遍历每一行的查询结果
+//		while (resultSet2.next()) {
+//			//获取区域编码
+//			regionCodeList.add(resultSet2.getString("code"));
+//			//循环遍历指标数组，获得查询后某一行的值
+//			ArrayList<String> fieldDatas = new ArrayList<>();
+//			for (int i = 0; i < fieldsName.length; i++) {
+//				fieldDatas.add(resultSet2.getString(fieldsName[i]));
+//			}
+//			//list转数组
+//			String[] valueArray = fieldDatas.toArray(new String[fieldDatas.size()]);
+//			//构建indicatorData
+//			IndicatorData indicatorData = new IndicatorData(fieldsName, StringToDoule(valueArray));
+//			indicatorList.add(indicatorData);
+//
+//		}
+//
+//
+//	} catch (Exception e) {
+//		e.printStackTrace();
+//	} finally {
+//		mysql.close();
+//	}
+//
+//}
+
 	public String[] getRegonData() {
 		return regonData;
 	}
@@ -204,6 +254,14 @@ public class ReadThematicData {
 //	       return yearStrings;
 //
 //	}
+	public double[] StringToDoule(String[] arrs){
+
+		double[] dbls=new double[arrs.length];
+		for (int i=0;i<dbls.length;i++){
+			dbls[i]=Double.parseDouble(arrs[i]);
+		}
+		return  dbls;
+	}
 	public void setYearData(String[] yearData) {
 		this.yearData = yearData;
 	}

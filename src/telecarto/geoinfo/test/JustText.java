@@ -28,34 +28,41 @@ public class JustText {
 //			}
 //		}
 //		System.out.println(regionData);
-		MysqlAccessBean mysql = new MysqlAccessBean();
-		String sql;
-		ResultSet resultSet2;
-		String regionClass="1";
-		//根据输入行政等级class，确立
-		sql="SELECT * FROM 	region_info WHERE	class =" + regionClass;
 
-		//sql_select = "LEFT JOIN "+ tableName +" t2 ON t1.RGN_CODE = t2.RGN_CODE WHERE t1.RGN_CODE LIKE '"+Param+"' AND t1.RGN_CODE!= '"+regionParam+"' AND t2.YEAR = '" + year + "'";
-		//sql_select = "LEFT JOIN "+ tableName +" t2 ON t1.RGN_CODE = t2.RGN_CODE WHERE t1.RGN_CLASS = '" + regionParam + "' AND t2.YEAR = '" + year + "'";
-		//sql = "SELECT t1.RGN_CODE,t1.RGN_NAME,t1.GEOMETRY,t1.REGION_X,t1.REGION_Y,t2."+ fieldName +" FROM region t1 " + sql_select;
-		// sql = "SELECT t1.RGN_CODE,t1.RGN_NAME,t1.GEOMETRY,t1.REGION_X,t1.REGION_Y,t2."+ fieldName +" FROM region t1 " + sql_select;
-		sql="";
-		try {
-			resultSet2 = mysql.query(sql);
-			ArrayList<ClassData> classList = new ArrayList<>();
-			while (resultSet2.next()) {
-				ClassData classData = new ClassData(resultSet2.getString(1),
-						resultSet2.getString(3),resultSet2.getString(5),resultSet2.getString(6),resultSet2.getString(7),resultSet2.getString(9));
-				classList.add(classData);
-			}
-
-		}
-		catch (Exception e) {
-			e.printStackTrace();
-		}
-		finally {
-			mysql.close();
-		}
+        //数据库连接测试
+//		MysqlAccessBean mysql = new MysqlAccessBean();
+//		String sql;
+//		ResultSet resultSet2;
+//		String regionClass="1";
+//		//根据输入行政等级class，确立
+//		sql="SELECT * FROM 	region_info WHERE	class =" + regionClass;
+//
+//		//sql_select = "LEFT JOIN "+ tableName +" t2 ON t1.RGN_CODE = t2.RGN_CODE WHERE t1.RGN_CODE LIKE '"+Param+"' AND t1.RGN_CODE!= '"+regionParam+"' AND t2.YEAR = '" + year + "'";
+//		//sql_select = "LEFT JOIN "+ tableName +" t2 ON t1.RGN_CODE = t2.RGN_CODE WHERE t1.RGN_CLASS = '" + regionParam + "' AND t2.YEAR = '" + year + "'";
+//		//sql = "SELECT t1.RGN_CODE,t1.RGN_NAME,t1.GEOMETRY,t1.REGION_X,t1.REGION_Y,t2."+ fieldName +" FROM region t1 " + sql_select;
+//		// sql = "SELECT t1.RGN_CODE,t1.RGN_NAME,t1.GEOMETRY,t1.REGION_X,t1.REGION_Y,t2."+ fieldName +" FROM region t1 " + sql_select;
+//		sql="";
+//		try {
+//			resultSet2 = mysql.query(sql);
+//			ArrayList<ClassData> classList = new ArrayList<>();
+//			while (resultSet2.next()) {
+//				ClassData classData = new ClassData(resultSet2.getString(1),
+//						resultSet2.getString(3),resultSet2.getString(5),resultSet2.getString(6),resultSet2.getString(7),resultSet2.getString(9));
+//				classList.add(classData);
+//			}
+//
+//		}
+//		catch (Exception e) {
+//			e.printStackTrace();
+//		}
+//		finally {
+//			mysql.close();
+//		}
+        String s="总人口数（万）";
+        int startIndex=s.indexOf("（");
+        int endIndex=s.indexOf("）");
+        String strn=s.substring(startIndex+1,endIndex);//截取数字,001,002等
+        System.out.println(strn);
 	}
 
 }

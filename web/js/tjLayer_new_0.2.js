@@ -7,12 +7,13 @@ var classNumSliderValue=5;
 var userLoadSpfilename;  //自定义上传空间数据的文件名
 var mouseMoveClassLyr;
 var fieldslist;
-
+var mouseMove;
+var mouseOut;
 var allTjLayerContent={};
 // 制图范围数据的json格式
 // var tjPanel1={"tabID":"1","identityField":"value","regionData":"","fileName":""};
 var tjPanel1={};
-var tjPanel2 = {"tabId":"1","dataAddress":"","tableName":"","spatialId":"","fieldsName":{},"fieldsNum":""};
+var tjPanel2 = {"tabId":"1","dataAddress":"","tableName":"","spatialId":"","fieldsName":[],"fieldsNum":0};
 //tjPanel3中有一个key是type，1表示统计图表，2表示分级符号
 var tjPanel3={};
 
@@ -717,14 +718,14 @@ function submitFields(){
             layer.alert(JSON.stringify(data.field), {
                 title: '最终的提交信息'
             });
+            tjPanel2.fieldsName = [];
             tjPanel2.fieldsNum = 0;
-            tjPanel2.fieldsName = {};
             $.each(data.field, function(index,item){
                 //console.log(index,item);
                 if(tjPanel2.fieldsNum!=0){
-                    tjPanel2.fieldsName[tjPanel2.fieldsNum] = item;
+                    tjPanel2.fieldsName.push(item);
                 }
-                tjPanel2.fieldsNum++;
+                tjPanel2.fieldsNum++
             });
             tjPanel2.fieldsNum = tjPanel2.fieldsNum - 1;
             $.ajax({
@@ -732,8 +733,14 @@ function submitFields(){
                 url:"./servlet/fileUploadServlet",
                 async:"false",
                 dataType:"json",
-                data:{"inputType":"test"},
+               // data:{"inputType":"test"},
+                data:{"inputType":"chartLayerData"},
                 success: function (data) {
+
+                    if (data.type==="chartLayer"){
+                        doChartLayer(data);
+                        return;
+                    }
 
                         console.log(data);
                         var classLegend = data.classLegend;
@@ -1331,7 +1338,152 @@ var colorTable={
         "color9":"#FFFEEC",
     }
 }
+function doChartLayer(data){
+    chartImg_url= "data:image/png;base64," + data.chartLegend;
+    // if(legendFlag!=0 && legendFlag == 'chart'){
+    //     $("#chartLegend").click();                   //触发chartlegend的点击事件
+    // }
+    var dataSource = data.source;
+    // $("#mapDiv .legend").css("background", "url(" + img_url + ")");
+    // $("#mapDiv .legend").css("background-size", "100% 100%");
+    //处理统计图表
+    var charts = data.charts;
+    var indiNum = charts[0].attributes.indiNum;//所选指标数目
+    // console.log(charts);
+    var graphics = new Array();
+    graphics = initChartLayer(charts);
+    // charts.forEach(alert);
+    if (map.graphicsLayerIds.length == 0) {
+        //可以为graphicLayer添加mouse-over,click等事件;
+        var graphicLayer = new esri.layers.GraphicsLayer();
+        graphicLayer.name = "chartGLayer";
+        //Graphic(geometry,symbol,attributes,infoTemplate)-->infoTemlate为弹出窗体,用以显示信息
+        for (var i=0;i<graphics.length;i++){
+            graphicLayer.add(graphics[i]);
+        }
+        map.addLayer(graphicLayer);
+    } else {
+        var flag = 0;// 用于判断是否有画图图层
+        for (var i = 0; i < map.graphicsLayerIds.length; i++) {
+            if ((map.getLayer(map.graphicsLayerIds[i])).name == "chartGLayer") {
+                var layer = map.getLayer(map.graphicsLayerIds[i]);
+                layer.clear();//清空所有graphics
+                // dojo.disconnect(mouseMove);
+                // dojo.disconnect(mouseOut);
+                for (var i=0;i<graphics.length;i++){
+                    layer.add(graphics[i]);
+                }
+                flag = 0;
+            } else// 第一个不是chart图层
+            {
+                flag = 1;
+            }
+        }
 
+        if (flag == 1)// 现有图层中没有画图图层
+        {
+            var graphicLayer = new esri.layers.GraphicsLayer();
+            graphicLayer.name = "chartGLayer";
+            for (var i=0;i<graphics.length;i++){
+                graphicLayer.add(graphics[i]);
+            }
+            map.addLayer(graphicLayer);
+        }
+
+    }
+    //添加鼠标响应事件
+    //var chartLayer;
+    for (var i = 0; i < map.graphicsLayerIds.length; i++) {
+        if ((map.getLayer(map.graphicsLayerIds[i])).name == "chartGLayer") {
+            chartLayer = map.getLayer(map.graphicsLayerIds[i]);
+            //取消事件绑定
+            if(mouseMove!=undefined && mouseOut!=undefined){
+                dojo.disconnect(mouseMove);                               //dojo：事件监听
+                dojo.disconnect(mouseOut);
+                // dojo.disconnect(mouseClick);
+            }
+            var chartWidth=0;
+            var chartHeight = 0;
+            var chartImg = 0;
+            var rgnCode = 0;
+            mouseMove = dojo.connect(chartLayer, "onMouseOver", function mouseMove(evt) {
+                //这里动态赋予graphicinfoTemplate,如果在生成是就初始化会默认添加鼠标点击事件!!!
+                var g = evt.graphic;
+                if(rgnCode!= g.attributes.rng_code){
+                    rgnCode = g.attributes.rng_code;
+                    // console.log(g.symbol);
+                    chartWidth = g.symbol.width;
+                    chartHeight = g.symbol.height;
+                    chartImg = g.symbol.url;
+                    var symbol = new esri.symbol.PictureMarkerSymbol(chartImg,chartWidth*1.15,chartHeight*1.15);
+                    g.setSymbol(symbol);
+
+                    var content = initInfoTemplate(g.attributes,indiNum,dataSource);
+                    var title = "统计符号信息";
+                    map.infoWindow.setContent(content);
+                    map.infoWindow.setTitle(title);
+                    map.infoWindow.show(evt.screenPoint,map.getInfoWindowAnchor(evt.screenPoint));
+                    map.infoWindow.resize(200,300);
+
+                    map.setMapCursor("pointer");
+                }
+                else {
+                    return false;
+                }
+            });
+            mouseOut = dojo.connect(chartLayer, "onMouseOut", function mouseOut(evt) {
+                var g = evt.graphic;
+                var symbol = new esri.symbol.PictureMarkerSymbol(chartImg,chartWidth,chartHeight);
+                // console.log(symbol);
+                g.setSymbol(symbol);
+                map.infoWindow.hide();
+                map.setMapCursor("default");
+                rgnCode = 0;
+            });
+
+            break;
+        }
+    }
+}
+//根据后台传输回来的数据进行graphic的生成,并进行ChartLayer的添加
+function initChartLayer (charts) {
+    var graphicArray= new Array();
+    // var infoTemplateArray= new Array();
+    require(["esri/InfoTemplate","esri/geometry/webMercatorUtils"], function(InfoTemplate,webMercatorUtils) {
+        for(var i=0;i<charts.length;i++){
+            var point = new esri.geometry.Point(
+                charts[i].point_x,
+                charts[i].point_y,
+                new esri.SpatialReference({wkid : 4326})
+                /* wym 修改 将4490 改为4326*/
+            );
+            // var point_XY = webMercatorUtils.geographicToWebMercator(point);//经纬度转墨卡托
+            var width = charts[i].imgWidth;
+            var height = charts[i].imgHeight;
+            var url = "data:image/png;base64," + charts[i].img;
+            var symbol = new esri.symbol.PictureMarkerSymbol(url,width,height);
+            var attributes = charts[i].attributes;
+            var graphic = new esri.Graphic(point,symbol,attributes);
+            // graphic.setInfoTemplate(infoTemplate);
+            graphicArray.push(graphic);
+        }
+    });
+    return graphicArray;
+}
+//动态生成graphic的弹出窗口
+function initInfoTemplate(attributes,indiNum,dataSource) {
+    var attrString = '<p><strong>区域名称 : </strong>' + attributes.rng_name + '</p>';
+    for (var j=0;j<indiNum;j++){                                //显示选中的各项指标
+        var indi = "indi" + j;
+        var value = "value" + j;
+        //object[]可以用变量进行取值,而object.xxx只能用常量取值
+        attrString += '<p><strong>'+attributes[indi]+' : </strong>'+ attributes[value]+ '</p>';
+    }
+    attrString += '<p><strong>数据来源 : </strong>'+dataSource+'</p>';
+    // attrString += '<p>注:单击可进入下一级行政区</p>';
+    // attrString += '<img  style="width:150px;height:150px;" src="'+chartImg+'">';
+    return attrString;
+}
 
 var originalTjLayerContent='<div class="tjPanel" id="tjPanel">\n' +
     '    <div class="tjPanel-leftBar">\n' +

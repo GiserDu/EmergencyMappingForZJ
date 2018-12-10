@@ -1,6 +1,13 @@
 package telecarto.geoinfo.servlets;
 
+import com.zz.chart.chartfactory.ChartFactory;
+import com.zz.chart.chartfactory.ChartStyleFactory;
+import com.zz.chart.chartfactory.IChart;
+import com.zz.chart.chartstyle.ChartDataPara;
+import com.zz.chart.chartstyle.ChartStyle;
 import com.zz.chart.data.ClassData;
+import com.zz.chart.data.IndicatorData;
+import com.zz.chart.data.ReadRegionData;
 import com.zz.util.*;
 import net.sf.json.JSONArray;
 import net.sf.json.JSONObject;
@@ -21,6 +28,7 @@ import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.awt.*;
+import java.awt.geom.Rectangle2D;
 import java.awt.image.BufferedImage;
 import java.io.*;
 import java.math.BigDecimal;
@@ -101,6 +109,9 @@ public class fileUploadServlet extends HttpServlet {
                         message.put("apiCallbackData",ReadGeojson.getPropertiesName());
                         //获取API地址
                         break;
+                    case "chartLayerData":
+                        doChartLayer(request,response);
+                        break;
                     default:
                         System.out.println("其他");
                         MysqlAccessBean mysql = new MysqlAccessBean();
@@ -118,8 +129,8 @@ public class fileUploadServlet extends HttpServlet {
                                 "\t*\n" +
                                 "FROM\n" +
                                 "\tregion_info\n" +
-                                "LEFT JOIN\tpopular\n" +
-                                "ON region_info.citycode=popular.`code`\n" +
+                                "LEFT JOIN\tpopulation\n" +
+                                "ON region_info.citycode=population.`code`\n" +
                                 "WHERE\n" +
                                 "\tregion_info.class = " + regionClass;
 
@@ -473,6 +484,258 @@ public class fileUploadServlet extends HttpServlet {
                 + request.getContextPath()     //项目名称
                 + outJsonPath.substring(outJsonPath.lastIndexOf("\\uploadFile"));
         message.put("geoJsonURL",relativeJsonPath);
+
+    }
+
+    //制作统计图表
+    public void doChartLayer(HttpServletRequest request, HttpServletResponse response) throws IOException {
+        String ip = "";
+    String statisticJson="{\n" +
+            "\t  \"nav\": \"nav2\",\n" +
+            "\t  \"tabId\": \"1\",\n" +
+            "\t  \"dataAddress\": \"\",\n" +
+            "\t  \"tableName\": \"population\",\n" +
+            "\t  \"spatialId\": \"id\",\n" +
+            "\t  \"fieldsName\": [\n" +
+            "\t\t\n" +
+            "\t\t\"总人口数（万）\",\n" +
+            "\t\t\"男性人口数（万）\",\n" +
+            "\t\t\"女性人口数（万）\",\n" +
+            "\t  ],\n" +
+            "\t  \"fieldsNum\": 5\n" +
+            "\t}";
+        //获得空间数据各个指标
+//        JSONObject spatialdataJson=JSONObject.fromObject(request.getParameter("spatialdata"));//空间数据json对象
+//
+//        String tabID_spatialdata=spatialdataJson.getString("tabID");    //空间数据来源标识ID，1-行政区划，2-上传shp
+//        JSONArray regionDataValue=spatialdataJson.getJSONArray("regionDataValue");  //区域标识编码数组
+//        String fileName=spatialdataJson.getString("fileName");
+
+
+        //获得统计数据各指标
+        //JSONObject statisticdataJson=JSONObject.fromObject(request.getParameter("statisticdata"));//空间数据json对象
+        JSONObject statisticdataJson=JSONObject.fromObject(statisticJson);
+        String tabID_statisticdata=statisticdataJson.getString("tabId");    //空间数据来源标识ID，1-行政区划，2-上传shp
+        String dataAddress=statisticdataJson.getString("dataAddress");
+        String tableName=statisticdataJson.getString("tableName");
+        String spatialId=statisticdataJson.getString("spatialId");
+        JSONArray fieldsNameArray=statisticdataJson.getJSONArray("fieldsName");
+        String fieldsNames=statisticdataJson.getString("fieldsName");
+        String[] fieldsName=new String[fieldsNameArray.size()];
+		if(fieldsNameArray!=null||fieldsNameArray.size()!=0){
+			for(int i=0;i<fieldsNameArray.size();i++){
+                fieldsName[i]=fieldsNameArray.get(i).toString();
+			}
+		}
+        int fieldsNum=statisticdataJson.getInt("fieldsNum");
+
+        //获得画图数据各指标
+//        JSONObject cartographydataJson= JSONObject.fromObject(request.getParameter("cartographydata"));
+//        String type=cartographydataJson.getString("cartographydataJson");
+        //String chartID=cartographydataJson.getString("chartID");
+        String chartID="10101";
+//        JSONArray colorArray=cartographydataJson.getJSONArray("colors");
+//        int symbolSize=cartographydataJson.getInt("symbolSizeSliderValue");
+        String tempSource="本地数据库";
+
+        // String wcString = request.getParameter("wc");
+        //String dcString = request.getParameter("dc");
+        //String chartid = request.getParameter("chartID");// 专题符号id
+        //int width = cartographydataJson.getInt("symbolSizeSliderValue");// 符号长宽
+        int width=80;
+        int height=80;
+        //int height= cartographydataJson.getInt("symbolSizeSliderValue");
+        String regionParam = "1";
+
+//		String islabelString = request.getParameter("ISLABEL");
+        // String islabelString = "false";
+        // String yearString = request.getParameter("year");
+
+        //String chartData = request.getParameter("CHARTDATA");
+        //System.out.println("chart data: "+chartData);
+        //String[] arr = chartData.split(",");
+        //System.out.println(arr);
+        tableName="population";
+        String thematicData = tableName;
+
+        //根据所选指标的数目进行不同的色彩配置(有几个指标配置几个色彩渐变)
+        //String colorRampSchema1 = request.getParameter("colorRampSchema");
+
+//		System.out.println(colorRampSchema1);
+        String colorString="15538980;2498916;15855872";
+        //colorString = ColorUtil.getColorScheme(arr.length - 1,colorRampSchema1);
+        String[] colors = colorString.split(";");
+        int[] fieldColors = new int[colors.length]; // 专题符号颜色
+        for (int i = 0; i < fieldColors.length; i++) {
+            fieldColors[i] = Integer.parseInt(colors[i]);
+        }
+
+        //Rectangle2D.Double DC = JUtil.StringToRect(dcString);// DC
+        ChartStyleFactory chartStyleFactory = new ChartStyleFactory();
+        ChartStyle chartStyle = chartStyleFactory.createcChartStyle(chartID);// 通过工厂模式实例化符号样式类
+        //设置符号宽高
+//        int width = Integer.parseInt(widthstring);
+//        int height = Integer.parseInt(heightstring);
+
+        //根据符号ID加载符号样式
+        String dir = "assets/";
+        String chartPath = dir + chartID + ".xml";
+        chartStyle.Load(chartPath);
+        //初始化符号参数
+        //统计符号的chartDataPara
+        ChartDataPara chartDataPara = new ChartDataPara();
+
+        chartDataPara.initial_ZJ(fieldsNames,tempSource);// 初始化专题符号层参数
+
+        chartDataPara.setFieldColor(fieldColors);
+        chartDataPara.setWidth(width);
+        chartDataPara.setHeight(height);
+
+
+//        //输入apiURL返回数据resultString
+//        //解析API返回的数据resultString，
+//        String URL="";
+//        String resultString=JUtil.getResultStrFromAPI("");
+//        IndicatorData[] indicatorDatas = JUtil.getIndicatorDataFromAPi(resultString);
+//        double[][] coordinatesXY=JUtil.getXYFromAPi(resultString);
+////        String[] xStrings = ReadRegionData.getRegonX();
+////        String[] yStrings = ReadRegionData.getRegonY();
+//        chartDataPara.initialAsAPI(indicatorDatas);// 初始化专题符号层参数
+        //
+        //ArrayList<String > regionData=new ArrayList();
+        IndicatorData[] indicatorDatas = JUtil.getIndicatorData_ZJ(tableName,fieldsName,regionParam);
+        ReadRegionData.doReadRegionData_ZJ(regionParam);
+        double[] maxValues = JUtil.maxValues(indicatorDatas);
+        double[] minValues = JUtil.minValues(indicatorDatas);
+        double[] averageValues = JUtil.averageValues(indicatorDatas);
+        double[] scales = JUtil.scales(indicatorDatas, width);
+        chartDataPara.setScales(scales);
+        String[] xStrings = ReadRegionData.getRegonX();
+        String[] yStrings = ReadRegionData.getRegonY();
+        String[] nameStrings = ReadRegionData.getRegonName();//regionCodes为区域代码数组
+
+        //生成图例
+        ChartFactory chartFactoryLegend = new ChartFactory();
+        IChart chartLegend = chartFactoryLegend.createcChart(chartID);
+        IndicatorData[] indicatorDataLegend = new IndicatorData[1];
+        indicatorDataLegend[0] = indicatorDatas[0];
+        BufferedImage bi = chartLegend.drawLegend(80, 160, chartDataPara, chartStyle, maxValues, minValues, averageValues, indicatorDataLegend);
+        BufferedImage bufferedImage = new BufferedImage(bi.getWidth(),bi.getHeight(),BufferedImage.TYPE_INT_RGB);
+        Graphics2D g2d = bufferedImage.createGraphics();
+//			g2d.setColor(new Color(247,247,247));
+        g2d.setColor(Color.white);
+        g2d.fillRect(0,0,bi.getWidth(),bi.getHeight());
+        //把图例bi绘制到bufferedImage上
+        g2d.drawImage(bi,0,0,bi.getWidth(),bi.getHeight(),null);
+        g2d.dispose();
+        //图例图片转码为base64
+        BASE64Encoder encoderLegend = new BASE64Encoder();
+        ByteArrayOutputStream baosLegend = new ByteArrayOutputStream();
+        ImageIO.write(bufferedImage, "png", baosLegend);
+        byte[] bytesLegend = baosLegend.toByteArray();
+        String imgStreamLegend = encoderLegend.encodeBuffer(bytesLegend).trim();
+        //输出统计图图例到本地(底色透明)
+        String tempPath = getServletContext().getRealPath("/") + "printMap";
+        String tempFilePath = getServletContext().getRealPath("/") + "printMap\\"+ ip.replaceAll("\\.","-");
+        File fileSavepath = new File(tempPath);
+        File fileSavepathMap = new File(tempFilePath);
+        if(!fileSavepath.exists()){
+            fileSavepath.mkdirs();
+        }
+        if(!fileSavepathMap.exists()){
+            fileSavepathMap.mkdirs();
+        }
+        String imgPath = fileSavepathMap + "/"+"chartLegend.png";
+        ImageIO.write(bi, "png", new File(imgPath));
+
+
+
+
+        /*单张图绘制,并进行最小闭包处理*/
+        int indiNum = indicatorDatas[0].getNames().length;//指标数目
+        String[] indiNames = new String[indiNum];
+        String[] indiUnits = new String[indiNum];
+        String indiSource = "";
+
+        for (int p=0;p<indiNum;p++) {
+            indiNames[p] = indicatorDatas[0].getNames()[p];
+            indiUnits[p] ="";//指标单位未获得，默认为空
+        }
+        JSONObject chartsObject = new JSONObject();
+        JSONArray chartArray = new JSONArray();
+        ArrayList<BufferedImage> biList = new ArrayList<>();
+
+        for (int i = 0; i < indicatorDatas.length; i++) {
+            IndicatorData[] indicatorData = new IndicatorData[1];
+            indicatorData[0] = indicatorDatas[i];
+            int biWidth = (new Double(width*1.3)).intValue();
+//				int biHeight = (new Double(height*1.2)).intValue();
+            BufferedImage bi2 = new BufferedImage(biWidth,height, BufferedImage.TYPE_INT_ARGB);
+            Graphics2D g2D2 = bi2.createGraphics();
+            ChartFactory chartFactory = new ChartFactory();
+            IChart chart = chartFactory.createcChart(chartID);
+            /*width/2, width/2,为绘制专题符号的中心点位置,这里width/2可以将符号绘制在正中心*/
+            chart.drawChart(g2D2, width/2, width/2, width, height, chartDataPara,
+                    chartStyle, maxValues, minValues, averageValues,
+                    indicatorData);
+
+            int imgWidth = bi2.getWidth();
+            int imgHeight = bi2.getHeight();
+            ConvexHull convex = new ConvexHull();
+            int [] scanerY = convex.getScanerY(imgWidth,imgHeight,bi2);
+            int [] scanerX = convex.getScanerX(imgWidth,imgHeight,bi2);
+            int convexWidth = scanerX[1] - scanerX[0] +1;
+            int convexHeight = scanerY[1] - scanerY[0] +1;
+            int [] imageArry = new int[convexWidth*convexHeight];
+            imageArry = bi2.getRGB(scanerX[0],scanerY[0],convexWidth,convexHeight,imageArry,0,convexWidth);
+
+
+            //convexBI为新生成的最小闭包图片
+            BufferedImage convexBI = new BufferedImage(convexWidth,convexHeight, BufferedImage.TYPE_INT_ARGB);
+            convexBI.setRGB(0,0,convexWidth,convexHeight,imageArry,0,convexWidth);
+            biList.add(convexBI);
+            g2D2.dispose();
+
+            //将生产的图片转换为base64编码的字符串imgStream
+            BASE64Encoder encoder = new BASE64Encoder();
+            ByteArrayOutputStream baos = new ByteArrayOutputStream();
+            ImageIO.write(biList.get(i), "png", baos);
+            byte[] bytes = baos.toByteArray();
+            String imgStream = encoder.encodeBuffer(bytes).trim();
+
+            JSONObject singleChart = new JSONObject();
+            JSONObject singleChartAttr = new JSONObject();
+
+//            singleChartAttr.put("rng_code", regionCodes[i]);
+            singleChartAttr.put("rng_name", indicatorData[0].getDomainAxis());
+
+            singleChart.put("point_x", xStrings[i]);
+            singleChart.put("point_y", yStrings[i]);
+            for (int r=0;r<indiNum;r++){
+                String indi = "indi" + r;
+                String valueName = "value" + r;
+                String value = indicatorDatas[i].getValues()[r] + indiUnits[r];
+                singleChartAttr.put(indi, indiNames[r]);
+                singleChartAttr.put(valueName, value);
+            }
+            singleChartAttr.put("indiNum", indiNum);
+//				singleChart.put("indiNum",indiNum);
+//				singleChart.put("unit", indiUnits[0]);
+            singleChart.put("img",imgStream);
+            singleChart.put("imgWidth",convexWidth);
+            singleChart.put("imgHeight",convexHeight);
+            singleChart.put("attributes",singleChartAttr);
+            chartArray.add(singleChart);
+        }
+        chartsObject.put("charts",chartArray);
+        //String timeData = yearString + "年";
+        //chartsObject.put("year",timeData);
+        chartsObject.put("source",indiSource);
+        chartsObject.put("chartLegend",imgStreamLegend.replaceAll("[\\s*\t\n\r]", ""));
+        chartsObject.put("type","chartLayer");
+        PrintWriter writer = response.getWriter();
+        writer.print(chartsObject);
+        writer.close();
 
     }
 

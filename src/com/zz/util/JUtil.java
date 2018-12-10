@@ -10,6 +10,7 @@ import com.zz.chart.data.ReadThematicData;
 import jxl.read.biff.BiffException;
 import net.sf.json.JSONObject;
 import telecarto.data.util.*;
+import telecarto.geoinfo.db.MysqlAccessBean;
 
 import java.awt.*;
 import java.awt.geom.Rectangle2D;
@@ -574,13 +575,72 @@ public class JUtil {
 	
 	}
 
+
+	public static IndicatorData[] getIndicatorData_ZJ(String tableName,String[] fieldsName,String regionParam) {
+		//fieldsName 指标名称数组
+		;//数据库 表的名称 以及要查询的指标的名称
+		//返回fields 数组,对应的值数组
+		ArrayList<IndicatorData> indicatorList = new ArrayList<IndicatorData>();
+		ArrayList<String> regionCodeList = new ArrayList<String>();
+
+		String sql = "SELECT" +
+				"*" +
+				"FROM\n" +
+				"\tregion_info\n" +
+				"LEFT JOIN " + tableName +
+				" ON region_info.citycode=" + tableName + ".`code`" +
+				"WHERE" +
+				"\tregion_info.class =" + regionParam;
+		ResultSet resultSet2;
+		MysqlAccessBean mysql = new MysqlAccessBean();
+		try {
+			resultSet2 = mysql.query(sql);
+
+
+			//遍历每一行的查询结果
+			while (resultSet2.next()) {
+				//获取区域编码
+				regionCodeList.add(resultSet2.getString("code"));
+				//循环遍历指标数组，获得查询后某一行的值
+				ArrayList<String> fieldDatas = new ArrayList<>();
+				for(int i = 0; i < fieldsName.length; i++) {
+					fieldDatas.add(resultSet2.getString(fieldsName[i]));
+				}
+				//list转数组
+				String[] valueArray = fieldDatas.toArray(new String[fieldDatas.size()]);
+				//构建indicatorData
+				IndicatorData indicatorData = new IndicatorData(resultSet2.getString("code"),fieldsName, StringToDoule(valueArray));
+				indicatorList.add(indicatorData);
+
+			}
+
+		} catch (Exception e) {
+			e.printStackTrace();
+		} finally {
+			mysql.close();
+		}
+		IndicatorData[] indicatorDatas = (IndicatorData[])indicatorList.toArray(new IndicatorData[1]);
+		//regionCodes.setRegonCode(regionCodeList.toArray(new String[regionCodeList.size()]));
+
+		return indicatorDatas;
+	}
+
+	//字符串数组转double数组
+	public static double[] StringToDoule(String[] arrs){
+
+		double[] dbls=new double[arrs.length];
+		for (int i=0;i<dbls.length;i++){
+			dbls[i]=Double.parseDouble(arrs[i]);
+		}
+		return  dbls;
+	}
 	//获取指标的中文名和单位
 	public static String getCnNameAndUnit(String enName) {
 		String cnName = null; //中文名
 		String unit = null;  //单位
 		String source = null;  //数据来源
 		String sqlString = "SELECT NAME_CN,UNIT,SOURCE FROM index_dictionary WHERE NAME_EN = '" +enName +"'";
-		
+
 		JConnection jConnection = new JConnection();
 		Connection connection = jConnection.getConnection();
 		ResultSet resultSet = null;
@@ -601,13 +661,44 @@ public class JUtil {
 		finally {
 			jConnection.close();
 		}
-		
+
 		String cnNameAndUnit = cnName+","+unit+","+source;
-		
+
 		return cnNameAndUnit;
-		
+
 	}
-	
+	public static String getCnNameAndUnit_ZJ(String enName) {
+		String cnName = null; //中文名
+		String unit = null;  //单位
+		String source = null;  //数据来源
+		String sqlString = "SELECT NAME_CN,UNIT,SOURCE FROM index_dictionary WHERE NAME_EN = '" +enName +"'";
+
+		JConnection jConnection = new JConnection();
+		Connection connection = jConnection.getConnection();
+		ResultSet resultSet = null;
+		try {
+			PreparedStatement pps = connection.prepareStatement(sqlString);
+			resultSet = pps.executeQuery();
+			while (resultSet.next()) {
+				cnName = resultSet.getString(1);
+				unit = resultSet.getString(2);
+				source = resultSet.getString(3);
+			}
+			pps.close();
+//			jConnection.close();
+		} catch (Exception e) {
+			// TODO: handle exception
+			e.printStackTrace();
+		}
+		finally {
+			jConnection.close();
+		}
+
+		String cnNameAndUnit = cnName+","+unit+","+source;
+
+		return cnNameAndUnit;
+
+	}
 	public static String getCnname(String chartDataString){
 		String[] temp = chartDataString.split(",");
 		String[] enNames = new String[temp.length];
