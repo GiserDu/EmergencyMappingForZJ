@@ -175,7 +175,7 @@ public class AntZipUtil {
                                   ZipOutputStream out) throws IOException {
         //
         FileInputStream in = null;
-        org.apache.tools.zip.ZipEntry entry = null;
+        ZipEntry entry = null;
         // 创建复制缓冲区 1024*4 = 4K
         byte[] buffer = new byte[1024 * 4];
         int bytes_read = 0;
@@ -183,7 +183,7 @@ public class AntZipUtil {
             in = new FileInputStream(file);
             // 根据 parent 路径名字符串和 child 路径名字符串创建一个新 File 实例
             String zipFileName = getEntryName(baseDirPath, file);
-            entry = new org.apache.tools.zip.ZipEntry(zipFileName);
+            entry = new ZipEntry(zipFileName);
             // "压缩文件" 对象加入 "要压缩的文件" 对象
             out.putNextEntry(entry);
             // 现在是把 "要压缩的文件" 对象中的内容写入到 "压缩文件" 对象
@@ -239,7 +239,7 @@ public class AntZipUtil {
         if (files.length == 0) {
             // 根据 parent 路径名字符串和 child 路径名字符串创建一个新 File 实例
             String zipFileName = getEntryName(baseDirPath, dir);
-            org.apache.tools.zip.ZipEntry entry = new org.apache.tools.zip.ZipEntry(
+            ZipEntry entry = new ZipEntry(
                     zipFileName);
             out.putNextEntry(entry);
             out.closeEntry();
@@ -306,10 +306,10 @@ public class AntZipUtil {
             org.apache.tools.zip.ZipFile zipFile = new org.apache.tools.zip.ZipFile(
                     zipFileName);
             java.util.Enumeration e = zipFile.getEntries();
-            org.apache.tools.zip.ZipEntry zipEntry = null;
+            ZipEntry zipEntry = null;
             createDirectory(outputDirectory, "");
             while (e.hasMoreElements()) {
-                zipEntry = (org.apache.tools.zip.ZipEntry) e.nextElement();
+                zipEntry = (ZipEntry) e.nextElement();
                 // System.out.println("unziping " + zipEntry.getName());
                 if (zipEntry.isDirectory()) {
                     String name = zipEntry.getName();
