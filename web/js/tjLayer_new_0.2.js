@@ -262,6 +262,7 @@ function constructTjJson3() {
         // -----获得用户选择的有关统计符号的值-----
         var chartID = $("#chart-selected>.select_title>img").attr("src").slice(-10,-4);
         var colors=[];
+        var colorName= $("#color-solution>.select_title>img").attr("name");
         // 获得所有颜色选择器
         var chartIndexColorpick=$(".userDefineColors").find('.chartColorPicker');
         for(var i=0;i<chartIndexColorpick.length;i++){
@@ -270,6 +271,7 @@ function constructTjJson3() {
         tjPanel3={
             "type":"1",
             "chartID":chartID,
+            "colorName":colorName,
             "colors":colors,
             "symbolSizeSliderValue":symbolSizeSliderValue,
             "symbolOpacitySliderValue":symbolOpacitySliderValue
