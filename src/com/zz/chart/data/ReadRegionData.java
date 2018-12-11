@@ -40,7 +40,7 @@ public class ReadRegionData {
 
 		if(regionParam.equals("1")){
 			sql_select = "WHERE class = '" + regionParam + "'";
-			sql = "SELECT citycode,x,y,class,name FROM region_info " + sql_select;
+			sql = "SELECT citycode,x,y,class,name FROM region_info " + sql_select + "ORDER BY citycode";
 			sql1 = "SELECT COUNT(citycode) FROM region_info " +sql_select;
 		}
 		else {

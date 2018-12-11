@@ -247,11 +247,17 @@ function constructTjJson3() {
             color2=tmp;
         };
         var colors=getColorbar(classNumSliderValue,color1,color2);
+        var colorString = "";
+        for (var i=0;i<colors.length;i++){
+            colorString += colors[i];
+            colorString += ";";
+        }
+        colorString = colorString.substring(0, colorString.length - 1);
         var modelName=$('#model option:selected').val();
         tjPanel3={
             "type":"2",
             "classNumSliderValue":classNumSliderValue,
-            "colors":colors,
+            "colors":colorString,
             "modelName":modelName,
             "symbolOpacitySliderValue":symbolOpacitySliderValue
         }
@@ -638,16 +644,31 @@ function displayTableTree(treeElement,createTree){
             elem: treeElement, //传入元素选择器
             nodes: createTree,
             click:function (node) {
-                //console.log(node.name);
-                tjPanel2.tableName = node.name;
+                console.log(node.name);
+                var nodeName;
+                switch (node.name){
+                    case "交通专题":
+                        nodeName = "transportation";
+                        break;
+                    case "人口专题":
+                        nodeName = "population";
+                        break;
+                    case "经济专题":
+                        nodeName = "economy";
+                        break;
+                }
+                tjPanel2.tableName = nodeName;
                 $.ajax({
                     type: 'post',
-                    url:"",
+                    url:"./servlet/fileUploadServlet",
+                    dataType:"json",
                     async:"false",
-                    data:{ "tableName":node.name},
+                    data:{ "tableName":nodeName, "inputType":"column"},
                     success: function (data) { //返回json结果(表头)
                         //tableFields = JSON.parse(data);
                         //tableFields = $.parseJSON(data);
+                        tableFields = data.tableField;
+                        // displayFields(fieldslist,tableFields);
                         displayFields(fieldslist,tableFields);
                     },
                     error:function(){
@@ -655,16 +676,17 @@ function displayTableTree(treeElement,createTree){
                     }
                 });
                 //构造
-                var tableFields1 = {"0":"id","1":"username","2":"email","3":"sex","4":"city","5":"sign","6":"experience","7":"ip","8":"logins","9":"joinTime"};
-                var tableFields2 = {"0":"id","1":"username","2":"sex","3":"city","4":"sign","5":"experience","6":"logins","7":"wealth","8":"classify","9":"score"};
-                if (node.name=="表格1"){
-                    tableFields=tableFields1;
-                }else if (node.name=="表格2"){
-                    tableFields=tableFields2;
-                }else{
-                    tableFields={};
-                }
-                displayFields($("#fieldslist1"),tableFields);
+                // var tableFields1 = {"0":"id","1":"username","2":"email","3":"sex","4":"city","5":"sign","6":"experience","7":"ip","8":"logins","9":"joinTime"};
+                // var tableFields2 = {"0":"id","1":"username","2":"sex","3":"city","4":"sign","5":"experience","6":"logins","7":"wealth","8":"classify","9":"score"};
+                // if (node.name=="表格1"){
+                //     tableFields=tableFields1;
+                // }else if (node.name=="表格2"){
+                //     tableFields=tableFields2;
+                // }else{
+                //     tableFields={};
+                // }
+
+
             }
         });
     })
@@ -728,190 +750,197 @@ function submitFields(){
                 tjPanel2.fieldsNum++
             });
             tjPanel2.fieldsNum = tjPanel2.fieldsNum - 1;
-            $.ajax({
-                type: 'GET',
-                url:"./servlet/fileUploadServlet",
-                async:"false",
-                dataType:"json",
-               // data:{"inputType":"test"},
-                data:{"inputType":"chartLayerData"},
-                success: function (data) {
 
-                    if (data.type==="chartLayer"){
-                        doChartLayer(data);
-                        return;
-                    }
-
-                        console.log(data);
-                        var classLegend = data.classLegend;
-                        classifyImg_url = "data:image/png;base64," + classLegend;
-                        // if(legendFlag!=0 &&legendFlag == 'classify'){
-                        //     $("#classifyLegend").click();                    //触发classifylegend的点击事件
-                        // }
-                        //ar dataSource = data.dataSource;
-                        // console.log(data.dataClassArray);
-                        var classGraphics = initClassLayer(data.classDataArray);
-                        if (map.graphicsLayerIds.length == 0) {
-                            //可以为graphicLayer添加mouse-over,click等事件;
-                            //map.removeLayer(baseLayerHB);
-                            var graphicLayer = new esri.layers.GraphicsLayer();
-                            graphicLayer.name = "classGLayer";
-                            //Graphic(geometry,symbol,attributes,infoTemplate)-->infoTemlate为弹出窗体,用以显示信息
-                            for (var i=0;i<classGraphics.length;i++){
-                                graphicLayer.add(classGraphics[i]);
-                            }
-                            map.addLayer(graphicLayer);
-                            graphicLayer.setOpacity(0.95);
-                        }
-                        else {
-                            //map.removeLayer(baseLayerHB);
-                            var flag = 0;
-                            for (var i = 0; i < map.graphicsLayerIds.length; i++) {
-                                if ((map.getLayer(map.graphicsLayerIds[i])).name == "chartGLayer") {
-                                    var layer = map.getLayer(map.graphicsLayerIds[i]);
-                                    layer.clear();//清空所有graphics
-                                    // map.removeLayer(layer);
-                                    break;
-                                }
-                            }
-                            for (var i = 0; i < map.graphicsLayerIds.length; i++) {
-                                if ((map.getLayer(map.graphicsLayerIds[i])).name == "classGLayer") {
-                                    var layer = map.getLayer(map.graphicsLayerIds[i]);
-                                    layer.clear();//清空所有graphics
-                                    for (var i=0;i<classGraphics.length;i++){
-                                        layer.add(classGraphics[i]);
-                                    }
-                                    flag = 1;
-                                    layer.setOpacity(0.95);
-                                    break;
-                                }
-                            }
-                            if(flag==0){
-                                var graphicLayer = new esri.layers.GraphicsLayer();
-                                graphicLayer.name = "classGLayer";
-                                //Graphic(geometry,symbol,attributes,infoTemplate)-->infoTemlate为弹出窗体,用以显示信息
-                                for (var i=0;i<classGraphics.length;i++){
-                                    graphicLayer.add(classGraphics[i]);
-                                }
-                                map.addLayer(graphicLayer);
-                                graphicLayer.setOpacity(0.95);
-                            }
-                            // map.removeLayer(baseLayerHB);
-                            // graphicLayer.setOpacity(0.9);
-                            refreshChartLyr(indi);
-                        }
-
-                        //添加鼠标响应事件
-                        var classLayer;
-                        for (var i = 0; i < map.graphicsLayerIds.length; i++) {
-                            if ((map.getLayer(map.graphicsLayerIds[i])).name == "classGLayer") {
-                                classLayer = map.getLayer(map.graphicsLayerIds[i]);
-                                //取消事件绑定
-                                if(mouseMoveClassLyr!=undefined && mouseOutClassLyr!=undefined){
-                                    dojo.disconnect(mouseMoveClassLyr);
-                                    dojo.disconnect(mouseOutClassLyr);
-                                    // dojo.disconnect(mouseClickClassLyr);
-                                }
-                                var rgnCode = 0;
-                                var polyColor;
-                                var polyOutline;
-                                var polyStyle;
-                                mouseMoveClassLyr = dojo.connect(classLayer, "onMouseOver", function mouseMove(evt) {
-                                    //这里动态赋予graphicinfoTemplate,如果在生成是就初始化会默认添加鼠标点击事件!!!
-                                    var g = evt.graphic;
-                                    if(rgnCode!= g.attributes.rng_code){
-                                        rgnCode = g.attributes.rng_code;
-                                        // console.log(g.symbol);
-                                        polyColor = g.symbol.color;
-                                        polyOutline = g.symbol.outline;
-                                        polyStyle = g.symbol.style;
-                                        var outline = new esri.symbol.SimpleLineSymbol(esri.symbol.SimpleFillSymbol.STYLE_SOLID,new esri.Color([92,68,187]),3);
-                                        var symbol = new esri.symbol.SimpleFillSymbol(polyStyle,outline,polyColor);
-                                        g.setSymbol(symbol);
-
-                                        var content = initClassInfoTemplate(g.attributes);
-                                        var title = g.attributes.rgn_name;
-                                        map.infoWindow.setContent(content);
-                                        map.infoWindow.setTitle(title);
-                                        map.infoWindow.show(evt.screenPoint,map.getInfoWindowAnchor(evt.screenPoint));
-                                        map.infoWindow.resize(200,300);
-                                        map.setMapCursor("pointer");
-                                    }
-                                    else {
-                                        return false;
-                                    }
-                                });
-                                mouseOutClassLyr = dojo.connect(classLayer, "onMouseOut", function mouseOut(evt) {
-                                    var g = evt.graphic;
-                                    var symbol = new esri.symbol.SimpleFillSymbol(polyStyle,polyOutline,polyColor);
-                                    // console.log(symbol);
-                                    g.setSymbol(symbol);
-                                    map.infoWindow.hide();
-                                    map.setMapCursor("default");
-                                    rgnCode = 0;
-                                });
-                                // mouseClickClassLyr = dojo.connect(classLayer, "onClick", function mouseOut(evt) {
-                                //     var g = evt.graphic;
-                                //     var codeParam = g.attributes.rgn_code;
-                                //     var rgn_name = g.attributes.rgn_name;
-                                //     // rgnName = g.attributes.rgn_name;
-                                //     var url;
-                                //     // var geometry = new Object();
-                                //     geometry.x = g.attributes.centerX;
-                                //     geometry.y = g.attributes.centerY;
-                                //
-                                //     for(i in cityArray){
-                                //         if(i==rgn_name){
-                                //             url=cityArray[i];
-                                //             rgnName = rgn_name;
-                                //         }
-                                //     }
-                                //     if(url===undefined){      //确保url不为空，默认为湖北省全图
-                                //         swal({
-                                //             title: "温馨提示",
-                                //             text: "您所选择的区域暂无相关数据",
-                                //             type: "info",
-                                //             showCancelButton: false,
-                                //             confirmButtonText: "确定",
-                                //             closeOnConfirm: false,
-                                //             closeOnCancel: false
-                                //         });
-                                //     }
-                                //     else {
-                                //         changeMap(url,geometry,9);
-                                //         regionParam = codeParam;
-                                //         // for (var i = 0; i < map.graphicsLayerIds.length; i++) {
-                                //         //     if ((map.getLayer(map.graphicsLayerIds[i])).name == "classGLayer") {
-                                //         //         var layer = map.getLayer(map.graphicsLayerIds[i]);
-                                //         //         map.removeLayer(layer);//清空所有graphics
-                                //         //         break;
-                                //         //     }
-                                //         // }
-                                //         refreshClassLyr(field,field_cn,table);
-                                //         if(indi.length !=0){
-                                //             refreshChartLyr(indi);
-                                //         }
-                                //         map.infoWindow.hide();
-                                //         map.setMapCursor("default");
-                                //         baseLayerURL = url;
-                                //     }
-                                // });
-                                break;
-                            }
-                        }
-                        // return data;
-
-                },
-                error:function(){
-                    alert("sorry!")
-                }
-            });
             console.log(tjPanel2);
             $("#selectMappingTemplate").click();
             return false;
         });
     })
 }
+
+function initTjLayer(allTjLayerContent, tjType) {
+    var url = "./servlet/fileUploadServlet?allTjLayerContent=" + encodeURI(allTjLayerContent);
+    console.log(tjType);
+    $.ajax({
+        type: 'POST',
+        url: url,
+        async:"false",
+        dataType:"json",
+        // data:{"inputType":"test"},
+        data:{"inputType": tjType},
+        success: function (data) {
+            console.log(url);
+            if (data.type==="chartLayer"){
+                doChartLayer(data)
+                return;
+            }
+
+            console.log(data);
+            var classLegend = data.classLegend;
+            classifyImg_url = "data:image/png;base64," + classLegend;
+            // if(legendFlag!=0 &&legendFlag == 'classify'){
+            //     $("#classifyLegend").click();                    //触发classifylegend的点击事件
+            // }
+            //ar dataSource = data.dataSource;
+            // console.log(data.dataClassArray);
+            var classGraphics = initClassLayer(data.classDataArray);
+            if (map.graphicsLayerIds.length == 0) {
+                //可以为graphicLayer添加mouse-over,click等事件;
+                //map.removeLayer(baseLayerHB);
+                var graphicLayer = new esri.layers.GraphicsLayer();
+                graphicLayer.name = "classGLayer";
+                //Graphic(geometry,symbol,attributes,infoTemplate)-->infoTemlate为弹出窗体,用以显示信息
+                for (var i=0;i<classGraphics.length;i++){
+                    graphicLayer.add(classGraphics[i]);
+                }
+                map.addLayer(graphicLayer);
+                graphicLayer.setOpacity(0.95);
+            }
+            else {
+                //map.removeLayer(baseLayerHB);
+                var flag = 0;
+                for (var i = 0; i < map.graphicsLayerIds.length; i++) {
+                    if ((map.getLayer(map.graphicsLayerIds[i])).name == "chartGLayer") {
+                        var layer = map.getLayer(map.graphicsLayerIds[i]);
+                        layer.clear();//清空所有graphics
+                        // map.removeLayer(layer);
+                        break;
+                    }
+                }
+                for (var i = 0; i < map.graphicsLayerIds.length; i++) {
+                    if ((map.getLayer(map.graphicsLayerIds[i])).name == "classGLayer") {
+                        var layer = map.getLayer(map.graphicsLayerIds[i]);
+                        layer.clear();//清空所有graphics
+                        for (var i=0;i<classGraphics.length;i++){
+                            layer.add(classGraphics[i]);
+                        }
+                        flag = 1;
+                        layer.setOpacity(0.95);
+                        break;
+                    }
+                }
+                if(flag==0){
+                    var graphicLayer = new esri.layers.GraphicsLayer();
+                    graphicLayer.name = "classGLayer";
+                    //Graphic(geometry,symbol,attributes,infoTemplate)-->infoTemlate为弹出窗体,用以显示信息
+                    for (var i=0;i<classGraphics.length;i++){
+                        graphicLayer.add(classGraphics[i]);
+                    }
+                    map.addLayer(graphicLayer);
+                    graphicLayer.setOpacity(0.95);
+                }
+                // map.removeLayer(baseLayerHB);
+                // graphicLayer.setOpacity(0.9);
+                refreshChartLyr(indi);
+            }
+
+            //添加鼠标响应事件
+            var classLayer;
+            for (var i = 0; i < map.graphicsLayerIds.length; i++) {
+                if ((map.getLayer(map.graphicsLayerIds[i])).name == "classGLayer") {
+                    classLayer = map.getLayer(map.graphicsLayerIds[i]);
+                    //取消事件绑定
+                    if(mouseMoveClassLyr!=undefined && mouseOutClassLyr!=undefined){
+                        dojo.disconnect(mouseMoveClassLyr);
+                        dojo.disconnect(mouseOutClassLyr);
+                        // dojo.disconnect(mouseClickClassLyr);
+                    }
+                    var rgnCode = 0;
+                    var polyColor;
+                    var polyOutline;
+                    var polyStyle;
+                    mouseMoveClassLyr = dojo.connect(classLayer, "onMouseOver", function mouseMove(evt) {
+                        //这里动态赋予graphicinfoTemplate,如果在生成是就初始化会默认添加鼠标点击事件!!!
+                        var g = evt.graphic;
+                        if(rgnCode!= g.attributes.rng_code){
+                            rgnCode = g.attributes.rng_code;
+                            // console.log(g.symbol);
+                            polyColor = g.symbol.color;
+                            polyOutline = g.symbol.outline;
+                            polyStyle = g.symbol.style;
+                            var outline = new esri.symbol.SimpleLineSymbol(esri.symbol.SimpleFillSymbol.STYLE_SOLID,new esri.Color([92,68,187]),3);
+                            var symbol = new esri.symbol.SimpleFillSymbol(polyStyle,outline,polyColor);
+                            g.setSymbol(symbol);
+
+                            var content = initClassInfoTemplate(g.attributes);
+                            var title = g.attributes.rgn_name;
+                            map.infoWindow.setContent(content);
+                            map.infoWindow.setTitle(title);
+                            map.infoWindow.show(evt.screenPoint,map.getInfoWindowAnchor(evt.screenPoint));
+                            map.infoWindow.resize(200,300);
+                            map.setMapCursor("pointer");
+                        }
+                        else {
+                            return false;
+                        }
+                    });
+                    mouseOutClassLyr = dojo.connect(classLayer, "onMouseOut", function mouseOut(evt) {
+                        var g = evt.graphic;
+                        var symbol = new esri.symbol.SimpleFillSymbol(polyStyle,polyOutline,polyColor);
+                        // console.log(symbol);
+                        g.setSymbol(symbol);
+                        map.infoWindow.hide();
+                        map.setMapCursor("default");
+                        rgnCode = 0;
+                    });
+                    // mouseClickClassLyr = dojo.connect(classLayer, "onClick", function mouseOut(evt) {
+                    //     var g = evt.graphic;
+                    //     var codeParam = g.attributes.rgn_code;
+                    //     var rgn_name = g.attributes.rgn_name;
+                    //     // rgnName = g.attributes.rgn_name;
+                    //     var url;
+                    //     // var geometry = new Object();
+                    //     geometry.x = g.attributes.centerX;
+                    //     geometry.y = g.attributes.centerY;
+                    //
+                    //     for(i in cityArray){
+                    //         if(i==rgn_name){
+                    //             url=cityArray[i];
+                    //             rgnName = rgn_name;
+                    //         }
+                    //     }
+                    //     if(url===undefined){      //确保url不为空，默认为湖北省全图
+                    //         swal({
+                    //             title: "温馨提示",
+                    //             text: "您所选择的区域暂无相关数据",
+                    //             type: "info",
+                    //             showCancelButton: false,
+                    //             confirmButtonText: "确定",
+                    //             closeOnConfirm: false,
+                    //             closeOnCancel: false
+                    //         });
+                    //     }
+                    //     else {
+                    //         changeMap(url,geometry,9);
+                    //         regionParam = codeParam;
+                    //         // for (var i = 0; i < map.graphicsLayerIds.length; i++) {
+                    //         //     if ((map.getLayer(map.graphicsLayerIds[i])).name == "classGLayer") {
+                    //         //         var layer = map.getLayer(map.graphicsLayerIds[i]);
+                    //         //         map.removeLayer(layer);//清空所有graphics
+                    //         //         break;
+                    //         //     }
+                    //         // }
+                    //         refreshClassLyr(field,field_cn,table);
+                    //         if(indi.length !=0){
+                    //             refreshChartLyr(indi);
+                    //         }
+                    //         map.infoWindow.hide();
+                    //         map.setMapCursor("default");
+                    //         baseLayerURL = url;
+                    //     }
+                    // });
+                    break;
+                }
+            }
+            // return data;
+
+        },
+        error:function(){
+            alert("sorry!")
+        }
+    });
+}
+
 //根据后台传输回来的数据进行面状graphic的生成,并进行ClassLayer的添加
 function initClassLayer (classGraphics) {
     var graphicArray= new Array();
@@ -1138,7 +1167,7 @@ refreshChartLyr = function(indicators){
 function initClassInfoTemplate(attributes) {
     // var attrString = classIndex + ":" + attributes.data;
 
-    var attrString = '<p><strong>'+classIndex+' : </strong>' + attributes.data + '</p>';
+    var attrString = '<p><strong>'+tjPanel2.fieldsName[0]+' : </strong>' + attributes.data + '</p>';
     attrString += '<p><strong>分级级别 : </strong>' + attributes.rgn_class + '</p>';
     // attrString += '<p><strong>数据来源 : </strong>' + dataSource + '</p>';
     // classifyImg_url = "data:image/png;base64," + classLegend;

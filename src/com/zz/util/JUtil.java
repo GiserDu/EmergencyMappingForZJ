@@ -576,7 +576,7 @@ public class JUtil {
 	}
 
 
-	public static IndicatorData[] getIndicatorData_ZJ(String tableName,String[] fieldsName,String regionParam) {
+	public static IndicatorData[] getIndicatorData_ZJ(String tableName,String[] fieldsName,String regionParam, String spatialID, String year) {
 		//fieldsName 指标名称数组
 		;//数据库 表的名称 以及要查询的指标的名称
 		//返回fields 数组,对应的值数组
@@ -588,9 +588,10 @@ public class JUtil {
 				"FROM\n" +
 				"\tregion_info\n" +
 				"LEFT JOIN " + tableName +
-				" ON region_info.citycode=" + tableName + ".`code`" +
+				" ON region_info.citycode=" + tableName + ".`" + spatialID + "` " +
 				"WHERE" +
-				"\tregion_info.class =" + regionParam;
+				"\tregion_info.class =" + regionParam +
+				" AND " + tableName + ".`年份`= "+ year + " ORDER BY citycode";
 		ResultSet resultSet2;
 		MysqlAccessBean mysql = new MysqlAccessBean();
 		try {

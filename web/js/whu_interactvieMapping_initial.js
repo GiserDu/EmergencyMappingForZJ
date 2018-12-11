@@ -491,18 +491,30 @@ function doMap() {
                                                     var treeObj = $.fn.zTree.getZTreeObj("doMapTree");
                                                     treeObj.addNodes(treeNode, -1, newNode);
                                                 }
-
+                                                //统计图层所有参数
                                                 allTjLayerContent={
                                                     "name":tjLayerName,
                                                     "spatialdata":tjPanel1,
                                                     "statisticdata":tjPanel2,
                                                     "cartographydata":tjPanel3
                                                 }
-                                                console.log( allTjLayerContent);
+
 
                                                 // tjLayertest="layui-layer"+index;
                                                 // tjLayertest=$("#tjPanel").html();
+                                                var tjType;
+                                                switch (allTjLayerContent.cartographydata.type){
+                                                    case "1":
+                                                        tjType = "chartLayerData";
+                                                        break;
+                                                    case "2":
+                                                        tjType = "classLayerData";
+                                                        break;
+                                                }
+                                                allTjLayerContent = JSON.stringify(allTjLayerContent);
+                                                console.log( allTjLayerContent);
 
+                                                initTjLayer(allTjLayerContent, tjType);
                                                 layer.close(index);
                                                 layer.close(layerIndex);
                                             }
