@@ -610,7 +610,7 @@ public class JUtil {
 				//list转数组
 				String[] valueArray = fieldDatas.toArray(new String[fieldDatas.size()]);
 				//构建indicatorData
-				IndicatorData indicatorData = new IndicatorData(resultSet2.getString("code"),fieldsName, StringToDoule(valueArray));
+				IndicatorData indicatorData = new IndicatorData(resultSet2.getString("name"),fieldsName, StringToDoule(valueArray));
 				indicatorList.add(indicatorData);
 
 			}

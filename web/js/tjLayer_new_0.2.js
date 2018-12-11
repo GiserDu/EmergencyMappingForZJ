@@ -28,7 +28,7 @@ function opentjMenuLayer() {
         opentjPanel2();
         form.render();
 
-        symbolSizeSliderValue=0;symbolOpacitySliderValue=0;classNumSliderValue=0;
+        symbolSizeSliderValue=50; symbolOpacitySliderValue=0; classNumSliderValue=5;
 
         element.on('nav(navDemo)', function(elem){
             // console.log(elem);
@@ -774,7 +774,7 @@ function submitFields(){
     })
 }
 
-function initTjLayer(allTjLayerContent, tjType) {
+function initTjLayer(allTjLayerContent, tjType, regionParamVar) {
     var url = "./servlet/fileUploadServlet?allTjLayerContent=" + encodeURI(allTjLayerContent);
     console.log(tjType);
     $.ajax({
@@ -783,7 +783,7 @@ function initTjLayer(allTjLayerContent, tjType) {
         async:"false",
         dataType:"json",
         // data:{"inputType":"test"},
-        data:{"inputType": tjType},
+        data:{"inputType": tjType, "regionParam": regionParamVar},
         success: function (data) {
             console.log(url);
             if (data.type==="chartLayer"){
@@ -800,36 +800,30 @@ function initTjLayer(allTjLayerContent, tjType) {
             //ar dataSource = data.dataSource;
             // console.log(data.dataClassArray);
             var classGraphics = initClassLayer(data.classDataArray);
-            if (map.graphicsLayerIds.length == 0) {
-                //可以为graphicLayer添加mouse-over,click等事件;
-                //map.removeLayer(baseLayerHB);
-                var graphicLayer = new esri.layers.GraphicsLayer();
-                graphicLayer.name = "classGLayer";
-                //Graphic(geometry,symbol,attributes,infoTemplate)-->infoTemlate为弹出窗体,用以显示信息
-                for (var i=0;i<classGraphics.length;i++){
-                    graphicLayer.add(classGraphics[i]);
-                }
-                map.addLayer(graphicLayer);
-                graphicLayer.setOpacity(0.95);
-            }
-            else {
+            // if (map.graphicsLayerIds.length == 0) {
+            //     //可以为graphicLayer添加mouse-over,click等事件;
+            //     //map.removeLayer(baseLayerHB);
+            //     var graphicLayer = new esri.layers.GraphicsLayer();
+            //     graphicLayer.name = "classGLayer";
+            //     //Graphic(geometry,symbol,attributes,infoTemplate)-->infoTemlate为弹出窗体,用以显示信息
+            //     for (var i=0;i<classGraphics.length;i++){
+            //         graphicLayer.add(classGraphics[i]);
+            //     }
+            //     map.addLayer(graphicLayer);
+            //     graphicLayer.setOpacity(0.95);
+            // }
+            // else {
                 //map.removeLayer(baseLayerHB);
                 var flag = 0;
                 for (var i = 0; i < map.graphicsLayerIds.length; i++) {
-                    if ((map.getLayer(map.graphicsLayerIds[i])).name == "chartGLayer") {
-                        var layer = map.getLayer(map.graphicsLayerIds[i]);
-                        layer.clear();//清空所有graphics
-                        // map.removeLayer(layer);
-                        break;
-                    }
-                }
-                for (var i = 0; i < map.graphicsLayerIds.length; i++) {
-                    if ((map.getLayer(map.graphicsLayerIds[i])).name == "classGLayer") {
+                    console.log(tjLayerName);
+                    if ((map.getLayer(map.graphicsLayerIds[i])).id == tjLayerName) {
                         var layer = map.getLayer(map.graphicsLayerIds[i]);
                         layer.clear();//清空所有graphics
                         for (var i=0;i<classGraphics.length;i++){
                             layer.add(classGraphics[i]);
                         }
+                        layer.content = allTjLayerContent;
                         flag = 1;
                         layer.setOpacity(0.95);
                         break;
@@ -838,6 +832,8 @@ function initTjLayer(allTjLayerContent, tjType) {
                 if(flag==0){
                     var graphicLayer = new esri.layers.GraphicsLayer();
                     graphicLayer.name = "classGLayer";
+                    graphicLayer.id = tjLayerName;
+                    graphicLayer.content = allTjLayerContent;
                     //Graphic(geometry,symbol,attributes,infoTemplate)-->infoTemlate为弹出窗体,用以显示信息
                     for (var i=0;i<classGraphics.length;i++){
                         graphicLayer.add(classGraphics[i]);
@@ -847,8 +843,8 @@ function initTjLayer(allTjLayerContent, tjType) {
                 }
                 // map.removeLayer(baseLayerHB);
                 // graphicLayer.setOpacity(0.9);
-                refreshChartLyr(indi);
-            }
+                // refreshChartLyr(indi);
+            // }
 
             //添加鼠标响应事件
             var classLayer;
@@ -955,6 +951,17 @@ function initTjLayer(allTjLayerContent, tjType) {
             alert("sorry!")
         }
     });
+}
+
+function onZoomInLevel10(){
+    // var classLayer;
+    // for (var i = 0; i < map.graphicsLayerIds.length; i++){
+    //     if ((map.getLayer(map.graphicsLayerIds[i])).name == "classGLayer"){
+    //         regionParamVar = "2";
+    //         var thisLayerContent = map.graphicsLayerIds[i].content;
+    //         initTjLayer(thisLayerContent, "classLayerData")
+    //     }
+    // }
 }
 
 //根据后台传输回来的数据进行面状graphic的生成,并进行ClassLayer的添加
@@ -1398,19 +1405,19 @@ function doChartLayer(data){
     var graphics = new Array();
     graphics = initChartLayer(charts);
     // charts.forEach(alert);
-    if (map.graphicsLayerIds.length == 0) {
-        //可以为graphicLayer添加mouse-over,click等事件;
-        var graphicLayer = new esri.layers.GraphicsLayer();
-        graphicLayer.name = "chartGLayer";
-        //Graphic(geometry,symbol,attributes,infoTemplate)-->infoTemlate为弹出窗体,用以显示信息
-        for (var i=0;i<graphics.length;i++){
-            graphicLayer.add(graphics[i]);
-        }
-        map.addLayer(graphicLayer);
-    } else {
+    // if (map.graphicsLayerIds.length == 0) {
+    //     //可以为graphicLayer添加mouse-over,click等事件;
+    //     var graphicLayer = new esri.layers.GraphicsLayer();
+    //     graphicLayer.name = "chartGLayer";
+    //     //Graphic(geometry,symbol,attributes,infoTemplate)-->infoTemlate为弹出窗体,用以显示信息
+    //     for (var i=0;i<graphics.length;i++){
+    //         graphicLayer.add(graphics[i]);
+    //     }
+    //     map.addLayer(graphicLayer);
+    // } else {
         var flag = 0;// 用于判断是否有画图图层
         for (var i = 0; i < map.graphicsLayerIds.length; i++) {
-            if ((map.getLayer(map.graphicsLayerIds[i])).name == "chartGLayer") {
+            if ((map.getLayer(map.graphicsLayerIds[i])).id == tjLayerName) {
                 var layer = map.getLayer(map.graphicsLayerIds[i]);
                 layer.clear();//清空所有graphics
                 // dojo.disconnect(mouseMove);
@@ -1418,24 +1425,28 @@ function doChartLayer(data){
                 for (var i=0;i<graphics.length;i++){
                     layer.add(graphics[i]);
                 }
+                console.log(tjLayerName);
+                // layer.setId = tjLayerName;
                 flag = 0;
-            } else// 第一个不是chart图层
+            }
+            else// 第一个不是chart图层
             {
                 flag = 1;
             }
         }
-
+    //
         if (flag == 1)// 现有图层中没有画图图层
         {
             var graphicLayer = new esri.layers.GraphicsLayer();
             graphicLayer.name = "chartGLayer";
+            graphicLayer.id = tjLayerName;
             for (var i=0;i<graphics.length;i++){
                 graphicLayer.add(graphics[i]);
             }
             map.addLayer(graphicLayer);
         }
 
-    }
+    // }
     //添加鼠标响应事件
     //var chartLayer;
     for (var i = 0; i < map.graphicsLayerIds.length; i++) {

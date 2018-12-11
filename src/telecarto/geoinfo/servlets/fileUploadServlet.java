@@ -162,7 +162,7 @@ public class fileUploadServlet extends HttpServlet {
                     default:
                         System.out.println("其他");
                         MysqlAccessBean mysql = new MysqlAccessBean();
-                        String sql;
+                        String sql = "";
                         ResultSet resultSet2;
                         JSONObject dataJson = JSONObject.fromObject(request.getParameter("allTjLayerContent"));
                         JSONObject statisticdataJson=JSONObject.fromObject(dataJson.getJSONObject("statisticdata"));
@@ -174,7 +174,7 @@ public class fileUploadServlet extends HttpServlet {
                         fieldsNamesBuffer.delete(0, 2);
                         fieldsNamesBuffer.delete(fieldsNamesBuffer.length()-2, fieldsNamesBuffer.length());
                         System.out.println(fieldsNamesBuffer);
-                        String regionClass="1";
+//                        String regionClass="1";
                         String dataFieldName=fieldsNamesBuffer.toString();
                         String fieldNameCN=dataFieldName;
 
@@ -183,19 +183,32 @@ public class fileUploadServlet extends HttpServlet {
                         int breakNum = Integer.parseInt(cartographydataJson.getString("classNumSliderValue"));
                         String breakMethod=cartographydataJson.getString("modelName");
                         String ip="127.0.0";
+                        String regionParam = request.getParameter("regionParam");
 
                         String color = cartographydataJson.getString("colors");
                         String  colors[]= color.trim().split(";");
                         System.out.println(colors);
                         //根据输入行政等级class，确立
-                        sql="SELECT\n" +
-                                "\t*\n" +
-                                "FROM\n" +
-                                "\tregion_info\n" +
-                                "LEFT JOIN\t"+ classTableName +"\n" +
-                                "ON region_info.citycode="+ classTableName +".`"+ spatialId +"`\n" +
-                                "WHERE\n" +
-                                "\tregion_info.class = " + regionClass +" AND "+ classTableName +".`年份` LIKE '2016'";
+                        if (regionParam.equals("1")){
+                            sql="SELECT\n" +
+                                    "\tregion_info_reduce.citycode, region_info_reduce.name, region_info_reduce.x, region_info_reduce.y, region_info_reduce.json, " + classTableName + "." + dataFieldName +
+                                    "\tFROM\n" +
+                                    "\tregion_info_reduce\n" +
+                                    "LEFT JOIN\t"+ classTableName +"\n" +
+                                    "ON region_info_reduce.citycode="+ classTableName +".`"+ spatialId +"`\n" +
+                                    "WHERE\n" +
+                                    "\tregion_info_reduce.class = " + regionParam +" AND "+ classTableName +".`年份` LIKE '2016'";
+                        }
+                        else if (regionParam.equals("2")){
+                            sql="SELECT\n" +
+                                    "\tregion_info.coutcode, region_info.name, region_info.x, region_info.y, region_info.json, " + classTableName + "." + dataFieldName +
+                                    "\tFROM\n" +
+                                    "\tregion_info\n" +
+                                    "LEFT JOIN\t"+ classTableName +"\n" +
+                                    "ON region_info.coutcode="+ classTableName +".`"+ spatialId +"`\n" +
+                                    "WHERE\n" +
+                                    "\tregion_info.class = " + regionParam +" AND "+ classTableName +".`年份` LIKE '2016'";
+                        }
 
                         //sql_select = "LEFT JOIN "+ tableName +" t2 ON t1.RGN_CODE = t2.RGN_CODE WHERE t1.RGN_CODE LIKE '"+Param+"' AND t1.RGN_CODE!= '"+regionParam+"' AND t2.YEAR = '" + year + "'";
                         //sql_select = "LEFT JOIN "+ tableName +" t2 ON t1.RGN_CODE = t2.RGN_CODE WHERE t1.RGN_CLASS = '" + regionParam + "' AND t2.YEAR = '" + year + "'";
@@ -206,8 +219,8 @@ public class fileUploadServlet extends HttpServlet {
                             resultSet2 = mysql.query(sql);
                             ArrayList<ClassData> classList = new ArrayList<>();
                             while (resultSet2.next()) {
-                                ClassData classData = new ClassData(resultSet2.getString(1),resultSet2.getString(3),
-                                        resultSet2.getString(5),resultSet2.getString(6),resultSet2.getString(7),resultSet2.getString(dataFieldName));
+                                ClassData classData = new ClassData(resultSet2.getString(1),resultSet2.getString(2),
+                                        resultSet2.getString(3),resultSet2.getString(4),resultSet2.getString(5),resultSet2.getString(6));
                                 classList.add(classData);
                             }
                             double maxValue =  Double.parseDouble(classList.get(0).getData());
@@ -616,7 +629,7 @@ public class fileUploadServlet extends HttpServlet {
 //        int width=80;
 //        int height=80;
         int height= cartographydataJson.getInt("symbolSizeSliderValue");
-        String regionParam = "1";
+//        String regionParam = "1";
 
 //		String islabelString = request.getParameter("ISLABEL");
         // String islabelString = "false";
@@ -629,8 +642,8 @@ public class fileUploadServlet extends HttpServlet {
         String thematicData = tableName;
 
         //根据所选指标的数目进行不同的色彩配置(有几个指标配置几个色彩渐变)
-//        String colorRampSchema1 = cartographydataJson.getString("colorName");
-        String colorRampSchema1 = "青黄色系";
+        String colorRampSchema1 = cartographydataJson.getString("colorName");
+//        String colorRampSchema1 = "青黄色系";
 //		System.out.println(colorRampSchema1);
 //        String colorString="15538980;2498916;15855872";
         String colorString;
@@ -640,6 +653,7 @@ public class fileUploadServlet extends HttpServlet {
         for (int i = 0; i < fieldColors.length; i++) {
             fieldColors[i] = Integer.parseInt(colors[i]);
         }
+        String regionParam = request.getParameter("regionParam");
         String dataTabID = statisticdataJson.getString("tabId");
         String indiSource = "";
         switch (dataTabID){
