@@ -28,7 +28,7 @@ function opentjMenuLayer() {
         opentjPanel2();
         form.render();
 
-        symbolSizeSliderValue=0;symbolOpacitySliderValue=0;classNumSliderValue=0;
+        symbolSizeSliderValue=50;symbolOpacitySliderValue=0;classNumSliderValue=5;
 
         element.on('nav(navDemo)', function(elem){
             // console.log(elem);
@@ -104,8 +104,27 @@ function modifytjMenuLayer(symPara1,symPara2,symPara3,symPara4) {
             ,form=layui.form;
 
         opentjPanel2();
-        // form.render();
-        // displayFields(fieldslist,tjTableFielsds);
+        //获取select和checkbox
+        var select = $("input[class='layui-input layui-unselect']").val();
+        var checkboxes = $(fieldslist).find(".layui-form-checkbox.layui-form-checked");
+        var checkName = [];
+        $.each(checkboxes,function(index,item){
+            checkName.push($(item).find("span").html());
+        });
+        //重新渲染并赋值
+        form.render();
+        //方式一：保留dom
+        $("#spatialId"+tjPanel2.tabId).siblings("div.layui-form-select").find("dl").find("dd[lay-value="+select+"]").click();
+        $.each(checkName,function(index,item){
+            $("input[name="+item+"]").prop('checked', true);
+            $("input[name="+item+"]").next().addClass('layui-form-checked');
+        });
+        // //方式二：个别存值
+        // $("#spatialId"+tjPanel2.tabId).siblings("div.layui-form-select").find("dl").find("dd[lay-value="+ allTjLayerContent.statisticdata.spatialId+"]").click();
+        // $.each(allTjLayerContent.statisticdata.fieldsName,function(index,item){
+        //     $("input[name="+item+"]").prop('checked', true);
+        //     $("input[name="+item+"]").next().addClass('layui-form-checked');
+        // });
 
         // ======================
         listenOnSymbolTitleClick();
@@ -261,8 +280,10 @@ function constructTjJson3() {
     } else if(selectedIndexNum>1){
         // -----获得用户选择的有关统计符号的值-----
         var chartID = $("#chart-selected>.select_title>img").attr("src").slice(-10,-4);
-        var colors=[];
         var colorName= $("#color-solution>.select_title>img").attr("name");
+        var xoffset=$("input[ name='x-offset' ]").val();
+        var yoffset=$("input[ name='y-offset' ]").val();
+        var colors=[];
         // 获得所有颜色选择器
         var chartIndexColorpick=$(".userDefineColors").find('.chartColorPicker');
         for(var i=0;i<chartIndexColorpick.length;i++){
@@ -274,7 +295,9 @@ function constructTjJson3() {
             "colorName":colorName,
             "colors":colors,
             "symbolSizeSliderValue":symbolSizeSliderValue,
-            "symbolOpacitySliderValue":symbolOpacitySliderValue
+            "symbolOpacitySliderValue":symbolOpacitySliderValue,
+            "xoffset":xoffset,
+            "yoffset":yoffset
         }
     }
 
@@ -1591,7 +1614,7 @@ var originalTjLayerContent='<div class="tjPanel" id="tjPanel">\n' +
     '                                                </div>\n' +
     '                                            </div>\n' +
     '                                            <div class="layui-form-item">\n' +
-    '                                                    <label class="layui-form-label" style="width:unset;margin-left:10%">时间唯一标识</label>\n' +
+    '                                                    <label class="layui-form-label" style="width:unset;margin-left:20%">时间唯一标识</label>\n' +
     '                                                    <div class="layui-input-inline">\n' +
     '                                                        <select class="timeId" name="timeId" lay-filter="timeId"\n' +
     '                                                                id="timeId2">\n' +
@@ -1635,8 +1658,8 @@ var originalTjLayerContent='<div class="tjPanel" id="tjPanel">\n' +
     '                                                    <select class="spatialId" name="spatialId" lay-filter="spatialId" id="spatialId3"></select>\n' +
     '                                                </div>\n' +
     '                                            </div>\n' +
-    '                                            <div class="layui-form-item">\n' +
-    '                                                    <label class="layui-form-label" style="width:unset;margin-left:10%">时间唯一标识</label>\n' +
+    '                                            <div class="layui-form-item ">\n' +
+    '                                                    <label class="layui-form-label" style="width:unset;margin-left:20%">时间唯一标识</label>\n' +
     '                                                    <div class="layui-input-inline">\n' +
     '                                                        <select class="timeId" name="timeId" lay-filter="timeId"\n' +
     '                                                                id="timeId3">\n' +
@@ -1693,10 +1716,25 @@ var originalTjLayerContent='<div class="tjPanel" id="tjPanel">\n' +
     '                            <div id="symbolSize"></div>\n' +
     '                            <h6>透明度：</h6>\n' +
     '                            <div id="symbolOpacity1"></div>\n' +
+    '                            <h6 style="margin-top: 10px">偏移量：</h6>'+
+    '                            <div class="chartSymbolOffsetItem">' +
+    '                            <div class="layui-form-item offsetItem">\n' +
+    '                                 <label class="layui-form-label">X偏移量：</label>\n' +
+    '                                 <div class="layui-input-block">\n' +
+    '                                     <input type="text" name="x-offset"  id="xOffset" lay-verify="required"  autocomplete="off" class="layui-input" value="0">\n' +
+    '                                 </div>\n' +
+    '                            </div>\n' +
+    '                            <div class="layui-form-item offsetItem">\n' +
+    '                                <label class="layui-form-label">Y偏移量：</label>\n' +
+    '                                <div class="layui-input-block">\n' +
+    '                                     <input type="text" name="y-offset" id="yOffset" lay-verify="required"  autocomplete="off" class="layui-input" value="0">\n' +
+    '                               </div>\n' +
+    '                            </div>'+
+    '                            </div>'+
     '                        </div>\n' +
     '                    </div>\n' +
     '                    <div id="symbolBtn1" style="float:right">\n' +
-    '                        <button class="layui-btn tjInfoSubmit" ">确定</button>\n' +
+    '                        <button class="layui-btn tjInfoSubmit">确定</button>\n' +
     '                    </div>\n' +
     '                </div>\n' +
     '            </div>\n' +

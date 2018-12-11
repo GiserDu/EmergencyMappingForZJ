@@ -198,3 +198,19 @@ body .tjLayerContent .layui-layer-content{
     text-align: right;
 }
 
+.chartSymbolOffsetItem{
+    margin-left: -27px;
+}
+
+.offsetItem{
+    margin-bottom: 0px;
+    display: inline-block;
+    width: 45%;
+}
+
+.offsetItem label{
+    width: 45%;
+    line-height: 38px;
+    padding: 0px 15px;
+}
+
