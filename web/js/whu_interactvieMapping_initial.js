@@ -160,7 +160,7 @@ $(document).ready(function() {
             resize: false,
             area: ["600px","500px"],
             // btn: ['按钮1','按钮2','按钮3'],
-            content: 'indexMini.html',
+            content: 'indexMini_zj.html',
             success: function (layero, index) {
                 $("#layui-layer-iframe1").css("height",'456px');
             },
@@ -455,16 +455,17 @@ function doMap() {
                                 skin: "layui-layer-lan tjLayerContent",
                                 shade: 0,
                                 area: ['700px', '480px'],
-                                // area:['600px','370px'],
                                 // content: $('#tjPanel'),
                                 content:originalTjLayerContent,
                                 success: function(layero,index){
                                     //do something
                                     opentjMenuLayer();
+
+                                    // console.log(layero.find(".layui-layer-content").html());
                                     // var newNode={name:$("#newFLName").val(),url:$("#newFLAds").val()};
 
                                     $(".tjInfoSubmit").bind('click',function () {
-                                        var tjLayertest=$("#tjPanel").html();
+                                        var tjLayertest=layero.find(".layui-layer-content").html();
                                         constructTjJson3();
                                         var index=layer.open({
                                             type: 0,
@@ -486,7 +487,7 @@ function doMap() {
                                                 }
 
                                                 if (tjLayerName != "") {
-                                                    var newNode = {name: tjLayerName, url: "123", dom: tjLayertest};
+                                                    var newNode = {name: tjLayerName, url: "123", dom: tjLayertest, symbolInfo:tjPanel3, checked:true};
                                                     layerNodes[3].children.push(newNode);
                                                     var treeObj = $.fn.zTree.getZTreeObj("doMapTree");
                                                     treeObj.addNodes(treeNode, -1, newNode);
@@ -823,24 +824,41 @@ function doMap() {
                                 content:treeNode.dom,
                                 success: function(layero,index){
                                     //do something
-                                    modifytjMenuLayer();
+
+                                    console.log(treeNode.dom);
+
+                                    var type=treeNode.symbolInfo.type;
+                                    if(type=1){
+                                        var preSymbolSizeSliderValue=treeNode.symbolInfo.symbolSizeSliderValue;
+                                        var preSymbolOpacitySliderValue=treeNode.symbolInfo.symbolOpacitySliderValue;
+                                        // var sliderValues=[lastSymbolSizeSliderValue,lastSymbolOpacitySliderValue,0,0];
+                                        modifytjMenuLayer(preSymbolSizeSliderValue,preSymbolOpacitySliderValue,0,0);
+                                    }else if(type=2){
+                                        var preClassNumSliderValue=treeNode.symbolInfo.classNumSliderValue;
+                                        var preSymbolOpacitySliderValue=treeNode.symbolInfo.symbolOpacitySliderValue;
+                                        // var sliderValues=[0,0,preClassNumSliderValue,preSymbolOpacitySliderValue];
+                                        modifytjMenuLayer(0,0,preClassNumSliderValue,preSymbolOpacitySliderValue);
+                                    }
+
                                     // var newNode={name:$("#newFLName").val(),url:$("#newFLAds").val()};
 
+
                                     $(".tjInfoSubmit").bind('click',function () {
+                                        var tjLayertest=layero.find(".layui-layer-content").html();
+                                        // console.log(tjLayertest);
                                         constructTjJson3();
                                         var index=layer.open({
                                             type: 0,
-                                            title:"统计图层名称",
+                                            title:"修改图层名称",
                                             skin:"layui-layer-lan",
                                             content:' <div style="margin-left:-24px">\n' +
                                             '             <label class="layui-form-label">图层名</label>\n' +
                                             '             <div class="layui-input-block" style="margin-left: 88px">\n' +
-                                            '                  <input type="text" id="newSLName" name="tjLayerName" lay-verify="required" placeholder="请输入统计图层名称" autocomplete="off" class="layui-input">\n' +
+                                            '                  <input type="text" id="newSLName" name="tjLayerName" lay-verify="required" placeholder="请输入统计图层名称" autocomplete="off" class="layui-input" value="'+treeNode.name+'">\n' +
                                             '             </div>\n' +
                                             '          </div>',
                                             yes:function (index,layero) {
-                                                console.log("OK");
-
+                                                console.log("OK2");
                                                 var tjLayerName=$("input[ name='tjLayerName' ]").val();
 
                                                 if(tjLayerName==""){
@@ -849,7 +867,10 @@ function doMap() {
 
                                                 if (tjLayerName != "") {
                                                     treeNode.name = tjLayerName;
-                                                    treeNode.checked=false;
+                                                    treeNode.checked=true;
+                                                    treeNode.dom=tjLayertest;
+                                                    treeNode.symbolInfo=tjPanel3;
+
                                                     var treeObj = $.fn.zTree.getZTreeObj("doMapTree");
                                                     treeObj.updateNode(treeNode);
                                                 }
@@ -2463,7 +2484,7 @@ $("#templateMap").click(function () {
             resize: false,
             area: ["600px","500px"],
             // btn: ['按钮1','按钮2','按钮3'],
-            content: 'indexMini.html',
+            content: 'indexMini_zj.html',
             yes: function(index, layero) {//确定后执行回调
 
             }

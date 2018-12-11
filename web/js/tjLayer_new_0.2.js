@@ -28,9 +28,10 @@ function opentjMenuLayer() {
         opentjPanel2();
         form.render();
 
+        symbolSizeSliderValue=0;symbolOpacitySliderValue=0;classNumSliderValue=0;
 
         element.on('nav(navDemo)', function(elem){
-            console.log(elem);
+            // console.log(elem);
             var leftMenuName=elem.attr('name');
             var selectedIndexNum;
 
@@ -96,14 +97,15 @@ function opentjMenuLayer() {
 }
 
 // 当用户修改时弹出的面板
-function modifytjMenuLayer(sliedersValues) {
+function modifytjMenuLayer(symPara1,symPara2,symPara3,symPara4) {
     layui.use(['layer','form','element'],function () {
         var layer = layui.layer
             ,element = layui.element
             ,form=layui.form;
 
-        // opentjPanel2();
+        opentjPanel2();
         // form.render();
+        // displayFields(fieldslist,tjTableFielsds);
 
         // ======================
         listenOnSymbolTitleClick();
@@ -111,11 +113,11 @@ function modifytjMenuLayer(sliedersValues) {
         userDefineChartColor();
         // ==========================
 
-        var slidersValues=[1,2,3,4];
-        setSlidersValue(slidersValues[0],slidersValues[1],slidersValues[2],slidersValues[3]);
+        // var slidersValues=[1,2,3,4];
+        setSlidersValue(symPara1,symPara2,symPara3,symPara4);
 
         element.on('nav(navDemo)', function(elem){
-            console.log(elem);
+            // console.log(elem);
             var leftMenuName=elem.attr('name');
             var selectedIndexNum;
 
@@ -125,6 +127,7 @@ function modifytjMenuLayer(sliedersValues) {
                 $("#tjPanel-content2").show();
                 $("#tjPanel-content3").hide();
                 $("#tjPanel-content4").hide();
+                // opentjPanel2();
 
 
             } else if(leftMenuName=="selectMappingTemplate") {
@@ -153,8 +156,8 @@ function modifytjMenuLayer(sliedersValues) {
 
                     // initTjGraduatedSymbol();
                     // renderSlider();
-                    setSlidersValue(symbolSizeSliderValue,symbolOpacitySliderValue,symbolOpacitySliderValue,classNumSliderValue);
-                    form.render();
+                    // setSlidersValue(symbolSizeSliderValue,symbolOpacitySliderValue,symbolOpacitySliderValue,classNumSliderValue);
+                    // form.render();
 
                     // clickAndLoadAllInfo();
 
@@ -174,7 +177,7 @@ function modifytjMenuLayer(sliedersValues) {
 
                     // initTjChartSymbol();
                     // renderSlider();
-                    setSlidersValue(symbolSizeSliderValue,symbolOpacitySliderValue,symbolOpacitySliderValue,classNumSliderValue);
+                    // setSlidersValue(symbolSizeSliderValue,symbolOpacitySliderValue,symbolOpacitySliderValue,classNumSliderValue);
                     form.render();
                     userDefineChartColor();
                     // clickAndLoadAllInfo();
@@ -265,6 +268,7 @@ function constructTjJson3() {
         // -----获得用户选择的有关统计符号的值-----
         var chartID = $("#chart-selected>.select_title>img").attr("src").slice(-10,-4);
         var colors=[];
+        var colorName= $("#color-solution>.select_title>img").attr("name");
         // 获得所有颜色选择器
         var chartIndexColorpick=$(".userDefineColors").find('.chartColorPicker');
         for(var i=0;i<chartIndexColorpick.length;i++){
@@ -273,6 +277,7 @@ function constructTjJson3() {
         tjPanel3={
             "type":"1",
             "chartID":chartID,
+            "colorName":colorName,
             "colors":colors,
             "symbolSizeSliderValue":symbolSizeSliderValue,
             "symbolOpacitySliderValue":symbolOpacitySliderValue
@@ -382,10 +387,10 @@ function userDefineChartColor() {
     }
     // var defaultColorTable=['#ED1B24','#262164','#F2F101','#21B24B','#92278F','#F18C24','#FFE375','#ABE94A','#FBA723','#D8350C'];
     var selectedStatisticIndex=tjPanel2.fieldsName;
-    var length=0;
-    for(var a in selectedStatisticIndex){
-        length++;
-    }
+    // var length=0;
+    // for(var a in selectedStatisticIndex){
+    //     length++;
+    // }
     // console.log(length);
 
     layui.use('colorpicker',function () {
@@ -395,7 +400,7 @@ function userDefineChartColor() {
 
         $('.userDefineColors').empty();
 
-        for(var i=0;i<length;i++){
+        for(var i=0;i<selectedStatisticIndex.length;i++){
             // 根据用户选中的指标数量动态生成颜色选择器
 
             var indexColorDiv= '<div class=" chartColorPickerDIV"><label class="selectedStaIndexsLabel">'+selectedStatisticIndex[i+1]+'</label>'+
@@ -572,10 +577,19 @@ function getColorbar(customNum,colorLow,colorHigh){
 
 //打开第二个页面
 function opentjPanel2(){
-    layui.use(['element'], function(){
-        var element = layui.element;
-        getTableTree();
-        submitFields();
+    layui.use(['element','form'], function(){
+
+        var element = layui.element
+            ,form=layui.form;
+        if(tjPanel2.tabId==1){
+            getTableTree();
+            submitFields();
+        }else if(tjPanel2.tabId==2){
+            OtherDatabase();
+            tjPanel2.tableName = "";
+        }else if(tjPanel2.tabId==3){
+            EXCELupload();
+        }
         element.on('tab(nav2)', function(data){
             //console.log(this); //当前Tab标题所在的原始DOM元素
             //console.log(data.index); //得到当前Tab的所在下标
@@ -737,19 +751,21 @@ function submitFields(){
         var form = layui.form;
         form.on('submit(fields)', function (data) {
             //console.log(data.field.database);
-            layer.alert(JSON.stringify(data.field), {
-                title: '最终的提交信息'
-            });
+            // layer.alert(JSON.stringify(data.field), {
+            //     title: '最终的提交信息'
+            // });
             tjPanel2.fieldsName = [];
             tjPanel2.fieldsNum = 0;
             $.each(data.field, function(index,item){
                 //console.log(index,item);
-                if(tjPanel2.fieldsNum!=0){
-                    tjPanel2.fieldsName.push(item);
-                }
+                if(tjPanel2.fieldsNum==0){
+
+                }else if(tjPanel2.fieldsNum==1){
+
+                }else {tjPanel2.fieldsName.push(item);}
                 tjPanel2.fieldsNum++
             });
-            tjPanel2.fieldsNum = tjPanel2.fieldsNum - 1;
+            tjPanel2.fieldsNum = tjPanel2.fieldsNum - 2;
 
             console.log(tjPanel2);
             $("#selectMappingTemplate").click();
@@ -1560,6 +1576,18 @@ var originalTjLayerContent='<div class="tjPanel" id="tjPanel">\n' +
     '                                                        <select class="spatialId" name="spatialId" lay-filter="spatialId" id="spatialId1"></select>\n' +
     '                                                    </div>\n' +
     '                                                </div>\n' +
+    '                                                <div class="layui-form-item">\n' +
+    '                                                    <label class="layui-form-label" style="width:unset;margin-left:10%">时间唯一标识</label>\n' +
+    '                                                    <div class="layui-input-inline">\n' +
+    '                                                        <select class="timeId" name="timeId" lay-filter="timeId"\n' +
+    '                                                                id="timeId1">\n' +
+    '                                                            <option value="Year">Year</option>\n' +
+    '                                                            <option value="2015">2015</option>\n' +
+    '                                                            <option value="2016">2016</option>\n' +
+    '                                                            <option value="2017">2017</option>\n' +
+    '                                                        </select>\n' +
+    '                                                    </div>\n' +
+    '                                                </div>'+
     '                                                <div class="layui-form-item" id="fieldslist1"></div>\n' +
     '                                                <div class="layui-form-item">\n' +
     '                                                    <button class="layui-btn" lay-submit="" lay-filter="fields">下一步</button>\n' +
@@ -1591,6 +1619,18 @@ var originalTjLayerContent='<div class="tjPanel" id="tjPanel">\n' +
     '                                                    <select class="spatialId" name="spatialId" lay-filter="spatialId" id="spatialId2"></select>\n' +
     '                                                </div>\n' +
     '                                            </div>\n' +
+    '                                            <div class="layui-form-item">\n' +
+    '                                                    <label class="layui-form-label" style="width:unset;margin-left:10%">时间唯一标识</label>\n' +
+    '                                                    <div class="layui-input-inline">\n' +
+    '                                                        <select class="timeId" name="timeId" lay-filter="timeId"\n' +
+    '                                                                id="timeId2">\n' +
+    '                                                            <option value="Year">Year</option>\n' +
+    '                                                            <option value="2015">2015</option>\n' +
+    '                                                            <option value="2016">2016</option>\n' +
+    '                                                            <option value="2017">2017</option>\n' +
+    '                                                        </select>\n' +
+    '                                                    </div>\n' +
+    '                                                </div>'+
     '                                            <div class="layui-form-item" id="fieldslist2"></div>\n' +
     '                                            <div class="layui-form-item">\n' +
     '                                                <button class="layui-btn" lay-submit="" lay-filter="fields">下一步</button>\n' +
@@ -1624,6 +1664,18 @@ var originalTjLayerContent='<div class="tjPanel" id="tjPanel">\n' +
     '                                                    <select class="spatialId" name="spatialId" lay-filter="spatialId" id="spatialId3"></select>\n' +
     '                                                </div>\n' +
     '                                            </div>\n' +
+    '                                            <div class="layui-form-item">\n' +
+    '                                                    <label class="layui-form-label" style="width:unset;margin-left:10%">时间唯一标识</label>\n' +
+    '                                                    <div class="layui-input-inline">\n' +
+    '                                                        <select class="timeId" name="timeId" lay-filter="timeId"\n' +
+    '                                                                id="timeId3">\n' +
+    '                                                            <option value="Year">Year</option>\n' +
+    '                                                            <option value="2015">2015</option>\n' +
+    '                                                            <option value="2016">2016</option>\n' +
+    '                                                            <option value="2017">2017</option>\n' +
+    '                                                        </select>\n' +
+    '                                                    </div>\n' +
+    '                                                </div>'+
     '                                            <div class="layui-form-item" id="fieldslist3"></div>\n' +
     '                                            <div class="layui-form-item">\n' +
     '                                                <button class="layui-btn" lay-submit="" lay-filter="fields">下一步</button>\n' +
