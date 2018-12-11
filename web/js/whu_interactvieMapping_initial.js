@@ -816,18 +816,20 @@ function doMap() {
 
                                     // console.log(treeNode.dom);
 
-                                    var type=parseInt(treeNode.symbolInfo.type);
-                                    if(type==1){
-                                        var preSymbolSizeSliderValue=treeNode.symbolInfo.symbolSizeSliderValue;
-                                        var preSymbolOpacitySliderValue=treeNode.symbolInfo.symbolOpacitySliderValue;
-                                        // var sliderValues=[lastSymbolSizeSliderValue,lastSymbolOpacitySliderValue,0,0];
-                                        modifytjMenuLayer(preSymbolSizeSliderValue,preSymbolOpacitySliderValue,0,0);
-                                    }else if(type==2){
-                                        var preClassNumSliderValue=treeNode.symbolInfo.classNumSliderValue;
-                                        var preSymbolOpacitySliderValue=treeNode.symbolInfo.symbolOpacitySliderValue;
-                                        // var sliderValues=[0,0,preClassNumSliderValue,preSymbolOpacitySliderValue];
-                                        modifytjMenuLayer(0,0,preSymbolOpacitySliderValue,preClassNumSliderValue);
-                                    }
+                                    modifytjMenuLayer(treeNode.symbolInfo);
+
+                                    // var type=parseInt(treeNode.symbolInfo.type);
+                                    // if(type==1){
+                                    //     var preSymbolSizeSliderValue=treeNode.symbolInfo.symbolSizeSliderValue;
+                                    //     var preSymbolOpacitySliderValue=treeNode.symbolInfo.symbolOpacitySliderValue;
+                                    //     // var sliderValues=[lastSymbolSizeSliderValue,lastSymbolOpacitySliderValue,0,0];
+                                    //     modifytjMenuLayer(preSymbolSizeSliderValue,preSymbolOpacitySliderValue,0,0);
+                                    // }else if(type==2){
+                                    //     var preClassNumSliderValue=treeNode.symbolInfo.classNumSliderValue;
+                                    //     var preSymbolOpacitySliderValue=treeNode.symbolInfo.symbolOpacitySliderValue;
+                                    //     // var sliderValues=[0,0,preClassNumSliderValue,preSymbolOpacitySliderValue];
+                                    //     modifytjMenuLayer(0,0,preSymbolOpacitySliderValue,preClassNumSliderValue);
+                                    // }
 
                                     // var newNode={name:$("#newFLName").val(),url:$("#newFLAds").val()};
 

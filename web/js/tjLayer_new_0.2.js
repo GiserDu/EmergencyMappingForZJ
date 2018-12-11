@@ -97,13 +97,30 @@ function opentjMenuLayer() {
 }
 
 // 当用户修改时弹出的面板
-function modifytjMenuLayer(symPara1,symPara2,symPara3,symPara4) {
+function modifytjMenuLayer(symbolInfo) {
+
+    var symPara1=0,
+        symPara2=0,
+        symPara3=0,
+        symPara4=0;
+
+    var type=parseInt(symbolInfo.type);
+    if(type==1){
+        symPara1=symbolInfo.symbolSizeSliderValue;
+        symPara2=symbolInfo.symbolOpacitySliderValue;
+    }else if(type==2){
+        symPara3=symbolInfo.symbolOpacitySliderValue;
+        symPara4=symbolInfo.classNumSliderValue;
+    }
+
     layui.use(['layer','form','element'],function () {
         var layer = layui.layer
             ,element = layui.element
             ,form=layui.form;
 
         opentjPanel2();
+
+        //复原第二个面板
         //获取select和checkbox
         var select = $("input[class='layui-input layui-unselect']").val();
         var checkboxes = $(fieldslist).find(".layui-form-checkbox.layui-form-checked");
@@ -126,6 +143,15 @@ function modifytjMenuLayer(symPara1,symPara2,symPara3,symPara4) {
         //     $("input[name="+item+"]").next().addClass('layui-form-checked');
         // });
 
+        // 复原第三个面板
+        // 获取分级模型的select
+        var selectedModelName=symbolInfo.modelName;
+        $("#model").siblings("div.layui-form-select").find("dl").find("dd[lay-value="+selectedModelName+"]").click();
+        var isColorInverse=symbolInfo.isColorInverse;
+        if(isColorInverse){
+            $('#isColorInverse').prop('checked', true);
+            $('#isColorInverse').next().addClass('layui-form-checked');
+        }
         // ======================
         listenOnSymbolTitleClick();
 
@@ -274,6 +300,7 @@ function constructTjJson3() {
             "type":"2",
             "classNumSliderValue":classNumSliderValue,
             "colors":colors,
+            "isColorInverse":isChecked,
             "modelName":modelName,
             "symbolOpacitySliderValue":symbolOpacitySliderValue
         }
