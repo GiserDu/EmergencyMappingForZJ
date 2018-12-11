@@ -28,7 +28,7 @@ function opentjMenuLayer() {
         opentjPanel2();
         form.render();
 
-        symbolSizeSliderValue=50; symbolOpacitySliderValue=0; classNumSliderValue=5;
+        symbolSizeSliderValue=50;symbolOpacitySliderValue=0;classNumSliderValue=5;
 
         element.on('nav(navDemo)', function(elem){
             // console.log(elem);
