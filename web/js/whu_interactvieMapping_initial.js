@@ -32,7 +32,7 @@ var textEditFlag = 0; //标识对服务地址要素图层编辑时的一种特�
 var layerNodes =[
     {id:1, pId:0, name:"地理底图", open:true, "nocheck":true,children:[
             {id:102, name:"矢量图",url:"http://t0.tianditu.cn/vec_w/wmts?SERVICE=WMTS&REQUEST=GetTile&VERSION=1.0.0&LAYER=vec&STYLE=default&TILEMATRIXSET=w&FORMAT=tiles&TILECOL=${col}&TILEROW=${row}&TILEMATRIX=${level},http://t2.tianditu.cn/cva_w/wmts?SERVICE=WMTS&REQUEST=GetTile&VERSION=1.0.0&LAYER=cva&STYLE=default&TILEMATRIXSET=w&FORMAT=tiles&TILECOL=${col}&TILEROW=${row}&TILEMATRIX=${level}",mapType:"WebTiledLayer",checked:true},
-            {id:102, name:"影像图",url:"http://t6.tianditu.gov.cn/DataServer?T=img_w&x=${col}&y=${row}&l=${level},http://t2.tianditu.cn/cva_w/wmts?SERVICE=WMTS&REQUEST=GetTile&VERSION=1.0.0&LAYER=cva&STYLE=default&TILEMATRIXSET=w&FORMAT=tiles&TILECOL=${col}&TILEROW=${row}&TILEMATRIX=${level}",mapType:"WebTiledLayer"},
+            {id:102, name:"影像图",url:"http://t6.tianditu.gov.cn/DataServer?T=img_w&x=${col}&y=${row}&l=${level},http://t3.tianditu.gov.cn/DataServer?T=ibo_w&x=${col}&y=${row}&l=${level},http://t2.tianditu.cn/cia_w/wmts?SERVICE=WMTS&REQUEST=GetTile&VERSION=1.0.0&LAYER=cia&STYLE=default&TILEMATRIXSET=w&FORMAT=tiles&TILECOL=${col}&TILEROW=${row}&TILEMATRIX=${level}",mapType:"WebTiledLayer"},
                /*{id:101,name:"新疆矢量图",url:"http://106.124.138.198:8080/OneMapServer/rest/services/XJ_VECTOR/MapServer,http://106.124.138.198:8080/OneMapServer/rest/services/XJ_POI/MapServer",checked:true}*/
           // {id:101, name:"专项矢量图",url:"http://qk.casm.ac.cn:9090/geowinmap/ds?serviceproviderid=map.cachedtms&serviceid=gettile&tilename=map&y=${row}&x=${col}&z=${level}",mapType:"WebTiledLayer"},
             //{id:102, name:"专项影像图",url:"http://qk.casm.ac.cn:9090/geowinmap/ds?serviceproviderid=map.cachedtms&serviceid=gettile&tilename=sate&y=${row}&x=${col}&z=${level}",mapType:"WebTiledLayer"}
@@ -93,8 +93,9 @@ $(document).ready(function() {
         require(["esri/layers/TileInfo","esri/map","esri/config","esri/layers/WebTiledLayer","esri/layers/ArcGISDynamicMapServiceLayer","esri/layers/ArcGISTiledMapServiceLayer","esri/layers/GraphicsLayer"],function (TileInfo,Map,config,WebTiledLayer,ArcGISDynamicMapServiceLayer,ArcGISTiledMapServiceLayer,GraphicsLayer) {
             map = new Map("mapContainer", {
                 //basemap:"dark-gray-vector",
+                logo:false,
                 center: [104,35],
-                zoom: 5
+                zoom: 7
             });
 
                /* //配置代理
@@ -131,7 +132,7 @@ $(document).ready(function() {
                     spatialReference: {
                         wkid: 4326
                     }
-                }), 6)
+                }), 8)
             });
 
            //baseMap=new ArcGISTiledMapServiceLayer("http://106.124.138.198:8080/OneMapServer/rest/services/XJ_VECTOR/MapServer");

@@ -158,7 +158,8 @@ function printResult(renderer) {
 	}
 }
 
-function printError() {
+function printError(e) {
+	console.log(e.error);
 	$("#loading").css("display","none");
 	swal({
 		title: "输出失败",
