@@ -20,6 +20,7 @@ import sun.awt.SunHints;
 import sun.misc.BASE64Encoder;
 import telecarto.data.util.ReadGeojson;
 import telecarto.geoinfo.db.MysqlAccessBean;
+import telecarto.data.util.ColorUtil;
 
 import javax.imageio.ImageIO;
 import javax.servlet.ServletException;
@@ -97,9 +98,55 @@ public class fileUploadServlet extends HttpServlet {
                     case "localDatabase":
                         System.out.println(inputType);
                         message.put("dataType","正常表单数据");
-                        String dataEx="[{name: '表格1'},{name: '表格2'},{name: '表格3'}]";
+                        MysqlAccessBean mysql1 = new MysqlAccessBean();
+                        //查询本地数据库中的表名
+                        String sql1 = "SELECT TABLE_NAME FROM information_schema.views WHERE TABLE_SCHEMA LIKE 'zj_mapping'";
+                        StringBuffer dataEx1 = new StringBuffer();
+                        try{
+                            ResultSet resultSet3 = mysql1.query(sql1);
 
+                            while (resultSet3.next()){
+                                dataEx1.append("{name: '"+resultSet3.getString(1)+"'},");
+                            }
+                            dataEx1.deleteCharAt(dataEx1.length()-1);
+                            dataEx1.insert(0, "[");
+                            dataEx1.insert(dataEx1.length(), "]");
+
+                        }
+                        catch (Exception e) {
+                            e.printStackTrace();
+                        }
+                        finally {
+                            mysql1.close();
+                        }
+//                        String dataEx2="[{name: '表格1'},{name: '表格2'},{name: '表格3'}]";
+                        String dataEx = dataEx1.toString();
                         message.put("dataEx",dataEx);
+                        break;
+                    case "column":
+                        String tableName = request.getParameter("tableName");
+                        MysqlAccessBean mysql2 = new MysqlAccessBean();
+                        String sql2 = "select COLUMN_NAME from information_schema.COLUMNS WHERE TABLE_NAME LIKE '" + tableName + "' AND COLUMN_NAME NOT LIKE '年份'";
+                        StringBuffer colomnName1 = new StringBuffer();
+                        try{
+                            ResultSet resultSet4 = mysql2.query(sql2);
+                            int i = 0;
+                            while (resultSet4.next()){
+                                colomnName1.append("\"" + i + "\": \"" + resultSet4.getString(1) + "\",");
+                                i++;
+                            }
+                            colomnName1.deleteCharAt(colomnName1.length()-1);
+                            colomnName1.insert(0, "{");
+                            colomnName1.insert(colomnName1.length(), "}");
+                            String colomnName = colomnName1.toString();
+                            message.put("tableField", colomnName);
+                        }
+                        catch (Exception e) {
+                            e.printStackTrace();
+                        }
+                        finally {
+                            mysql2.close();
+                        }
                         break;
                     case "APIData":
                         String apiUrl = request.getParameter("apiUrl");
@@ -115,24 +162,53 @@ public class fileUploadServlet extends HttpServlet {
                     default:
                         System.out.println("其他");
                         MysqlAccessBean mysql = new MysqlAccessBean();
-                        String sql;
+                        String sql = "";
                         ResultSet resultSet2;
-                        String regionClass="1";
-                        String dataFieldName="总人口数（万）";
-                        String fieldNameCN="总人口数（万）";
-                        int breakNum=5;
-                        String breakMethod="界限等分模型";
+                        JSONObject dataJson = JSONObject.fromObject(request.getParameter("allTjLayerContent"));
+                        JSONObject statisticdataJson=JSONObject.fromObject(dataJson.getJSONObject("statisticdata"));
+                        String classTableName = statisticdataJson.getString("tableName");
+                        String spatialId = statisticdataJson.getString("spatialId");
+                        JSONArray fieldsNameArray=statisticdataJson.getJSONArray("fieldsName");
+                        String fieldsNames=statisticdataJson.getString("fieldsName");
+                        StringBuffer fieldsNamesBuffer = new StringBuffer(fieldsNames);
+                        fieldsNamesBuffer.delete(0, 2);
+                        fieldsNamesBuffer.delete(fieldsNamesBuffer.length()-2, fieldsNamesBuffer.length());
+                        System.out.println(fieldsNamesBuffer);
+//                        String regionClass="1";
+                        String dataFieldName=fieldsNamesBuffer.toString();
+                        String fieldNameCN=dataFieldName;
+
+                        JSONObject cartographydataJson=JSONObject.fromObject(dataJson.getJSONObject("cartographydata"));
+
+                        int breakNum = Integer.parseInt(cartographydataJson.getString("classNumSliderValue"));
+                        String breakMethod=cartographydataJson.getString("modelName");
                         String ip="127.0.0";
-                        String  colors[]= {"rgb(20,0,0)","rgb(60,0,0)","rgb(100,0,0)","rgb(140,0,0)","rgb(180,0,0)"};
+                        String regionParam = request.getParameter("regionParam");
+
+                        String color = cartographydataJson.getString("colors");
+                        String  colors[]= color.trim().split(";");
+                        System.out.println(colors);
                         //根据输入行政等级class，确立
-                        sql="SELECT\n" +
-                                "\t*\n" +
-                                "FROM\n" +
-                                "\tregion_info\n" +
-                                "LEFT JOIN\tpopulation\n" +
-                                "ON region_info.citycode=population.`code`\n" +
-                                "WHERE\n" +
-                                "\tregion_info.class = " + regionClass;
+                        if (regionParam.equals("1")){
+                            sql="SELECT\n" +
+                                    "\tregion_info_reduce.citycode, region_info_reduce.name, region_info_reduce.x, region_info_reduce.y, region_info_reduce.json, " + classTableName + "." + dataFieldName +
+                                    "\tFROM\n" +
+                                    "\tregion_info_reduce\n" +
+                                    "LEFT JOIN\t"+ classTableName +"\n" +
+                                    "ON region_info_reduce.citycode="+ classTableName +".`"+ spatialId +"`\n" +
+                                    "WHERE\n" +
+                                    "\tregion_info_reduce.class = " + regionParam +" AND "+ classTableName +".`年份` LIKE '2016'";
+                        }
+                        else if (regionParam.equals("2")){
+                            sql="SELECT\n" +
+                                    "\tregion_info.coutcode, region_info.name, region_info.x, region_info.y, region_info.json, " + classTableName + "." + dataFieldName +
+                                    "\tFROM\n" +
+                                    "\tregion_info\n" +
+                                    "LEFT JOIN\t"+ classTableName +"\n" +
+                                    "ON region_info.coutcode="+ classTableName +".`"+ spatialId +"`\n" +
+                                    "WHERE\n" +
+                                    "\tregion_info.class = " + regionParam +" AND "+ classTableName +".`年份` LIKE '2016'";
+                        }
 
                         //sql_select = "LEFT JOIN "+ tableName +" t2 ON t1.RGN_CODE = t2.RGN_CODE WHERE t1.RGN_CODE LIKE '"+Param+"' AND t1.RGN_CODE!= '"+regionParam+"' AND t2.YEAR = '" + year + "'";
                         //sql_select = "LEFT JOIN "+ tableName +" t2 ON t1.RGN_CODE = t2.RGN_CODE WHERE t1.RGN_CLASS = '" + regionParam + "' AND t2.YEAR = '" + year + "'";
@@ -143,8 +219,8 @@ public class fileUploadServlet extends HttpServlet {
                             resultSet2 = mysql.query(sql);
                             ArrayList<ClassData> classList = new ArrayList<>();
                             while (resultSet2.next()) {
-                                ClassData classData = new ClassData(resultSet2.getString(1),resultSet2.getString(3),
-                                        resultSet2.getString(5),resultSet2.getString(6),resultSet2.getString(7),resultSet2.getString(dataFieldName));
+                                ClassData classData = new ClassData(resultSet2.getString(1),resultSet2.getString(2),
+                                        resultSet2.getString(3),resultSet2.getString(4),resultSet2.getString(5),resultSet2.getString(6));
                                 classList.add(classData);
                             }
                             double maxValue =  Double.parseDouble(classList.get(0).getData());
@@ -232,6 +308,7 @@ public class fileUploadServlet extends HttpServlet {
                             //图例图片转码为base64
                             BASE64Encoder encoderLegend = new sun.misc.BASE64Encoder();
                             ByteArrayOutputStream baosLegend = new ByteArrayOutputStream();
+                            ImageIO.setUseCache(false);
                             ImageIO.write(image, "png", baosLegend);
                             byte[] bytesLegend = baosLegend.toByteArray();
                             String imgStreamLegend = encoderLegend.encodeBuffer(bytesLegend).trim();
@@ -513,12 +590,16 @@ public class fileUploadServlet extends HttpServlet {
 
 
         //获得统计数据各指标
-        //JSONObject statisticdataJson=JSONObject.fromObject(request.getParameter("statisticdata"));//空间数据json对象
-        JSONObject statisticdataJson=JSONObject.fromObject(statisticJson);
+        JSONObject dataJson = JSONObject.fromObject(request.getParameter("allTjLayerContent"));
+        JSONObject statisticdataJson=JSONObject.fromObject(dataJson.getJSONObject("statisticdata"));
+        System.out.println(statisticdataJson);
+//        JSONObject statisticdataJson=JSONObject.fromObject(statisticJson);
         String tabID_statisticdata=statisticdataJson.getString("tabId");    //空间数据来源标识ID，1-行政区划，2-上传shp
         String dataAddress=statisticdataJson.getString("dataAddress");
         String tableName=statisticdataJson.getString("tableName");
         String spatialId=statisticdataJson.getString("spatialId");
+//        String year = statisticdataJson.getString("year"); //根据实际情况修改
+        String year = "2016";
         JSONArray fieldsNameArray=statisticdataJson.getJSONArray("fieldsName");
         String fieldsNames=statisticdataJson.getString("fieldsName");
         String[] fieldsName=new String[fieldsNameArray.size()];
@@ -530,10 +611,13 @@ public class fileUploadServlet extends HttpServlet {
         int fieldsNum=statisticdataJson.getInt("fieldsNum");
 
         //获得画图数据各指标
-//        JSONObject cartographydataJson= JSONObject.fromObject(request.getParameter("cartographydata"));
+        JSONObject cartographydataJson=JSONObject.fromObject(dataJson.getJSONObject("cartographydata"));
+        System.out.println(cartographydataJson);
 //        String type=cartographydataJson.getString("cartographydataJson");
-        //String chartID=cartographydataJson.getString("chartID");
-        String chartID="10101";
+        String chartID0=cartographydataJson.getString("chartID");
+        String chartID = chartID0.substring(1, 6);
+        System.out.println(chartID);
+//        String chartID="10101";
 //        JSONArray colorArray=cartographydataJson.getJSONArray("colors");
 //        int symbolSize=cartographydataJson.getInt("symbolSizeSliderValue");
         String tempSource="本地数据库";
@@ -541,11 +625,11 @@ public class fileUploadServlet extends HttpServlet {
         // String wcString = request.getParameter("wc");
         //String dcString = request.getParameter("dc");
         //String chartid = request.getParameter("chartID");// 专题符号id
-        //int width = cartographydataJson.getInt("symbolSizeSliderValue");// 符号长宽
-        int width=80;
-        int height=80;
-        //int height= cartographydataJson.getInt("symbolSizeSliderValue");
-        String regionParam = "1";
+        int width = cartographydataJson.getInt("symbolSizeSliderValue");// 符号长宽
+//        int width=80;
+//        int height=80;
+        int height= cartographydataJson.getInt("symbolSizeSliderValue");
+//        String regionParam = "1";
 
 //		String islabelString = request.getParameter("ISLABEL");
         // String islabelString = "false";
@@ -553,21 +637,35 @@ public class fileUploadServlet extends HttpServlet {
 
         //String chartData = request.getParameter("CHARTDATA");
         //System.out.println("chart data: "+chartData);
-        //String[] arr = chartData.split(",");
-        //System.out.println(arr);
-        tableName="population";
+        String[] arr = fieldsNames.split(",");
+//        tableName= statisticdataJson.getString("tableName");
         String thematicData = tableName;
 
         //根据所选指标的数目进行不同的色彩配置(有几个指标配置几个色彩渐变)
-        //String colorRampSchema1 = request.getParameter("colorRampSchema");
-
+        String colorRampSchema1 = cartographydataJson.getString("colorName");
+//        String colorRampSchema1 = "青黄色系";
 //		System.out.println(colorRampSchema1);
-        String colorString="15538980;2498916;15855872";
-        //colorString = ColorUtil.getColorScheme(arr.length - 1,colorRampSchema1);
+//        String colorString="15538980;2498916;15855872";
+        String colorString;
+        colorString = ColorUtil.getColorScheme(arr.length,colorRampSchema1);
         String[] colors = colorString.split(";");
         int[] fieldColors = new int[colors.length]; // 专题符号颜色
         for (int i = 0; i < fieldColors.length; i++) {
             fieldColors[i] = Integer.parseInt(colors[i]);
+        }
+        String regionParam = request.getParameter("regionParam");
+        String dataTabID = statisticdataJson.getString("tabId");
+        String indiSource = "";
+        switch (dataTabID){
+            case "1":
+                indiSource = "平台数据库";
+                break;
+            case "2":
+                indiSource = "API数据";
+                break;
+            case "3":
+                indiSource = "上传EXCEL文件";
+                break;
         }
 
         //Rectangle2D.Double DC = JUtil.StringToRect(dcString);// DC
@@ -585,7 +683,7 @@ public class fileUploadServlet extends HttpServlet {
         //统计符号的chartDataPara
         ChartDataPara chartDataPara = new ChartDataPara();
 
-        chartDataPara.initial_ZJ(fieldsNames,tempSource);// 初始化专题符号层参数
+        chartDataPara.initial_ZJ(fieldsNames,indiSource);// 初始化专题符号层参数
 
         chartDataPara.setFieldColor(fieldColors);
         chartDataPara.setWidth(width);
@@ -603,7 +701,7 @@ public class fileUploadServlet extends HttpServlet {
 //        chartDataPara.initialAsAPI(indicatorDatas);// 初始化专题符号层参数
         //
         //ArrayList<String > regionData=new ArrayList();
-        IndicatorData[] indicatorDatas = JUtil.getIndicatorData_ZJ(tableName,fieldsName,regionParam);
+        IndicatorData[] indicatorDatas = JUtil.getIndicatorData_ZJ(tableName, fieldsName, regionParam, spatialId, year);
         ReadRegionData.doReadRegionData_ZJ(regionParam);
         double[] maxValues = JUtil.maxValues(indicatorDatas);
         double[] minValues = JUtil.minValues(indicatorDatas);
@@ -631,6 +729,7 @@ public class fileUploadServlet extends HttpServlet {
         //图例图片转码为base64
         BASE64Encoder encoderLegend = new BASE64Encoder();
         ByteArrayOutputStream baosLegend = new ByteArrayOutputStream();
+        ImageIO.setUseCache(false);
         ImageIO.write(bufferedImage, "png", baosLegend);
         byte[] bytesLegend = baosLegend.toByteArray();
         String imgStreamLegend = encoderLegend.encodeBuffer(bytesLegend).trim();
@@ -655,7 +754,6 @@ public class fileUploadServlet extends HttpServlet {
         int indiNum = indicatorDatas[0].getNames().length;//指标数目
         String[] indiNames = new String[indiNum];
         String[] indiUnits = new String[indiNum];
-        String indiSource = "";
 
         for (int p=0;p<indiNum;p++) {
             indiNames[p] = indicatorDatas[0].getNames()[p];
