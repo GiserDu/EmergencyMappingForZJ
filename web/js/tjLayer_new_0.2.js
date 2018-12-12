@@ -46,6 +46,10 @@ function opentjMenuLayer() {
                 // form.render();
 
             } else if(leftMenuName=="selectMappingTemplate") {
+                $("#fieldslist"+tjPanel2.tabId).next().find("button[lay-filter='fields']")[0].click();//辅助用户点击“下一步”，获取当前指标
+
+                // var a=$("#fieldslist"+tjPanel2.tabId).next().find("button")[0];
+                // a.click();
 
                 selectedIndexNum=tjPanel2.fieldsNum;
 
@@ -99,6 +103,7 @@ function opentjMenuLayer() {
 // 当用户修改时弹出的面板
 function modifytjMenuLayer(symbolInfo) {
 
+
     var symPara1=0,
         symPara2=0,
         symPara3=0,
@@ -143,6 +148,8 @@ function modifytjMenuLayer(symbolInfo) {
         //     $("input[name="+item+"]").next().addClass('layui-form-checked');
         // });
 
+        $("#fieldslist"+tjPanel2.tabId).next().find("button[lay-filter='fields']")[0].click();//辅助用户点击“下一步”，获取当前指标
+
         // 复原第三个面板
         // 获取分级模型的select
         var selectedModelName=symbolInfo.modelName;
@@ -163,6 +170,7 @@ function modifytjMenuLayer(symbolInfo) {
 
         element.on('nav(navDemo)', function(elem){
             // console.log(elem);
+
             var leftMenuName=elem.attr('name');
             var selectedIndexNum;
 
@@ -176,6 +184,8 @@ function modifytjMenuLayer(symbolInfo) {
 
 
             } else if(leftMenuName=="selectMappingTemplate") {
+
+                $("#fieldslist"+tjPanel2.tabId).next().find("button[lay-filter='fields']")[0].click();//辅助用户点击“下一步”，获取当前指标
 
                 selectedIndexNum=tjPanel2.fieldsNum;
 
