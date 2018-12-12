@@ -72,41 +72,6 @@ layui.use(['layer','upload'], function(){
             var dataUrl = res.saveFilePath;
             fetch(dataUrl).then(response=>response.json())
             .then(data=>{
-                // 添加热力图
-                heapMapSource = data.features;
-                heapMapSource = heapMapSource.map(function (p) { return [p.geometry.coordinates[1],p.geometry.coordinates[0]]; });
-                heatLayer = L.heatLayer(heapMapSource,heapmapOptions);
-                // heatLayer = L.heatLayer(heapMapSource,heapmapOptions).addTo(map);
-                layerControl.addOverlay(heatLayer, '热力图');
-
-                // 添加点聚合图
-                geoJsonData = data.features;
-                var featureName =  Object.keys(data.features[0].properties)[0];
-                markers = L.markerClusterGroup({
-                    spiderfyShapePositions: function(count, centerPt) {
-                        var distanceFromCenter = 35,
-                            markerDistance = 45,
-                            lineLength = markerDistance * (count - 1),
-                            lineStart = centerPt.y - lineLength / 2,
-                            res = [],
-                            i;
-                        res.length = count;
-                        for (i = count - 1; i >= 0; i--) {
-                            res[i] = new Point(centerPt.x + distanceFromCenter, lineStart + markerDistance * i);
-                        }
-                        return res;
-                    }
-                });
-                geoJsonLayer = L.geoJson(geoJsonData, {
-                    onEachFeature: function (feature, layer) {
-                        layer.bindPopup(feature.properties[featureName]);
-                    }
-                });
-                markers.addLayer(geoJsonLayer);
-                // map.addLayer(markers);
-                layerControl.addOverlay(markers, '点聚合图');
-                // map.fitBounds(markers.getBounds());
-
                 // 添加echarts散点图
                 placeList = data.features;
                 placeList = placeList.map(function (p) { return { name:p.properties[featureName], geoCoord:p.geometry.coordinates,value:Math.random()*10}; });
@@ -118,8 +83,8 @@ layui.use(['layer','upload'], function(){
                         'rgba(37, 140, 249, 0.8)'
                     ],
                     // title: {
-                    //     text: '大规模MarkPoint特效',
-                    //     subtext: '纯属虚构',
+                    //     text: '浙江省山塘分布散点图',
+                    //     // subtext: '纯属虚构',
                     //     x: 'center',
                     //     textStyle: {
                     //         color: '#fff'
@@ -128,6 +93,7 @@ layui.use(['layer','upload'], function(){
                     legend: {
                         orient: 'vertical',
                         x: 'right',
+                        y:'bottom',
                         data: ['强', '中', '弱'],
                         textStyle: {
                             color: '#fff'
@@ -230,7 +196,7 @@ layui.use(['layer','upload'], function(){
                             }
                         },
                         {
-                            name: '强',
+                            name: '高',
                             type: 'map',
                             mapType: 'none',
                             hoverable: false,
@@ -273,6 +239,44 @@ layui.use(['layer','upload'], function(){
                 // L.flowEcharts(echartsOption).addTo(map);
                 echartsLayer = L.flowEcharts(echartsOption);
                 layerControl.addOverlay(echartsLayer, '散点图');
+
+
+                // 添加点聚合图
+                geoJsonData = data.features;
+                var featureName =  Object.keys(data.features[0].properties)[0];
+                markers = L.markerClusterGroup({
+                    spiderfyShapePositions: function(count, centerPt) {
+                        var distanceFromCenter = 35,
+                            markerDistance = 45,
+                            lineLength = markerDistance * (count - 1),
+                            lineStart = centerPt.y - lineLength / 2,
+                            res = [],
+                            i;
+                        res.length = count;
+                        for (i = count - 1; i >= 0; i--) {
+                            res[i] = new Point(centerPt.x + distanceFromCenter, lineStart + markerDistance * i);
+                        }
+                        return res;
+                    }
+                });
+                geoJsonLayer = L.geoJson(geoJsonData, {
+                    onEachFeature: function (feature, layer) {
+                        layer.bindPopup(feature.properties[featureName]);
+                    }
+                });
+                markers.addLayer(geoJsonLayer);
+                // map.addLayer(markers);
+                layerControl.addOverlay(markers, '点聚合图');
+                // map.fitBounds(markers.getBounds());
+
+                // 添加热力图
+                heapMapSource = data.features;
+                heapMapSource = heapMapSource.map(function (p) { return [p.geometry.coordinates[1],p.geometry.coordinates[0]]; });
+                heatLayer = L.heatLayer(heapMapSource,heapmapOptions);
+                // heatLayer = L.heatLayer(heapMapSource,heapmapOptions).addTo(map);
+                layerControl.addOverlay(heatLayer, '热力图');
+
+
             });
             // 上传完毕后自动关闭上传窗口
             layer.close(layer.index);
@@ -282,19 +286,19 @@ layui.use(['layer','upload'], function(){
 });
 
 // 添加点击获取坐标信息
-var mypop = L.popup();
-map.on('click', function(e) {
-    var content = '你临幸了这个点：<br>';
-    content += e.latlng.toString();
-    mypop.setLatLng(e.latlng)
-        .setContent(content)
-        .openOn(map);
-    // heatLayer.setOptions({
-    //     minOpacity:0.1,
-    //     maxZoom: 15,
-    //     max:0.85,
-    //     radius:20,
-    //     blur:15,
-    //     gradient:{0.2:'green', 0.4: 'lime', 0.6: 'yellow', 0.8: 'orange', 1: 'red'}
-    // });
-});
+// var mypop = L.popup();
+// map.on('click', function(e) {
+//     var content = '你临幸了这个点：<br>';
+//     content += e.latlng.toString();
+//     mypop.setLatLng(e.latlng)
+//         .setContent(content)
+//         .openOn(map);
+//     // heatLayer.setOptions({
+//     //     minOpacity:0.1,
+//     //     maxZoom: 15,
+//     //     max:0.85,
+//     //     radius:20,
+//     //     blur:15,
+//     //     gradient:{0.2:'green', 0.4: 'lime', 0.6: 'yellow', 0.8: 'orange', 1: 'red'}
+//     // });
+// });
