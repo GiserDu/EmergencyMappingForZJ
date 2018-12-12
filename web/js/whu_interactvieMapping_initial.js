@@ -488,7 +488,8 @@ function doMap() {
                                                 tjLayerName=$("input[ name='tjLayerName' ]").val();
 
                                                 if(tjLayerName==""){
-                                                    alert("请输入名称");
+                                                    layer.tips('请输入图层名称', '#newSLName')
+                                                    // layer.alert('');
                                                 }
 
                                                 if (tjLayerName != "") {
@@ -496,32 +497,34 @@ function doMap() {
                                                     layerNodes[3].children.push(newNode);
                                                     var treeObj = $.fn.zTree.getZTreeObj("doMapTree");
                                                     treeObj.addNodes(treeNode, -1, newNode);
-                                                }
-                                                //统计图层所有参数
-                                                allTjLayerContent={
-                                                    "name":tjLayerName,
-                                                    "spatialdata":tjPanel1,
-                                                    "statisticdata":tjPanel2,
-                                                    "cartographydata":tjPanel3
+
+                                                    //统计图层所有参数
+                                                    allTjLayerContent={
+                                                        "name":tjLayerName,
+                                                        "spatialdata":tjPanel1,
+                                                        "statisticdata":tjPanel2,
+                                                        "cartographydata":tjPanel3
+                                                    }
+
+                                                    // tjLayertest="layui-layer"+index;
+                                                    // tjLayertest=$("#tjPanel").html();
+                                                    var tjType;
+                                                    switch (allTjLayerContent.cartographydata.type){
+                                                        case "1":
+                                                            tjType = "chartLayerData";
+                                                            break;
+                                                        case "2":
+                                                            tjType = "classLayerData";
+                                                            break;
+                                                    }
+                                                    allTjLayerContent = JSON.stringify(allTjLayerContent);
+                                                    console.log( allTjLayerContent);
+
+                                                    initTjLayer(allTjLayerContent, tjType, "1");
+                                                    layer.close(index);
+                                                    layer.close(layerIndex);
                                                 }
 
-                                                // tjLayertest="layui-layer"+index;
-                                                // tjLayertest=$("#tjPanel").html();
-                                                var tjType;
-                                                switch (allTjLayerContent.cartographydata.type){
-                                                    case "1":
-                                                        tjType = "chartLayerData";
-                                                        break;
-                                                    case "2":
-                                                        tjType = "classLayerData";
-                                                        break;
-                                                }
-                                                allTjLayerContent = JSON.stringify(allTjLayerContent);
-                                                console.log( allTjLayerContent);
-
-                                                initTjLayer(allTjLayerContent, tjType, "1");
-                                                layer.close(index);
-                                                layer.close(layerIndex);
                                             }
                                         });
                                     });
@@ -868,7 +871,8 @@ function doMap() {
                                                 tjLayerName=$("input[ name='tjLayerName1' ]").val();
 
                                                 if(tjLayerName==""){
-                                                    alert("请输入名称");
+                                                    layer.tips('请输入图层名称', '#newSLName')
+                                                    // layer.alert('');
                                                 }
 
                                                 if (tjLayerName != "") {
@@ -879,29 +883,31 @@ function doMap() {
 
                                                     var treeObj = $.fn.zTree.getZTreeObj("doMapTree");
                                                     treeObj.updateNode(treeNode);
-                                                }
-                                                allTjLayerContent={
-                                                    "name":tjLayerName,
-                                                    "spatialdata":tjPanel1,
-                                                    "statisticdata":tjPanel2,
-                                                    "cartographydata":tjPanel3
-                                                }
-                                                // tjLayerName = "";
-                                                var tjType;
-                                                switch (allTjLayerContent.cartographydata.type){
-                                                    case "1":
-                                                        tjType = "chartLayerData";
-                                                        break;
-                                                    case "2":
-                                                        tjType = "classLayerData";
-                                                        break;
-                                                }
-                                                allTjLayerContent = JSON.stringify(allTjLayerContent);
-                                                console.log( allTjLayerContent);
 
-                                                initTjLayer(allTjLayerContent, tjType, "1");
-                                                layer.close(index);
-                                                layer.close(layerIndex);
+
+                                                    allTjLayerContent={
+                                                        "name":tjLayerName,
+                                                        "spatialdata":tjPanel1,
+                                                        "statisticdata":tjPanel2,
+                                                        "cartographydata":tjPanel3
+                                                    }
+                                                    // tjLayerName = "";
+                                                    var tjType;
+                                                    switch (allTjLayerContent.cartographydata.type){
+                                                        case "1":
+                                                            tjType = "chartLayerData";
+                                                            break;
+                                                        case "2":
+                                                            tjType = "classLayerData";
+                                                            break;
+                                                    }
+                                                    allTjLayerContent = JSON.stringify(allTjLayerContent);
+                                                    console.log( allTjLayerContent);
+
+                                                    initTjLayer(allTjLayerContent, tjType, "1");
+                                                    layer.close(index);
+                                                    layer.close(layerIndex);
+                                                }
                                             }
                                         });
                                     });

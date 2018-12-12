@@ -102,8 +102,6 @@ function opentjMenuLayer() {
 
 // 当用户修改时弹出的面板
 function modifytjMenuLayer(symbolInfo) {
-
-
     var symPara1=0,
         symPara2=0,
         symPara3=0,
