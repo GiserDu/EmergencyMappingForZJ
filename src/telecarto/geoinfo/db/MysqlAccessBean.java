@@ -7,9 +7,9 @@ import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 
 public class MysqlAccessBean {
-	 	public static Connection con = null;//定义连接  
-	    public static Statement st = null;//定义statement  
-	    public static PreparedStatement pStmt = null; 
+	 	public Connection con = null;//定义连接
+	    public Statement st = null;//定义statement
+	    public PreparedStatement pStmt = null;
 	    public ResultSet result = null;//定义结果集   
 	    public static String url;//定义URL
 	    public static String user;//定义用户名     

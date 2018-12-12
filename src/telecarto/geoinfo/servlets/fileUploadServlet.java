@@ -191,23 +191,23 @@ public class fileUploadServlet extends HttpServlet {
                         //根据输入行政等级class，确立
                         if (regionParam.equals("1")){
                             sql="SELECT\n" +
-                                    "\tregion_info_reduce.citycode, region_info_reduce.name, region_info_reduce.x, region_info_reduce.y, region_info_reduce.json, " + classTableName + "." + dataFieldName +
+                                    "\tregion_info_copy1.citycode, region_info_copy1.name, region_info_copy1.x, region_info_copy1.y, region_info_copy1.json, " + classTableName + "." + dataFieldName +
                                     "\tFROM\n" +
-                                    "\tregion_info_reduce\n" +
+                                    "\tregion_info_copy1\n" +
                                     "LEFT JOIN\t"+ classTableName +"\n" +
-                                    "ON region_info_reduce.citycode="+ classTableName +".`"+ spatialId +"`\n" +
+                                    "ON region_info_copy1.citycode="+ classTableName +".`"+ spatialId +"`\n" +
                                     "WHERE\n" +
-                                    "\tregion_info_reduce.class = " + regionParam +" AND "+ classTableName +".`年份` LIKE '2016'";
+                                    "\tregion_info_copy1.class = " + regionParam +" AND "+ classTableName +".`年份` LIKE '2016'";
                         }
                         else if (regionParam.equals("2")){
                             sql="SELECT\n" +
-                                    "\tregion_info.coutcode, region_info.name, region_info.x, region_info.y, region_info.json, " + classTableName + "." + dataFieldName +
+                                    "\tregion_info_copy1.coutcode, region_info_copy1.name, region_info_copy1.x, region_info_copy1.y, region_info_copy1.json, " + classTableName + "." + dataFieldName +
                                     "\tFROM\n" +
-                                    "\tregion_info\n" +
+                                    "\tregion_info_copy1\n" +
                                     "LEFT JOIN\t"+ classTableName +"\n" +
-                                    "ON region_info.coutcode="+ classTableName +".`"+ spatialId +"`\n" +
+                                    "ON region_info_copy1.coutcode="+ classTableName +".`"+ spatialId +"`\n" +
                                     "WHERE\n" +
-                                    "\tregion_info.class = " + regionParam +" AND "+ classTableName +".`年份` LIKE '2016'";
+                                    "\tregion_info_copy1.class = " + regionParam +" AND "+ classTableName +".`年份` LIKE '2016'";
                         }
 
                         //sql_select = "LEFT JOIN "+ tableName +" t2 ON t1.RGN_CODE = t2.RGN_CODE WHERE t1.RGN_CODE LIKE '"+Param+"' AND t1.RGN_CODE!= '"+regionParam+"' AND t2.YEAR = '" + year + "'";

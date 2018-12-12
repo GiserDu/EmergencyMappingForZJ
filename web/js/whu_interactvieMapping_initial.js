@@ -59,6 +59,7 @@ var thematicData={};
 var iMLegend;//iM means interactiveMapping
 var iMLegendCreated = false;//图例是否创建？
 var tjLayerName = ""; //统计图层名作为layer的id
+var zoomFlag = 0; //是否已下钻
 $(document).ready(function() {
     findDimensions();
     $("#mapContainer").height(winHeight);
@@ -149,8 +150,17 @@ $(document).ready(function() {
             map.addLayer(studyAreaLayer);
             mapExtentChange = map.on("zoom-end", function zoomed() {
                 var zoomLevel = map.getZoom();
-                if (zoomLevel > 9){
-                    onZoomInLevel10();
+                if  (zoomFlag == 0){
+                    if (zoomLevel > 8){
+                        onZoomInLevelAbove10();
+                        zoomFlag = 1;
+                    }
+                }
+                else if (zoomFlag == 1){
+                    if (zoomLevel < 9){
+                        onZoomInLevelBelow10();
+                        zoomFlag = 0;
+                    }
                 }
         });
         });
@@ -518,8 +528,11 @@ function doMap() {
                                                 }
                                                 allTjLayerContent = JSON.stringify(allTjLayerContent);
                                                 console.log( allTjLayerContent);
-
-                                                initTjLayer(allTjLayerContent, tjType, "1");
+                                                var zoomLevel = map.getZoom();
+                                                if (zoomLevel < 9)
+                                                    initTjLayer(allTjLayerContent, tjType, "1");
+                                                else
+                                                    initTjLayer(allTjLayerContent, tjType, "2");
                                                 layer.close(index);
                                                 layer.close(layerIndex);
                                             }
@@ -896,8 +909,11 @@ function doMap() {
                                                 }
                                                 allTjLayerContent = JSON.stringify(allTjLayerContent);
                                                 console.log( allTjLayerContent);
-
-                                                initTjLayer(allTjLayerContent, tjType, "1");
+                                                var zoomLevel = map.getZoom();
+                                                if (zoomLevel < 9)
+                                                    initTjLayer(allTjLayerContent, tjType, "1");
+                                                else
+                                                    initTjLayer(allTjLayerContent, tjType, "2");
                                                 layer.close(index);
                                                 layer.close(layerIndex);
                                             }

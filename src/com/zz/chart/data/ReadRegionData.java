@@ -47,10 +47,10 @@ public class ReadRegionData {
 			//String Param = regionParam.substring(0, 4) + "__";
 			//String Param =  "1000_";
 			//sql_select = "WHERE RGN_CODE LIKE '" + Param + "' AND RGN_CODE!= '" + regionParam + "'";
-			sql_select = "WHERE RGN_CLASS = '" + regionParam + "'";
-			sql = "SELECT RGN_CODE,REGION_X,REGION_Y,RGN_CLASS,RGN_NAME FROM region " + sql_select;
+			sql_select = "WHERE class = '" + regionParam + "'";
+			sql = "SELECT coutcode,x,y,class,name FROM region_info " + sql_select + "ORDER BY coutcode";
 //			sql = "SELECT RGN_CODE,NAME_CN,NAME_EN,POP_TOTAL,POP_PERM FROM theme_pop " + sql_select;
-			sql1 = "SELECT COUNT(RGN_CODE) FROM region " + sql_select;
+			sql1 = "SELECT COUNT(coutcode) FROM region_info " + sql_select;
 		}
 		try {
 			Connection connection = DBManager.getConnection();

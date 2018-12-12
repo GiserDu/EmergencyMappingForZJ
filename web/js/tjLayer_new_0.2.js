@@ -16,7 +16,9 @@ var tjPanel1={};
 var tjPanel2 = {"tabId":"1","dataAddress":"","tableName":"","spatialId":"","fieldsName":[],"fieldsNum":0};
 //tjPanel3中有一个key是type，1表示统计图表，2表示分级符号
 var tjPanel3={};
-
+var zoomOutFlag = 0;
+var zoomGraphics;
+var thisZoomLayer;
 
 // 当用户新建时弹出的面板
 function opentjMenuLayer() {
@@ -810,7 +812,33 @@ function initTjLayer(allTjLayerContent, tjType, regionParamVar) {
         success: function (data) {
             console.log(url);
             if (data.type==="chartLayer"){
-                doChartLayer(data)
+                if (zoomOutFlag == 1){
+                    zoomGraphics = initChartLayer(data.charts);
+                    // var layer = thisZoomLayer;
+                    thisZoomLayer.clear();//清空所有graphics
+                    // dojo.disconnect(mouseMove);
+                    // dojo.disconnect(mouseOut);
+                    for (var i=0;i<zoomGraphics.length;i++){
+                        thisZoomLayer.add(zoomGraphics[i]);
+                    }
+                    thisZoomLayer.content = allTjLayerContent;
+                    zoomOutFlag = 0;
+                    return;
+                }
+                doChartLayer(data);
+                return;
+            }
+            if (zoomOutFlag == 1){
+                zoomGraphics = initClassLayer(data.classDataArray);
+                // console.log(zoomGraphics);
+                // var layer = thisZoomLayer;
+                thisZoomLayer.clear();//清空所有graphics
+                for (var i=0;i<zoomGraphics.length;i++){
+                    thisZoomLayer.add(zoomGraphics[i]);
+                }
+                thisZoomLayer.content = allTjLayerContent;
+                thisZoomLayer.setOpacity(0.95);
+                zoomOutFlag = 0;
                 return;
             }
 
@@ -976,15 +1004,87 @@ function initTjLayer(allTjLayerContent, tjType, regionParamVar) {
     });
 }
 
-function onZoomInLevel10(){
+function changeLayerOnZoom(thisLayer, tjType, regionParamVar) {
+    var url = "./servlet/fileUploadServlet?allTjLayerContent=" + encodeURI(thisLayer.content);
+    console.log(tjType);
+    $.ajax({
+        type: 'POST',
+        url: url,
+        async: "false",
+        dataType: "json",
+        // data:{"inputType":"test"},
+        data: {"inputType": tjType, "regionParam": regionParamVar},
+        success: function (data) {
+            if (data.type==="chartLayer"){
+                zoomGraphics = initChartLayer(data.charts);
+                // var layer = thisZoomLayer;
+                thisLayer.clear();//清空所有graphics
+                // dojo.disconnect(mouseMove);
+                // dojo.disconnect(mouseOut);
+                for (var i=0;i<zoomGraphics.length;i++){
+                    thisLayer.add(zoomGraphics[i]);
+                }
+                // thisLayer.content = allTjLayerContent;
+                zoomOutFlag = 0;
+            }
+            else {
+                zoomGraphics = initClassLayer(data.classDataArray);
+                // console.log(zoomGraphics);
+                // var layer = thisZoomLayer;
+                thisLayer.clear();//清空所有graphics
+                for (var i=0;i<zoomGraphics.length;i++){
+                    thisLayer.add(zoomGraphics[i]);
+                }
+                // thisZoomLayer.content = allTjLayerContent;
+                thisLayer.setOpacity(0.95);
+                zoomOutFlag = 0;
+            }
+        }
+    });
+}
+
+function onZoomInLevelAbove10(){
     // var classLayer;
-    // for (var i = 0; i < map.graphicsLayerIds.length; i++){
-    //     if ((map.getLayer(map.graphicsLayerIds[i])).name == "classGLayer"){
-    //         regionParamVar = "2";
-    //         var thisLayerContent = map.graphicsLayerIds[i].content;
-    //         initTjLayer(thisLayerContent, "classLayerData")
-    //     }
-    // }
+    for (var i = 0; i < map.graphicsLayerIds.length; i++){
+        if ((map.getLayer(map.graphicsLayerIds[i])).name == "classGLayer"){
+            // regionParamVar = "2";
+            thisZoomLayer = map.getLayer(map.graphicsLayerIds[i]);
+            var thisLayerContent = map.getLayer(map.graphicsLayerIds[i]).content;
+            console.log(thisLayerContent);
+            zoomOutFlag = 1;
+            changeLayerOnZoom(thisZoomLayer, "classLayerData", "2");
+
+        }
+        else if ((map.getLayer(map.graphicsLayerIds[i])).name == "chartGLayer"){
+            // regionParamVar = "2";
+            thisZoomLayer = map.getLayer(map.graphicsLayerIds[i]);
+            var thisLayerContent = map.getLayer(map.graphicsLayerIds[i]).content;
+            console.log(thisLayerContent);
+            zoomOutFlag = 1;
+            changeLayerOnZoom(thisZoomLayer, "chartLayerData", "2");
+        }
+    }
+}
+
+function onZoomInLevelBelow10() {
+    for (var i = 0; i < map.graphicsLayerIds.length; i++){
+        if ((map.getLayer(map.graphicsLayerIds[i])).name == "classGLayer"){
+            // regionParamVar = "2";
+            thisZoomLayer = map.getLayer(map.graphicsLayerIds[i]);
+            var thisLayerContent = map.getLayer(map.graphicsLayerIds[i]).content;
+            console.log(thisLayerContent);
+            zoomOutFlag = 1;
+            changeLayerOnZoom(thisZoomLayer, "classLayerData", "1");
+        }
+        else if ((map.getLayer(map.graphicsLayerIds[i])).name == "chartGLayer"){
+            // regionParamVar = "2";
+            thisZoomLayer = map.getLayer(map.graphicsLayerIds[i]);
+            var thisLayerContent = map.getLayer(map.graphicsLayerIds[i]).content;
+            console.log(thisLayerContent);
+            zoomOutFlag = 1;
+            changeLayerOnZoom(thisZoomLayer, "chartLayerData", "1");
+        }
+    }
 }
 
 //根据后台传输回来的数据进行面状graphic的生成,并进行ClassLayer的添加
@@ -1426,6 +1526,7 @@ function doChartLayer(data){
     var indiNum = charts[0].attributes.indiNum;//所选指标数目
     // console.log(charts);
     var graphics = new Array();
+
     graphics = initChartLayer(charts);
     // charts.forEach(alert);
     // if (map.graphicsLayerIds.length == 0) {
@@ -1448,7 +1549,8 @@ function doChartLayer(data){
                 for (var i=0;i<graphics.length;i++){
                     layer.add(graphics[i]);
                 }
-                console.log(tjLayerName);
+                layer.content = allTjLayerContent;
+                // console.log(tjLayerName);
                 // layer.setId = tjLayerName;
                 flag = 0;
             }
@@ -1463,6 +1565,7 @@ function doChartLayer(data){
             var graphicLayer = new esri.layers.GraphicsLayer();
             graphicLayer.name = "chartGLayer";
             graphicLayer.id = tjLayerName;
+            graphicLayer.content = allTjLayerContent;
             for (var i=0;i<graphics.length;i++){
                 graphicLayer.add(graphics[i]);
             }

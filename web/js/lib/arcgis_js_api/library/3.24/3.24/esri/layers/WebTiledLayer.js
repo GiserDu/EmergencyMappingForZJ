@@ -14,7 +14,6 @@ define("esri/layers/WebTiledLayer", "dojo/_base/declare dojo/_base/lang dojo/_ba
     f = f(y, {
         declaredClass: "esri.layers.WebTiledLayer",
         constructor: function (c, a) {
-            debugger
             a || (a = {});
             this.urlTemplate = c = A(c, a.wmtsInfo);
             var b = new r(-2.0037508342787E7, -2.003750834278E7, 2.003750834278E7, 2.0037508342787E7, new m({

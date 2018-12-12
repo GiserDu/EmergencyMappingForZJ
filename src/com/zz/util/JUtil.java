@@ -583,15 +583,31 @@ public class JUtil {
 		ArrayList<IndicatorData> indicatorList = new ArrayList<IndicatorData>();
 		ArrayList<String> regionCodeList = new ArrayList<String>();
 
-		String sql = "SELECT" +
-				"*" +
-				"FROM\n" +
-				"\tregion_info\n" +
-				"LEFT JOIN " + tableName +
-				" ON region_info.citycode=" + tableName + ".`" + spatialID + "` " +
-				"WHERE" +
-				"\tregion_info.class =" + regionParam +
-				" AND " + tableName + ".`年份`= "+ year + " ORDER BY citycode";
+		String sql;
+		if (regionParam.equals("1")){
+			sql = "SELECT" +
+					"*" +
+					"FROM\n" +
+					"\tregion_info\n" +
+					"LEFT JOIN " + tableName +
+					" ON region_info.citycode=" + tableName + ".`" + spatialID + "` " +
+					"WHERE" +
+					"\tregion_info.class =" + regionParam +
+					" AND " + tableName + ".`年份`= "+ year + " ORDER BY citycode";
+		}
+		else{
+			sql = "SELECT" +
+					"*" +
+					"FROM\n" +
+					"\tregion_info\n" +
+					"LEFT JOIN " + tableName +
+					" ON region_info.coutcode=" + tableName + ".`" + spatialID + "` " +
+					"WHERE" +
+					"\tregion_info.class =" + regionParam +
+					" AND " + tableName + ".`年份`= "+ year + " ORDER BY coutcode";
+		}
+
+
 		ResultSet resultSet2;
 		MysqlAccessBean mysql = new MysqlAccessBean();
 		try {
