@@ -60,6 +60,8 @@ var iMLegend;//iM means interactiveMapping
 var iMLegendCreated = false;//图例是否创建？
 var tjLayerName = ""; //统计图层名作为layer的id
 var zoomFlag = 0; //是否已下钻
+var fieldsOrIndi = "";
+var field_cn = "";
 $(document).ready(function() {
     findDimensions();
     $("#mapContainer").height(winHeight);
@@ -533,6 +535,7 @@ function doMap() {
                                                             tjType = "classLayerData";
                                                             break;
                                                     }
+                                                    fieldsOrIndi = allTjLayerContent.statisticdata.fieldsName;
                                                     allTjLayerContent = JSON.stringify(allTjLayerContent);
                                                     console.log(allTjLayerContent);
                                                     var zoomLevel = map.getZoom();
@@ -540,6 +543,7 @@ function doMap() {
                                                         initTjLayer(allTjLayerContent, tjType, "1");
                                                     else
                                                         initTjLayer(allTjLayerContent, tjType, "2");
+                                                    $("#legend-container .legend").remove();
                                                     layer.close(index);
                                                     layer.close(layerIndex);
                                                 }
@@ -918,6 +922,7 @@ function doMap() {
                                                             tjType = "classLayerData";
                                                             break;
                                                     }
+                                                    fieldsOrIndi = allTjLayerContent.statisticdata.fieldsName;
                                                     allTjLayerContent = JSON.stringify(allTjLayerContent);
                                                     console.log(allTjLayerContent);
                                                     var zoomLevel = map.getZoom();
@@ -925,6 +930,7 @@ function doMap() {
                                                         initTjLayer(allTjLayerContent, tjType, "1");
                                                     else
                                                         initTjLayer(allTjLayerContent, tjType, "2");
+                                                    $("#legend-container .legend").remove();
                                                     layer.close(index);
                                                     layer.close(layerIndex);
                                                 }
@@ -986,6 +992,17 @@ function doMap() {
 
                                 if(map&&(map.getLayer(treeNode.name))) {
                                     var thisLayer = map.getLayer(treeNode.name);
+                                    var thisTjLayerType = thisLayer.name;
+                                    switch (thisTjLayerType){
+                                        case "chartGLayer":
+                                            indi = [];
+                                            $("#legend-container .legend").remove();
+                                            break;
+                                        case "classGLayer":
+                                            field_cn = "";
+                                            $("#legend-container .legend").remove();
+                                            break;
+                                    }
                                     map.removeLayer(thisLayer);
                                 }
 
@@ -2964,6 +2981,7 @@ function layerOncheck(treeId, treeNode) {
         else {
             var isChecked = !treeNode.checked;
             var dataUrl = treeNode.name;
+            console.log(dataUrl);
             if (isChecked){
                 if (map && (map.getLayer(dataUrl))) {
                     var thisLayer = map.getLayer(dataUrl);

@@ -191,7 +191,7 @@ public class fileUploadServlet extends HttpServlet {
                         //根据输入行政等级class，确立
                         if (regionParam.equals("1")){
                             sql="SELECT\n" +
-                                    "\tregion_info_copy1.citycode, region_info_copy1.name, region_info_copy1.x, region_info_copy1.y, region_info_copy1.json, " + classTableName + "." + dataFieldName +
+                                    "\tregion_info_copy1.citycode, region_info_copy1.name, region_info_copy1.x, region_info_copy1.y, region_info_copy1.json, " + classTableName + ".`" + dataFieldName +"`" +
                                     "\tFROM\n" +
                                     "\tregion_info_copy1\n" +
                                     "LEFT JOIN\t"+ classTableName +"\n" +
@@ -201,7 +201,7 @@ public class fileUploadServlet extends HttpServlet {
                         }
                         else if (regionParam.equals("2")){
                             sql="SELECT\n" +
-                                    "\tregion_info_copy1.coutcode, region_info_copy1.name, region_info_copy1.x, region_info_copy1.y, region_info_copy1.json, " + classTableName + "." + dataFieldName +
+                                    "\tregion_info_copy1.coutcode, region_info_copy1.name, region_info_copy1.x, region_info_copy1.y, region_info_copy1.json, " + classTableName + ".`" + dataFieldName +"`" +
                                     "\tFROM\n" +
                                     "\tregion_info_copy1\n" +
                                     "LEFT JOIN\t"+ classTableName +"\n" +
@@ -239,7 +239,7 @@ public class fileUploadServlet extends HttpServlet {
                             JSONObject classObject = new JSONObject();
                             //绘制分级图图例
                             double []classInterval = classifiter.getIntervals(minValue,maxValue,breakNum,breakMethod);
-                            int width = 165;
+                            int width = 225;
                             int height = 21 * breakNum+45;
                             BufferedImage image = new BufferedImage(width, height,
                                     BufferedImage.TYPE_INT_RGB);
@@ -261,7 +261,7 @@ public class fileUploadServlet extends HttpServlet {
                             // 获取图例标题的像素范围对象
                             double fontWidth = imageUtil.getTitleSize(g2d,font,fieldNameCN);
                             int stringWidth = new BigDecimal(fontWidth).setScale(0, BigDecimal.ROUND_HALF_UP).intValue();
-                            int startX = new BigDecimal((165.0 - stringWidth)/2).setScale(0, BigDecimal.ROUND_HALF_UP).intValue();
+                            int startX = new BigDecimal((225.0 - stringWidth)/2).setScale(0, BigDecimal.ROUND_HALF_UP).intValue();
                             if(startX>0){
                                 g2d.drawString(fieldNameCN, startX, 25);
                             }
@@ -269,7 +269,7 @@ public class fileUploadServlet extends HttpServlet {
                                 g2d.setFont(new Font("黑体", Font.PLAIN, 16));
                                 fontWidth = imageUtil.getTitleSize(g2d,font,fieldNameCN);
                                 stringWidth = new BigDecimal(fontWidth).setScale(0, BigDecimal.ROUND_HALF_UP).intValue();
-                                startX = new BigDecimal((165 - stringWidth)/2).setScale(0, BigDecimal.ROUND_HALF_UP).intValue();
+                                startX = new BigDecimal((225 - stringWidth)/2).setScale(0, BigDecimal.ROUND_HALF_UP).intValue();
                                 g2d.drawString(fieldNameCN, startX, 25);
                             }
 

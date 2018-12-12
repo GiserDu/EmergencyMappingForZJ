@@ -42,7 +42,18 @@
 <div id="main">
 
 
-<div id="mapContainer"></div>
+<div id="mapContainer">
+    <div id="legend-container">
+        <img id="legend" class="legend">
+        <!--<img id="legend2" class="legend">-->
+        <span id="legend-remove" class="glyphicon glyphicon-remove"></span>
+    </div>
+
+    <div id="twoLegend">
+        <div id="chartLegend" class="legend-menu"></div>
+        <div id="classifyLegend" class="legend-menu"></div>
+    </div>
+</div>
     <div id="administrativeRegion">
 
     </div>
@@ -136,6 +147,9 @@
 
     <div id="map-save" class="right-top-bottom" title="打印">
         <span class="glyphicon glyphicon-print" data-toggle="modal" data-target="#map-save-Modal"></span>
+    </div>
+    <div id="map-legend" class="right-top-bottom" title="图例">
+        <span class="glyphicon glyphicon-th"></span>
     </div>
 
     <div class="modal fade in" id="map-save-Modal" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true" >

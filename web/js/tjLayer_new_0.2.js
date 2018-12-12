@@ -19,6 +19,121 @@ var tjPanel3={};
 var zoomOutFlag = 0;
 var zoomGraphics;
 var thisZoomLayer;
+var chartImg_url = undefined;//饼图图例的url
+// var chartImg_url2 = undefined;
+// var charLegendMonitor;//饼图图例的定时器
+var legendFlag = 0;
+var classifyImg_url = undefined;//分级统计图图例的url
+
+// 图例按钮的事件
+$("#map-legend").bind({
+    mouseover:function () {
+        // $("#twoLegend").css("visibility","visible");
+        $("#twoLegend").css("width","148px");
+        $("#mapContainer .legend-menu").css("width","58px");
+        $("#mapContainer .legend-menu").css("border","1px solid rgba(179,209,193,0.6)");
+    },
+    mouseleave:function () {
+        setTimeout(function () {
+            if($("#twoLegend").css("width")!="0px"){
+                $("#twoLegend").css("width","0px");
+                $("#mapContainer .legend-menu").css("width","0px");
+                $("#mapContainer .legend-menu").css("border","0px");
+            }
+        },2500)
+    }
+});
+
+
+//点击右上角统计图图例按钮时的点击事件
+$("#chartLegend").click(function () {
+    if (indi.length==0){
+        swal({
+            title: "温馨提示",
+            text: "您还未选择统计指标",
+            type: "info",
+            showCancelButton: false,
+            confirmButtonText: "确定",
+            closeOnConfirm: false,
+            closeOnCancel: false
+        });
+    }else {
+        // clearInterval(classifyLegendMonitor);
+        legendFlag='chart';
+        // $("#mapDiv .legend").remove();
+        // $("#mapDiv").append('<img id="legend" class="legend">');
+        // $("#mapDiv .legend").attr("src",chartImg_url);
+
+        $("#legend-container .legend").remove();
+        $("#legend-remove").css("display","block");
+        $("#legend-container").append('<img id="legend" class="legend">');
+        $("#legend-container").css("display","block");
+        $("#legend-container #legend").attr("src",chartImg_url);
+
+    }
+
+    //图例列表回收
+    $("#twoLegend").css("width","0px");
+    $("#mapContainer .legend-menu").css("width","0px");
+    $("#mapContainer .legend-menu").css("border","0px");
+
+});
+$("#classifyLegend").click(function () {
+    if (field_cn==""){
+        swal({
+            title: "温馨提示",
+            text: "您还未选择分级指标",
+            type: "info",
+            showCancelButton: false,
+            confirmButtonText: "确定",
+            closeOnConfirm: false,
+            closeOnCancel: false
+        });
+    }else {
+        // clearInterval(charLegendMonitor);
+        legendFlag='classify';
+        $("#legend-container .legend").remove();
+
+        // $("#mapDiv .legend").remove();
+
+        // $("#mapDiv").append('<div id="legend" class="legend"></div>');
+
+        // $("#mapDiv").append('<img id="legend" class="legend">');
+
+        $("#legend-container").append('<img id="legend" class="legend">');
+        // classifyLegendMonitor=setInterval(function () {
+        //     // $("#mapDiv .legend").css("background", "url(" + classifyImg_url + ")");
+        //     // $("#mapDiv .legend").css("background-size", "100% 100%");
+        //     $("#mapDiv .legend").attr("src", classifyImg_url);
+        // },400);
+        $("#legend-container").css("display","block");
+        $("#legend-container .legend").attr("src", classifyImg_url);
+
+        // $("#mapDiv .legend").attr("src", classifyImg_url);
+    }
+    //图例列表回收
+    $("#twoLegend").css("width","0px");
+    $("#legend-remove").css("display","block");
+    $("#mapContainer .legend-menu").css("width","0px");
+    $("#mapContainer .legend-menu").css("border","0px");
+
+});
+
+
+// 鼠标移入图例后，X按钮变成黑色
+$("#legend-container").mouseover(function () {
+    $("#legend-remove").css("color","black");
+})
+// 鼠标移出图例后，X按钮重新变成灰色
+$("#legend-container").mouseout(function () {
+    $("#legend-remove").css("color","#F2EFE6");
+})
+//点击图例上的X按钮关闭图例
+$("#legend-remove").click(function () {
+    $("#legend-container .legend").remove();
+    $("#legend-remove").css("display","none");
+    legendFlag = 0;
+});
 
 // 当用户新建时弹出的面板
 function opentjMenuLayer() {
@@ -835,6 +950,7 @@ function submitFields(){
 }
 
 function initTjLayer(allTjLayerContent, tjType, regionParamVar) {
+    // var allTjLayerContentStr = JSON.stringify(allTjLayerContent);
     var url = "./servlet/fileUploadServlet?allTjLayerContent=" + encodeURI(allTjLayerContent);
     console.log(tjType);
     $.ajax({
@@ -847,38 +963,14 @@ function initTjLayer(allTjLayerContent, tjType, regionParamVar) {
         success: function (data) {
             console.log(url);
             if (data.type==="chartLayer"){
-                if (zoomOutFlag == 1){
-                    zoomGraphics = initChartLayer(data.charts);
-                    // var layer = thisZoomLayer;
-                    thisZoomLayer.clear();//清空所有graphics
-                    // dojo.disconnect(mouseMove);
-                    // dojo.disconnect(mouseOut);
-                    for (var i=0;i<zoomGraphics.length;i++){
-                        thisZoomLayer.add(zoomGraphics[i]);
-                    }
-                    thisZoomLayer.content = allTjLayerContent;
-                    zoomOutFlag = 0;
-                    return;
-                }
                 doChartLayer(data);
-                return;
-            }
-            if (zoomOutFlag == 1){
-                zoomGraphics = initClassLayer(data.classDataArray);
-                // console.log(zoomGraphics);
-                // var layer = thisZoomLayer;
-                thisZoomLayer.clear();//清空所有graphics
-                for (var i=0;i<zoomGraphics.length;i++){
-                    thisZoomLayer.add(zoomGraphics[i]);
-                }
-                thisZoomLayer.content = allTjLayerContent;
-                thisZoomLayer.setOpacity(0.95);
-                zoomOutFlag = 0;
                 return;
             }
 
             console.log(data);
             var classLegend = data.classLegend;
+            field_cn = fieldsOrIndi;
+            console.log(field_cn);
             classifyImg_url = "data:image/png;base64," + classLegend;
             // if(legendFlag!=0 &&legendFlag == 'classify'){
             //     $("#classifyLegend").click();                    //触发classifylegend的点击事件
@@ -963,7 +1055,7 @@ function initTjLayer(allTjLayerContent, tjType, regionParamVar) {
                             var content = initClassInfoTemplate(g.attributes);
                             var title = g.attributes.rgn_name;
                             map.infoWindow.setContent(content);
-                            map.infoWindow.setTitle(title);
+                            map.infoWindow.setTitle("分级图层信息");
                             map.infoWindow.show(evt.screenPoint,map.getInfoWindowAnchor(evt.screenPoint));
                             map.infoWindow.resize(200,300);
                             map.setMapCursor("pointer");
@@ -1040,6 +1132,7 @@ function initTjLayer(allTjLayerContent, tjType, regionParamVar) {
 }
 
 function changeLayerOnZoom(thisLayer, tjType, regionParamVar) {
+    // var thisLayerContent = JSON.stringify(thisLayer.content);
     var url = "./servlet/fileUploadServlet?allTjLayerContent=" + encodeURI(thisLayer.content);
     console.log(tjType);
     $.ajax({
@@ -1051,7 +1144,9 @@ function changeLayerOnZoom(thisLayer, tjType, regionParamVar) {
         data: {"inputType": tjType, "regionParam": regionParamVar},
         success: function (data) {
             if (data.type==="chartLayer"){
-                zoomGraphics = initChartLayer(data.charts);
+                var xOffset = parseInt(JSON.parse(thisLayer.content).cartographydata.xoffset);
+                var yOffset = parseInt(JSON.parse(thisLayer.content).cartographydata.yoffset);
+                zoomGraphics = initChartLayer(data.charts, xOffset, yOffset);
                 // var layer = thisZoomLayer;
                 thisLayer.clear();//清空所有graphics
                 // dojo.disconnect(mouseMove);
@@ -1348,7 +1443,8 @@ refreshChartLyr = function(indicators){
 function initClassInfoTemplate(attributes) {
     // var attrString = classIndex + ":" + attributes.data;
 
-    var attrString = '<p><strong>'+tjPanel2.fieldsName[0]+' : </strong>' + attributes.data + '</p>';
+    var attrString = '<p><strong>区域名称 : </strong>' + attributes.rgn_code + '</p>';
+        attrString += '<p><strong>'+tjPanel2.fieldsName[0]+' : </strong>' + attributes.data + '</p>';
     attrString += '<p><strong>分级级别 : </strong>' + attributes.rgn_class + '</p>';
     // attrString += '<p><strong>数据来源 : </strong>' + dataSource + '</p>';
     // classifyImg_url = "data:image/png;base64," + classLegend;
@@ -1549,6 +1645,8 @@ var colorTable={
     }
 }
 function doChartLayer(data){
+    indi = fieldsOrIndi;
+    console.log(indi);
     chartImg_url= "data:image/png;base64," + data.chartLegend;
     // if(legendFlag!=0 && legendFlag == 'chart'){
     //     $("#chartLegend").click();                   //触发chartlegend的点击事件
@@ -1561,8 +1659,10 @@ function doChartLayer(data){
     var indiNum = charts[0].attributes.indiNum;//所选指标数目
     // console.log(charts);
     var graphics = new Array();
+    var xOffset = parseInt(tjPanel3.xoffset);
+    var yOffset = parseInt(tjPanel3.yoffset);
 
-    graphics = initChartLayer(charts);
+    graphics = initChartLayer(charts, xOffset, yOffset);
     // charts.forEach(alert);
     // if (map.graphicsLayerIds.length == 0) {
     //     //可以为graphicLayer添加mouse-over,click等事件;
@@ -1633,6 +1733,7 @@ function doChartLayer(data){
                     chartHeight = g.symbol.height;
                     chartImg = g.symbol.url;
                     var symbol = new esri.symbol.PictureMarkerSymbol(chartImg,chartWidth*1.15,chartHeight*1.15);
+                    symbol.setOffset(xOffset, yOffset);
                     g.setSymbol(symbol);
 
                     var content = initInfoTemplate(g.attributes,indiNum,dataSource);
@@ -1651,6 +1752,7 @@ function doChartLayer(data){
             mouseOut = dojo.connect(chartLayer, "onMouseOut", function mouseOut(evt) {
                 var g = evt.graphic;
                 var symbol = new esri.symbol.PictureMarkerSymbol(chartImg,chartWidth,chartHeight);
+                symbol.setOffset(xOffset, yOffset);
                 // console.log(symbol);
                 g.setSymbol(symbol);
                 map.infoWindow.hide();
@@ -1663,7 +1765,7 @@ function doChartLayer(data){
     }
 }
 //根据后台传输回来的数据进行graphic的生成,并进行ChartLayer的添加
-function initChartLayer (charts) {
+function initChartLayer (charts, xoffset, yoffset) {
     var graphicArray= new Array();
     // var infoTemplateArray= new Array();
     require(["esri/InfoTemplate","esri/geometry/webMercatorUtils"], function(InfoTemplate,webMercatorUtils) {
@@ -1679,6 +1781,7 @@ function initChartLayer (charts) {
             var height = charts[i].imgHeight;
             var url = "data:image/png;base64," + charts[i].img;
             var symbol = new esri.symbol.PictureMarkerSymbol(url,width,height);
+            symbol.setOffset(xoffset, yoffset);
             var attributes = charts[i].attributes;
             var graphic = new esri.Graphic(point,symbol,attributes);
             // graphic.setInfoTemplate(infoTemplate);
@@ -1892,8 +1995,8 @@ var originalTjLayerContent='<div class="tjPanel" id="tjPanel">\n' +
     '                            </div>\n' +
     '                            <h6>符号大小：</h6>\n' +
     '                            <div id="symbolSize"></div>\n' +
-    '                            <h6>透明度：</h6>\n' +
-    '                            <div id="symbolOpacity1"></div>\n' +
+    '                            <h6 style="display: none">透明度：</h6>\n' +
+    '                            <div id="symbolOpacity1" style="display: none"></div>\n' +
     '                            <h6 style="margin-top: 10px">偏移量：</h6>'+
     '                            <div class="chartSymbolOffsetItem">' +
     '                            <div class="layui-form-item offsetItem">\n' +
@@ -1950,8 +2053,8 @@ var originalTjLayerContent='<div class="tjPanel" id="tjPanel">\n' +
     '                                    <option value="间隔等比模型">间隔等比模型</option>\n' +
     '                                </select>\n' +
     '                            </div>\n' +
-    '                            <h6>透明度：</h6>\n' +
-    '                            <div id="symbolOpacity2"></div>\n' +
+    '                            <h6 style="display: none">透明度：</h6>\n' +
+    '                            <div id="symbolOpacity2" style="display: none"></div>\n' +
     '                        </div>\n' +
     '                    </div>\n' +
     '                    <div id="symbolBtn" style="float: right;">\n' +
