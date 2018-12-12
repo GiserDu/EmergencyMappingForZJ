@@ -495,46 +495,54 @@ function doMap() {
                                             yes:function (index,layero) {
                                                 console.log("OK");
 
-                                                tjLayerName=$("input[ name='tjLayerName' ]").val();
+                                                tjLayerName = $("input[ name='tjLayerName' ]").val();
 
-                                                if(tjLayerName==""){
-                                                    alert("请输入名称");
+                                                if (tjLayerName == "") {
+                                                    layer.tips('请输入图层名称', '#newSLName')
+                                                    // layer.alert('');
                                                 }
 
                                                 if (tjLayerName != "") {
-                                                    var newNode = {name: tjLayerName, url: "123", dom: tjLayertest, symbolInfo:tjPanel3, checked:true};
+                                                    var newNode = {
+                                                        name: tjLayerName,
+                                                        url: "123",
+                                                        dom: tjLayertest,
+                                                        symbolInfo: tjPanel3,
+                                                        checked: true
+                                                    };
                                                     layerNodes[3].children.push(newNode);
                                                     var treeObj = $.fn.zTree.getZTreeObj("doMapTree");
                                                     treeObj.addNodes(treeNode, -1, newNode);
-                                                }
-                                                //统计图层所有参数
-                                                allTjLayerContent={
-                                                    "name":tjLayerName,
-                                                    "spatialdata":tjPanel1,
-                                                    "statisticdata":tjPanel2,
-                                                    "cartographydata":tjPanel3
-                                                }
 
-                                                // tjLayertest="layui-layer"+index;
-                                                // tjLayertest=$("#tjPanel").html();
-                                                var tjType;
-                                                switch (allTjLayerContent.cartographydata.type){
-                                                    case "1":
-                                                        tjType = "chartLayerData";
-                                                        break;
-                                                    case "2":
-                                                        tjType = "classLayerData";
-                                                        break;
+                                                    //统计图层所有参数
+                                                    allTjLayerContent = {
+                                                        "name": tjLayerName,
+                                                        "spatialdata": tjPanel1,
+                                                        "statisticdata": tjPanel2,
+                                                        "cartographydata": tjPanel3
+                                                    }
+
+                                                    // tjLayertest="layui-layer"+index;
+                                                    // tjLayertest=$("#tjPanel").html();
+                                                    var tjType;
+                                                    switch (allTjLayerContent.cartographydata.type) {
+                                                        case "1":
+                                                            tjType = "chartLayerData";
+                                                            break;
+                                                        case "2":
+                                                            tjType = "classLayerData";
+                                                            break;
+                                                    }
+                                                    allTjLayerContent = JSON.stringify(allTjLayerContent);
+                                                    console.log(allTjLayerContent);
+                                                    var zoomLevel = map.getZoom();
+                                                    if (zoomLevel < 9)
+                                                        initTjLayer(allTjLayerContent, tjType, "1");
+                                                    else
+                                                        initTjLayer(allTjLayerContent, tjType, "2");
+                                                    layer.close(index);
+                                                    layer.close(layerIndex);
                                                 }
-                                                allTjLayerContent = JSON.stringify(allTjLayerContent);
-                                                console.log( allTjLayerContent);
-                                                var zoomLevel = map.getZoom();
-                                                if (zoomLevel < 9)
-                                                    initTjLayer(allTjLayerContent, tjType, "1");
-                                                else
-                                                    initTjLayer(allTjLayerContent, tjType, "2");
-                                                layer.close(index);
-                                                layer.close(layerIndex);
                                             }
                                         });
                                     });
@@ -844,18 +852,20 @@ function doMap() {
 
                                     // console.log(treeNode.dom);
 
-                                    var type=parseInt(treeNode.symbolInfo.type);
-                                    if(type==1){
-                                        var preSymbolSizeSliderValue=treeNode.symbolInfo.symbolSizeSliderValue;
-                                        var preSymbolOpacitySliderValue=treeNode.symbolInfo.symbolOpacitySliderValue;
-                                        // var sliderValues=[lastSymbolSizeSliderValue,lastSymbolOpacitySliderValue,0,0];
-                                        modifytjMenuLayer(preSymbolSizeSliderValue,preSymbolOpacitySliderValue,0,0);
-                                    }else if(type==2){
-                                        var preClassNumSliderValue=treeNode.symbolInfo.classNumSliderValue;
-                                        var preSymbolOpacitySliderValue=treeNode.symbolInfo.symbolOpacitySliderValue;
-                                        // var sliderValues=[0,0,preClassNumSliderValue,preSymbolOpacitySliderValue];
-                                        modifytjMenuLayer(0,0,preSymbolOpacitySliderValue,preClassNumSliderValue);
-                                    }
+                                    modifytjMenuLayer(treeNode.symbolInfo);
+
+                                    // var type=parseInt(treeNode.symbolInfo.type);
+                                    // if(type==1){
+                                    //     var preSymbolSizeSliderValue=treeNode.symbolInfo.symbolSizeSliderValue;
+                                    //     var preSymbolOpacitySliderValue=treeNode.symbolInfo.symbolOpacitySliderValue;
+                                    //     // var sliderValues=[lastSymbolSizeSliderValue,lastSymbolOpacitySliderValue,0,0];
+                                    //     modifytjMenuLayer(preSymbolSizeSliderValue,preSymbolOpacitySliderValue,0,0);
+                                    // }else if(type==2){
+                                    //     var preClassNumSliderValue=treeNode.symbolInfo.classNumSliderValue;
+                                    //     var preSymbolOpacitySliderValue=treeNode.symbolInfo.symbolOpacitySliderValue;
+                                    //     // var sliderValues=[0,0,preClassNumSliderValue,preSymbolOpacitySliderValue];
+                                    //     modifytjMenuLayer(0,0,preSymbolOpacitySliderValue,preClassNumSliderValue);
+                                    // }
 
                                     // var newNode={name:$("#newFLName").val(),url:$("#newFLAds").val()};
 
@@ -876,46 +886,48 @@ function doMap() {
                                             '          </div>',
                                             yes:function (index,layero) {
                                                 console.log("OK2");
-                                                tjLayerName=$("input[ name='tjLayerName1' ]").val();
+                                                tjLayerName = $("input[ name='tjLayerName1' ]").val();
 
-                                                if(tjLayerName==""){
-                                                    alert("请输入名称");
+                                                if (tjLayerName == "") {
+                                                    layer.tips('请输入图层名称', '#newSLName')
+                                                    // layer.alert('');
                                                 }
 
                                                 if (tjLayerName != "") {
                                                     treeNode.name = tjLayerName;
-                                                    treeNode.checked=true;
-                                                    treeNode.dom=tjLayertest;
-                                                    treeNode.symbolInfo=tjPanel3;
+                                                    treeNode.checked = true;
+                                                    treeNode.dom = tjLayertest;
+                                                    treeNode.symbolInfo = tjPanel3;
 
                                                     var treeObj = $.fn.zTree.getZTreeObj("doMapTree");
                                                     treeObj.updateNode(treeNode);
+
+                                                    allTjLayerContent = {
+                                                        "name": tjLayerName,
+                                                        "spatialdata": tjPanel1,
+                                                        "statisticdata": tjPanel2,
+                                                        "cartographydata": tjPanel3
+                                                    }
+                                                    // tjLayerName = "";
+                                                    var tjType;
+                                                    switch (allTjLayerContent.cartographydata.type) {
+                                                        case "1":
+                                                            tjType = "chartLayerData";
+                                                            break;
+                                                        case "2":
+                                                            tjType = "classLayerData";
+                                                            break;
+                                                    }
+                                                    allTjLayerContent = JSON.stringify(allTjLayerContent);
+                                                    console.log(allTjLayerContent);
+                                                    var zoomLevel = map.getZoom();
+                                                    if (zoomLevel < 9)
+                                                        initTjLayer(allTjLayerContent, tjType, "1");
+                                                    else
+                                                        initTjLayer(allTjLayerContent, tjType, "2");
+                                                    layer.close(index);
+                                                    layer.close(layerIndex);
                                                 }
-                                                allTjLayerContent={
-                                                    "name":tjLayerName,
-                                                    "spatialdata":tjPanel1,
-                                                    "statisticdata":tjPanel2,
-                                                    "cartographydata":tjPanel3
-                                                }
-                                                // tjLayerName = "";
-                                                var tjType;
-                                                switch (allTjLayerContent.cartographydata.type){
-                                                    case "1":
-                                                        tjType = "chartLayerData";
-                                                        break;
-                                                    case "2":
-                                                        tjType = "classLayerData";
-                                                        break;
-                                                }
-                                                allTjLayerContent = JSON.stringify(allTjLayerContent);
-                                                console.log( allTjLayerContent);
-                                                var zoomLevel = map.getZoom();
-                                                if (zoomLevel < 9)
-                                                    initTjLayer(allTjLayerContent, tjType, "1");
-                                                else
-                                                    initTjLayer(allTjLayerContent, tjType, "2");
-                                                layer.close(index);
-                                                layer.close(layerIndex);
                                             }
                                         });
                                     });
