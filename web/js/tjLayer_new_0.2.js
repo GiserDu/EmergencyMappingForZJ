@@ -381,6 +381,7 @@ function modifytjMenuLayer_new(allTjLayerContent) {
 
         // 复原第二个面板的信息
         $("#tab"+allTjLayerContent.statisticdata.tabId).click();
+        tjPanel2.tableName = allTjLayerContent.statisticdata.tableName;
         $("input[name='dataAddress']").val(allTjLayerContent.statisticdata.dataAddress);
         displayFields($("#fieldslist"+allTjLayerContent.statisticdata.tabId),allTjLayerContent.statisticdata.tableFields);
         $("#spatialId"+allTjLayerContent.statisticdata.tabId).siblings(".layui-form-select").find("dd[lay-value="+ allTjLayerContent.statisticdata.spatialId+"]").click();
@@ -393,10 +394,10 @@ function modifytjMenuLayer_new(allTjLayerContent) {
         // 复原第三个面板的信息
         var type=parseInt(symbolInfo.type);
 
-        var symPara1=0,
+        var symPara1=50,
             symPara2=0,
             symPara3=0,
-            symPara4=0;
+            symPara4=5;
 
         if(type==1){
             symPara1=symbolInfo.symbolSizeSliderValue;
@@ -453,15 +454,36 @@ function modifytjMenuLayer_new(allTjLayerContent) {
                     listenOnSymbolTitleClick();
                     // form.render();
 
-                    var selectedModelName=symbolInfo.modelName;
+                    var selectedModelName="界限等分模型";
+                    var isColorInverse=false;
+                    var imgSrc='./assets/imgs/gradeIcon/9/4.jpg';
+                    var color1='#FFFEE3';var color2='#00935B';
+
+                    var colors=symbolInfo.colors.split(";");
+
+                    if(type==2){
+                        selectedModelName=symbolInfo.modelName;
+                        isColorInverse=symbolInfo.isColorInverse;
+                        imgSrc=symbolInfo.colorSolutionSrc;
+                        if(isColorInverse)
+                            color1=hexify(colors[symbolInfo.classNumSliderValue-1]);
+                            color2=hexify(colors[0]);
+                        }else {
+                            color1=hexify(colors[0]);
+                            color2=hexify(colors[symbolInfo.classNumSliderValue-1]);
+                        }
+                    }
+
                     $("#model").siblings("div.layui-form-select").find("dl").find("dd[lay-value="+selectedModelName+"]").click();
-                    var isColorInverse=symbolInfo.isColorInverse;
+
                     if(isColorInverse){
                         $('#isColorInverse').prop('checked', true);
                         $('#isColorInverse').next().addClass('layui-form-checked');
                     }
-                    var imgSrc=symbolInfo.colorSolutionSrc;
+
                     $("#color-selected>.select_title>img").attr("src",imgSrc);
+                    $("#color-selected>.select_title>img").attr("color1",color1);
+                    $("#color-selected>.select_title>img").attr("color2",color2);
 
                     setSlidersValue(symbolSizeSliderValue,symbolOpacitySliderValue,symbolOpacitySliderValue,classNumSliderValue);
 
@@ -478,21 +500,26 @@ function modifytjMenuLayer_new(allTjLayerContent) {
                     };
                     listenOnSymbolTitleClick();
 
-                    var chartID=symbolInfo.chartID;
+                    var chartID='010101';
+                    var solutionSrc='assets/imgs/gradeIcon/10/6.jpg';
+
+                    if (type==1) {
+                        chartID=symbolInfo.chartID;;
+
+                        var solutionSrc=symbolInfo.colorSolutionSrc;
+
+                        $("#xOffset").val(symbolInfo.xoffset);
+                        $("#yOffset").val(symbolInfo.yoffset);
+                    }
                     var chartSrc="assets/imgs/chartIcon/"+chartID+".png";
                     $("#chart-selected>.select_title>img").attr("src",chartSrc);
 
-                    var solutionSrc=symbolInfo.colorSolutionSrc;
                     $("#color-solution>.select_title>img").attr("src",solutionSrc);
-
-                    $("#xOffset").val(symbolInfo.xoffset);
-                    $("#yOffset").val(symbolInfo.yoffset);
 
                     setSlidersValue(symbolSizeSliderValue,symbolOpacitySliderValue,symbolOpacitySliderValue,classNumSliderValue);
                     // form.render();
                     userDefineChartColor();
                 }
-            }
         });
         element.render('nav');
 
@@ -957,6 +984,15 @@ function getColorbar(customNum,colorLow,colorHigh){
         colors.push("rgba("+parseInt(r>rmax?2*rmax-r:r)+", "+parseInt(g>gmax?2*gmax-g:g)+", "+parseInt(b>bmax?2*bmax-b:b)+","+1+")")
     }
     return colors;
+}
+
+//输出为十六进制格式
+function hexify(color) {
+    var values = color.replace(/rgba?\(/, '').replace(/\)/, '').replace(/[\s+]/g, '').split(',');
+    var a = parseFloat(values[3] || 1), r = Math.floor(a * parseInt(values[0]) + (1 - a) * 255),
+        g = Math.floor(a * parseInt(values[1]) + (1 - a) * 255),
+        b = Math.floor(a * parseInt(values[2]) + (1 - a) * 255);
+    return "#" + ("0" + r.toString(16)).slice(-2) + ("0" + g.toString(16)).slice(-2) + ("0" + b.toString(16)).slice(-2);
 }
 
 

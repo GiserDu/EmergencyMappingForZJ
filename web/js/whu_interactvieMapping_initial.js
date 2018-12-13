@@ -1733,9 +1733,10 @@ function addModelLayUI(mapName) {
                                                     var newNode = {
                                                         name: tjLayerName,
                                                         url: "123",
-                                                        // dom: tjLayertest,
-                                                        // cartographydata: tjPanel3,
-                                                        allContent: allTjLayerContent,
+                                                        // allContent: allTjLayerContent,
+                                                        spatialdata:tjPanel1,
+                                                        statisticdata:tjPanel2,
+                                                        cartographydata:tjPanel3,
                                                         checked: true
                                                     };
                                                     layerNodes[3].children.push(newNode);
