@@ -29,6 +29,8 @@ import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 
 public class JUtil {
@@ -67,174 +69,7 @@ public class JUtil {
 	public static String getResultStrFromAPI(String apiUrl){
 		String resultString = "";
 		try{
-//			String resultString="{" +
-//					"  \"type\": \"FeatureCollection\"," +
-//					"  \"features\": [" +
-//					"    {" +
-//					"      \"type\": \"Feature\"," +
-//					"      \"geometry\": {" +
-//					"        \"type\": \"Point\"," +
-//					"        \"coordinates\": [" +
-//					"          119.52814," +
-//					"          29.879936" +
-//					"        ]" +
-//					"      }," +
-//					"      \"properties\": {" +
-//					"        \"市\": \"杭州市\"," +
-//					"        \"隐患点\": 781.3," +
-//					"        \"避让搬迁\": 115," +
-//					"        \"工程治理\": 218" +
-//					"      }" +
-//					"    }," +
-//					"    {" +
-//					"      \"type\": \"Feature\"," +
-//					"      \"geometry\": {" +
-//					"        \"type\": \"Point\"," +
-//					"        \"coordinates\": [" +
-//					"          121.565296," +
-//					"          29.658292" +
-//					"        ]" +
-//					"      }," +
-//					"      \"properties\": {" +
-//					"        \"市\": \"宁波市\"," +
-//					"        \"隐患点\": 276," +
-//					"        \"避让搬迁\": 43," +
-//					"        \"工程治理\": 37" +
-//					"      }" +
-//					"    }," +
-//					"    {" +
-//					"      \"type\": \"Feature\"," +
-//					"      \"geometry\": {" +
-//					"        \"type\": \"Point\"," +
-//					"        \"coordinates\": [" +
-//					"          120.438594," +
-//					"          27.882016" +
-//					"        ]" +
-//					"      }," +
-//					"      \"properties\": {" +
-//					"        \"市\": \"温州市\"," +
-//					"        \"隐患点\": 1545," +
-//					"        \"避让搬迁\": 290," +
-//					"        \"工程治理\": 258" +
-//					"      }" +
-//					"    }," +
-//					"    {" +
-//					"      \"type\": \"Feature\"," +
-//					"      \"geometry\": {" +
-//					"        \"type\": \"Point\"," +
-//					"        \"coordinates\": [" +
-//					"          119.859578," +
-//					"          30.780919" +
-//					"        ]" +
-//					"      }," +
-//					"      \"properties\": {" +
-//					"        \"市\": \"湖州市\"," +
-//					"        \"隐患点\": 160," +
-//					"        \"避让搬迁\": 45," +
-//					"        \"工程治理\": 62" +
-//					"      }" +
-//					"    }," +
-//					"    {" +
-//					"      \"type\": \"Feature\"," +
-//					"      \"geometry\": {" +
-//					"        \"type\": \"Point\"," +
-//					"        \"coordinates\": [" +
-//					"          120.556913," +
-//					"          29.7612356" +
-//					"        ]" +
-//					"      }," +
-//					"      \"properties\": {" +
-//					"        \"市\": \"绍兴市\"," +
-//					"        \"隐患点\": 289," +
-//					"        \"避让搬迁\": 63," +
-//					"        \"工程治理\": 218" +
-//					"      }" +
-//					"    }," +
-//					"    {" +
-//					"      \"type\": \"Feature\"," +
-//					"      \"geometry\": {" +
-//					"        \"type\": \"Point\"," +
-//					"        \"coordinates\": [" +
-//					"          119.9997208," +
-//					"          29.1041079" +
-//					"        ]" +
-//					"      }," +
-//					"      \"properties\": {" +
-//					"        \"市\": \"金华市\"," +
-//					"        \"隐患点\": 643," +
-//					"        \"避让搬迁\": 70," +
-//					"        \"工程治理\": 97" +
-//					"      }" +
-//					"    }," +
-//					"    {" +
-//					"      \"type\": \"Feature\"," +
-//					"      \"geometry\": {" +
-//					"        \"type\": \"Point\"," +
-//					"        \"coordinates\": [" +
-//					"          118.6833012," +
-//					"          28.8731117" +
-//					"        ]" +
-//					"      }," +
-//					"      \"properties\": {" +
-//					"        \"市\": \"衢州市\"," +
-//					"        \"隐患点\": 616," +
-//					"        \"避让搬迁\": 141," +
-//					"        \"工程治理\": 102" +
-//					"      }" +
-//					"    }," +
-//					"    {" +
-//					"      \"type\": \"Feature\"," +
-//					"      \"geometry\": {" +
-//					"        \"type\": \"Point\"," +
-//					"        \"coordinates\": [" +
-//					"          122.225178," +
-//					"          30.238917" +
-//					"        ]" +
-//					"      }," +
-//					"      \"properties\": {" +
-//					"        \"市\": \"舟山市\"," +
-//					"        \"隐患点\": 220," +
-//					"        \"避让搬迁\": 0," +
-//					"        \"工程治理\": 0" +
-//					"      }" +
-//					"    }," +
-//					"    {" +
-//					"      \"type\": \"Feature\"," +
-//					"      \"geometry\": {" +
-//					"        \"type\": \"Point\"," +
-//					"        \"coordinates\": [" +
-//					"          121.1135732," +
-//					"          28.683662" +
-//					"        ]" +
-//					"      }," +
-//					"      \"properties\": {" +
-//					"        \"市\": \"台州市\"," +
-//					"        \"隐患点\": 330," +
-//					"        \"避让搬迁\": 51," +
-//					"        \"工程治理\": 141" +
-//					"      }" +
-//					"    }," +
-//					"    {" +
-//					"      \"type\": \"Feature\"," +
-//					"      \"geometry\": {" +
-//					"        \"type\": \"Point\"," +
-//					"        \"coordinates\": [" +
-//					"          119.5667332," +
-//					"          28.1894542" +
-//					"        ]" +
-//					"      }," +
-//					"      \"properties\": {" +
-//					"        \"市\": \"丽水市\"," +
-//					"        \"隐患点\": 894," +
-//					"        \"避让搬迁\": 191," +
-//					"        \"工程治理\": 70" +
-//					"      }" +
-//					"    }" +
-//					"  ]" +
-//					"}";
-			String str = URLEncoder.encode("汇总-按市统计","utf-8");
-			URL url = new URL("http://115.236.34.34:8668/api/v1/datasets/dizai/"+str+"?year=2017&month=9");
-			//URL url = new URL("http://www.baidu.com");
+			URL url = new URL(JUtil.chineseToUnicode(apiUrl));
 			HttpURLConnection urlConnection = (HttpURLConnection) url.openConnection();
 			urlConnection.setRequestMethod("GET");
 			urlConnection.setRequestProperty("User-Agent", "Mozilla/4.0 (compatible; MSIE 5.0; Windows NT; DigExt)");
@@ -729,7 +564,32 @@ public class JUtil {
 		cnNames = cnNames.substring(0,cnNames.length()-1);
 		return cnNames;
 	}
-	
+	//中文url转换为unicode编码后的url
+	public static String chineseToUnicode(String url) {
+//        String result = "";
+//        for (int i = 0; i < str.length(); i++) {
+//            int chr1 = (char) str.charAt(i);
+//            if (chr1 >= 19968 && chr1 <= 171941) {//汉字范围 \u4e00-\u9fa5 (中文)
+//                result += "\\u" + Integer.toHexString(chr1);
+//            } else {
+//                result += str.charAt(i);
+//            }
+//        }
+//        return result;
+		Pattern p = Pattern.compile("[\\u4e00-\\u9fa5]");
+		//找到中文url中的中文
+		Matcher m = p.matcher(url);
+		//依次递推，查找下一个单个文字，然后把他替换成utf-8
+		while(m.find()){
+			String group = m.group();
+			try {
+				url =  url.replaceFirst(group, URLEncoder.encode(group, "utf-8"));
+			} catch (Exception e) {
+				// do nothing
+			}
+		}
+		return url;
+	}
 	
 	public static double[] maxValues(IndicatorData[] indicatorDatas)
 	{

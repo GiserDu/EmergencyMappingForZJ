@@ -1114,7 +1114,7 @@ function submitFields(){
 }
 
 function initTjLayer(allTjLayerContent, tjType, regionParamVar) {
-    // var allTjLayerContentStr = JSON.stringify(allTjLayerContent);
+    var url;
     if (tjType == "chartLayerData"){
         var chartLayerNum = 1; //当前添加的统计图层数量
         for (var i=0; i<map.graphicsLayerIds.length; i++){
@@ -1123,7 +1123,12 @@ function initTjLayer(allTjLayerContent, tjType, regionParamVar) {
         }
         console.log(chartLayerNum);
     }
-    var url = "./servlet/fileUploadServlet?allTjLayerContent=" + encodeURI(allTjLayerContent);
+    if (tjPanel2.tabId=="1"){
+        url= "./servlet/fileUploadServlet?allTjLayerContent=" + encodeURI(allTjLayerContent);
+    }else if(tjPanel2.tabId=="2"){
+        url= "./servlet/chartLayerFromAPIServlet?allTjLayerContent="+ encodeURIComponent(allTjLayerContent);
+    }
+
     console.log(tjType);
     $.ajax({
         type: 'POST',
