@@ -1,39 +1,32 @@
 package com.zz.servlet;
 
-import javax.servlet.ServletException;
-import javax.servlet.annotation.WebServlet;
-import javax.servlet.http.HttpServlet;
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
-import java.io.IOException;
-
-import com.et.mvc.util.Json;
 import com.zz.chart.chartfactory.ChartFactory;
 import com.zz.chart.chartfactory.ChartStyleFactory;
 import com.zz.chart.chartfactory.IChart;
 import com.zz.chart.chartstyle.ChartDataPara;
 import com.zz.chart.chartstyle.ChartStyle;
 import com.zz.chart.data.IndicatorData;
-import com.zz.chart.data.ReadRegionData;
 import com.zz.util.ConvexHull;
 import com.zz.util.JUtil;
 import com.zz.util.NetworkUtil;
 import net.sf.json.JSONArray;
 import net.sf.json.JSONObject;
 import sun.misc.BASE64Encoder;
-import telecarto.data.util.ChEnConverter;
 import telecarto.data.util.ColorUtil;
 
 import javax.imageio.ImageIO;
+import javax.servlet.ServletException;
+import javax.servlet.annotation.WebServlet;
+import javax.servlet.http.HttpServlet;
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
 import java.awt.*;
-import java.awt.geom.Rectangle2D;
 import java.awt.image.BufferedImage;
 import java.io.ByteArrayOutputStream;
 import java.io.File;
-
+import java.io.IOException;
 import java.io.PrintWriter;
 import java.util.ArrayList;
-
 
 
 @WebServlet(name = "chartLayerFromAPIServlet")
@@ -54,63 +47,67 @@ public class chartLayerFromAPIServlet extends HttpServlet {
         response.setContentType("text/javascript;charset=UTF-8");//返回json格式的数据
         request.setCharacterEncoding("UTF-8");//设置服务器端对前端传输数据的解码方式!!!
 
+
         String ip = NetworkUtil.getIpAddr(request);
-        //获得空间数据各个指标
-        JSONObject spatialdataJson=JSONObject.fromObject(request.getParameter("spatialdata"));//空间数据json对象
-        String tabID_spatialdata=spatialdataJson.getString("tabID");    //空间数据来源标识ID，1-行政区划，2-上传shp
-        JSONArray regionDataValue=spatialdataJson.getJSONArray("regionDataValue");  //区域标识编码数组
-        String fileName=spatialdataJson.getString("fileName");
-        //获得统计数据各指标
-        JSONObject statisticdataJson=JSONObject.fromObject(request.getParameter("statisticdata"));//空间数据json对象
-        String tabID_statisticdata=statisticdataJson.getString("tabID");    //空间数据来源标识ID，1-行政区划，2-上传shp
-        String dataAddress=statisticdataJson.getString("dataAddress");
-        String tableName=statisticdataJson.getString("tableName");
-        String spatialId=statisticdataJson.getString("spatialId");
-        JSONArray fieldsName=statisticdataJson.getJSONArray("fieldsName");
-        int fieldsNum=statisticdataJson.getInt("fieldsNum");
-        
-        //获得画图数据各指标
-        JSONObject cartographydataJson= JSONObject.fromObject(request.getParameter("cartographydata"));
-        String type=cartographydataJson.getString("cartographydataJson");
-        String chartID=cartographydataJson.getString("chartID");
-        JSONArray colorArray=cartographydataJson.getJSONArray("colors");
-        int symbolSize=cartographydataJson.getInt("symbolSizeSliderValue");
+//
+//        String chartid = request.getParameter("CHARTID");// 专题符号id
+//        String widthstring = request.getParameter("WIDTH");// 符号长宽
+//        String heightstring = request.getParameter("WIDTH");
+//        String URL="";
+//       // String regionParam = request.getParameter("regionParam");
+//
+////		String islabelString = request.getParameter("ISLABEL");
+//       // String islabelString = "false";
+//        // String yearString = request.getParameter("year");
+//
+//        String chartData = request.getParameter("CHARTDATA");
+//        System.out.println("chart data: "+chartData);
+//        String[] arr = chartData.split(",");
+//        System.out.println(arr);
+//        String thematicData = arr[0];
+        JSONObject dataJson = JSONObject.fromObject(request.getParameter("allTjLayerContent"));
+        JSONObject statisticdataJson=JSONObject.fromObject(dataJson.getJSONObject("statisticdata"));
+        String fieldsNames=statisticdataJson.getString("fieldsName");
 
-        // String wcString = request.getParameter("wc");
-        String dcString = request.getParameter("dc");
-        String chartid = request.getParameter("chartID");// 专题符号id
-        String widthstring = request.getParameter("symbolSizeSliderValue");// 符号长宽
-        String heightstring = request.getParameter("WIDTH");
-        String regionParam = request.getParameter("regionParam");
+//获得画图数据各指标
 
-//		String islabelString = request.getParameter("ISLABEL");
-       // String islabelString = "false";
-        // String yearString = request.getParameter("year");
+        JSONObject cartographydataJson=JSONObject.fromObject(dataJson.getJSONObject("cartographydata"));
+        System.out.println(cartographydataJson);
+//        String type=cartographydataJson.getString("cartographydataJson");
+        String chartID0=cartographydataJson.getString("chartID");
+        String chartid = chartID0.substring(1, 6);
+        System.out.println(chartid);
+//        String chartID="10101";
+//        JSONArray colorArray=cartographydataJson.getJSONArray("colors");
+//        int symbolSize=cartographydataJson.getInt("symbolSizeSliderValue");
 
-        String chartData = request.getParameter("CHARTDATA");
-        System.out.println("chart data: "+chartData);
-        String[] arr = chartData.split(",");
-        System.out.println(arr);
-        String thematicData = arr[0];
 
+
+        int width = cartographydataJson.getInt("symbolSizeSliderValue");// 符号长宽
+
+        int height= cartographydataJson.getInt("symbolSizeSliderValue");
+//        String regionParam = "1";
+
+        String url=statisticdataJson.getString("dataAddress");;
+        String[] arr = fieldsNames.split(",");
         //根据所选指标的数目进行不同的色彩配置(有几个指标配置几个色彩渐变)
-        //String colorRampSchema1 = request.getParameter("colorRampSchema");
+        String colorRampSchema1 = cartographydataJson.getString("colorName");
 
-//		System.out.println(colorRampSchema1);
-        String colorString="15538980;2498916;15855872";
-        //colorString = ColorUtil.getColorScheme(arr.length - 1,colorRampSchema1);
+    	System.out.println(colorRampSchema1);
+        //String colorString="15538980;2498916;15855872";
+        String colorString = ColorUtil.getColorScheme(arr.length ,colorRampSchema1);
         String[] colors = colorString.split(";");
         int[] fieldColors = new int[colors.length]; // 专题符号颜色
         for (int i = 0; i < fieldColors.length; i++) {
             fieldColors[i] = Integer.parseInt(colors[i]);
         }
 
-        Rectangle2D.Double DC = JUtil.StringToRect(dcString);// DC
+
         ChartStyleFactory chartStyleFactory = new ChartStyleFactory();
         ChartStyle chartStyle = chartStyleFactory.createcChartStyle(chartid);// 通过工厂模式实例化符号样式类
         //设置符号宽高
-        int width = Integer.parseInt(widthstring);
-        int height = Integer.parseInt(heightstring);
+//        int width = Integer.parseInt(widthstring);
+//        int height = Integer.parseInt(heightstring);
         //根据符号ID加载符号样式
         String dir = "assets/";
         String chartPath = dir + chartid + ".xml";
@@ -128,10 +125,10 @@ public class chartLayerFromAPIServlet extends HttpServlet {
 
         //输入apiURL返回数据resultString
         //解析API返回的数据resultString，
-        String URL="";
-        String resultString=JUtil.getResultStrFromAPI("");
+
+        String resultString= JUtil.getResultStrFromAPI(url);
         IndicatorData[] indicatorDatas = JUtil.getIndicatorDataFromAPi(resultString);
-        double[][] coordinatesXY=JUtil.getXYFromAPi(resultString);
+        double[][] coordinatesXY= JUtil.getXYFromAPi(resultString);
 //        String[] xStrings = ReadRegionData.getRegonX();
 //        String[] yStrings = ReadRegionData.getRegonY();
         chartDataPara.initialAsAPI(indicatorDatas);// 初始化专题符号层参数
@@ -179,12 +176,11 @@ public class chartLayerFromAPIServlet extends HttpServlet {
 
 
 
-
         /*单张图绘制,并进行最小闭包处理*/
         int indiNum = indicatorDatas[0].getNames().length;//指标数目
         String[] indiNames = new String[indiNum];
         String[] indiUnits = new String[indiNum];
-        String indiSource = URL;
+        String indiSource =url ;
 
         for (int p=0;p<indiNum;p++) {
             indiNames[p] = indicatorDatas[0].getNames()[p];
@@ -260,9 +256,7 @@ public class chartLayerFromAPIServlet extends HttpServlet {
         chartsObject.put("year",timeData);
         chartsObject.put("source",indiSource);
         chartsObject.put("chartLegend",imgStreamLegend.replaceAll("[\\s*\t\n\r]", ""));
-
-
-
+        chartsObject.put("type","chartLayer");
 
         PrintWriter writer = response.getWriter();
         writer.print(chartsObject);
