@@ -59,7 +59,7 @@ public class printMapServlet extends HttpServlet {
 				+ request.getContextPath();      //项目名称
 
 		String ipContext = ip.replaceAll("\\.","-");
-		String printSavePath = getServletContext().getRealPath("/") + "printMap/"+ ipContext;
+		String printSavePath = getServletContext().getRealPath("/") + "printMap/"+ ipContext ;
 		String printMapURL = imageUtil.getImgFromUrl(strBackUrl,ipContext,imgURL,printSavePath,printLegendFlag,layout,dpi);
 		PrintWriter out = response.getWriter();
 		out.println(printMapURL);

@@ -170,6 +170,8 @@ public class fileUploadServlet extends HttpServlet {
                         String spatialId = statisticdataJson.getString("spatialId");
                         JSONArray fieldsNameArray=statisticdataJson.getJSONArray("fieldsName");
                         String fieldsNames=statisticdataJson.getString("fieldsName");
+                        String year = statisticdataJson.getString("timeId");
+//                        String year = "2016";
                         StringBuffer fieldsNamesBuffer = new StringBuffer(fieldsNames);
                         fieldsNamesBuffer.delete(0, 2);
                         fieldsNamesBuffer.delete(fieldsNamesBuffer.length()-2, fieldsNamesBuffer.length());
@@ -182,7 +184,7 @@ public class fileUploadServlet extends HttpServlet {
 
                         int breakNum = Integer.parseInt(cartographydataJson.getString("classNumSliderValue"));
                         String breakMethod=cartographydataJson.getString("modelName");
-                        String ip="127.0.0";
+                        String ip = NetworkUtil.getIpAddr(request);
                         String regionParam = request.getParameter("regionParam");
 
                         String color = cartographydataJson.getString("colors");
@@ -197,7 +199,7 @@ public class fileUploadServlet extends HttpServlet {
                                     "LEFT JOIN\t"+ classTableName +"\n" +
                                     "ON region_info_copy1.citycode="+ classTableName +".`"+ spatialId +"`\n" +
                                     "WHERE\n" +
-                                    "\tregion_info_copy1.class = " + regionParam +" AND "+ classTableName +".`年份` LIKE '2016'";
+                                    "\tregion_info_copy1.class = " + regionParam +" AND "+ classTableName +".`年份` LIKE '" + year +"'";
                         }
                         else if (regionParam.equals("2")){
                             sql="SELECT\n" +
@@ -207,7 +209,7 @@ public class fileUploadServlet extends HttpServlet {
                                     "LEFT JOIN\t"+ classTableName +"\n" +
                                     "ON region_info_copy1.coutcode="+ classTableName +".`"+ spatialId +"`\n" +
                                     "WHERE\n" +
-                                    "\tregion_info_copy1.class = " + regionParam +" AND "+ classTableName +".`年份` LIKE '2016'";
+                                    "\tregion_info_copy1.class = " + regionParam +" AND "+ classTableName +".`年份` LIKE '" + year +"'";
                         }
 
                         //sql_select = "LEFT JOIN "+ tableName +" t2 ON t1.RGN_CODE = t2.RGN_CODE WHERE t1.RGN_CODE LIKE '"+Param+"' AND t1.RGN_CODE!= '"+regionParam+"' AND t2.YEAR = '" + year + "'";
@@ -220,7 +222,7 @@ public class fileUploadServlet extends HttpServlet {
                             ArrayList<ClassData> classList = new ArrayList<>();
                             while (resultSet2.next()) {
                                 ClassData classData = new ClassData(resultSet2.getString(1),resultSet2.getString(2),
-                                        resultSet2.getString(3),resultSet2.getString(4),resultSet2.getString(5),resultSet2.getString(6));
+                                        resultSet2.getString(3),resultSet2.getString(4),resultSet2.getString(5),resultSet2.getString(6),fieldNameCN);
                                 classList.add(classData);
                             }
                             double maxValue =  Double.parseDouble(classList.get(0).getData());
@@ -323,6 +325,7 @@ public class fileUploadServlet extends HttpServlet {
 
                             //传输JSON分级grapgics数组到前端
                             classObject.put("classDataArray",classDataArray);
+                            classObject.put("fieldName", fieldNameCN);
                             //classObject.put("dataSource",dataSource);
                             classObject.put("classLegend",imgStreamLegend.replaceAll("[\\s*\t\n\r]", ""));
                             PrintWriter out = response.getWriter();
@@ -566,8 +569,8 @@ public class fileUploadServlet extends HttpServlet {
 
     //制作统计图表
     public void doChartLayer(HttpServletRequest request, HttpServletResponse response) throws IOException {
-        String ip = "";
-    String statisticJson="{\n" +
+        String ip = NetworkUtil.getIpAddr(request);
+        String statisticJson="{\n" +
             "\t  \"nav\": \"nav2\",\n" +
             "\t  \"tabId\": \"1\",\n" +
             "\t  \"dataAddress\": \"\",\n" +
@@ -590,6 +593,7 @@ public class fileUploadServlet extends HttpServlet {
 
 
         //获得统计数据各指标
+        String chartLayerNum = request.getParameter("chartLayerNum");
         JSONObject dataJson = JSONObject.fromObject(request.getParameter("allTjLayerContent"));
         JSONObject statisticdataJson=JSONObject.fromObject(dataJson.getJSONObject("statisticdata"));
         System.out.println(statisticdataJson);
@@ -598,8 +602,8 @@ public class fileUploadServlet extends HttpServlet {
         String dataAddress=statisticdataJson.getString("dataAddress");
         String tableName=statisticdataJson.getString("tableName");
         String spatialId=statisticdataJson.getString("spatialId");
-//        String year = statisticdataJson.getString("year"); //根据实际情况修改
-        String year = "2016";
+        String year = statisticdataJson.getString("timeId"); //根据实际情况修改
+//        String year = "2016";
         JSONArray fieldsNameArray=statisticdataJson.getJSONArray("fieldsName");
         String fieldsNames=statisticdataJson.getString("fieldsName");
         String[] fieldsName=new String[fieldsNameArray.size()];
@@ -637,7 +641,12 @@ public class fileUploadServlet extends HttpServlet {
 
         //String chartData = request.getParameter("CHARTDATA");
         //System.out.println("chart data: "+chartData);
-        String[] arr = fieldsNames.split(",");
+        StringBuffer fieldsNamesStr = new StringBuffer(fieldsNames);
+        fieldsNamesStr.deleteCharAt(0);
+        fieldsNamesStr.deleteCharAt(fieldsNamesStr.length()-1);
+        String fieldsNameString = fieldsNamesStr.toString();
+        fieldsNameString = fieldsNameString.replaceAll("\"", "");
+        String[] arr = fieldsNameString.split(",");
 //        tableName= statisticdataJson.getString("tableName");
         String thematicData = tableName;
 
@@ -683,7 +692,7 @@ public class fileUploadServlet extends HttpServlet {
         //统计符号的chartDataPara
         ChartDataPara chartDataPara = new ChartDataPara();
 
-        chartDataPara.initial_ZJ(fieldsNames,indiSource);// 初始化专题符号层参数
+        chartDataPara.initial_ZJ(fieldsNameString,indiSource);// 初始化专题符号层参数
 
         chartDataPara.setFieldColor(fieldColors);
         chartDataPara.setWidth(width);
@@ -718,14 +727,42 @@ public class fileUploadServlet extends HttpServlet {
         IndicatorData[] indicatorDataLegend = new IndicatorData[1];
         indicatorDataLegend[0] = indicatorDatas[0];
         BufferedImage bi = chartLegend.drawLegend(80, 160, chartDataPara, chartStyle, maxValues, minValues, averageValues, indicatorDataLegend);
-        BufferedImage bufferedImage = new BufferedImage(bi.getWidth(),bi.getHeight(),BufferedImage.TYPE_INT_RGB);
-        Graphics2D g2d = bufferedImage.createGraphics();
-//			g2d.setColor(new Color(247,247,247));
-        g2d.setColor(Color.white);
-        g2d.fillRect(0,0,bi.getWidth(),bi.getHeight());
-        //把图例bi绘制到bufferedImage上
-        g2d.drawImage(bi,0,0,bi.getWidth(),bi.getHeight(),null);
-        g2d.dispose();
+        BufferedImage bufferedImage = null;
+        String tempPath = getServletContext().getRealPath("/") + "printMap";
+        String tempFilePath = getServletContext().getRealPath("/") + "printMap\\"+ ip.replaceAll("\\.","-");
+
+        if(chartLayerNum.equals("1")){
+            bufferedImage = new BufferedImage(bi.getWidth(),bi.getHeight(),BufferedImage.TYPE_INT_RGB);
+            Graphics2D g2d = bufferedImage.createGraphics();
+    //			g2d.setColor(new Color(247,247,247));
+            g2d.setColor(Color.white);
+            g2d.fillRect(0,0,bi.getWidth(),bi.getHeight());
+            //把图例bi绘制到bufferedImage上
+            g2d.drawImage(bi,0,0,bi.getWidth(),bi.getHeight(),null);
+            g2d.dispose();
+        }else {
+            String formerChartLegend = getServletContext().getRealPath("/") + "printMap\\"+ ip.replaceAll("\\.","-") +"\\"+ "chartLegend.png";
+            BufferedImage chartImage = ImageIO.read(new FileInputStream(formerChartLegend));
+
+            bufferedImage = new BufferedImage(bi.getWidth(),bi.getHeight()+chartImage.getHeight(),BufferedImage.TYPE_INT_RGB);
+            Graphics2D g2d = bufferedImage.createGraphics();
+            g2d.setColor(Color.white);
+            g2d.fillRect(0,0,bufferedImage.getWidth(),bufferedImage.getHeight());
+
+            //把两个图例绘制到bufferedImage上
+            g2d.drawImage(bi,0,0,bi.getWidth(),bi.getHeight(),null);
+            g2d.drawImage(chartImage,0,bi.getHeight(),chartImage.getWidth(),chartImage.getHeight(),null);
+            g2d.dispose();
+
+        }
+//        BufferedImage bufferedImage = new BufferedImage(bi.getWidth(),bi.getHeight(),BufferedImage.TYPE_INT_RGB);
+//        Graphics2D g2d = bufferedImage.createGraphics();
+////			g2d.setColor(new Color(247,247,247));
+//        g2d.setColor(Color.white);
+//        g2d.fillRect(0,0,bi.getWidth(),bi.getHeight());
+//        //把图例bi绘制到bufferedImage上
+//        g2d.drawImage(bi,0,0,bi.getWidth(),bi.getHeight(),null);
+//        g2d.dispose();
         //图例图片转码为base64
         BASE64Encoder encoderLegend = new BASE64Encoder();
         ByteArrayOutputStream baosLegend = new ByteArrayOutputStream();
@@ -734,8 +771,8 @@ public class fileUploadServlet extends HttpServlet {
         byte[] bytesLegend = baosLegend.toByteArray();
         String imgStreamLegend = encoderLegend.encodeBuffer(bytesLegend).trim();
         //输出统计图图例到本地(底色透明)
-        String tempPath = getServletContext().getRealPath("/") + "printMap";
-        String tempFilePath = getServletContext().getRealPath("/") + "printMap\\"+ ip.replaceAll("\\.","-");
+//        String tempPath = getServletContext().getRealPath("/") + "printMap";
+//        String tempFilePath = getServletContext().getRealPath("/") + "printMap\\"+ ip.replaceAll("\\.","-");
         File fileSavepath = new File(tempPath);
         File fileSavepathMap = new File(tempFilePath);
         if(!fileSavepath.exists()){
@@ -745,8 +782,7 @@ public class fileUploadServlet extends HttpServlet {
             fileSavepathMap.mkdirs();
         }
         String imgPath = fileSavepathMap + "/"+"chartLegend.png";
-        ImageIO.write(bi, "png", new File(imgPath));
-
+        ImageIO.write(bufferedImage, "png", new File(imgPath));
 
 
 

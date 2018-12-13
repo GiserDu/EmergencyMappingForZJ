@@ -3,6 +3,7 @@ package telecarto.data.util;
 import java.util.Map;
 
 public class FeaturesFromAPI {
+
     public String getType() {
         return type;
     }
