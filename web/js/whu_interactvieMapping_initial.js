@@ -1455,6 +1455,7 @@ function addModelLayUI(mapName) {
     }
     //为模板中的统计图层初始化
     for(var i=0;i<statisticLayer_Model.modules.length;i++){
+        layerNodes_Model[3].children[i].checked = true;
         tjLayerName=statisticLayer_Model.modules[i]["name"];
         var zoomLevel = map.getZoom();
         var tjType;

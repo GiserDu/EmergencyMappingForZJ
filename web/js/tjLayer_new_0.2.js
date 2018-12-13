@@ -1443,43 +1443,41 @@ function changeLayerOnZoom(thisLayer, tjType, regionParamVar, chartLayerN) {
 function onZoomInLevelAbove10(){
     // var classLayer;
     $("#legend-container .legend").remove();
-    var num = 0;
+    var chartNum = 0;
     for (var i = 0; i < map.graphicsLayerIds.length; i++){
         if ((map.getLayer(map.graphicsLayerIds[i])).name == "classGLayer"){
             // regionParamVar = "2";
             thisZoomLayer = map.getLayer(map.graphicsLayerIds[i]);
             zoomOutFlag = 1;
-            num = 1;
-            changeLayerOnZoom(thisZoomLayer, "classLayerData", "2", num);
+            changeLayerOnZoom(thisZoomLayer, "classLayerData", "2", 1);
 
         }
         else if ((map.getLayer(map.graphicsLayerIds[i])).name == "chartGLayer"){
             // regionParamVar = "2";
             thisZoomLayer = map.getLayer(map.graphicsLayerIds[i]);
             zoomOutFlag = 1;
-            num++;
-            changeLayerOnZoom(thisZoomLayer, "chartLayerData", "2", num);
+            chartNum++;
+            changeLayerOnZoom(thisZoomLayer, "chartLayerData", "2", chartNum);
         }
     }
 }
 
 function onZoomInLevelBelow10() {
     $("#legend-container .legend").remove();
-    var num = 0;
+    var chartNum = 0;
     for (var i = 0; i < map.graphicsLayerIds.length; i++){
         if ((map.getLayer(map.graphicsLayerIds[i])).name == "classGLayer"){
             // regionParamVar = "2";
             thisZoomLayer = map.getLayer(map.graphicsLayerIds[i]);
             zoomOutFlag = 1;
-            num = 1;
-            changeLayerOnZoom(thisZoomLayer, "classLayerData", "1", num);
+            changeLayerOnZoom(thisZoomLayer, "classLayerData", "1", 1);
         }
         else if ((map.getLayer(map.graphicsLayerIds[i])).name == "chartGLayer"){
             // regionParamVar = "2";
             thisZoomLayer = map.getLayer(map.graphicsLayerIds[i]);
             zoomOutFlag = 1;
-            num++;
-            changeLayerOnZoom(thisZoomLayer, "chartLayerData", "1", num);
+            chartNum++;
+            changeLayerOnZoom(thisZoomLayer, "chartLayerData", "1", chartNum);
         }
     }
 }
