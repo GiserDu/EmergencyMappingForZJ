@@ -978,11 +978,27 @@ function doMap() {
                                     var thisTjLayerType = thisLayer.name;
                                     switch (thisTjLayerType){
                                         case "chartGLayer":
-                                            indi = [];
+                                            var chartFlag = 0;
+                                            for (var i=0; i<map.graphicsLayerIds.length; i++){
+                                                if (map.getLayer(map.graphicsLayerIds[i]).name == "chartGLayer"){
+                                                    chartFlag = 1;
+                                                    break;
+                                                }
+                                            }
+                                            if (chartFlag == 0)
+                                                indi = [];
                                             $("#legend-container .legend").remove();
                                             break;
                                         case "classGLayer":
-                                            field_cn = "";
+                                            var classFlag = 0;
+                                            for (var i=0; i<map.graphicsLayerIds.length; i++){
+                                                if (map.getLayer(map.graphicsLayerIds[i]).name == "classGLayer"){
+                                                    classFlag = 1;
+                                                    break;
+                                                }
+                                            }
+                                            if (classFlag == 0)
+                                                field_cn = "";
                                             $("#legend-container .legend").remove();
                                             break;
                                     }
@@ -1439,6 +1455,7 @@ function addModelLayUI(mapName) {
     }
     //为模板中的统计图层初始化
     for(var i=0;i<statisticLayer_Model.modules.length;i++){
+        layerNodes_Model[3].children[i].checked = true;
         tjLayerName=statisticLayer_Model.modules[i]["name"];
         var zoomLevel = map.getZoom();
         var tjType;

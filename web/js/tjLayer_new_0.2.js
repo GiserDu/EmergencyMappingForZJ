@@ -13,7 +13,7 @@ var allTjLayerContent={};
 // 制图范围数据的json格式
 // var tjPanel1={"tabID":"1","identityField":"value","regionData":"","fileName":""};
 var tjPanel1={};
-var tjPanel2 = {"tabId":"1","dataAddress":"","tableName":"","spatialId":"","fieldsName":[],"fieldsNum":0};
+var tjPanel2 = {"tabId":"1","dataAddress":"","tableName":"","spatialId":"","timeId":"","tableFields":[],"fieldsName":[],"fieldsNum":0};
 //tjPanel3中有一个key是type，1表示统计图表，2表示分级符号
 var tjPanel3={};
 var zoomOutFlag = 0;
@@ -24,6 +24,7 @@ var chartImg_url = undefined;//饼图图例的url
 // var charLegendMonitor;//饼图图例的定时器
 var legendFlag = 0;
 var classifyImg_url = undefined;//分级统计图图例的url
+var chartLayerNum = 1; //当前添加的统计图层数量
 
 // 图例按钮的事件
 $("#map-legend").bind({
@@ -228,6 +229,9 @@ function modifytjMenuLayer(symbolInfo) {
     if(type==1){
         symPara1=symbolInfo.symbolSizeSliderValue;
         symPara2=symbolInfo.symbolOpacitySliderValue;
+        $("#xOffset").val(symbolInfo.xoffset);
+        $("#yOffset").val(symbolInfo.yoffset);
+
     }else if(type==2){
         symPara3=symbolInfo.symbolOpacitySliderValue;
         symPara4=symbolInfo.classNumSliderValue;
@@ -377,6 +381,8 @@ function modifytjMenuLayer_new(allTjLayerContent) {
 
         // 复原第二个面板的信息
         $("#tab"+allTjLayerContent.statisticdata.tabId).click();
+        tjPanel2.tableName = allTjLayerContent.statisticdata.tableName;
+        $("input[name='dataAddress']").val(allTjLayerContent.statisticdata.dataAddress);
         displayFields($("#fieldslist"+allTjLayerContent.statisticdata.tabId),allTjLayerContent.statisticdata.tableFields);
         $("#spatialId"+allTjLayerContent.statisticdata.tabId).siblings(".layui-form-select").find("dd[lay-value="+ allTjLayerContent.statisticdata.spatialId+"]").click();
         $("#timeId"+allTjLayerContent.statisticdata.tabId).siblings(".layui-form-select").find("dd[lay-value="+ allTjLayerContent.statisticdata.timeId+"]").click();
@@ -388,10 +394,10 @@ function modifytjMenuLayer_new(allTjLayerContent) {
         // 复原第三个面板的信息
         var type=parseInt(symbolInfo.type);
 
-        var symPara1=0,
+        var symPara1=50,
             symPara2=0,
             symPara3=0,
-            symPara4=0;
+            symPara4=5;
 
         if(type==1){
             symPara1=symbolInfo.symbolSizeSliderValue;
@@ -448,15 +454,36 @@ function modifytjMenuLayer_new(allTjLayerContent) {
                     listenOnSymbolTitleClick();
                     // form.render();
 
-                    var selectedModelName=symbolInfo.modelName;
+                    var selectedModelName="界限等分模型";
+                    var isColorInverse=false;
+                    var imgSrc='./assets/imgs/gradeIcon/9/4.jpg';
+                    var color1='#FFFEE3';var color2='#00935B';
+
+                    var colors=symbolInfo.colors.split(";");
+
+                    if(type==2){
+                        selectedModelName=symbolInfo.modelName;
+                        isColorInverse=symbolInfo.isColorInverse;
+                        imgSrc=symbolInfo.colorSolutionSrc;
+                        if(isColorInverse)
+                            color1=hexify(colors[symbolInfo.classNumSliderValue-1]);
+                            color2=hexify(colors[0]);
+                        }else {
+                            color1=hexify(colors[0]);
+                            color2=hexify(colors[symbolInfo.classNumSliderValue-1]);
+                        }
+                    }
+
                     $("#model").siblings("div.layui-form-select").find("dl").find("dd[lay-value="+selectedModelName+"]").click();
-                    var isColorInverse=symbolInfo.isColorInverse;
+
                     if(isColorInverse){
                         $('#isColorInverse').prop('checked', true);
                         $('#isColorInverse').next().addClass('layui-form-checked');
                     }
-                    var imgSrc=symbolInfo.colorSolutionSrc;
+
                     $("#color-selected>.select_title>img").attr("src",imgSrc);
+                    $("#color-selected>.select_title>img").attr("color1",color1);
+                    $("#color-selected>.select_title>img").attr("color2",color2);
 
                     setSlidersValue(symbolSizeSliderValue,symbolOpacitySliderValue,symbolOpacitySliderValue,classNumSliderValue);
 
@@ -473,21 +500,26 @@ function modifytjMenuLayer_new(allTjLayerContent) {
                     };
                     listenOnSymbolTitleClick();
 
-                    var chartID=symbolInfo.chartID;
+                    var chartID='010101';
+                    var solutionSrc='assets/imgs/gradeIcon/10/6.jpg';
+
+                    if (type==1) {
+                        chartID=symbolInfo.chartID;;
+
+                        var solutionSrc=symbolInfo.colorSolutionSrc;
+
+                        $("#xOffset").val(symbolInfo.xoffset);
+                        $("#yOffset").val(symbolInfo.yoffset);
+                    }
                     var chartSrc="assets/imgs/chartIcon/"+chartID+".png";
                     $("#chart-selected>.select_title>img").attr("src",chartSrc);
 
-                    var solutionSrc=symbolInfo.colorSolutionSrc;
                     $("#color-solution>.select_title>img").attr("src",solutionSrc);
-
-                    $("#xOffset").val(symbolInfo.xoffset);
-                    $("#yOffset").val(symbolInfo.yoffset);
 
                     setSlidersValue(symbolSizeSliderValue,symbolOpacitySliderValue,symbolOpacitySliderValue,classNumSliderValue);
                     // form.render();
                     userDefineChartColor();
                 }
-            }
         });
         element.render('nav');
 
@@ -545,6 +577,7 @@ function constructTjJson3() {
         alert("您还未选择用于制图的统计指标");
     } else if(selectedIndexNum==1){
         // -----获得用户选择的有关分级符号的值-----
+        var solutionSrc=$("#color-selected>.select_title>img").attr("src");
         var color1=$("#color-selected>.select_title>img").attr("color1");
         var color2=$("#color-selected>.select_title>img").attr("color2");
         var isChecked=$('#isColorInverse').is(':checked'); ;
@@ -565,6 +598,7 @@ function constructTjJson3() {
         tjPanel3={
             "type":"2",
             "classNumSliderValue":classNumSliderValue,
+            "colorSolutionSrc":solutionSrc,
             "colors":colorString,
             "isColorInverse":isChecked,
             "modelName":modelName,
@@ -574,6 +608,7 @@ function constructTjJson3() {
         // -----获得用户选择的有关统计符号的值-----
         var chartID = $("#chart-selected>.select_title>img").attr("src").slice(-10,-4);
         var colorName= $("#color-solution>.select_title>img").attr("name");
+        var solutionSrc= $("#color-solution>.select_title>img").attr("src");
         var xoffset=$("input[ name='x-offset' ]").val();
         var yoffset=$("input[ name='y-offset' ]").val();
         var colors=[];
@@ -586,6 +621,73 @@ function constructTjJson3() {
             "type":"1",
             "chartID":chartID,
             "colorName":colorName,
+            "colorSolutionSrc":solutionSrc,
+            "colors":colors,
+            "symbolSizeSliderValue":symbolSizeSliderValue,
+            "symbolOpacitySliderValue":symbolOpacitySliderValue,
+            "xoffset":xoffset,
+            "yoffset":yoffset
+        }
+    }
+
+    console.log(tjPanel3);
+}
+
+// 当修改时创建json
+function constructTjJson3_modify(content) {
+
+    var statisticInfo=content.statisticdata;
+    var selectedIndexNum=statisticInfo.fieldsNum;
+
+    if(selectedIndexNum==null || selectedIndexNum==0){
+        alert("您还未选择用于制图的统计指标");
+    } else if(selectedIndexNum==1){
+        // -----获得用户选择的有关分级符号的值-----
+        var solutionSrc=$("#color-selected>.select_title>img").attr("src");
+        var color1=$("#color-selected>.select_title>img").attr("color1");
+        var color2=$("#color-selected>.select_title>img").attr("color2");
+        var isChecked=$('#isColorInverse').is(':checked'); ;
+        if(isChecked){
+            var tmp;
+            tmp=color1;
+            color1=color2;
+            color2=tmp;
+        };
+        var colors=getColorbar(classNumSliderValue,color1,color2);
+        var colorString = "";
+        for (var i=0;i<colors.length;i++){
+            colorString += colors[i];
+            colorString += ";";
+        }
+        colorString = colorString.substring(0, colorString.length - 1);
+        var modelName=$('#model option:selected').val();
+        tjPanel3={
+            "type":"2",
+            "classNumSliderValue":classNumSliderValue,
+            "colorSolutionSrc":solutionSrc,
+            "colors":colorString,
+            "isColorInverse":isChecked,
+            "modelName":modelName,
+            "symbolOpacitySliderValue":symbolOpacitySliderValue
+        }
+    } else if(selectedIndexNum>1){
+        // -----获得用户选择的有关统计符号的值-----
+        var chartID = $("#chart-selected>.select_title>img").attr("src").slice(-10,-4);
+        var colorName= $("#color-solution>.select_title>img").attr("name");
+        var solutionSrc= $("#color-solution>.select_title>img").attr("src");
+        var xoffset=$("input[ name='x-offset' ]").val();
+        var yoffset=$("input[ name='y-offset' ]").val();
+        var colors=[];
+        // 获得所有颜色选择器
+        var chartIndexColorpick=$(".userDefineColors").find('.chartColorPicker');
+        for(var i=0;i<chartIndexColorpick.length;i++){
+            colors[i]=$(".userDefineColors").find('.chartColorPicker').find('.layui-colorpicker-trigger-span')[i].style.backgroundColor;
+        }
+        tjPanel3={
+            "type":"1",
+            "chartID":chartID,
+            "colorName":colorName,
+            "colorSolutionSrc":solutionSrc,
             "colors":colors,
             "symbolSizeSliderValue":symbolSizeSliderValue,
             "symbolOpacitySliderValue":symbolOpacitySliderValue,
@@ -612,7 +714,7 @@ function initTjChartSymbol() {
         $("#color-solution").find('.select_content').html('');
         for ( var k=1;k<e.length;k++) {
             $("#color-solution").find('.select_content').append(
-                '<li><img  style="width:100%;" name="'
+                '<li><img  style="width:100%;"  name="'
                 + e[k]
                 + '" src="./assets/imgs/gradeIcon/10/' + k + '.jpg"></li>');
         }
@@ -884,6 +986,15 @@ function getColorbar(customNum,colorLow,colorHigh){
     return colors;
 }
 
+//输出为十六进制格式
+function hexify(color) {
+    var values = color.replace(/rgba?\(/, '').replace(/\)/, '').replace(/[\s+]/g, '').split(',');
+    var a = parseFloat(values[3] || 1), r = Math.floor(a * parseInt(values[0]) + (1 - a) * 255),
+        g = Math.floor(a * parseInt(values[1]) + (1 - a) * 255),
+        b = Math.floor(a * parseInt(values[2]) + (1 - a) * 255);
+    return "#" + ("0" + r.toString(16)).slice(-2) + ("0" + g.toString(16)).slice(-2) + ("0" + b.toString(16)).slice(-2);
+}
+
 
 //打开第二个页面
 function opentjPanel2(){
@@ -892,12 +1003,14 @@ function opentjPanel2(){
         var element = layui.element
             ,form=layui.form;
         if(tjPanel2.tabId==1){
+            tjPanel2.dataAddress="";
             getTableTree();
             submitFields();
         }else if(tjPanel2.tabId==2){
-            OtherDatabase();
             tjPanel2.tableName = "";
+            OtherDatabase();
         }else if(tjPanel2.tabId==3){
+            tjPanel2.dataAddress="";
             EXCELupload();
         }
         element.on('tab(nav2)', function(data){
@@ -906,14 +1019,16 @@ function opentjPanel2(){
             //console.log(data.elem); //得到当前的Tab大容器
             if((data.index+1)==1){
                 tjPanel2.tabId = 1;
+                tjPanel2.dataAddress="";
                 getTableTree();
                 submitFields();
             }else if((data.index+1)==2){
                 tjPanel2.tabId = 2;
-                OtherDatabase();
                 tjPanel2.tableName = "";
+                OtherDatabase();
             }else if((data.index+1)==3){
                 tjPanel2.tabId = 3;
+                tjPanel2.dataAddress="";
                 EXCELupload();
             }
         });
@@ -947,6 +1062,7 @@ function getTableTree(){
         success: function (data) { //返回json结果
             //alert(data);
             createTree =data.dataEx;
+            console.log(createTree);
             displayTableTree(treeElement,createTree);
         },
         error:function(){
@@ -996,7 +1112,7 @@ function displayTableTree(treeElement,createTree){
                         displayFields(fieldslist,tableFields);
                     },
                     error:function(){
-                        alert("sorry!")
+                        alert("sorry1!")
                     }
                 });
                 //构造
@@ -1018,6 +1134,7 @@ function displayTableTree(treeElement,createTree){
 
 //渲染字段
 function displayFields(fieldslist,tableFields){
+    tjPanel2.tableFields = tableFields;
     layui.use(['form'],function() {
         var form = layui.form;
         fieldslist.empty();
@@ -1071,9 +1188,9 @@ function submitFields(){
                 if(tjPanel2.fieldsNum==0){
 
                 }else if(tjPanel2.fieldsNum==1){
-
+                    tjPanel2.timeId = item;
                 }else {tjPanel2.fieldsName.push(item);}
-                tjPanel2.fieldsNum++
+                    tjPanel2.fieldsNum++
             });
             tjPanel2.fieldsNum = tjPanel2.fieldsNum - 2;
 
@@ -1085,8 +1202,22 @@ function submitFields(){
 }
 
 function initTjLayer(allTjLayerContent, tjType, regionParamVar) {
-    // var allTjLayerContentStr = JSON.stringify(allTjLayerContent);
-    var url = "./servlet/fileUploadServlet?allTjLayerContent=" + encodeURI(allTjLayerContent);
+    var url;
+    if (tjType == "chartLayerData"){
+        var num = 0;
+        for (var i=0; i<map.graphicsLayerIds.length; i++){
+            if (map.getLayer(map.graphicsLayerIds[i]).name == "chartGLayer")
+                num++;
+        }
+        chartLayerNum = num + 1;
+        console.log(chartLayerNum);
+    }
+    if (tjPanel2.tabId=="1"){
+        url= "./servlet/fileUploadServlet?allTjLayerContent=" + encodeURI(allTjLayerContent);
+    }else if(tjPanel2.tabId=="2"){
+        url= "./servlet/chartLayerFromAPIServlet?allTjLayerContent="+ encodeURIComponent(allTjLayerContent);
+    }
+
     console.log(tjType);
     $.ajax({
         type: 'POST',
@@ -1094,7 +1225,7 @@ function initTjLayer(allTjLayerContent, tjType, regionParamVar) {
         async:"false",
         dataType:"json",
         // data:{"inputType":"test"},
-        data:{"inputType": tjType, "regionParam": regionParamVar},
+        data:{"inputType": tjType, "regionParam": regionParamVar, "chartLayerNum": chartLayerNum},
         success: function (data) {
             tjLayerName=JSON.parse(allTjLayerContent).name;
             console.log(url);
@@ -1102,7 +1233,6 @@ function initTjLayer(allTjLayerContent, tjType, regionParamVar) {
                 doChartLayer(data);
                 return;
             }
-
             console.log(data);
             var classLegend = data.classLegend;
             field_cn = fieldsOrIndi;
@@ -1257,8 +1387,6 @@ function initTjLayer(allTjLayerContent, tjType, regionParamVar) {
                     //     }
                     // });
                     // break;
-
-                   // break;
                 }
             }
             // return data;
@@ -1270,17 +1398,17 @@ function initTjLayer(allTjLayerContent, tjType, regionParamVar) {
     });
 }
 
-function changeLayerOnZoom(thisLayer, tjType, regionParamVar) {
+function changeLayerOnZoom(thisLayer, tjType, regionParamVar, chartLayerN) {
     // var thisLayerContent = JSON.stringify(thisLayer.content);
+    console.log(chartLayerN);
     var url = "./servlet/fileUploadServlet?allTjLayerContent=" + encodeURI(thisLayer.content);
-    console.log(tjType);
     $.ajax({
         type: 'POST',
         url: url,
         async: "false",
         dataType: "json",
         // data:{"inputType":"test"},
-        data: {"inputType": tjType, "regionParam": regionParamVar},
+        data: {"inputType": tjType, "regionParam": regionParamVar, "chartLayerNum": chartLayerN},
         success: function (data) {
             if (data.type==="chartLayer"){
                 var xOffset = parseInt(JSON.parse(thisLayer.content).cartographydata.xoffset);
@@ -1314,44 +1442,42 @@ function changeLayerOnZoom(thisLayer, tjType, regionParamVar) {
 
 function onZoomInLevelAbove10(){
     // var classLayer;
+    $("#legend-container .legend").remove();
+    var chartNum = 0;
     for (var i = 0; i < map.graphicsLayerIds.length; i++){
         if ((map.getLayer(map.graphicsLayerIds[i])).name == "classGLayer"){
             // regionParamVar = "2";
             thisZoomLayer = map.getLayer(map.graphicsLayerIds[i]);
-            var thisLayerContent = map.getLayer(map.graphicsLayerIds[i]).content;
-            console.log(thisLayerContent);
             zoomOutFlag = 1;
-            changeLayerOnZoom(thisZoomLayer, "classLayerData", "2");
+            changeLayerOnZoom(thisZoomLayer, "classLayerData", "2", 1);
 
         }
         else if ((map.getLayer(map.graphicsLayerIds[i])).name == "chartGLayer"){
             // regionParamVar = "2";
             thisZoomLayer = map.getLayer(map.graphicsLayerIds[i]);
-            var thisLayerContent = map.getLayer(map.graphicsLayerIds[i]).content;
-            console.log(thisLayerContent);
             zoomOutFlag = 1;
-            changeLayerOnZoom(thisZoomLayer, "chartLayerData", "2");
+            chartNum++;
+            changeLayerOnZoom(thisZoomLayer, "chartLayerData", "2", chartNum);
         }
     }
 }
 
 function onZoomInLevelBelow10() {
+    $("#legend-container .legend").remove();
+    var chartNum = 0;
     for (var i = 0; i < map.graphicsLayerIds.length; i++){
         if ((map.getLayer(map.graphicsLayerIds[i])).name == "classGLayer"){
             // regionParamVar = "2";
             thisZoomLayer = map.getLayer(map.graphicsLayerIds[i]);
-            var thisLayerContent = map.getLayer(map.graphicsLayerIds[i]).content;
-            console.log(thisLayerContent);
             zoomOutFlag = 1;
-            changeLayerOnZoom(thisZoomLayer, "classLayerData", "1");
+            changeLayerOnZoom(thisZoomLayer, "classLayerData", "1", 1);
         }
         else if ((map.getLayer(map.graphicsLayerIds[i])).name == "chartGLayer"){
             // regionParamVar = "2";
             thisZoomLayer = map.getLayer(map.graphicsLayerIds[i]);
-            var thisLayerContent = map.getLayer(map.graphicsLayerIds[i]).content;
-            console.log(thisLayerContent);
             zoomOutFlag = 1;
-            changeLayerOnZoom(thisZoomLayer, "chartLayerData", "1");
+            chartNum++;
+            changeLayerOnZoom(thisZoomLayer, "chartLayerData", "1", chartNum);
         }
     }
 }
@@ -1521,8 +1647,53 @@ refreshChartLyr = function(indicators){
                         map.setMapCursor("default");
                         rgnCode = 0;
                     });
-
-                    //break;
+                    // mouseClick = dojo.connect(chartLayer, "onClick", function mouseOut(evt) {
+                    //     var g = evt.graphic;
+                    //     var codeParam = g.attributes.rng_code;
+                    //     var rgn_name = g.attributes.rng_name;
+                    //     // rgnName = g.attributes.rng_name;
+                    //     var url;
+                    //     geometry = g.geometry;
+                    //     for(i in cityArray){
+                    //         if(i==rgn_name){
+                    //             url=cityArray[i];
+                    //             rgnName = rgn_name;
+                    //         }
+                    //     }
+                    //     if(url===undefined){      //确保url不为空，默认为湖北省全图
+                    //         // swal("温馨提示", "您所选择的区域暂无相关数据", "info");
+                    //         swal({
+                    //             title: "温馨提示",
+                    //             text: "您所选择的区域暂无相关数据",
+                    //             type: "info",
+                    //             showCancelButton: false,
+                    //             confirmButtonText: "确定",
+                    //             closeOnConfirm: false,
+                    //             closeOnCancel: false
+                    //         });
+                    //     }
+                    //     else {
+                    //         changeMap(url,geometry,9);
+                    //         regionParam = codeParam;
+                    //         if(classIndex!=undefined){
+                    //             // for (var i = 0; i < map.graphicsLayerIds.length; i++) {
+                    //             //     if ((map.getLayer(map.graphicsLayerIds[i])).name == "classGLayer") {
+                    //             //         var layer = map.getLayer(map.graphicsLayerIds[i]);
+                    //             //         map.removeLayer(layer);//清空所有graphics
+                    //             //         break;
+                    //             //     }
+                    //             // }
+                    //             if(field_cn){
+                    //                 refreshClassLyr();
+                    //             }
+                    //         }
+                    //         refreshChartLyr(indi);
+                    //         map.infoWindow.hide();
+                    //         map.setMapCursor("default");
+                    //         baseLayerURL = url;
+                    //     }
+                    // });
+                    // break;
                 }
             }
         },
@@ -1538,7 +1709,7 @@ function initClassInfoTemplate(attributes) {
     // var attrString = classIndex + ":" + attributes.data;
 
     var attrString = '<p><strong>区域名称 : </strong>' + attributes.rgn_code + '</p>';
-        attrString += '<p><strong>'+tjPanel2.fieldsName[0]+' : </strong>' + attributes.data + '</p>';
+        attrString += '<p><strong>'+ attributes.label +' : </strong>' + attributes.data + '</p>';
     attrString += '<p><strong>分级级别 : </strong>' + attributes.rgn_class + '</p>';
     // attrString += '<p><strong>数据来源 : </strong>' + dataSource + '</p>';
     // classifyImg_url = "data:image/png;base64," + classLegend;
@@ -1557,16 +1728,16 @@ function OtherDatabase(){
             element = layui.element;
         //链接数据库
         form.on('submit(otherdatabase)', function (data) {
-            layer.alert(JSON.stringify(data.field), {
-                title: '最终的提交信息'
-            });
-            tjPanel2.dataAddress = data.field.address;
+            // layer.alert(JSON.stringify(data.field), {
+            //     title: '最终的提交信息'
+            // });
+            tjPanel2.dataAddress = data.field.dataAddress;
             $.ajax({
                 type: 'post',
                 url:"./servlet/fileUploadServlet",
                 async:"false",
                 dataType:"json",
-                data:{"inputType":"APIData","apiUrl": data.field.address},
+                data:{"inputType":"APIData","apiUrl": data.field.dataAddress},
                 success: function (data) { //返回tabletree
                     //alert(data);
                     var tableFields = data.apiCallbackData;
@@ -1574,7 +1745,7 @@ function OtherDatabase(){
                     submitFields();
                 },
                 error:function(){
-                    alert("sorry!")
+                    alert("sorry2!")
                 }
             });
 
@@ -1779,7 +1950,9 @@ function doChartLayer(data){
                     layer.add(graphics[i]);
                 }
                 layer.content = allTjLayerContent;
-
+                layer.legend = chartImg_url;
+                // console.log(tjLayerName);
+                // layer.setId = tjLayerName;
                 flag = 0;
             }
             else// 第一个不是chart图层
@@ -1794,6 +1967,7 @@ function doChartLayer(data){
             graphicLayer.name = "chartGLayer";
             graphicLayer.id = tjLayerName;
             graphicLayer.content = allTjLayerContent;
+            graphicLayer.legend = chartImg_url;
             for (var i=0;i<graphics.length;i++){
                 graphicLayer.add(graphics[i]);
             }
@@ -1802,7 +1976,7 @@ function doChartLayer(data){
 
     // }
     //添加鼠标响应事件
-    //var chartLayer;
+    var chartLayer;
     for (var i = 0; i < map.graphicsLayerIds.length; i++) {
         if ((map.getLayer(map.graphicsLayerIds[i])).name == "chartGLayer") {
             chartLayer = map.getLayer(map.graphicsLayerIds[i]);
@@ -1825,10 +1999,16 @@ function doChartLayer(data){
                     chartWidth = g.symbol.width;
                     chartHeight = g.symbol.height;
                     chartImg = g.symbol.url;
-                    var symbol = new esri.symbol.PictureMarkerSymbol(chartImg,chartWidth*1.15,chartHeight*1.15);
-                    symbol.setOffset(xOffset, yOffset);
+                    // var symbol = new esri.symbol.PictureMarkerSymbol(chartImg,chartWidth*1.15,chartHeight*1.15);
+                    // if (parseInt(JSON.parse(chartLayer.content).cartographydata.xoffset) != 0 || parseInt(JSON.parse(chartLayer.content).cartographydata.yoffset) != 0)
+                    //     symbol.setOffset(parseInt(JSON.parse(chartLayer.content).cartographydata.xoffset), parseInt(JSON.parse(chartLayer.content).cartographydata.yoffset));
+                    //g.setSymbol(symbol);
+                   /* g.symbol.height = 1.15*g.symbol.height;
+                    g.symbol.width = 1.15*g.symbol.width;*/
+                    var symbol=g.symbol;
+                    symbol.height = 1.15*symbol.height;
+                    symbol.width = 1.15*symbol.width;
                     g.setSymbol(symbol);
-
                     var content = initInfoTemplate(g.attributes,indiNum,dataSource);
                     var title = "统计符号信息";
                     map.infoWindow.setContent(content);
@@ -1842,11 +2022,15 @@ function doChartLayer(data){
                     return false;
                 }
             });
-            mouseOut = dojo.connect(chartLayer, "onMouseOut", function mouseOut(evt) {
+            dojo.connect(chartLayer, "onMouseOut", function mouseOut(evt) {
                 var g = evt.graphic;
-                var symbol = new esri.symbol.PictureMarkerSymbol(chartImg,chartWidth,chartHeight);
-                symbol.setOffset(xOffset, yOffset);
+                //var symbol = new esri.symbol.PictureMarkerSymbol(chartImg,chartWidth,chartHeight);
+                // if (parseInt(JSON.parse(chartLayer.content).cartographydata.xoffset) != 0 || parseInt(JSON.parse(chartLayer.content).cartographydata.yoffset) != 0)
+                    //symbol.setOffset(parseInt(JSON.parse(chartLayer.content).cartographydata.xoffset), parseInt(JSON.parse(chartLayer.content).cartographydata.yoffset));
                 // console.log(symbol);
+                var symbol=g.symbol;
+                symbol.height = symbol.height/1.15;
+                symbol.width = symbol.width/1.15;
                 g.setSymbol(symbol);
                 map.infoWindow.hide();
                 map.setMapCursor("default");
@@ -1913,9 +2097,9 @@ var originalTjLayerContent='<div class="tjPanel" id="tjPanel">\n' +
     '        <div id="tjPanel-content2" style="display:block">\n' +
     '            <div class="layui-tab layui-tab-brief" lay-filter="nav2">\n' +
     '                <ul class="layui-tab-title">\n' +
-    '                    <li class="layui-this">平台数据库</li>\n' +
-    '                    <li>API数据</li>\n' +
-    '                    <li>上传EXCEL文件</li>\n' +
+    '                    <li class="layui-this" id="tab1">平台数据库</li>\n' +
+    '                    <li id="tab2">API数据</li>\n' +
+    '                    <li id="tab3">上传EXCEL文件</li>\n' +
     '                </ul>\n' +
     '                <div class="layui-tab-content">\n' +
     '                    <div class="layui-tab-item layui-show">\n' +
@@ -1949,10 +2133,9 @@ var originalTjLayerContent='<div class="tjPanel" id="tjPanel">\n' +
     '                                                    <div class="layui-input-inline">\n' +
     '                                                        <select class="timeId" name="timeId" lay-filter="timeId"\n' +
     '                                                                id="timeId1">\n' +
-    '                                                            <option value="Year">Year</option>\n' +
-    '                                                            <option value="2015">2015</option>\n' +
     '                                                            <option value="2016">2016</option>\n' +
     '                                                            <option value="2017">2017</option>\n' +
+    '                                                            <option value="2018">2018</option>\n' +
     '                                                        </select>\n' +
     '                                                    </div>\n' +
     '                                                </div>'+
@@ -1971,7 +2154,7 @@ var originalTjLayerContent='<div class="tjPanel" id="tjPanel">\n' +
     '                    <div class="layui-tab-item" layui-filter="tjPanel22">\n' +
     '                        <form class="layui-form" action="" lay-filter="OtherDatabase1" id="OtherDatabase1">\n' +
     '                            <div class="layui-form-item" style="text-align:center">\n' +
-    '                                <input type="text" name="address" lay-verify="address" autocomplete="off" placeholder="请输入数据链接地址" class="layui-input" style="width: 82%;display: unset;">\n' +
+    '                                <input type="text" name="dataAddress" lay-verify="dataAddress" autocomplete="off" placeholder="请输入数据链接地址" class="layui-input" style="width: 82%;display: unset;">\n' +
     '                                <button class="layui-btn" lay-submit="" lay-filter="otherdatabase" id="chooseDatabase">链接数据</button>\n' +
     '                            </div>\n' +
     '                        </form>\n' +
@@ -1992,10 +2175,9 @@ var originalTjLayerContent='<div class="tjPanel" id="tjPanel">\n' +
     '                                                    <div class="layui-input-inline">\n' +
     '                                                        <select class="timeId" name="timeId" lay-filter="timeId"\n' +
     '                                                                id="timeId2">\n' +
-    '                                                            <option value="Year">Year</option>\n' +
-    '                                                            <option value="2015">2015</option>\n' +
     '                                                            <option value="2016">2016</option>\n' +
     '                                                            <option value="2017">2017</option>\n' +
+    '                                                            <option value="2018">2018</option>\n' +
     '                                                        </select>\n' +
     '                                                    </div>\n' +
     '                                                </div>'+
@@ -2012,13 +2194,11 @@ var originalTjLayerContent='<div class="tjPanel" id="tjPanel">\n' +
     '                    </div>\n' +
     '                    <div class="layui-tab-item">\n' +
     '                        <form class="layui-form">\n' +
-    '                            <div class="layui-upload-drag" style="margin-bottom: 10px;" id="EXCELupload1">\n' +
+    '                            <div class="layui-upload-drag" style="margin-bottom: 10px;width: 400px;" id="EXCELupload1">\n' +
     '                                <i class="layui-icon layui-icon-upload-drag"></i>\n' +
-    '                                <p id="fileName">点击上传，或将文件拖拽到此处</p>\n' +
+    '                                <p id="fileName">将文件拖拽到此处</p>\n' +
     '                            </div>\n' +
-    '                            <div>\n' +
-    '                                <button id="EXCELupload" type="button" class="layui-btn layui-input-inline" style="bottom: 260px;right: 20px;position: absolute;">开始上传</button>\n' +
-    '                            </div>\n' +
+    '                            <button id="EXCELupload" type="button" class="layui-btn layui-input-inline" style="top:20px">开始上传</button>\n' +
     '                        </form>\n'+
     '                        <form class="layui-form">\n' +
     '                            <div class="layui-form-item">\n' +
@@ -2037,10 +2217,9 @@ var originalTjLayerContent='<div class="tjPanel" id="tjPanel">\n' +
     '                                                    <div class="layui-input-inline">\n' +
     '                                                        <select class="timeId" name="timeId" lay-filter="timeId"\n' +
     '                                                                id="timeId3">\n' +
-    '                                                            <option value="Year">Year</option>\n' +
-    '                                                            <option value="2015">2015</option>\n' +
     '                                                            <option value="2016">2016</option>\n' +
     '                                                            <option value="2017">2017</option>\n' +
+    '                                                            <option value="2018">2018</option>\n' +
     '                                                        </select>\n' +
     '                                                    </div>\n' +
     '                                                </div>'+
