@@ -1700,6 +1700,14 @@ function addModelLayUI(mapName) {
 
                                                 tjLayerName = $("input[ name='tjLayerName' ]").val();
 
+                                                //统计图层所有参数
+                                                allTjLayerContent = {
+                                                    "name": tjLayerName,
+                                                    "spatialdata": tjPanel1,
+                                                    "statisticdata": tjPanel2,
+                                                    "cartographydata": tjPanel3
+                                                }
+
                                                 if (tjLayerName == "") {
                                                     layer.tips('请输入图层名称', '#newSLName')
                                                     // layer.alert('');
@@ -1709,25 +1717,15 @@ function addModelLayUI(mapName) {
                                                     var newNode = {
                                                         name: tjLayerName,
                                                         url: "123",
-                                                        dom: tjLayertest,
-                                                        cartographydata: tjPanel3,
+                                                        // dom: tjLayertest,
+                                                        // cartographydata: tjPanel3,
+                                                        allContent: allTjLayerContent,
                                                         checked: true
                                                     };
                                                     layerNodes[3].children.push(newNode);
                                                     var treeObj = $.fn.zTree.getZTreeObj("doMapTree_Template");
                                                     treeObj.addNodes(treeNode, -1, newNode);
 
-                                                    //统计图层所有参数
-                                                    allTjLayerContent = {
-                                                        "name": tjLayerName,
-                                                        "spatialdata": tjPanel1,
-                                                        "statisticdata": tjPanel2,
-                                                        "cartographydata": tjPanel3
-                                                    }
-
-                                                    // tjLayertest="layui-layer"+index;
-                                                    // tjLayertest=$("#tjPanel").html();
-                                                    var tjType;
                                                     switch (allTjLayerContent.cartographydata.type) {
                                                         case "1":
                                                             tjType = "chartLayerData";
@@ -1736,6 +1734,7 @@ function addModelLayUI(mapName) {
                                                             tjType = "classLayerData";
                                                             break;
                                                     }
+                                                    fieldsOrIndi = allTjLayerContent.statisticdata.fieldsName;
                                                     allTjLayerContent = JSON.stringify(allTjLayerContent);
                                                     console.log(allTjLayerContent);
                                                     var zoomLevel = map.getZoom();
@@ -1743,6 +1742,7 @@ function addModelLayUI(mapName) {
                                                         initTjLayer(allTjLayerContent, tjType, "1");
                                                     else
                                                         initTjLayer(allTjLayerContent, tjType, "2");
+                                                    $("#legend-container .legend").remove();
                                                     layer.close(index);
                                                     layer.close(layerIndex);
                                                 }
@@ -2065,34 +2065,19 @@ function addModelLayUI(mapName) {
                                 shade: 0,
                                 area: ['700px', '480px'],
                                 // content:layerNodes[3].children[0].dom,
-                                content:treeNode.dom,
+                                content:originalTjLayerContent,
                                 success: function(layero,index){
-                                    //do something
-
-                                    // console.log(treeNode.dom);
-
-                                    modifytjMenuLayer(treeNode.cartographydata);
-
-                                    // var type=parseInt(treeNode.cartographydata.type);
-                                    // if(type==1){
-                                    //     var preSymbolSizeSliderValue=treeNode.cartographydata.symbolSizeSliderValue;
-                                    //     var preSymbolOpacitySliderValue=treeNode.cartographydata.symbolOpacitySliderValue;
-                                    //     // var sliderValues=[lastSymbolSizeSliderValue,lastSymbolOpacitySliderValue,0,0];
-                                    //     modifytjMenuLayer(preSymbolSizeSliderValue,preSymbolOpacitySliderValue,0,0);
-                                    // }else if(type==2){
-                                    //     var preClassNumSliderValue=treeNode.cartographydata.classNumSliderValue;
-                                    //     var preSymbolOpacitySliderValue=treeNode.cartographydata.symbolOpacitySliderValue;
-                                    //     // var sliderValues=[0,0,preClassNumSliderValue,preSymbolOpacitySliderValue];
-                                    //     modifytjMenuLayer(0,0,preSymbolOpacitySliderValue,preClassNumSliderValue);
-                                    // }
+                                    // modifytjMenuLayer(treeNode.cartographydata);
+                                    modifytjMenuLayer_new(treeNode);
 
                                     // var newNode={name:$("#newFLName").val(),url:$("#newFLAds").val()};
-
 
                                     $(".tjInfoSubmit").bind('click',function () {
                                         var tjLayertest=layero.find(".layui-layer-content").html();
                                         // console.log(tjLayertest);
                                         constructTjJson3();
+                                        // constructTjJson3_modify(treeNode.allContent);
+
                                         var index=layer.open({
                                             type: 0,
                                             title:"修改图层名称",
@@ -2107,6 +2092,13 @@ function addModelLayUI(mapName) {
                                                 console.log("OK2");
                                                 tjLayerName = $("input[ name='tjLayerName1' ]").val();
 
+                                                allTjLayerContent = {
+                                                    "name": tjLayerName,
+                                                    "spatialdata": tjPanel1,
+                                                    "statisticdata": tjPanel2,
+                                                    "cartographydata": tjPanel3
+                                                }
+
                                                 if (tjLayerName == "") {
                                                     layer.tips('请输入图层名称', '#newSLName')
                                                     // layer.alert('');
@@ -2115,20 +2107,14 @@ function addModelLayUI(mapName) {
                                                 if (tjLayerName != "") {
                                                     treeNode.name = tjLayerName;
                                                     treeNode.checked = true;
-                                                    treeNode.dom = tjLayertest;
-                                                    treeNode.cartographydata = tjPanel3;
+                                                    // treeNode.dom = tjLayertest;
+                                                    // treeNode.cartographydata = tjPanel3;
+                                                    treeNode.statisticdata=tjPanel2;
+                                                    treeNode.cartographydata=tjPanel3;
 
                                                     var treeObj = $.fn.zTree.getZTreeObj("doMapTree_Template");
                                                     treeObj.updateNode(treeNode);
 
-                                                    allTjLayerContent = {
-                                                        "name": tjLayerName,
-                                                        "spatialdata": tjPanel1,
-                                                        "statisticdata": tjPanel2,
-                                                        "cartographydata": tjPanel3
-                                                    }
-                                                    // tjLayerName = "";
-                                                    var tjType;
                                                     switch (allTjLayerContent.cartographydata.type) {
                                                         case "1":
                                                             tjType = "chartLayerData";
@@ -2137,6 +2123,7 @@ function addModelLayUI(mapName) {
                                                             tjType = "classLayerData";
                                                             break;
                                                     }
+                                                    fieldsOrIndi = allTjLayerContent.statisticdata.fieldsName;
                                                     allTjLayerContent = JSON.stringify(allTjLayerContent);
                                                     console.log(allTjLayerContent);
                                                     var zoomLevel = map.getZoom();
@@ -2144,6 +2131,7 @@ function addModelLayUI(mapName) {
                                                         initTjLayer(allTjLayerContent, tjType, "1");
                                                     else
                                                         initTjLayer(allTjLayerContent, tjType, "2");
+                                                    $("#legend-container .legend").remove();
                                                     layer.close(index);
                                                     layer.close(layerIndex);
                                                 }

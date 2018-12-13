@@ -380,6 +380,7 @@ function modifytjMenuLayer_new(allTjLayerContent) {
 
         // 复原第二个面板的信息
         $("#tab"+allTjLayerContent.statisticdata.tabId).click();
+        $("input[name='dataAddress']").val(allTjLayerContent.statisticdata.dataAddress);
         displayFields($("#fieldslist"+allTjLayerContent.statisticdata.tabId),allTjLayerContent.statisticdata.tableFields);
         $("#spatialId"+allTjLayerContent.statisticdata.tabId).siblings(".layui-form-select").find("dd[lay-value="+ allTjLayerContent.statisticdata.spatialId+"]").click();
         $("#timeId"+allTjLayerContent.statisticdata.tabId).siblings(".layui-form-select").find("dd[lay-value="+ allTjLayerContent.statisticdata.timeId+"]").click();
@@ -1073,7 +1074,7 @@ function displayTableTree(treeElement,createTree){
                         displayFields(fieldslist,tableFields);
                     },
                     error:function(){
-                        alert("sorry!")
+                        alert("sorry1!")
                     }
                 });
                 //构造
@@ -1690,9 +1691,9 @@ function OtherDatabase(){
             element = layui.element;
         //链接数据库
         form.on('submit(otherdatabase)', function (data) {
-            layer.alert(JSON.stringify(data.field), {
-                title: '最终的提交信息'
-            });
+            // layer.alert(JSON.stringify(data.field), {
+            //     title: '最终的提交信息'
+            // });
             tjPanel2.dataAddress = data.field.dataAddress;
             $.ajax({
                 type: 'post',
@@ -1707,7 +1708,7 @@ function OtherDatabase(){
                     submitFields();
                 },
                 error:function(){
-                    alert("sorry!")
+                    alert("sorry2!")
                 }
             });
 
