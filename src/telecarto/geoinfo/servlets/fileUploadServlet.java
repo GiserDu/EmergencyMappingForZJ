@@ -170,8 +170,8 @@ public class fileUploadServlet extends HttpServlet {
                         String spatialId = statisticdataJson.getString("spatialId");
                         JSONArray fieldsNameArray=statisticdataJson.getJSONArray("fieldsName");
                         String fieldsNames=statisticdataJson.getString("fieldsName");
-//                        String year = statisticdataJson.getString("year");
-                        String year = "2016";
+                        String year = statisticdataJson.getString("timeId");
+//                        String year = "2016";
                         StringBuffer fieldsNamesBuffer = new StringBuffer(fieldsNames);
                         fieldsNamesBuffer.delete(0, 2);
                         fieldsNamesBuffer.delete(fieldsNamesBuffer.length()-2, fieldsNamesBuffer.length());
@@ -600,8 +600,8 @@ public class fileUploadServlet extends HttpServlet {
         String dataAddress=statisticdataJson.getString("dataAddress");
         String tableName=statisticdataJson.getString("tableName");
         String spatialId=statisticdataJson.getString("spatialId");
-//        String year = statisticdataJson.getString("year"); //根据实际情况修改
-        String year = "2016";
+        String year = statisticdataJson.getString("timeId"); //根据实际情况修改
+//        String year = "2016";
         JSONArray fieldsNameArray=statisticdataJson.getJSONArray("fieldsName");
         String fieldsNames=statisticdataJson.getString("fieldsName");
         String[] fieldsName=new String[fieldsNameArray.size()];
@@ -639,6 +639,9 @@ public class fileUploadServlet extends HttpServlet {
 
         //String chartData = request.getParameter("CHARTDATA");
         //System.out.println("chart data: "+chartData);
+        StringBuffer fieldsNamesStr = new StringBuffer(fieldsNames);
+        fieldsNamesStr.deleteCharAt(0);
+
         String[] arr = fieldsNames.split(",");
 //        tableName= statisticdataJson.getString("tableName");
         String thematicData = tableName;

@@ -1909,7 +1909,7 @@ function doChartLayer(data){
                     chartImg = g.symbol.url;
                     var symbol = new esri.symbol.PictureMarkerSymbol(chartImg,chartWidth*1.15,chartHeight*1.15);
                     if (parseInt(JSON.parse(chartLayer.content).cartographydata.xoffset) != 0 || parseInt(JSON.parse(chartLayer.content).cartographydata.yoffset) != 0)
-                        symbol.setOffset(xOffset, yOffset);
+                        symbol.setOffset(parseInt(JSON.parse(chartLayer.content).cartographydata.xoffset), parseInt(JSON.parse(chartLayer.content).cartographydata.yoffset));
                     g.setSymbol(symbol);
 
                     var content = initInfoTemplate(g.attributes,indiNum,dataSource);
@@ -1929,7 +1929,7 @@ function doChartLayer(data){
                 var g = evt.graphic;
                 var symbol = new esri.symbol.PictureMarkerSymbol(chartImg,chartWidth,chartHeight);
                 if (parseInt(JSON.parse(chartLayer.content).cartographydata.xoffset) != 0 || parseInt(JSON.parse(chartLayer.content).cartographydata.yoffset) != 0)
-                    symbol.setOffset(xOffset, yOffset);
+                    symbol.setOffset(parseInt(JSON.parse(chartLayer.content).cartographydata.xoffset), parseInt(JSON.parse(chartLayer.content).cartographydata.yoffset));
                 // console.log(symbol);
                 g.setSymbol(symbol);
                 map.infoWindow.hide();
