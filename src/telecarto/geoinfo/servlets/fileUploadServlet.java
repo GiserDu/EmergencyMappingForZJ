@@ -170,6 +170,8 @@ public class fileUploadServlet extends HttpServlet {
                         String spatialId = statisticdataJson.getString("spatialId");
                         JSONArray fieldsNameArray=statisticdataJson.getJSONArray("fieldsName");
                         String fieldsNames=statisticdataJson.getString("fieldsName");
+//                        String year = statisticdataJson.getString("year");
+                        String year = "2016";
                         StringBuffer fieldsNamesBuffer = new StringBuffer(fieldsNames);
                         fieldsNamesBuffer.delete(0, 2);
                         fieldsNamesBuffer.delete(fieldsNamesBuffer.length()-2, fieldsNamesBuffer.length());
@@ -182,7 +184,7 @@ public class fileUploadServlet extends HttpServlet {
 
                         int breakNum = Integer.parseInt(cartographydataJson.getString("classNumSliderValue"));
                         String breakMethod=cartographydataJson.getString("modelName");
-                        String ip="127.0.0";
+                        String ip = NetworkUtil.getIpAddr(request);
                         String regionParam = request.getParameter("regionParam");
 
                         String color = cartographydataJson.getString("colors");
@@ -197,7 +199,7 @@ public class fileUploadServlet extends HttpServlet {
                                     "LEFT JOIN\t"+ classTableName +"\n" +
                                     "ON region_info_copy1.citycode="+ classTableName +".`"+ spatialId +"`\n" +
                                     "WHERE\n" +
-                                    "\tregion_info_copy1.class = " + regionParam +" AND "+ classTableName +".`年份` LIKE '2016'";
+                                    "\tregion_info_copy1.class = " + regionParam +" AND "+ classTableName +".`年份` LIKE '" + year +"'";
                         }
                         else if (regionParam.equals("2")){
                             sql="SELECT\n" +
@@ -207,7 +209,7 @@ public class fileUploadServlet extends HttpServlet {
                                     "LEFT JOIN\t"+ classTableName +"\n" +
                                     "ON region_info_copy1.coutcode="+ classTableName +".`"+ spatialId +"`\n" +
                                     "WHERE\n" +
-                                    "\tregion_info_copy1.class = " + regionParam +" AND "+ classTableName +".`年份` LIKE '2016'";
+                                    "\tregion_info_copy1.class = " + regionParam +" AND "+ classTableName +".`年份` LIKE '" + year +"'";
                         }
 
                         //sql_select = "LEFT JOIN "+ tableName +" t2 ON t1.RGN_CODE = t2.RGN_CODE WHERE t1.RGN_CODE LIKE '"+Param+"' AND t1.RGN_CODE!= '"+regionParam+"' AND t2.YEAR = '" + year + "'";
@@ -566,7 +568,7 @@ public class fileUploadServlet extends HttpServlet {
 
     //制作统计图表
     public void doChartLayer(HttpServletRequest request, HttpServletResponse response) throws IOException {
-        String ip = "";
+        String ip = NetworkUtil.getIpAddr(request);
     String statisticJson="{\n" +
             "\t  \"nav\": \"nav2\",\n" +
             "\t  \"tabId\": \"1\",\n" +

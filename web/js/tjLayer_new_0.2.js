@@ -951,6 +951,14 @@ function submitFields(){
 
 function initTjLayer(allTjLayerContent, tjType, regionParamVar) {
     // var allTjLayerContentStr = JSON.stringify(allTjLayerContent);
+    if (tjType == "chartLayerData"){
+        var chartLayerNum = 1; //当前添加的统计图层数量
+        for (var i=0; i<map.graphicsLayerIds.length; i++){
+            if (map.getLayer(map.graphicsLayerIds[i]).name == "chartGLayer")
+                chartLayerNum++;
+        }
+        console.log(chartLayerNum);
+    }
     var url = "./servlet/fileUploadServlet?allTjLayerContent=" + encodeURI(allTjLayerContent);
     console.log(tjType);
     $.ajax({
@@ -959,7 +967,7 @@ function initTjLayer(allTjLayerContent, tjType, regionParamVar) {
         async:"false",
         dataType:"json",
         // data:{"inputType":"test"},
-        data:{"inputType": tjType, "regionParam": regionParamVar},
+        data:{"inputType": tjType, "regionParam": regionParamVar, "chartLayerNum": chartLayerNum},
         success: function (data) {
             console.log(url);
             if (data.type==="chartLayer"){
@@ -1685,6 +1693,7 @@ function doChartLayer(data){
                     layer.add(graphics[i]);
                 }
                 layer.content = allTjLayerContent;
+                layer.legend = chartImg_url;
                 // console.log(tjLayerName);
                 // layer.setId = tjLayerName;
                 flag = 0;
@@ -1701,6 +1710,7 @@ function doChartLayer(data){
             graphicLayer.name = "chartGLayer";
             graphicLayer.id = tjLayerName;
             graphicLayer.content = allTjLayerContent;
+            graphicLayer.legend = chartImg_url;
             for (var i=0;i<graphics.length;i++){
                 graphicLayer.add(graphics[i]);
             }
@@ -1709,7 +1719,7 @@ function doChartLayer(data){
 
     // }
     //添加鼠标响应事件
-    //var chartLayer;
+    var chartLayer;
     for (var i = 0; i < map.graphicsLayerIds.length; i++) {
         if ((map.getLayer(map.graphicsLayerIds[i])).name == "chartGLayer") {
             chartLayer = map.getLayer(map.graphicsLayerIds[i]);
@@ -1733,7 +1743,8 @@ function doChartLayer(data){
                     chartHeight = g.symbol.height;
                     chartImg = g.symbol.url;
                     var symbol = new esri.symbol.PictureMarkerSymbol(chartImg,chartWidth*1.15,chartHeight*1.15);
-                    symbol.setOffset(xOffset, yOffset);
+                    if (parseInt(JSON.parse(chartLayer.content).cartographydata.xoffset) != 0 || parseInt(JSON.parse(chartLayer.content).cartographydata.yoffset) != 0)
+                        symbol.setOffset(xOffset, yOffset);
                     g.setSymbol(symbol);
 
                     var content = initInfoTemplate(g.attributes,indiNum,dataSource);
@@ -1752,7 +1763,8 @@ function doChartLayer(data){
             mouseOut = dojo.connect(chartLayer, "onMouseOut", function mouseOut(evt) {
                 var g = evt.graphic;
                 var symbol = new esri.symbol.PictureMarkerSymbol(chartImg,chartWidth,chartHeight);
-                symbol.setOffset(xOffset, yOffset);
+                if (parseInt(JSON.parse(chartLayer.content).cartographydata.xoffset) != 0 || parseInt(JSON.parse(chartLayer.content).cartographydata.yoffset) != 0)
+                    symbol.setOffset(xOffset, yOffset);
                 // console.log(symbol);
                 g.setSymbol(symbol);
                 map.infoWindow.hide();
