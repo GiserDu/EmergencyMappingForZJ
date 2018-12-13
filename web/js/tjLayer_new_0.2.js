@@ -118,6 +118,7 @@ function modifytjMenuLayer(symbolInfo) {
         symPara4=symbolInfo.classNumSliderValue;
     }
 
+
     layui.use(['layer','form','element'],function () {
         var layer = layui.layer
             ,element = layui.element
@@ -845,6 +846,7 @@ function initTjLayer(allTjLayerContent, tjType, regionParamVar) {
         // data:{"inputType":"test"},
         data:{"inputType": tjType, "regionParam": regionParamVar},
         success: function (data) {
+            tjLayerName=JSON.parse(allTjLayerContent).name;
             console.log(url);
             if (data.type==="chartLayer"){
                 if (zoomOutFlag == 1){
@@ -1585,8 +1587,7 @@ function doChartLayer(data){
                     layer.add(graphics[i]);
                 }
                 layer.content = allTjLayerContent;
-                // console.log(tjLayerName);
-                // layer.setId = tjLayerName;
+
                 flag = 0;
             }
             else// 第一个不是chart图层
