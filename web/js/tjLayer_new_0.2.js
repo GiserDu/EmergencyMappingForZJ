@@ -24,6 +24,7 @@ var chartImg_url = undefined;//饼图图例的url
 // var charLegendMonitor;//饼图图例的定时器
 var legendFlag = 0;
 var classifyImg_url = undefined;//分级统计图图例的url
+var chartLayerNum = 1; //当前添加的统计图层数量
 
 // 图例按钮的事件
 $("#map-legend").bind({
@@ -1064,6 +1065,7 @@ function getTableTree(){
         success: function (data) { //返回json结果
             //alert(data);
             createTree =data.dataEx;
+            console.log(createTree);
             displayTableTree(treeElement,createTree);
         },
         error:function(){
@@ -1205,11 +1207,12 @@ function submitFields(){
 function initTjLayer(allTjLayerContent, tjType, regionParamVar) {
     var url;
     if (tjType == "chartLayerData"){
-        var chartLayerNum = 1; //当前添加的统计图层数量
+        var num = 0;
         for (var i=0; i<map.graphicsLayerIds.length; i++){
             if (map.getLayer(map.graphicsLayerIds[i]).name == "chartGLayer")
-                chartLayerNum++;
+                num++;
         }
+        chartLayerNum = num + 1;
         console.log(chartLayerNum);
     }
     if (tjPanel2.tabId=="1"){
@@ -1398,17 +1401,17 @@ function initTjLayer(allTjLayerContent, tjType, regionParamVar) {
     });
 }
 
-function changeLayerOnZoom(thisLayer, tjType, regionParamVar) {
+function changeLayerOnZoom(thisLayer, tjType, regionParamVar, chartLayerN) {
     // var thisLayerContent = JSON.stringify(thisLayer.content);
+    console.log(chartLayerN);
     var url = "./servlet/fileUploadServlet?allTjLayerContent=" + encodeURI(thisLayer.content);
-    console.log(tjType);
     $.ajax({
         type: 'POST',
         url: url,
         async: "false",
         dataType: "json",
         // data:{"inputType":"test"},
-        data: {"inputType": tjType, "regionParam": regionParamVar},
+        data: {"inputType": tjType, "regionParam": regionParamVar, "chartLayerNum": chartLayerN},
         success: function (data) {
             if (data.type==="chartLayer"){
                 var xOffset = parseInt(JSON.parse(thisLayer.content).cartographydata.xoffset);
@@ -1442,44 +1445,42 @@ function changeLayerOnZoom(thisLayer, tjType, regionParamVar) {
 
 function onZoomInLevelAbove10(){
     // var classLayer;
+    $("#legend-container .legend").remove();
+    var chartNum = 0;
     for (var i = 0; i < map.graphicsLayerIds.length; i++){
         if ((map.getLayer(map.graphicsLayerIds[i])).name == "classGLayer"){
             // regionParamVar = "2";
             thisZoomLayer = map.getLayer(map.graphicsLayerIds[i]);
-            var thisLayerContent = map.getLayer(map.graphicsLayerIds[i]).content;
-            console.log(thisLayerContent);
             zoomOutFlag = 1;
-            changeLayerOnZoom(thisZoomLayer, "classLayerData", "2");
+            changeLayerOnZoom(thisZoomLayer, "classLayerData", "2", 1);
 
         }
         else if ((map.getLayer(map.graphicsLayerIds[i])).name == "chartGLayer"){
             // regionParamVar = "2";
             thisZoomLayer = map.getLayer(map.graphicsLayerIds[i]);
-            var thisLayerContent = map.getLayer(map.graphicsLayerIds[i]).content;
-            console.log(thisLayerContent);
             zoomOutFlag = 1;
-            changeLayerOnZoom(thisZoomLayer, "chartLayerData", "2");
+            chartNum++;
+            changeLayerOnZoom(thisZoomLayer, "chartLayerData", "2", chartNum);
         }
     }
 }
 
 function onZoomInLevelBelow10() {
+    $("#legend-container .legend").remove();
+    var chartNum = 0;
     for (var i = 0; i < map.graphicsLayerIds.length; i++){
         if ((map.getLayer(map.graphicsLayerIds[i])).name == "classGLayer"){
             // regionParamVar = "2";
             thisZoomLayer = map.getLayer(map.graphicsLayerIds[i]);
-            var thisLayerContent = map.getLayer(map.graphicsLayerIds[i]).content;
-            console.log(thisLayerContent);
             zoomOutFlag = 1;
-            changeLayerOnZoom(thisZoomLayer, "classLayerData", "1");
+            changeLayerOnZoom(thisZoomLayer, "classLayerData", "1", 1);
         }
         else if ((map.getLayer(map.graphicsLayerIds[i])).name == "chartGLayer"){
             // regionParamVar = "2";
             thisZoomLayer = map.getLayer(map.graphicsLayerIds[i]);
-            var thisLayerContent = map.getLayer(map.graphicsLayerIds[i]).content;
-            console.log(thisLayerContent);
             zoomOutFlag = 1;
-            changeLayerOnZoom(thisZoomLayer, "chartLayerData", "1");
+            chartNum++;
+            changeLayerOnZoom(thisZoomLayer, "chartLayerData", "1", chartNum);
         }
     }
 }

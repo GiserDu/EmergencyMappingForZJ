@@ -157,6 +157,7 @@ public class chartLayerFromAPIServlet extends HttpServlet {
         //图例图片转码为base64
         BASE64Encoder encoderLegend = new BASE64Encoder();
         ByteArrayOutputStream baosLegend = new ByteArrayOutputStream();
+        ImageIO.setUseCache(false);
         ImageIO.write(bufferedImage, "png", baosLegend);
         byte[] bytesLegend = baosLegend.toByteArray();
         String imgStreamLegend = encoderLegend.encodeBuffer(bytesLegend).trim();
