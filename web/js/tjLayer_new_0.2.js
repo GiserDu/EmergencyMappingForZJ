@@ -429,99 +429,102 @@ function modifytjMenuLayer_new(allTjLayerContent) {
                 // form.render();
 
             } else if(leftMenuName=="selectMappingTemplate") {
-                $("#fieldslist"+tjPanel2.tabId).next().find("button[lay-filter='fields']")[0].click();//辅助用户点击“下一步”，获取当前指标
+                $("#fieldslist" + tjPanel2.tabId).next().find("button[lay-filter='fields']")[0].click();//辅助用户点击“下一步”，获取当前指标
 
                 // selectedIndexNum=statisticInfo.fieldsNum;
-                selectedIndexNum=tjPanel2.fieldsNum;
+                selectedIndexNum = tjPanel2.fieldsNum;
 
-                if (selectedIndexNum==0){
+                if (selectedIndexNum == 0) {
                     alert('请选择统计指标');
                     elem.parent().removeClass("layui-this");
                     elem.parent().prev().addClass("layui-this");
 
-                } else if(selectedIndexNum==1){
-
+                } else if (selectedIndexNum == 1) {
                     $("#tjPanel-content2").hide();
                     $("#tjPanel-content3").hide();
                     $("#tjPanel-content4").show();
 
-                    var isSymbolLoaded=$("#tjPanel-content4").attr("isloaded");
-                    if (isSymbolLoaded=="false") {
+                    var isSymbolLoaded = $("#tjPanel-content4").attr("isloaded");
+                    if (isSymbolLoaded == "false") {
                         initTjGraduatedSymbol();
-                        $("#tjPanel-content4").attr("isloaded","true");
-                    };
+                        $("#tjPanel-content4").attr("isloaded", "true");
+                    }
+                    ;
                     listenOnSymbolTitleClick();
                     // form.render();
 
-                    var selectedModelName="界限等分模型";
-                    var isColorInverse=false;
-                    var imgSrc='./assets/imgs/gradeIcon/9/4.jpg';
-                    var color1='#FFFEE3';var color2='#00935B';
+                    var selectedModelName = "界限等分模型";
+                    var isColorInverse = false;
+                    var imgSrc = './assets/imgs/gradeIcon/9/4.jpg';
+                    var color1 = '#FFFEE3';
+                    var color2 = '#00935B';
 
-                    var colors=symbolInfo.colors.split(";");
+                    var colors = symbolInfo.colors;
 
-                    if(type==2){
-                        selectedModelName=symbolInfo.modelName;
-                        isColorInverse=symbolInfo.isColorInverse;
-                        imgSrc=symbolInfo.colorSolutionSrc;
-                        if(isColorInverse)
-                            color1=hexify(colors[symbolInfo.classNumSliderValue-1]);
-                            color2=hexify(colors[0]);
-                        }else {
-                            color1=hexify(colors[0]);
-                            color2=hexify(colors[symbolInfo.classNumSliderValue-1]);
+                    if (type == 2) {
+                        selectedModelName = symbolInfo.modelName;
+                        isColorInverse = symbolInfo.isColorInverse;
+                        imgSrc = symbolInfo.colorSolutionSrc;
+                        if (isColorInverse) {
+                            color1 = hexify(colors[symbolInfo.classNumSliderValue - 1]);
+                            color2 = hexify(colors[0]);
+                        } else {
+                            color1 = hexify(colors[0]);
+                            color2 = hexify(colors[symbolInfo.classNumSliderValue - 1]);
                         }
                     }
 
-                    $("#model").siblings("div.layui-form-select").find("dl").find("dd[lay-value="+selectedModelName+"]").click();
+                    $("#model").siblings("div.layui-form-select").find("dl").find("dd[lay-value=" + selectedModelName + "]").click();
 
-                    if(isColorInverse){
+                    if (isColorInverse) {
                         $('#isColorInverse').prop('checked', true);
                         $('#isColorInverse').next().addClass('layui-form-checked');
                     }
 
-                    $("#color-selected>.select_title>img").attr("src",imgSrc);
-                    $("#color-selected>.select_title>img").attr("color1",color1);
-                    $("#color-selected>.select_title>img").attr("color2",color2);
+                    $("#color-selected>.select_title>img").attr("src", imgSrc);
+                    $("#color-selected>.select_title>img").attr("color1", color1);
+                    $("#color-selected>.select_title>img").attr("color2", color2);
 
-                    setSlidersValue(symbolSizeSliderValue,symbolOpacitySliderValue,symbolOpacitySliderValue,classNumSliderValue);
+                    setSlidersValue(symbolSizeSliderValue, symbolOpacitySliderValue, symbolOpacitySliderValue, classNumSliderValue);
 
-                }else {
+                } else {
                     // $(".tjPanel-content").html(html3);
                     $("#tjPanel-content2").hide();
                     $("#tjPanel-content3").show();
                     $("#tjPanel-content4").hide();
 
-                    var isSymbolLoaded=$("#tjPanel-content3").attr("isloaded");
-                    if (isSymbolLoaded=="false") {
+                    var isSymbolLoaded = $("#tjPanel-content3").attr("isloaded");
+                    if (isSymbolLoaded == "false") {
                         initTjChartSymbol();
-                        $("#tjPanel-content3").attr("isloaded","true");
-                    };
+                        $("#tjPanel-content3").attr("isloaded", "true");
+                    }
+                    ;
                     listenOnSymbolTitleClick();
 
-                    var chartID='010101';
-                    var solutionSrc='assets/imgs/gradeIcon/10/6.jpg';
+                    var chartID = '010101';
+                    var solutionSrc = 'assets/imgs/gradeIcon/10/6.jpg';
 
-                    if (type==1) {
-                        chartID=symbolInfo.chartID;;
+                    if (type == 1) {
+                        chartID = symbolInfo.chartID;
+                        ;
 
-                        var solutionSrc=symbolInfo.colorSolutionSrc;
+                        var solutionSrc = symbolInfo.colorSolutionSrc;
 
                         $("#xOffset").val(symbolInfo.xoffset);
                         $("#yOffset").val(symbolInfo.yoffset);
                     }
-                    var chartSrc="assets/imgs/chartIcon/"+chartID+".png";
-                    $("#chart-selected>.select_title>img").attr("src",chartSrc);
+                    var chartSrc = "assets/imgs/chartIcon/" + chartID + ".png";
+                    $("#chart-selected>.select_title>img").attr("src", chartSrc);
 
-                    $("#color-solution>.select_title>img").attr("src",solutionSrc);
+                    $("#color-solution>.select_title>img").attr("src", solutionSrc);
 
-                    setSlidersValue(symbolSizeSliderValue,symbolOpacitySliderValue,symbolOpacitySliderValue,classNumSliderValue);
+                    setSlidersValue(symbolSizeSliderValue, symbolOpacitySliderValue, symbolOpacitySliderValue, classNumSliderValue);
                     // form.render();
                     userDefineChartColor();
                 }
+            }
         });
         element.render('nav');
-
     });
 }
 
