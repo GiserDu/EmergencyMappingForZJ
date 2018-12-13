@@ -858,19 +858,6 @@ function doMap() {
 
                                     modifytjMenuLayer(treeNode.cartographydata);
 
-                                    // var type=parseInt(treeNode.cartographydata.type);
-                                    // if(type==1){
-                                    //     var preSymbolSizeSliderValue=treeNode.cartographydata.symbolSizeSliderValue;
-                                    //     var preSymbolOpacitySliderValue=treeNode.cartographydata.symbolOpacitySliderValue;
-                                    //     // var sliderValues=[lastSymbolSizeSliderValue,lastSymbolOpacitySliderValue,0,0];
-                                    //     modifytjMenuLayer(preSymbolSizeSliderValue,preSymbolOpacitySliderValue,0,0);
-                                    // }else if(type==2){
-                                    //     var preClassNumSliderValue=treeNode.cartographydata.classNumSliderValue;
-                                    //     var preSymbolOpacitySliderValue=treeNode.cartographydata.symbolOpacitySliderValue;
-                                    //     // var sliderValues=[0,0,preClassNumSliderValue,preSymbolOpacitySliderValue];
-                                    //     modifytjMenuLayer(0,0,preSymbolOpacitySliderValue,preClassNumSliderValue);
-                                    // }
-
                                     // var newNode={name:$("#newFLName").val(),url:$("#newFLAds").val()};
 
 

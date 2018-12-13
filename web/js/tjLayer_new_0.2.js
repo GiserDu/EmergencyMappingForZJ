@@ -13,7 +13,7 @@ var allTjLayerContent={};
 // 制图范围数据的json格式
 // var tjPanel1={"tabID":"1","identityField":"value","regionData":"","fileName":""};
 var tjPanel1={};
-var tjPanel2 = {"tabId":"1","dataAddress":"","tableName":"","spatialId":"","fieldsName":[],"fieldsNum":0};
+var tjPanel2 = {"tabId":"1","dataAddress":"","tableName":"","spatialId":"","timeId":"","tableFields":[],"fieldsName":[],"fieldsNum":0};
 //tjPanel3中有一个key是type，1表示统计图表，2表示分级符号
 var tjPanel3={};
 var zoomOutFlag = 0;
@@ -228,6 +228,166 @@ function modifytjMenuLayer(symbolInfo) {
     if(type==1){
         symPara1=symbolInfo.symbolSizeSliderValue;
         symPara2=symbolInfo.symbolOpacitySliderValue;
+        $("#xOffset").val(symbolInfo.xoffset);
+        $("#yOffset").val(symbolInfo.yoffset);
+
+    }else if(type==2){
+        symPara3=symbolInfo.symbolOpacitySliderValue;
+        symPara4=symbolInfo.classNumSliderValue;
+    }
+
+
+    layui.use(['layer','form','element'],function () {
+        var layer = layui.layer
+            ,element = layui.element
+            ,form=layui.form;
+
+        opentjPanel2();
+
+        //复原第二个面板
+        //获取select和checkbox
+        var select = $("input[class='layui-input layui-unselect']").val();
+        var checkboxes = $(fieldslist).find(".layui-form-checkbox.layui-form-checked");
+        var checkName = [];
+        $.each(checkboxes,function(index,item){
+            checkName.push($(item).find("span").html());
+        });
+        //重新渲染并赋值
+        form.render();
+        //方式一：保留dom
+        $("#spatialId"+tjPanel2.tabId).siblings("div.layui-form-select").find("dl").find("dd[lay-value="+select+"]").click();
+        $.each(checkName,function(index,item){
+            $("input[name="+item+"]").prop('checked', true);
+            $("input[name="+item+"]").next().addClass('layui-form-checked');
+        });
+        // //方式二：个别存值
+        // $("#spatialId"+tjPanel2.tabId).siblings("div.layui-form-select").find("dl").find("dd[lay-value="+ allTjLayerContent.statisticdata.spatialId+"]").click();
+        // $.each(allTjLayerContent.statisticdata.fieldsName,function(index,item){
+        //     $("input[name="+item+"]").prop('checked', true);
+        //     $("input[name="+item+"]").next().addClass('layui-form-checked');
+        // });
+
+        $("#fieldslist"+tjPanel2.tabId).next().find("button[lay-filter='fields']")[0].click();//辅助用户点击“下一步”，获取当前指标
+
+        // 复原第三个面板
+        // 获取分级模型的select
+        var selectedModelName=symbolInfo.modelName;
+        $("#model").siblings("div.layui-form-select").find("dl").find("dd[lay-value="+selectedModelName+"]").click();
+        var isColorInverse=symbolInfo.isColorInverse;
+        if(isColorInverse){
+            $('#isColorInverse').prop('checked', true);
+            $('#isColorInverse').next().addClass('layui-form-checked');
+        }
+        // ======================
+        listenOnSymbolTitleClick();
+
+        userDefineChartColor();
+        // ==========================
+
+        // var slidersValues=[1,2,3,4];
+        setSlidersValue(symPara1,symPara2,symPara3,symPara4);
+
+        element.on('nav(navDemo)', function(elem){
+            // console.log(elem);
+
+            var leftMenuName=elem.attr('name');
+            var selectedIndexNum;
+
+            if (leftMenuName=="selectStatistics") {
+                // $(".tjPanel-content").html(html2);
+
+                $("#tjPanel-content2").show();
+                $("#tjPanel-content3").hide();
+                $("#tjPanel-content4").hide();
+                // opentjPanel2();
+
+
+            } else if(leftMenuName=="selectMappingTemplate") {
+
+                $("#fieldslist"+tjPanel2.tabId).next().find("button[lay-filter='fields']")[0].click();//辅助用户点击“下一步”，获取当前指标
+
+                selectedIndexNum=tjPanel2.fieldsNum;
+
+                if (selectedIndexNum==0){
+                    alert('请选择统计指标');
+                    elem.parent().removeClass("layui-this");
+                    elem.parent().prev().addClass("layui-this");
+
+                } else if(selectedIndexNum==1){
+                    // $(".tjPanel-content").html(html4);
+
+                    $("#tjPanel-content2").hide();
+                    $("#tjPanel-content3").hide();
+                    $("#tjPanel-content4").show();
+
+                    var isSymbolLoaded=$("#tjPanel-content4").attr("isloaded");
+                    if (isSymbolLoaded=="false") {
+                        initTjGraduatedSymbol();
+                        $("#tjPanel-content4").attr("isloaded","true");
+                    };
+                    listenOnSymbolTitleClick();
+
+
+                    // initTjGraduatedSymbol();
+                    // renderSlider();
+                    // setSlidersValue(symbolSizeSliderValue,symbolOpacitySliderValue,symbolOpacitySliderValue,classNumSliderValue);
+                    // form.render();
+
+                    // clickAndLoadAllInfo();
+
+
+                }else {
+                    // $(".tjPanel-content").html(html3);
+                    $("#tjPanel-content2").hide();
+                    $("#tjPanel-content3").show();
+                    $("#tjPanel-content4").hide();
+
+                    var isSymbolLoaded=$("#tjPanel-content3").attr("isloaded");
+                    if (isSymbolLoaded=="false") {
+                        initTjChartSymbol();
+                        $("#tjPanel-content3").attr("isloaded","true");
+                    };
+                    listenOnSymbolTitleClick();
+
+                    // initTjChartSymbol();
+                    // renderSlider();
+                    // setSlidersValue(symbolSizeSliderValue,symbolOpacitySliderValue,symbolOpacitySliderValue,classNumSliderValue);
+                    form.render();
+                    userDefineChartColor();
+                    // clickAndLoadAllInfo();
+
+                }
+            }
+        });
+        element.render('nav');
+    })
+}
+// 当用户修改时弹出的面板_新
+function modifytjMenuLayer_new(allTjLayerContent) {
+
+    var statisticInfo=allTjLayerContent.statisticdata;
+    var symbolInfo=allTjLayerContent.cartographydata;
+
+    // 先打开一个全新的制图面板
+    opentjMenuLayer();
+    // 复原第二个面板的信息
+
+    // 复原第三个面板的信息
+    var type=parseInt(symbolInfo.type);
+
+
+
+    var symPara1=0,
+        symPara2=0,
+        symPara3=0,
+        symPara4=0;
+
+
+    if(type==1){
+        symPara1=symbolInfo.symbolSizeSliderValue;
+        symPara2=symbolInfo.symbolOpacitySliderValue;
+        $("#xOffset").val(symbolInfo.xoffset);
+        $("#yOffset").val(symbolInfo.yoffset);
 
     }else if(type==2){
         symPara3=symbolInfo.symbolOpacitySliderValue;
@@ -412,6 +572,7 @@ function constructTjJson3() {
         alert("您还未选择用于制图的统计指标");
     } else if(selectedIndexNum==1){
         // -----获得用户选择的有关分级符号的值-----
+        var colorName=$("#color-selected>.select_title>img").attr("name");
         var color1=$("#color-selected>.select_title>img").attr("color1");
         var color2=$("#color-selected>.select_title>img").attr("color2");
         var isChecked=$('#isColorInverse').is(':checked'); ;
@@ -432,6 +593,7 @@ function constructTjJson3() {
         tjPanel3={
             "type":"2",
             "classNumSliderValue":classNumSliderValue,
+            "colorName":colorName,
             "colors":colorString,
             "isColorInverse":isChecked,
             "modelName":modelName,
@@ -516,7 +678,7 @@ function initTjGraduatedSymbol() {
         $("#color-selected").find('.select_content').html('');
         for ( var k in e) {
             $("#color-selected").find('.select_content').append(
-                '<li><img style="width:100%;"  color1="'
+                '<li><img style="width:100%;" name="gradeIcon'+k+'" color1="'
                 + e[k][0] + '" color2="' + e[k][1]
                 + '" src="./assets/imgs/gradeIcon/9/' + k + '.jpg"></li>');
         }
@@ -938,9 +1100,9 @@ function submitFields(){
                 if(tjPanel2.fieldsNum==0){
 
                 }else if(tjPanel2.fieldsNum==1){
-
+                    tjPanel2.timeId = item;
                 }else {tjPanel2.fieldsName.push(item);}
-                tjPanel2.fieldsNum++
+                    tjPanel2.fieldsNum++
             });
             tjPanel2.fieldsNum = tjPanel2.fieldsNum - 2;
 
@@ -1858,10 +2020,9 @@ var originalTjLayerContent='<div class="tjPanel" id="tjPanel">\n' +
     '                                                    <div class="layui-input-inline">\n' +
     '                                                        <select class="timeId" name="timeId" lay-filter="timeId"\n' +
     '                                                                id="timeId1">\n' +
-    '                                                            <option value="Year">Year</option>\n' +
-    '                                                            <option value="2015">2015</option>\n' +
     '                                                            <option value="2016">2016</option>\n' +
     '                                                            <option value="2017">2017</option>\n' +
+    '                                                            <option value="2018">2018</option>\n' +
     '                                                        </select>\n' +
     '                                                    </div>\n' +
     '                                                </div>'+
@@ -1901,10 +2062,9 @@ var originalTjLayerContent='<div class="tjPanel" id="tjPanel">\n' +
     '                                                    <div class="layui-input-inline">\n' +
     '                                                        <select class="timeId" name="timeId" lay-filter="timeId"\n' +
     '                                                                id="timeId2">\n' +
-    '                                                            <option value="Year">Year</option>\n' +
-    '                                                            <option value="2015">2015</option>\n' +
     '                                                            <option value="2016">2016</option>\n' +
     '                                                            <option value="2017">2017</option>\n' +
+    '                                                            <option value="2018">2018</option>\n' +
     '                                                        </select>\n' +
     '                                                    </div>\n' +
     '                                                </div>'+
@@ -1946,10 +2106,9 @@ var originalTjLayerContent='<div class="tjPanel" id="tjPanel">\n' +
     '                                                    <div class="layui-input-inline">\n' +
     '                                                        <select class="timeId" name="timeId" lay-filter="timeId"\n' +
     '                                                                id="timeId3">\n' +
-    '                                                            <option value="Year">Year</option>\n' +
-    '                                                            <option value="2015">2015</option>\n' +
     '                                                            <option value="2016">2016</option>\n' +
     '                                                            <option value="2017">2017</option>\n' +
+    '                                                            <option value="2018">2018</option>\n' +
     '                                                        </select>\n' +
     '                                                    </div>\n' +
     '                                                </div>'+
