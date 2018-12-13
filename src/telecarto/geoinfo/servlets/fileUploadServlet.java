@@ -222,7 +222,7 @@ public class fileUploadServlet extends HttpServlet {
                             ArrayList<ClassData> classList = new ArrayList<>();
                             while (resultSet2.next()) {
                                 ClassData classData = new ClassData(resultSet2.getString(1),resultSet2.getString(2),
-                                        resultSet2.getString(3),resultSet2.getString(4),resultSet2.getString(5),resultSet2.getString(6));
+                                        resultSet2.getString(3),resultSet2.getString(4),resultSet2.getString(5),resultSet2.getString(6),fieldNameCN);
                                 classList.add(classData);
                             }
                             double maxValue =  Double.parseDouble(classList.get(0).getData());
@@ -325,6 +325,7 @@ public class fileUploadServlet extends HttpServlet {
 
                             //传输JSON分级grapgics数组到前端
                             classObject.put("classDataArray",classDataArray);
+                            classObject.put("fieldName", fieldNameCN);
                             //classObject.put("dataSource",dataSource);
                             classObject.put("classLegend",imgStreamLegend.replaceAll("[\\s*\t\n\r]", ""));
                             PrintWriter out = response.getWriter();
@@ -642,8 +643,10 @@ public class fileUploadServlet extends HttpServlet {
         //System.out.println("chart data: "+chartData);
         StringBuffer fieldsNamesStr = new StringBuffer(fieldsNames);
         fieldsNamesStr.deleteCharAt(0);
-
-        String[] arr = fieldsNames.split(",");
+        fieldsNamesStr.deleteCharAt(fieldsNamesStr.length()-1);
+        String fieldsNameString = fieldsNamesStr.toString();
+        fieldsNameString = fieldsNameString.replaceAll("\"", "");
+        String[] arr = fieldsNameString.split(",");
 //        tableName= statisticdataJson.getString("tableName");
         String thematicData = tableName;
 
@@ -689,7 +692,7 @@ public class fileUploadServlet extends HttpServlet {
         //统计符号的chartDataPara
         ChartDataPara chartDataPara = new ChartDataPara();
 
-        chartDataPara.initial_ZJ(fieldsNames,indiSource);// 初始化专题符号层参数
+        chartDataPara.initial_ZJ(fieldsNameString,indiSource);// 初始化专题符号层参数
 
         chartDataPara.setFieldColor(fieldColors);
         chartDataPara.setWidth(width);

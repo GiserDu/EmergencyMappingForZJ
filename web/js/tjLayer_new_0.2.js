@@ -1139,7 +1139,6 @@ function initTjLayer(allTjLayerContent, tjType, regionParamVar) {
                 doChartLayer(data);
                 return;
             }
-
             console.log(data);
             var classLegend = data.classLegend;
             field_cn = fieldsOrIndi;
@@ -1203,16 +1202,16 @@ function initTjLayer(allTjLayerContent, tjType, regionParamVar) {
                 if ((map.getLayer(map.graphicsLayerIds[i])).name == "classGLayer") {
                     classLayer = map.getLayer(map.graphicsLayerIds[i]);
                     //取消事件绑定
-                    if(mouseMoveClassLyr!=undefined && mouseOutClassLyr!=undefined){
+                    /*if(mouseMoveClassLyr!=undefined && mouseOutClassLyr!=undefined){
                         dojo.disconnect(mouseMoveClassLyr);
                         dojo.disconnect(mouseOutClassLyr);
                         // dojo.disconnect(mouseClickClassLyr);
-                    }
+                    }*/
                     var rgnCode = 0;
                     var polyColor;
                     var polyOutline;
                     var polyStyle;
-                    mouseMoveClassLyr = dojo.connect(classLayer, "onMouseOver", function mouseMove(evt) {
+                    dojo.connect(classLayer, "onMouseOver", function mouseMove(evt) {
                         //这里动态赋予graphicinfoTemplate,如果在生成是就初始化会默认添加鼠标点击事件!!!
                         var g = evt.graphic;
                         if(rgnCode!= g.attributes.rng_code){
@@ -1225,6 +1224,7 @@ function initTjLayer(allTjLayerContent, tjType, regionParamVar) {
                             var symbol = new esri.symbol.SimpleFillSymbol(polyStyle,outline,polyColor);
                             g.setSymbol(symbol);
 
+                            //var fieldNameClass = (JSON.parse(classLayer.content)).statisticdata.fieldsName[0];
                             var content = initClassInfoTemplate(g.attributes);
                             var title = g.attributes.rgn_name;
                             map.infoWindow.setContent(content);
@@ -1237,7 +1237,7 @@ function initTjLayer(allTjLayerContent, tjType, regionParamVar) {
                             return false;
                         }
                     });
-                    mouseOutClassLyr = dojo.connect(classLayer, "onMouseOut", function mouseOut(evt) {
+                    dojo.connect(classLayer, "onMouseOut", function mouseOut(evt) {
                         var g = evt.graphic;
                         var symbol = new esri.symbol.SimpleFillSymbol(polyStyle,polyOutline,polyColor);
                         // console.log(symbol);
@@ -1292,7 +1292,7 @@ function initTjLayer(allTjLayerContent, tjType, regionParamVar) {
                     //         baseLayerURL = url;
                     //     }
                     // });
-                    break;
+                    // break;
                 }
             }
             // return data;
@@ -1512,16 +1512,16 @@ refreshChartLyr = function(indicators){
                 if ((map.getLayer(map.graphicsLayerIds[i])).name == "chartGLayer") {
                     chartLayer = map.getLayer(map.graphicsLayerIds[i]);
                     //取消事件绑定
-                    if(mouseMove!=undefined && mouseOut!=undefined){
+                    /*if(mouseMove!=undefined && mouseOut!=undefined){
                         dojo.disconnect(mouseMove);                               //dojo：事件监听
                         dojo.disconnect(mouseOut);
                         // dojo.disconnect(mouseClick);
-                    }
+                    }*/
                     var chartWidth=0;
                     var chartHeight = 0;
                     var chartImg = 0;
                     var rgnCode = 0;
-                    mouseMove = dojo.connect(chartLayer, "onMouseOver", function mouseMove(evt) {
+                    dojo.connect(chartLayer, "onMouseOver", function mouseMove(evt) {
                         //这里动态赋予graphicinfoTemplate,如果在生成是就初始化会默认添加鼠标点击事件!!!
                         var g = evt.graphic;
                         if(rgnCode!= g.attributes.rng_code){
@@ -1546,7 +1546,7 @@ refreshChartLyr = function(indicators){
                             return false;
                         }
                     });
-                    mouseOut = dojo.connect(chartLayer, "onMouseOut", function mouseOut(evt) {
+                    dojo.connect(chartLayer, "onMouseOut", function mouseOut(evt) {
                         var g = evt.graphic;
                         var symbol = new esri.symbol.PictureMarkerSymbol(chartImg,chartWidth,chartHeight);
                         // console.log(symbol);
@@ -1601,7 +1601,7 @@ refreshChartLyr = function(indicators){
                     //         baseLayerURL = url;
                     //     }
                     // });
-                    break;
+                    // break;
                 }
             }
         },
@@ -1617,7 +1617,7 @@ function initClassInfoTemplate(attributes) {
     // var attrString = classIndex + ":" + attributes.data;
 
     var attrString = '<p><strong>区域名称 : </strong>' + attributes.rgn_code + '</p>';
-        attrString += '<p><strong>'+tjPanel2.fieldsName[0]+' : </strong>' + attributes.data + '</p>';
+        attrString += '<p><strong>'+ attributes.label +' : </strong>' + attributes.data + '</p>';
     attrString += '<p><strong>分级级别 : </strong>' + attributes.rgn_class + '</p>';
     // attrString += '<p><strong>数据来源 : </strong>' + dataSource + '</p>';
     // classifyImg_url = "data:image/png;base64," + classLegend;
@@ -1889,16 +1889,16 @@ function doChartLayer(data){
         if ((map.getLayer(map.graphicsLayerIds[i])).name == "chartGLayer") {
             chartLayer = map.getLayer(map.graphicsLayerIds[i]);
             //取消事件绑定
-            if(mouseMove!=undefined && mouseOut!=undefined){
-                dojo.disconnect(mouseMove);                               //dojo：事件监听
-                dojo.disconnect(mouseOut);
-                // dojo.disconnect(mouseClick);
-            }
+            // if(mouseMove!=undefined && mouseOut!=undefined){
+            //     dojo.disconnect(mouseMove);                               //dojo：事件监听
+            //     dojo.disconnect(mouseOut);
+            //     // dojo.disconnect(mouseClick);
+            // }
             var chartWidth=0;
             var chartHeight = 0;
             var chartImg = 0;
             var rgnCode = 0;
-            mouseMove = dojo.connect(chartLayer, "onMouseOver", function mouseMove(evt) {
+            dojo.connect(chartLayer, "onMouseOver", function mouseMove(evt) {
                 //这里动态赋予graphicinfoTemplate,如果在生成是就初始化会默认添加鼠标点击事件!!!
                 var g = evt.graphic;
                 if(rgnCode!= g.attributes.rng_code){
@@ -1907,11 +1907,16 @@ function doChartLayer(data){
                     chartWidth = g.symbol.width;
                     chartHeight = g.symbol.height;
                     chartImg = g.symbol.url;
-                    var symbol = new esri.symbol.PictureMarkerSymbol(chartImg,chartWidth*1.15,chartHeight*1.15);
-                    if (parseInt(JSON.parse(chartLayer.content).cartographydata.xoffset) != 0 || parseInt(JSON.parse(chartLayer.content).cartographydata.yoffset) != 0)
-                        symbol.setOffset(parseInt(JSON.parse(chartLayer.content).cartographydata.xoffset), parseInt(JSON.parse(chartLayer.content).cartographydata.yoffset));
+                    // var symbol = new esri.symbol.PictureMarkerSymbol(chartImg,chartWidth*1.15,chartHeight*1.15);
+                    // if (parseInt(JSON.parse(chartLayer.content).cartographydata.xoffset) != 0 || parseInt(JSON.parse(chartLayer.content).cartographydata.yoffset) != 0)
+                    //     symbol.setOffset(parseInt(JSON.parse(chartLayer.content).cartographydata.xoffset), parseInt(JSON.parse(chartLayer.content).cartographydata.yoffset));
+                    //g.setSymbol(symbol);
+                   /* g.symbol.height = 1.15*g.symbol.height;
+                    g.symbol.width = 1.15*g.symbol.width;*/
+                    var symbol=g.symbol;
+                    symbol.height = 1.15*symbol.height;
+                    symbol.width = 1.15*symbol.width;
                     g.setSymbol(symbol);
-
                     var content = initInfoTemplate(g.attributes,indiNum,dataSource);
                     var title = "统计符号信息";
                     map.infoWindow.setContent(content);
@@ -1925,19 +1930,22 @@ function doChartLayer(data){
                     return false;
                 }
             });
-            mouseOut = dojo.connect(chartLayer, "onMouseOut", function mouseOut(evt) {
+            dojo.connect(chartLayer, "onMouseOut", function mouseOut(evt) {
                 var g = evt.graphic;
-                var symbol = new esri.symbol.PictureMarkerSymbol(chartImg,chartWidth,chartHeight);
-                if (parseInt(JSON.parse(chartLayer.content).cartographydata.xoffset) != 0 || parseInt(JSON.parse(chartLayer.content).cartographydata.yoffset) != 0)
-                    symbol.setOffset(parseInt(JSON.parse(chartLayer.content).cartographydata.xoffset), parseInt(JSON.parse(chartLayer.content).cartographydata.yoffset));
+                //var symbol = new esri.symbol.PictureMarkerSymbol(chartImg,chartWidth,chartHeight);
+                // if (parseInt(JSON.parse(chartLayer.content).cartographydata.xoffset) != 0 || parseInt(JSON.parse(chartLayer.content).cartographydata.yoffset) != 0)
+                    //symbol.setOffset(parseInt(JSON.parse(chartLayer.content).cartographydata.xoffset), parseInt(JSON.parse(chartLayer.content).cartographydata.yoffset));
                 // console.log(symbol);
+                var symbol=g.symbol;
+                symbol.height = symbol.height/1.15;
+                symbol.width = symbol.width/1.15;
                 g.setSymbol(symbol);
                 map.infoWindow.hide();
                 map.setMapCursor("default");
                 rgnCode = 0;
             });
 
-            break;
+            // break;
         }
     }
 }
