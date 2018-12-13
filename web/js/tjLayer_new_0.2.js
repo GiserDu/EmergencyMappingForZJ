@@ -392,10 +392,10 @@ function modifytjMenuLayer_new(allTjLayerContent) {
         // 复原第三个面板的信息
         var type=parseInt(symbolInfo.type);
 
-        var symPara1=0,
+        var symPara1=50,
             symPara2=0,
             symPara3=0,
-            symPara4=0;
+            symPara4=5;
 
         if(type==1){
             symPara1=symbolInfo.symbolSizeSliderValue;
@@ -452,14 +452,23 @@ function modifytjMenuLayer_new(allTjLayerContent) {
                     listenOnSymbolTitleClick();
                     // form.render();
 
-                    var selectedModelName=symbolInfo.modelName;
+                    var selectedModelName="界限等分模型";
+                    var isColorInverse=false;
+                    var imgSrc='./assets/imgs/gradeIcon/9/4.jpg';
+
+                    if(type==2){
+                        selectedModelName=symbolInfo.modelName;
+                        isColorInverse=symbolInfo.isColorInverse;
+                        imgSrc=symbolInfo.colorSolutionSrc;
+                    }
+
                     $("#model").siblings("div.layui-form-select").find("dl").find("dd[lay-value="+selectedModelName+"]").click();
-                    var isColorInverse=symbolInfo.isColorInverse;
+
                     if(isColorInverse){
                         $('#isColorInverse').prop('checked', true);
                         $('#isColorInverse').next().addClass('layui-form-checked');
                     }
-                    var imgSrc=symbolInfo.colorSolutionSrc;
+
                     $("#color-selected>.select_title>img").attr("src",imgSrc);
 
                     setSlidersValue(symbolSizeSliderValue,symbolOpacitySliderValue,symbolOpacitySliderValue,classNumSliderValue);
@@ -477,15 +486,21 @@ function modifytjMenuLayer_new(allTjLayerContent) {
                     };
                     listenOnSymbolTitleClick();
 
-                    var chartID=symbolInfo.chartID;
+                    var chartID='010101';
+                    var solutionSrc='assets/imgs/gradeIcon/10/6.jpg';
+
+                    if (type==1) {
+                        chartID=symbolInfo.chartID;;
+
+                        var solutionSrc=symbolInfo.colorSolutionSrc;
+
+                        $("#xOffset").val(symbolInfo.xoffset);
+                        $("#yOffset").val(symbolInfo.yoffset);
+                    }
                     var chartSrc="assets/imgs/chartIcon/"+chartID+".png";
                     $("#chart-selected>.select_title>img").attr("src",chartSrc);
 
-                    var solutionSrc=symbolInfo.colorSolutionSrc;
                     $("#color-solution>.select_title>img").attr("src",solutionSrc);
-
-                    $("#xOffset").val(symbolInfo.xoffset);
-                    $("#yOffset").val(symbolInfo.yoffset);
 
                     setSlidersValue(symbolSizeSliderValue,symbolOpacitySliderValue,symbolOpacitySliderValue,classNumSliderValue);
                     // form.render();
