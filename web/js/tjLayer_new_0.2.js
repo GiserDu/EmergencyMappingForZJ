@@ -362,92 +362,57 @@ function modifytjMenuLayer(symbolInfo) {
         element.render('nav');
     })
 }
-// 当用户修改时弹出的面板_新
+
+// 当用户修改时弹出的面板_新_测试
 function modifytjMenuLayer_new(allTjLayerContent) {
-
-    var statisticInfo=allTjLayerContent.statisticdata;
-    var symbolInfo=allTjLayerContent.cartographydata;
-
-    // 先打开一个全新的制图面板
-    opentjMenuLayer();
-    // 复原第二个面板的信息
-
-    // 复原第三个面板的信息
-    var type=parseInt(symbolInfo.type);
-
-
-
-    var symPara1=0,
-        symPara2=0,
-        symPara3=0,
-        symPara4=0;
-
-
-    if(type==1){
-        symPara1=symbolInfo.symbolSizeSliderValue;
-        symPara2=symbolInfo.symbolOpacitySliderValue;
-        $("#xOffset").val(symbolInfo.xoffset);
-        $("#yOffset").val(symbolInfo.yoffset);
-
-    }else if(type==2){
-        symPara3=symbolInfo.symbolOpacitySliderValue;
-        symPara4=symbolInfo.classNumSliderValue;
-    }
-
-
     layui.use(['layer','form','element'],function () {
         var layer = layui.layer
             ,element = layui.element
             ,form=layui.form;
 
         opentjPanel2();
-
-        //复原第二个面板
-        //获取select和checkbox
-        var select = $("input[class='layui-input layui-unselect']").val();
-        var checkboxes = $(fieldslist).find(".layui-form-checkbox.layui-form-checked");
-        var checkName = [];
-        $.each(checkboxes,function(index,item){
-            checkName.push($(item).find("span").html());
-        });
-        //重新渲染并赋值
         form.render();
-        //方式一：保留dom
-        $("#spatialId"+tjPanel2.tabId).siblings("div.layui-form-select").find("dl").find("dd[lay-value="+select+"]").click();
-        $.each(checkName,function(index,item){
-            $("input[name="+item+"]").prop('checked', true);
-            $("input[name="+item+"]").next().addClass('layui-form-checked');
-        });
-        // //方式二：个别存值
-        // $("#spatialId"+tjPanel2.tabId).siblings("div.layui-form-select").find("dl").find("dd[lay-value="+ allTjLayerContent.statisticdata.spatialId+"]").click();
-        // $.each(allTjLayerContent.statisticdata.fieldsName,function(index,item){
-        //     $("input[name="+item+"]").prop('checked', true);
-        //     $("input[name="+item+"]").next().addClass('layui-form-checked');
-        // });
 
+
+        //==================================================
+        var statisticInfo=allTjLayerContent.statisticdata;
+        var symbolInfo=allTjLayerContent.cartographydata;
+
+        // 复原第二个面板的信息
+        $("#tab"+allTjLayerContent.statisticdata.tabId).click();
+        displayFields($("#fieldslist"+allTjLayerContent.statisticdata.tabId),allTjLayerContent.statisticdata.tableFields);
+        $("#spatialId"+allTjLayerContent.statisticdata.tabId).siblings(".layui-form-select").find("dd[lay-value="+ allTjLayerContent.statisticdata.spatialId+"]").click();
+        $("#timeId"+allTjLayerContent.statisticdata.tabId).siblings(".layui-form-select").find("dd[lay-value="+ allTjLayerContent.statisticdata.timeId+"]").click();
+        $.each(allTjLayerContent.statisticdata.fieldsName,function(index,item){
+            $("#fieldslist"+allTjLayerContent.statisticdata.tabId).find("input[value="+item+"]").next().click();
+        });
         $("#fieldslist"+tjPanel2.tabId).next().find("button[lay-filter='fields']")[0].click();//辅助用户点击“下一步”，获取当前指标
 
-        // 复原第三个面板
-        // 获取分级模型的select
-        var selectedModelName=symbolInfo.modelName;
-        $("#model").siblings("div.layui-form-select").find("dl").find("dd[lay-value="+selectedModelName+"]").click();
-        var isColorInverse=symbolInfo.isColorInverse;
-        if(isColorInverse){
-            $('#isColorInverse').prop('checked', true);
-            $('#isColorInverse').next().addClass('layui-form-checked');
+        // 复原第三个面板的信息
+        var type=parseInt(symbolInfo.type);
+
+        var symPara1=0,
+            symPara2=0,
+            symPara3=0,
+            symPara4=0;
+
+        if(type==1){
+            symPara1=symbolInfo.symbolSizeSliderValue;
+            symPara2=symbolInfo.symbolOpacitySliderValue;
+        }else if(type==2){
+            symPara3=symbolInfo.symbolOpacitySliderValue;
+            symPara4=symbolInfo.classNumSliderValue;
         }
-        // ======================
-        listenOnSymbolTitleClick();
 
-        userDefineChartColor();
-        // ==========================
-
-        // var slidersValues=[1,2,3,4];
-        setSlidersValue(symPara1,symPara2,symPara3,symPara4);
+        // listenOnSymbolTitleClick();
+        //
+        // userDefineChartColor();
+        //
+        // setSlidersValue(symPara1,symPara2,symPara3,symPara4);
+        //=============================================================================================
 
         element.on('nav(navDemo)', function(elem){
             // console.log(elem);
-
             var leftMenuName=elem.attr('name');
             var selectedIndexNum;
 
@@ -457,13 +422,14 @@ function modifytjMenuLayer_new(allTjLayerContent) {
                 $("#tjPanel-content2").show();
                 $("#tjPanel-content3").hide();
                 $("#tjPanel-content4").hide();
-                // opentjPanel2();
 
+                // opentjPanel2();
+                // form.render();
 
             } else if(leftMenuName=="selectMappingTemplate") {
-
                 $("#fieldslist"+tjPanel2.tabId).next().find("button[lay-filter='fields']")[0].click();//辅助用户点击“下一步”，获取当前指标
 
+                // selectedIndexNum=statisticInfo.fieldsNum;
                 selectedIndexNum=tjPanel2.fieldsNum;
 
                 if (selectedIndexNum==0){
@@ -472,7 +438,6 @@ function modifytjMenuLayer_new(allTjLayerContent) {
                     elem.parent().prev().addClass("layui-this");
 
                 } else if(selectedIndexNum==1){
-                    // $(".tjPanel-content").html(html4);
 
                     $("#tjPanel-content2").hide();
                     $("#tjPanel-content3").hide();
@@ -484,15 +449,19 @@ function modifytjMenuLayer_new(allTjLayerContent) {
                         $("#tjPanel-content4").attr("isloaded","true");
                     };
                     listenOnSymbolTitleClick();
-
-
-                    // initTjGraduatedSymbol();
-                    // renderSlider();
-                    // setSlidersValue(symbolSizeSliderValue,symbolOpacitySliderValue,symbolOpacitySliderValue,classNumSliderValue);
                     // form.render();
 
-                    // clickAndLoadAllInfo();
+                    var selectedModelName=symbolInfo.modelName;
+                    $("#model").siblings("div.layui-form-select").find("dl").find("dd[lay-value="+selectedModelName+"]").click();
+                    var isColorInverse=symbolInfo.isColorInverse;
+                    if(isColorInverse){
+                        $('#isColorInverse').prop('checked', true);
+                        $('#isColorInverse').next().addClass('layui-form-checked');
+                    }
+                    var imgSrc=symbolInfo.colorSolutionSrc;
+                    $("#color-selected>.select_title>img").attr("src",imgSrc);
 
+                    setSlidersValue(symbolSizeSliderValue,symbolOpacitySliderValue,symbolOpacitySliderValue,classNumSliderValue);
 
                 }else {
                     // $(".tjPanel-content").html(html3);
@@ -507,18 +476,25 @@ function modifytjMenuLayer_new(allTjLayerContent) {
                     };
                     listenOnSymbolTitleClick();
 
-                    // initTjChartSymbol();
-                    // renderSlider();
-                    // setSlidersValue(symbolSizeSliderValue,symbolOpacitySliderValue,symbolOpacitySliderValue,classNumSliderValue);
-                    form.render();
-                    userDefineChartColor();
-                    // clickAndLoadAllInfo();
+                    var chartID=symbolInfo.chartID;
+                    var chartSrc="assets/imgs/chartIcon/"+chartID+".png";
+                    $("#chart-selected>.select_title>img").attr("src",chartSrc);
 
+                    var solutionSrc=symbolInfo.colorSolutionSrc;
+                    $("#color-solution>.select_title>img").attr("src",solutionSrc);
+
+                    $("#xOffset").val(symbolInfo.xoffset);
+                    $("#yOffset").val(symbolInfo.yoffset);
+
+                    setSlidersValue(symbolSizeSliderValue,symbolOpacitySliderValue,symbolOpacitySliderValue,classNumSliderValue);
+                    // form.render();
+                    userDefineChartColor();
                 }
             }
         });
         element.render('nav');
-    })
+
+    });
 }
 
 // 构造载入行政区划事件下的json
@@ -572,7 +548,7 @@ function constructTjJson3() {
         alert("您还未选择用于制图的统计指标");
     } else if(selectedIndexNum==1){
         // -----获得用户选择的有关分级符号的值-----
-        var colorName=$("#color-selected>.select_title>img").attr("name");
+        var solutionSrc=$("#color-selected>.select_title>img").attr("src");
         var color1=$("#color-selected>.select_title>img").attr("color1");
         var color2=$("#color-selected>.select_title>img").attr("color2");
         var isChecked=$('#isColorInverse').is(':checked'); ;
@@ -593,7 +569,7 @@ function constructTjJson3() {
         tjPanel3={
             "type":"2",
             "classNumSliderValue":classNumSliderValue,
-            "colorName":colorName,
+            "colorSolutionSrc":solutionSrc,
             "colors":colorString,
             "isColorInverse":isChecked,
             "modelName":modelName,
@@ -603,6 +579,7 @@ function constructTjJson3() {
         // -----获得用户选择的有关统计符号的值-----
         var chartID = $("#chart-selected>.select_title>img").attr("src").slice(-10,-4);
         var colorName= $("#color-solution>.select_title>img").attr("name");
+        var solutionSrc= $("#color-solution>.select_title>img").attr("src");
         var xoffset=$("input[ name='x-offset' ]").val();
         var yoffset=$("input[ name='y-offset' ]").val();
         var colors=[];
@@ -615,6 +592,73 @@ function constructTjJson3() {
             "type":"1",
             "chartID":chartID,
             "colorName":colorName,
+            "colorSolutionSrc":solutionSrc,
+            "colors":colors,
+            "symbolSizeSliderValue":symbolSizeSliderValue,
+            "symbolOpacitySliderValue":symbolOpacitySliderValue,
+            "xoffset":xoffset,
+            "yoffset":yoffset
+        }
+    }
+
+    console.log(tjPanel3);
+}
+
+// 当修改时创建json
+function constructTjJson3_modify(content) {
+
+    var statisticInfo=content.statisticdata;
+    var selectedIndexNum=statisticInfo.fieldsNum;
+
+    if(selectedIndexNum==null || selectedIndexNum==0){
+        alert("您还未选择用于制图的统计指标");
+    } else if(selectedIndexNum==1){
+        // -----获得用户选择的有关分级符号的值-----
+        var solutionSrc=$("#color-selected>.select_title>img").attr("src");
+        var color1=$("#color-selected>.select_title>img").attr("color1");
+        var color2=$("#color-selected>.select_title>img").attr("color2");
+        var isChecked=$('#isColorInverse').is(':checked'); ;
+        if(isChecked){
+            var tmp;
+            tmp=color1;
+            color1=color2;
+            color2=tmp;
+        };
+        var colors=getColorbar(classNumSliderValue,color1,color2);
+        var colorString = "";
+        for (var i=0;i<colors.length;i++){
+            colorString += colors[i];
+            colorString += ";";
+        }
+        colorString = colorString.substring(0, colorString.length - 1);
+        var modelName=$('#model option:selected').val();
+        tjPanel3={
+            "type":"2",
+            "classNumSliderValue":classNumSliderValue,
+            "colorSolutionSrc":solutionSrc,
+            "colors":colorString,
+            "isColorInverse":isChecked,
+            "modelName":modelName,
+            "symbolOpacitySliderValue":symbolOpacitySliderValue
+        }
+    } else if(selectedIndexNum>1){
+        // -----获得用户选择的有关统计符号的值-----
+        var chartID = $("#chart-selected>.select_title>img").attr("src").slice(-10,-4);
+        var colorName= $("#color-solution>.select_title>img").attr("name");
+        var solutionSrc= $("#color-solution>.select_title>img").attr("src");
+        var xoffset=$("input[ name='x-offset' ]").val();
+        var yoffset=$("input[ name='y-offset' ]").val();
+        var colors=[];
+        // 获得所有颜色选择器
+        var chartIndexColorpick=$(".userDefineColors").find('.chartColorPicker');
+        for(var i=0;i<chartIndexColorpick.length;i++){
+            colors[i]=$(".userDefineColors").find('.chartColorPicker').find('.layui-colorpicker-trigger-span')[i].style.backgroundColor;
+        }
+        tjPanel3={
+            "type":"1",
+            "chartID":chartID,
+            "colorName":colorName,
+            "colorSolutionSrc":solutionSrc,
             "colors":colors,
             "symbolSizeSliderValue":symbolSizeSliderValue,
             "symbolOpacitySliderValue":symbolOpacitySliderValue,
@@ -641,7 +685,7 @@ function initTjChartSymbol() {
         $("#color-solution").find('.select_content').html('');
         for ( var k=1;k<e.length;k++) {
             $("#color-solution").find('.select_content').append(
-                '<li><img  style="width:100%;" name="'
+                '<li><img  style="width:100%;"  name="'
                 + e[k]
                 + '" src="./assets/imgs/gradeIcon/10/' + k + '.jpg"></li>');
         }
@@ -678,7 +722,7 @@ function initTjGraduatedSymbol() {
         $("#color-selected").find('.select_content').html('');
         for ( var k in e) {
             $("#color-selected").find('.select_content').append(
-                '<li><img style="width:100%;" name="gradeIcon'+k+'" color1="'
+                '<li><img style="width:100%;"  color1="'
                 + e[k][0] + '" color2="' + e[k][1]
                 + '" src="./assets/imgs/gradeIcon/9/' + k + '.jpg"></li>');
         }
@@ -921,12 +965,14 @@ function opentjPanel2(){
         var element = layui.element
             ,form=layui.form;
         if(tjPanel2.tabId==1){
+            tjPanel2.dataAddress="";
             getTableTree();
             submitFields();
         }else if(tjPanel2.tabId==2){
-            OtherDatabase();
             tjPanel2.tableName = "";
+            OtherDatabase();
         }else if(tjPanel2.tabId==3){
+            tjPanel2.dataAddress="";
             EXCELupload();
         }
         element.on('tab(nav2)', function(data){
@@ -935,14 +981,16 @@ function opentjPanel2(){
             //console.log(data.elem); //得到当前的Tab大容器
             if((data.index+1)==1){
                 tjPanel2.tabId = 1;
+                tjPanel2.dataAddress="";
                 getTableTree();
                 submitFields();
             }else if((data.index+1)==2){
                 tjPanel2.tabId = 2;
-                OtherDatabase();
                 tjPanel2.tableName = "";
+                OtherDatabase();
             }else if((data.index+1)==3){
                 tjPanel2.tabId = 3;
+                tjPanel2.dataAddress="";
                 EXCELupload();
             }
         });
@@ -1047,6 +1095,7 @@ function displayTableTree(treeElement,createTree){
 
 //渲染字段
 function displayFields(fieldslist,tableFields){
+    tjPanel2.tableFields = tableFields;
     layui.use(['form'],function() {
         var form = layui.form;
         fieldslist.empty();
@@ -1631,13 +1680,13 @@ function OtherDatabase(){
             layer.alert(JSON.stringify(data.field), {
                 title: '最终的提交信息'
             });
-            tjPanel2.dataAddress = data.field.address;
+            tjPanel2.dataAddress = data.field.dataAddress;
             $.ajax({
                 type: 'post',
                 url:"./servlet/fileUploadServlet",
                 async:"false",
                 dataType:"json",
-                data:{"inputType":"APIData","apiUrl": data.field.address},
+                data:{"inputType":"APIData","apiUrl": data.field.dataAddress},
                 success: function (data) { //返回tabletree
                     //alert(data);
                     var tableFields = data.apiCallbackData;
@@ -1984,9 +2033,9 @@ var originalTjLayerContent='<div class="tjPanel" id="tjPanel">\n' +
     '        <div id="tjPanel-content2" style="display:block">\n' +
     '            <div class="layui-tab layui-tab-brief" lay-filter="nav2">\n' +
     '                <ul class="layui-tab-title">\n' +
-    '                    <li class="layui-this">平台数据库</li>\n' +
-    '                    <li>API数据</li>\n' +
-    '                    <li>上传EXCEL文件</li>\n' +
+    '                    <li class="layui-this" id="tab1">平台数据库</li>\n' +
+    '                    <li id="tab2">API数据</li>\n' +
+    '                    <li id="tab3">上传EXCEL文件</li>\n' +
     '                </ul>\n' +
     '                <div class="layui-tab-content">\n' +
     '                    <div class="layui-tab-item layui-show">\n' +
@@ -2041,7 +2090,7 @@ var originalTjLayerContent='<div class="tjPanel" id="tjPanel">\n' +
     '                    <div class="layui-tab-item" layui-filter="tjPanel22">\n' +
     '                        <form class="layui-form" action="" lay-filter="OtherDatabase1" id="OtherDatabase1">\n' +
     '                            <div class="layui-form-item" style="text-align:center">\n' +
-    '                                <input type="text" name="address" lay-verify="address" autocomplete="off" placeholder="请输入数据链接地址" class="layui-input" style="width: 82%;display: unset;">\n' +
+    '                                <input type="text" name="dataAddress" lay-verify="dataAddress" autocomplete="off" placeholder="请输入数据链接地址" class="layui-input" style="width: 82%;display: unset;">\n' +
     '                                <button class="layui-btn" lay-submit="" lay-filter="otherdatabase" id="chooseDatabase">链接数据</button>\n' +
     '                            </div>\n' +
     '                        </form>\n' +
@@ -2081,13 +2130,11 @@ var originalTjLayerContent='<div class="tjPanel" id="tjPanel">\n' +
     '                    </div>\n' +
     '                    <div class="layui-tab-item">\n' +
     '                        <form class="layui-form">\n' +
-    '                            <div class="layui-upload-drag" style="margin-bottom: 10px;" id="EXCELupload1">\n' +
+    '                            <div class="layui-upload-drag" style="margin-bottom: 10px;width: 400px;" id="EXCELupload1">\n' +
     '                                <i class="layui-icon layui-icon-upload-drag"></i>\n' +
-    '                                <p id="fileName">点击上传，或将文件拖拽到此处</p>\n' +
+    '                                <p id="fileName">将文件拖拽到此处</p>\n' +
     '                            </div>\n' +
-    '                            <div>\n' +
-    '                                <button id="EXCELupload" type="button" class="layui-btn layui-input-inline" style="bottom: 260px;right: 20px;position: absolute;">开始上传</button>\n' +
-    '                            </div>\n' +
+    '                            <button id="EXCELupload" type="button" class="layui-btn layui-input-inline" style="top:20px">开始上传</button>\n' +
     '                        </form>\n'+
     '                        <form class="layui-form">\n' +
     '                            <div class="layui-form-item">\n' +

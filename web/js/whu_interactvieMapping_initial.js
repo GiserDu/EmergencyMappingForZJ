@@ -499,6 +499,14 @@ function doMap() {
 
                                                 tjLayerName = $("input[ name='tjLayerName' ]").val();
 
+                                                //统计图层所有参数
+                                                allTjLayerContent = {
+                                                    "name": tjLayerName,
+                                                    "spatialdata": tjPanel1,
+                                                    "statisticdata": tjPanel2,
+                                                    "cartographydata": tjPanel3
+                                                }
+
                                                 if (tjLayerName == "") {
                                                     layer.tips('请输入图层名称', '#newSLName')
                                                     // layer.alert('');
@@ -508,25 +516,15 @@ function doMap() {
                                                     var newNode = {
                                                         name: tjLayerName,
                                                         url: "123",
-                                                        dom: tjLayertest,
-                                                        cartographydata: tjPanel3,
+                                                        // dom: tjLayertest,
+                                                        // cartographydata: tjPanel3,
+                                                        allContent: allTjLayerContent,
                                                         checked: true
                                                     };
                                                     layerNodes[3].children.push(newNode);
                                                     var treeObj = $.fn.zTree.getZTreeObj("doMapTree");
                                                     treeObj.addNodes(treeNode, -1, newNode);
 
-                                                    //统计图层所有参数
-                                                    allTjLayerContent = {
-                                                        "name": tjLayerName,
-                                                        "spatialdata": tjPanel1,
-                                                        "statisticdata": tjPanel2,
-                                                        "cartographydata": tjPanel3
-                                                    }
-
-                                                    // tjLayertest="layui-layer"+index;
-                                                    // tjLayertest=$("#tjPanel").html();
-                                                    var tjType;
                                                     switch (allTjLayerContent.cartographydata.type) {
                                                         case "1":
                                                             tjType = "chartLayerData";
@@ -850,21 +848,19 @@ function doMap() {
                                 shade: 0,
                                 area: ['700px', '480px'],
                                 // content:layerNodes[3].children[0].dom,
-                                content:treeNode.dom,
+                                content:originalTjLayerContent,
                                 success: function(layero,index){
-                                    //do something
-
-                                    // console.log(treeNode.dom);
-
-                                    modifytjMenuLayer(treeNode.cartographydata);
+                                    // modifytjMenuLayer(treeNode.cartographydata);
+                                    modifytjMenuLayer_new(treeNode.allContent);
 
                                     // var newNode={name:$("#newFLName").val(),url:$("#newFLAds").val()};
-
 
                                     $(".tjInfoSubmit").bind('click',function () {
                                         var tjLayertest=layero.find(".layui-layer-content").html();
                                         // console.log(tjLayertest);
                                         constructTjJson3();
+                                        // constructTjJson3_modify(treeNode.allContent);
+
                                         var index=layer.open({
                                             type: 0,
                                             title:"修改图层名称",
@@ -879,6 +875,13 @@ function doMap() {
                                                 console.log("OK2");
                                                 tjLayerName = $("input[ name='tjLayerName1' ]").val();
 
+                                                allTjLayerContent = {
+                                                    "name": tjLayerName,
+                                                    "spatialdata": tjPanel1,
+                                                    "statisticdata": tjPanel2,
+                                                    "cartographydata": tjPanel3
+                                                }
+
                                                 if (tjLayerName == "") {
                                                     layer.tips('请输入图层名称', '#newSLName')
                                                     // layer.alert('');
@@ -887,20 +890,13 @@ function doMap() {
                                                 if (tjLayerName != "") {
                                                     treeNode.name = tjLayerName;
                                                     treeNode.checked = true;
-                                                    treeNode.dom = tjLayertest;
-                                                    treeNode.cartographydata = tjPanel3;
+                                                    // treeNode.dom = tjLayertest;
+                                                    // treeNode.cartographydata = tjPanel3;
+                                                   treeNode.allContent=allTjLayerContent;
 
                                                     var treeObj = $.fn.zTree.getZTreeObj("doMapTree");
                                                     treeObj.updateNode(treeNode);
 
-                                                    allTjLayerContent = {
-                                                        "name": tjLayerName,
-                                                        "spatialdata": tjPanel1,
-                                                        "statisticdata": tjPanel2,
-                                                        "cartographydata": tjPanel3
-                                                    }
-                                                    // tjLayerName = "";
-                                                    var tjType;
                                                     switch (allTjLayerContent.cartographydata.type) {
                                                         case "1":
                                                             tjType = "chartLayerData";
