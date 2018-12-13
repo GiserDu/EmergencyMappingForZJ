@@ -113,6 +113,7 @@ function modifytjMenuLayer(symbolInfo) {
     if(type==1){
         symPara1=symbolInfo.symbolSizeSliderValue;
         symPara2=symbolInfo.symbolOpacitySliderValue;
+
     }else if(type==2){
         symPara3=symbolInfo.symbolOpacitySliderValue;
         symPara4=symbolInfo.classNumSliderValue;
