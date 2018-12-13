@@ -569,7 +569,7 @@ public class fileUploadServlet extends HttpServlet {
     //制作统计图表
     public void doChartLayer(HttpServletRequest request, HttpServletResponse response) throws IOException {
         String ip = NetworkUtil.getIpAddr(request);
-    String statisticJson="{\n" +
+        String statisticJson="{\n" +
             "\t  \"nav\": \"nav2\",\n" +
             "\t  \"tabId\": \"1\",\n" +
             "\t  \"dataAddress\": \"\",\n" +
@@ -592,6 +592,7 @@ public class fileUploadServlet extends HttpServlet {
 
 
         //获得统计数据各指标
+        String chartLayerNum = request.getParameter("chartLayerNum");
         JSONObject dataJson = JSONObject.fromObject(request.getParameter("allTjLayerContent"));
         JSONObject statisticdataJson=JSONObject.fromObject(dataJson.getJSONObject("statisticdata"));
         System.out.println(statisticdataJson);
@@ -723,14 +724,42 @@ public class fileUploadServlet extends HttpServlet {
         IndicatorData[] indicatorDataLegend = new IndicatorData[1];
         indicatorDataLegend[0] = indicatorDatas[0];
         BufferedImage bi = chartLegend.drawLegend(80, 160, chartDataPara, chartStyle, maxValues, minValues, averageValues, indicatorDataLegend);
-        BufferedImage bufferedImage = new BufferedImage(bi.getWidth(),bi.getHeight(),BufferedImage.TYPE_INT_RGB);
-        Graphics2D g2d = bufferedImage.createGraphics();
-//			g2d.setColor(new Color(247,247,247));
-        g2d.setColor(Color.white);
-        g2d.fillRect(0,0,bi.getWidth(),bi.getHeight());
-        //把图例bi绘制到bufferedImage上
-        g2d.drawImage(bi,0,0,bi.getWidth(),bi.getHeight(),null);
-        g2d.dispose();
+        BufferedImage bufferedImage = null;
+        String tempPath = getServletContext().getRealPath("/") + "printMap";
+        String tempFilePath = getServletContext().getRealPath("/") + "printMap\\"+ ip.replaceAll("\\.","-");
+
+        if(chartLayerNum.equals("1")){
+            bufferedImage = new BufferedImage(bi.getWidth(),bi.getHeight(),BufferedImage.TYPE_INT_RGB);
+            Graphics2D g2d = bufferedImage.createGraphics();
+    //			g2d.setColor(new Color(247,247,247));
+            g2d.setColor(Color.white);
+            g2d.fillRect(0,0,bi.getWidth(),bi.getHeight());
+            //把图例bi绘制到bufferedImage上
+            g2d.drawImage(bi,0,0,bi.getWidth(),bi.getHeight(),null);
+            g2d.dispose();
+        }else {
+            String formerChartLegend = getServletContext().getRealPath("/") + "printMap\\"+ ip.replaceAll("\\.","-") +"\\"+ "chartLegend.png";
+            BufferedImage chartImage = ImageIO.read(new FileInputStream(formerChartLegend));
+
+            bufferedImage = new BufferedImage(bi.getWidth(),bi.getHeight()+chartImage.getHeight(),BufferedImage.TYPE_INT_RGB);
+            Graphics2D g2d = bufferedImage.createGraphics();
+            g2d.setColor(Color.white);
+            g2d.fillRect(0,0,bufferedImage.getWidth(),bufferedImage.getHeight());
+
+            //把两个图例绘制到bufferedImage上
+            g2d.drawImage(bi,0,0,bi.getWidth(),bi.getHeight(),null);
+            g2d.drawImage(chartImage,0,bi.getHeight(),chartImage.getWidth(),chartImage.getHeight(),null);
+            g2d.dispose();
+
+        }
+//        BufferedImage bufferedImage = new BufferedImage(bi.getWidth(),bi.getHeight(),BufferedImage.TYPE_INT_RGB);
+//        Graphics2D g2d = bufferedImage.createGraphics();
+////			g2d.setColor(new Color(247,247,247));
+//        g2d.setColor(Color.white);
+//        g2d.fillRect(0,0,bi.getWidth(),bi.getHeight());
+//        //把图例bi绘制到bufferedImage上
+//        g2d.drawImage(bi,0,0,bi.getWidth(),bi.getHeight(),null);
+//        g2d.dispose();
         //图例图片转码为base64
         BASE64Encoder encoderLegend = new BASE64Encoder();
         ByteArrayOutputStream baosLegend = new ByteArrayOutputStream();
@@ -739,8 +768,8 @@ public class fileUploadServlet extends HttpServlet {
         byte[] bytesLegend = baosLegend.toByteArray();
         String imgStreamLegend = encoderLegend.encodeBuffer(bytesLegend).trim();
         //输出统计图图例到本地(底色透明)
-        String tempPath = getServletContext().getRealPath("/") + "printMap";
-        String tempFilePath = getServletContext().getRealPath("/") + "printMap\\"+ ip.replaceAll("\\.","-");
+//        String tempPath = getServletContext().getRealPath("/") + "printMap";
+//        String tempFilePath = getServletContext().getRealPath("/") + "printMap\\"+ ip.replaceAll("\\.","-");
         File fileSavepath = new File(tempPath);
         File fileSavepathMap = new File(tempFilePath);
         if(!fileSavepath.exists()){
@@ -750,8 +779,7 @@ public class fileUploadServlet extends HttpServlet {
             fileSavepathMap.mkdirs();
         }
         String imgPath = fileSavepathMap + "/"+"chartLegend.png";
-        ImageIO.write(bi, "png", new File(imgPath));
-
+        ImageIO.write(bufferedImage, "png", new File(imgPath));
 
 
 
