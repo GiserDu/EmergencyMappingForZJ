@@ -18,7 +18,7 @@ body {
 #map-save{
     top: 90px;
     left: 20px;
-    border-radius: 5px;
+    border-radius: 5px 5px 0 0;
 }
 h1,h2,h3,h4,h5,h6{
     font-family: "Microsoft YaHei";
@@ -365,8 +365,8 @@ input[type="checkbox"]{
 
 #mapContainer #twoLegend{
     position:absolute;
-    top: 25px;
-    left: 94px;
+    top: 95px;
+    left: 52px;
     /*width: 150px;*/
     width: 0px;
     height: 58px;
@@ -455,7 +455,8 @@ input[type="checkbox"]{
     display: none;
 }
 #map-legend{
-    top: 52px;
+    top: 122px;
+    left: 20px;
     border-radius: 0 0 5px 5px;
 }
 
@@ -492,6 +493,9 @@ layui-layer-btn1{
 #iMNameInfo{
 
 }
-.layui-tab{
-    /*display: none;*/
+#complexLayer{
+    display: none;
+}
+#complexLayer_Template{
+    display: none;
 }
