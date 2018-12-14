@@ -75,7 +75,7 @@ public class ClassLayerServletForZJ extends HttpServlet {
 
         String regionClass="1";
         //根据输入行政等级class，确立
-        sql="SELECT * FROM 	region_info WHERE	class ="+regionClass;
+        sql="SELECT * FROM 	region_info_copy1 WHERE	class ="+regionClass;
 
         //sql_select = "LEFT JOIN "+ tableName +" t2 ON t1.RGN_CODE = t2.RGN_CODE WHERE t1.RGN_CODE LIKE '"+Param+"' AND t1.RGN_CODE!= '"+regionParam+"' AND t2.YEAR = '" + year + "'";
         //sql_select = "LEFT JOIN "+ tableName +" t2 ON t1.RGN_CODE = t2.RGN_CODE WHERE t1.RGN_CLASS = '" + regionParam + "' AND t2.YEAR = '" + year + "'";

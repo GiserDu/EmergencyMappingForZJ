@@ -376,7 +376,7 @@ function modifytjMenuLayer_new(allTjLayerContent) {
         opentjPanel2();
         form.render();
 
-        // tjPanel3=allTjLayerContent.cartographydata;
+
         //==================================================
         var statisticInfo=allTjLayerContent.statisticdata;
         var symbolInfo=allTjLayerContent.cartographydata;
@@ -875,7 +875,7 @@ function renderSlider() {
         var slider=layui.slider;
 
         // 滑块
-       slider.render({
+        slider.render({
             elem: '#symbolSize'
             // ,input: true //输入框
             ,diabled:"false"
@@ -1242,7 +1242,7 @@ function initTjLayer(allTjLayerContent, tjType, regionParamVar) {
         data:{"inputType": tjType, "regionParam": regionParamVar, "chartLayerNum": chartLayerNum},
         success: function (data) {
             tjLayerName=JSON.parse(allTjLayerContent).name;
-            // console.log(url);
+            console.log(url);
             if (data.type==="chartLayer"){
                 doChartLayer(data, allTjLayerContent);
                 if (editFlag == 1){  //编辑图层时，重新生成组合图例
@@ -1743,7 +1743,7 @@ function initClassInfoTemplate(attributes) {
     // var attrString = classIndex + ":" + attributes.data;
 
     var attrString = '<p><strong>区域名称 : </strong>' + attributes.rgn_code + '</p>';
-        attrString += '<p><strong>'+ attributes.label +' : </strong>' + attributes.data + '</p>';
+    attrString += '<p><strong>'+ attributes.label +' : </strong>' + attributes.data + '</p>';
     attrString += '<p><strong>分级级别 : </strong>' + attributes.rgn_class + '</p>';
     // attrString += '<p><strong>数据来源 : </strong>' + dataSource + '</p>';
     // classifyImg_url = "data:image/png;base64," + classLegend;
@@ -1960,9 +1960,14 @@ function doChartLayer(data, allChartLayerContent){
     var indiNum = charts[0].attributes.indiNum;//所选指标数目
     // console.log(charts);
     var graphics = new Array();
-    var xOffset = parseInt(tjPanel3.xoffset);
-    var yOffset = parseInt(tjPanel3.yoffset);
-
+    var xOffset,yOffset;
+    if($.isEmptyObject(tjPanel3)){
+        xOffset = 0;
+        yOffset = 0;
+    }else {
+        xOffset = parseInt(tjPanel3.xoffset);
+        yOffset = parseInt(tjPanel3.yoffset);
+    }
     graphics = initChartLayer(charts, xOffset, yOffset);
     // charts.forEach(alert);
     // if (map.graphicsLayerIds.length == 0) {

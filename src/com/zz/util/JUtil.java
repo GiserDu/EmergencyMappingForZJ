@@ -423,22 +423,22 @@ public class JUtil {
 			sql = "SELECT" +
 					"*" +
 					"FROM\n" +
-					"\tregion_info\n" +
+					"\tregion_info_copy1\n" +
 					"LEFT JOIN " + tableName +
-					" ON region_info.citycode=" + tableName + ".`" + spatialID + "` " +
+					" ON region_info_copy1.citycode=" + tableName + ".`" + spatialID + "` " +
 					"WHERE" +
-					"\tregion_info.class =" + regionParam +
+					"\tregion_info_copy1.class =" + regionParam +
 					" AND " + tableName + ".`年份`= "+ year + " ORDER BY citycode";
 		}
 		else{
 			sql = "SELECT" +
 					"*" +
 					"FROM\n" +
-					"\tregion_info\n" +
+					"\tregion_info_copy1\n" +
 					"LEFT JOIN " + tableName +
-					" ON region_info.coutcode=" + tableName + ".`" + spatialID + "` " +
+					" ON region_info_copy1.coutcode=" + tableName + ".`" + spatialID + "` " +
 					"WHERE" +
-					"\tregion_info.class =" + regionParam +
+					"\tregion_info_copy1.class =" + regionParam +
 					" AND " + tableName + ".`年份`= "+ year + " ORDER BY coutcode";
 		}
 
