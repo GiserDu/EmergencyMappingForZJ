@@ -13,7 +13,7 @@ var regionParam = 0;//regionParam为所选的区域代码(1:初始第一级17个
 var rgnName;//当前所选区域名称
 var geometry = new Object();//当前所选区域中心点对象
 var baseMap=new Array();//底图
-var doMapIndex=0;//制图目录树表示，0表示为构造，1表示构造
+var doMapIndex=0;//制图目录树表示，0表示未构造，1表示构造
 var doMapIndex_Template =0;//模板制图目录树表示
 var ARIndex=0;//行政区目录树表示，0表示为构造，1表示构造
 var studyAreaLayer;//制图区域
@@ -973,39 +973,68 @@ function doMap() {
                             treeObj.refresh();
                             //删除节点时将地图上的图层也删去
 
-                                if(map&&(map.getLayer(treeNode.name))) {
-                                    var thisLayer = map.getLayer(treeNode.name);
-                                    var thisTjLayerType = thisLayer.name;
-                                    switch (thisTjLayerType){
-                                        case "chartGLayer":
-                                            var chartFlag = 0;
-                                            for (var i=0; i<map.graphicsLayerIds.length; i++){
-                                                if (map.getLayer(map.graphicsLayerIds[i]).name == "chartGLayer"){
-                                                    chartFlag = 1;
-                                                    break;
-                                                }
+                            if(map&&(map.getLayer(treeNode.name))) {
+                                var thisLayer = map.getLayer(treeNode.name);
+                                var thisTjLayerType = thisLayer.name;
+                                switch (thisTjLayerType){
+                                    case "chartGLayer":
+                                        var chartFlag = 0;
+                                        for (var i=0; i<map.graphicsLayerIds.length; i++){
+                                            if (map.getLayer(map.graphicsLayerIds[i]).name == "chartGLayer"){
+                                                chartFlag = 1;
+                                                break;
                                             }
-                                            if (chartFlag == 0)
-                                                indi = [];
-                                            $("#legend-container .legend").remove();
-                                            break;
-                                        case "classGLayer":
-                                            var classFlag = 0;
-                                            for (var i=0; i<map.graphicsLayerIds.length; i++){
-                                                if (map.getLayer(map.graphicsLayerIds[i]).name == "classGLayer"){
-                                                    classFlag = 1;
-                                                    break;
-                                                }
+                                        }
+                                        if (chartFlag == 0)
+                                            indi = [];
+                                        $("#legend-container .legend").remove();
+                                        break;
+                                    case "classGLayer":
+                                        var classFlag = 0;
+                                        for (var i=0; i<map.graphicsLayerIds.length; i++){
+                                            if (map.getLayer(map.graphicsLayerIds[i]).name == "classGLayer"){
+                                                classFlag = 1;
+                                                break;
                                             }
-                                            if (classFlag == 0)
-                                                field_cn = "";
-                                            $("#legend-container .legend").remove();
-                                            break;
-                                    }
-                                    map.removeLayer(thisLayer);
+                                        }
+                                        if (classFlag == 0)
+                                            field_cn = "";
+                                        $("#legend-container .legend").remove();
+                                        break;
                                 }
-
-
+                                map.removeLayer(thisLayer);
+                                //删除节点时，调整组合图例的内容
+                                editFlag = 1;
+                                switch (thisTjLayerType){
+                                    case "chartGLayer":
+                                        var cLN = 0;
+                                        for (var i=0; i<map.graphicsLayerIds.length; i++) {
+                                            if (map.getLayer(map.graphicsLayerIds[i]).name == "chartGLayer") {
+                                                var thisLayer = map.getLayer(map.graphicsLayerIds[i]);
+                                                cLN++;
+                                                var zoomLevel = map.getZoom();
+                                                if (zoomLevel < 9)
+                                                    changeLayerOnZoom(thisLayer, "chartLayerData", "1", cLN);
+                                                else
+                                                    changeLayerOnZoom(thisLayer, "chartLayerData", "2", cLN);
+                                            }
+                                        }
+                                        break;
+                                    case "classGLayer":
+                                        for (var i=0; i<map.graphicsLayerIds.length; i++) {
+                                            if (map.getLayer(map.graphicsLayerIds[i]).name == "classGLayer"){
+                                                var thisLayer = map.getLayer(map.graphicsLayerIds[i]);
+                                                var zoomLevel = map.getZoom();
+                                                if (zoomLevel < 9)
+                                                    changeLayerOnZoom(thisLayer, "classLayerData", "1", 1);
+                                                else
+                                                    changeLayerOnZoom(thisLayer, "chlassLayerData", "2", 1);
+                                            }
+                                        }
+                                        break;
+                                }
+                                editFlag = 0;
+                            }
                         }
                     });
                 }
@@ -1047,8 +1076,10 @@ function doMap() {
 
         if(doMapIndex==0){
             layerNodesObj=$.fn.zTree.init($("#doMapTree"), setting, layerNodes_InFunc);
+
             doMapIndex=1;
         }
+        layerNodesObj.refresh();
     }
     layui.use('layer', function (layui_index) {
         var layer = layui.layer;
@@ -1344,6 +1375,9 @@ function sweetAlert1(mapName) {
                     map.addLayer(baseMap[i]);
     
                 });});
+            $("#legend-container .legend").remove();
+            indi = [];
+            field_cn = "";
             addModelLayUI(mapName);
             if (templateFlag == 0)
                 templateClassNo = layer.index;
@@ -1454,25 +1488,36 @@ function addModelLayUI(mapName) {
         layerNodes_Model[2].children[i].dataType="templateData"
     }
     //为模板中的统计图层初始化
+
     for(var i=0;i<statisticLayer_Model.modules.length;i++){
-        layerNodes_Model[3].children[i].checked = true;
-        tjLayerName=statisticLayer_Model.modules[i]["name"];
-        var zoomLevel = map.getZoom();
-        var tjType;
-        switch (statisticLayer_Model.modules[i].cartographydata.type) {
-            case "1":
-                tjType = "chartLayerData";
-                break;
-            case "2":
-                tjType = "classLayerData";
+        if (statisticLayer_Model.modules[i].cartographydata.type == "2") {
+            layerNodes_Model[3].children[i].checked = true;
+            tjLayerName=statisticLayer_Model.modules[i]["name"];
+            var tjType = "classLayerData";
+            fieldsOrIndi = statisticLayer_Model.modules[i].statisticdata.fieldsName;
+            var str=JSON.stringify(statisticLayer_Model.modules[i])
+            var zoomLevel = map.getZoom();
+            if (zoomLevel < 9)
+                initTjLayer(str, tjType, "1");
+            else
+                initTjLayer(str, tjType, "2");
                 break;
         }
-        var str=JSON.stringify(statisticLayer_Model.modules[i])
-        if (zoomLevel < 9)
-
-            initTjLayer(str, tjType, "1");
-        else
-            initTjLayer(str, tjType, "2");
+    }
+    for(var i=0;i<statisticLayer_Model.modules.length;i++){
+        if (statisticLayer_Model.modules[i].cartographydata.type == "1") {
+            layerNodes_Model[3].children[i].checked = true;
+            tjLayerName=statisticLayer_Model.modules[i]["name"];
+            var tjType = "chartLayerData";
+            fieldsOrIndi = statisticLayer_Model.modules[i].statisticdata.fieldsName;
+            var str=JSON.stringify(statisticLayer_Model.modules[i])
+            var zoomLevel = map.getZoom();
+            if (zoomLevel < 9)
+                initTjLayer(str, tjType, "1");
+            else
+                initTjLayer(str, tjType, "2");
+            break;
+        }
     }
 
 
@@ -2219,7 +2264,65 @@ function addModelLayUI(mapName) {
 
                             if(map&&(map.getLayer(treeNode.name))) {
                                 var thisLayer = map.getLayer(treeNode.name);
+                                var thisTjLayerType = thisLayer.name;
+                                switch (thisTjLayerType){
+                                    case "chartGLayer":
+                                        var chartFlag = 0;
+                                        for (var i=0; i<map.graphicsLayerIds.length; i++){
+                                            if (map.getLayer(map.graphicsLayerIds[i]).name == "chartGLayer"){
+                                                chartFlag = 1;
+                                                break;
+                                            }
+                                        }
+                                        if (chartFlag == 0)
+                                            indi = [];
+                                        $("#legend-container .legend").remove();
+                                        break;
+                                    case "classGLayer":
+                                        var classFlag = 0;
+                                        for (var i=0; i<map.graphicsLayerIds.length; i++){
+                                            if (map.getLayer(map.graphicsLayerIds[i]).name == "classGLayer"){
+                                                classFlag = 1;
+                                                break;
+                                            }
+                                        }
+                                        if (classFlag == 0)
+                                            field_cn = "";
+                                        $("#legend-container .legend").remove();
+                                        break;
+                                }
                                 map.removeLayer(thisLayer);
+                                //删除节点时，调整组合图例的内容
+                                editFlag = 1;
+                                switch (thisTjLayerType){
+                                    case "chartGLayer":
+                                        var cLN = 0;
+                                        for (var i=0; i<map.graphicsLayerIds.length; i++) {
+                                            if (map.getLayer(map.graphicsLayerIds[i]).name == "chartGLayer") {
+                                                var thisLayer = map.getLayer(map.graphicsLayerIds[i]);
+                                                cLN++;
+                                                var zoomLevel = map.getZoom();
+                                                if (zoomLevel < 9)
+                                                    changeLayerOnZoom(thisLayer, "chartLayerData", "1", cLN);
+                                                else
+                                                    changeLayerOnZoom(thisLayer, "chartLayerData", "2", cLN);
+                                            }
+                                        }
+                                        break;
+                                    case "classGLayer":
+                                        for (var i=0; i<map.graphicsLayerIds.length; i++) {
+                                            if (map.getLayer(map.graphicsLayerIds[i]).name == "classGLayer"){
+                                                var thisLayer = map.getLayer(map.graphicsLayerIds[i]);
+                                                var zoomLevel = map.getZoom();
+                                                if (zoomLevel < 9)
+                                                    changeLayerOnZoom(thisLayer, "classLayerData", "1", 1);
+                                                else
+                                                    changeLayerOnZoom(thisLayer, "chlassLayerData", "2", 1);
+                                            }
+                                        }
+                                        break;
+                                }
+                                editFlag = 0;
                             }
 
 
@@ -2342,8 +2445,17 @@ function blank_btnClick() {
             //     var layerRemoved = map.getLayer(otherLayerIDs[i])
             //     map.removeLayer(layerRemoved);
             // }
+            polygonFeatureLayer.clear();
+            polylineFeatureLayer.clear();
+            pointFeatureLayer.clear();
+            //删除本地和缓存的标绘图形
+            deleteAllFeatureFromLocalstorage();
+            //移除所有图层
             map.removeAllLayers();
-
+            //将清将清空graphics的图层加上，因为后面还要标绘。
+            map.addLayer(polygonFeatureLayer);
+            map.addLayer(polylineFeatureLayer);
+            map.addLayer(pointFeatureLayer);
             /* $.each(baseMap,function (i) {
                 map.addLayer(baseMap[i]);
             }); */
@@ -2377,10 +2489,17 @@ function blank_btnClick() {
                 console.log(nodes);
                 treeObj.removeChildNodes(nodes[1]);
                 treeObj.removeChildNodes(nodes[2]);
+                treeObj.removeChildNodes(nodes[3]);
                 treeObj.refresh();
             }
-
-            //$("#doMap").click();
+            //清空之前模板制图中添加的图层节点
+            layerNodes[1].children = [];
+            layerNodes[2].children = [];
+            layerNodes[3].children = [];
+            //清空图例
+            $("#legend-container .legend").remove();
+            indi = [];
+            field_cn = "";
 
             doMap();
             if (blankFlag == 0)

@@ -1,6 +1,6 @@
 var layerIndex;
 // var symbolSizeSlider, symbolOpacitySlider1, symbolOpacitySlider2, classNumSlider;
-var symbolSizeSliderValue=0;
+var symbolSizeSliderValue=50;
 var symbolOpacitySliderValue=0;
 var classNumSliderValue=5;
 
@@ -25,6 +25,7 @@ var chartImg_url = undefined;//饼图图例的url
 var legendFlag = 0;
 var classifyImg_url = undefined;//分级统计图图例的url
 var chartLayerNum = 1; //当前添加的统计图层数量
+var editFlag = 0; //当前是否是统计图层编辑
 
 // 图例按钮的事件
 $("#map-legend").bind({
@@ -366,6 +367,7 @@ function modifytjMenuLayer(symbolInfo) {
 
 // 当用户修改时弹出的面板_新_测试
 function modifytjMenuLayer_new(allTjLayerContent) {
+    editFlag = 1;
     layui.use(['layer','form','element'],function () {
         var layer = layui.layer
             ,element = layui.element
@@ -374,7 +376,7 @@ function modifytjMenuLayer_new(allTjLayerContent) {
         opentjPanel2();
         form.render();
 
-
+        // tjPanel3=allTjLayerContent.cartographydata;
         //==================================================
         var statisticInfo=allTjLayerContent.statisticdata;
         var symbolInfo=allTjLayerContent.cartographydata;
@@ -486,7 +488,7 @@ function modifytjMenuLayer_new(allTjLayerContent) {
                     $("#color-selected>.select_title>img").attr("color1", color1);
                     $("#color-selected>.select_title>img").attr("color2", color2);
 
-                    setSlidersValue(symbolSizeSliderValue, symbolOpacitySliderValue, symbolOpacitySliderValue, classNumSliderValue);
+                    setSlidersValue(symbolSizeSliderValue,symbolOpacitySliderValue,symbolOpacitySliderValue,classNumSliderValue);
 
                 } else {
                     // $(".tjPanel-content").html(html3);
@@ -504,10 +506,11 @@ function modifytjMenuLayer_new(allTjLayerContent) {
 
                     var chartID = '010101';
                     var solutionSrc = 'assets/imgs/gradeIcon/10/6.jpg';
+                    var solutionName="青黄色系";
 
                     if (type == 1) {
                         chartID = symbolInfo.chartID;
-                        ;
+                        solutionName=symbolInfo.colorName;
 
                         var solutionSrc = symbolInfo.colorSolutionSrc;
 
@@ -518,8 +521,9 @@ function modifytjMenuLayer_new(allTjLayerContent) {
                     $("#chart-selected>.select_title>img").attr("src", chartSrc);
 
                     $("#color-solution>.select_title>img").attr("src", solutionSrc);
+                    $("#color-solution>.select_title>img").attr("name", solutionName);
 
-                    setSlidersValue(symbolSizeSliderValue, symbolOpacitySliderValue, symbolOpacitySliderValue, classNumSliderValue);
+                    setSlidersValue(symbolSizeSliderValue,symbolOpacitySliderValue,symbolOpacitySliderValue,classNumSliderValue);
                     // form.render();
                     userDefineChartColor();
                 }
@@ -1060,7 +1064,7 @@ function getTableTree(){
         type: 'post',
         url:"./servlet/fileUploadServlet",
         dataType:"json",
-        async:"false",
+        async:false,
         data:{ "inputType":"localDatabase"},
         success: function (data) { //返回json结果
             //alert(data);
@@ -1105,7 +1109,7 @@ function displayTableTree(treeElement,createTree){
                     type: 'post',
                     url:"./servlet/fileUploadServlet",
                     dataType:"json",
-                    async:"false",
+                    async:false,
                     data:{ "tableName":nodeName, "inputType":"column"},
                     success: function (data) { //返回json结果(表头)
                         //tableFields = JSON.parse(data);
@@ -1206,14 +1210,21 @@ function submitFields(){
 
 function initTjLayer(allTjLayerContent, tjType, regionParamVar) {
     var url;
+    $("#legend-container .legend").remove();
     if (tjType == "chartLayerData"){
+
         var num = 0;
-        for (var i=0; i<map.graphicsLayerIds.length; i++){
-            if (map.getLayer(map.graphicsLayerIds[i]).name == "chartGLayer")
-                num++;
+        if (editFlag == 0){ //新添加图层时
+            for (var i=0; i<map.graphicsLayerIds.length; i++) {
+                if (map.getLayer(map.graphicsLayerIds[i]).name == "chartGLayer")
+                    num++;
+            }
+            chartLayerNum = num + 1;
         }
-        chartLayerNum = num + 1;
-        console.log(chartLayerNum);
+        else if (editFlag == 1){ //编辑图层时
+                chartLayerNum = 1;
+        }
+        console.log("chartLayerNum: " + chartLayerNum);
     }
     if (tjPanel2.tabId=="1"){
         url= "./servlet/fileUploadServlet?allTjLayerContent=" + encodeURI(allTjLayerContent);
@@ -1225,18 +1236,34 @@ function initTjLayer(allTjLayerContent, tjType, regionParamVar) {
     $.ajax({
         type: 'POST',
         url: url,
-        async:"false",
+        async:false,
         dataType:"json",
         // data:{"inputType":"test"},
         data:{"inputType": tjType, "regionParam": regionParamVar, "chartLayerNum": chartLayerNum},
         success: function (data) {
             tjLayerName=JSON.parse(allTjLayerContent).name;
-            console.log(url);
+            // console.log(url);
             if (data.type==="chartLayer"){
-                doChartLayer(data);
+                doChartLayer(data, allTjLayerContent);
+                if (editFlag == 1){  //编辑图层时，重新生成组合图例
+                    var cLN = 0;
+                    for (var i=0; i<map.graphicsLayerIds.length; i++){
+                        if (map.getLayer(map.graphicsLayerIds[i]).name == "chartGLayer"){
+                            var thisLayer = map.getLayer(map.graphicsLayerIds[i]);
+                            cLN++;
+                            var zoomLevel = map.getZoom();
+                            if (zoomLevel < 9)
+                                changeLayerOnZoom(thisLayer, "chartLayerData", "1", cLN);
+                            else
+                                changeLayerOnZoom(thisLayer, "chartLayerData", "2", cLN);
+                        }
+                    }
+                    editFlag = 0;
+                }
                 return;
             }
             console.log(data);
+            editFlag = 0;
             var classLegend = data.classLegend;
             field_cn = fieldsOrIndi;
             console.log(field_cn);
@@ -1408,12 +1435,14 @@ function changeLayerOnZoom(thisLayer, tjType, regionParamVar, chartLayerN) {
     $.ajax({
         type: 'POST',
         url: url,
-        async: "false",
+        async: false,
         dataType: "json",
         // data:{"inputType":"test"},
         data: {"inputType": tjType, "regionParam": regionParamVar, "chartLayerNum": chartLayerN},
         success: function (data) {
             if (data.type==="chartLayer"){
+                if (editFlag == 1) //如果当前的操作是编辑或删除图层，得到图例url
+                    chartImg_url = "data:image/png;base64," + data.chartLegend;
                 var xOffset = parseInt(JSON.parse(thisLayer.content).cartographydata.xoffset);
                 var yOffset = parseInt(JSON.parse(thisLayer.content).cartographydata.yoffset);
                 zoomGraphics = initChartLayer(data.charts, xOffset, yOffset);
@@ -1428,6 +1457,8 @@ function changeLayerOnZoom(thisLayer, tjType, regionParamVar, chartLayerN) {
                 zoomOutFlag = 0;
             }
             else {
+                if (editFlag == 1) //如果当前的操作是编辑或删除图层，得到图例url
+                    classifyImg_url = "data:image/png;base64," + data.classLegend;
                 zoomGraphics = initClassLayer(data.classDataArray);
                 // console.log(zoomGraphics);
                 // var layer = thisZoomLayer;
@@ -1738,7 +1769,7 @@ function OtherDatabase(){
             $.ajax({
                 type: 'post',
                 url:"./servlet/fileUploadServlet",
-                async:"false",
+                async:false,
                 dataType:"json",
                 data:{"inputType":"APIData","apiUrl": data.field.dataAddress},
                 success: function (data) { //返回tabletree
@@ -1912,10 +1943,12 @@ var colorTable={
         "color9":"#FFFEEC",
     }
 }
-function doChartLayer(data){
+function doChartLayer(data, allChartLayerContent){
     indi = fieldsOrIndi;
     console.log(indi);
-    chartImg_url= "data:image/png;base64," + data.chartLegend;
+    if (editFlag == 0)
+        chartImg_url= "data:image/png;base64," + data.chartLegend;
+
     // if(legendFlag!=0 && legendFlag == 'chart'){
     //     $("#chartLegend").click();                   //触发chartlegend的点击事件
     // }
@@ -1952,7 +1985,7 @@ function doChartLayer(data){
                 for (var i=0;i<graphics.length;i++){
                     layer.add(graphics[i]);
                 }
-                layer.content = allTjLayerContent;
+                layer.content = allChartLayerContent;
                 layer.legend = chartImg_url;
                 // console.log(tjLayerName);
                 // layer.setId = tjLayerName;
@@ -1969,12 +2002,13 @@ function doChartLayer(data){
             var graphicLayer = new esri.layers.GraphicsLayer();
             graphicLayer.name = "chartGLayer";
             graphicLayer.id = tjLayerName;
-            graphicLayer.content = allTjLayerContent;
+            graphicLayer.content = allChartLayerContent;
             graphicLayer.legend = chartImg_url;
             for (var i=0;i<graphics.length;i++){
                 graphicLayer.add(graphics[i]);
             }
             map.addLayer(graphicLayer);
+            map.reorderLayer(graphicLayer, map.graphicsLayerIds.length-1);
         }
 
     // }
