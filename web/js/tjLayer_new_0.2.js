@@ -25,6 +25,7 @@ var chartImg_url = undefined;//饼图图例的url
 var legendFlag = 0;
 var classifyImg_url = undefined;//分级统计图图例的url
 var chartLayerNum = 1; //当前添加的统计图层数量
+var editFlag = 0; //当前是否是统计图层编辑
 
 // 图例按钮的事件
 $("#map-legend").bind({
@@ -366,6 +367,7 @@ function modifytjMenuLayer(symbolInfo) {
 
 // 当用户修改时弹出的面板_新_测试
 function modifytjMenuLayer_new(allTjLayerContent) {
+    editFlag = 1;
     layui.use(['layer','form','element'],function () {
         var layer = layui.layer
             ,element = layui.element
@@ -374,7 +376,7 @@ function modifytjMenuLayer_new(allTjLayerContent) {
         opentjPanel2();
         form.render();
 
-        // tjPanel3=allTjLayerContent.cartographydata;
+
         //==================================================
         var statisticInfo=allTjLayerContent.statisticdata;
         var symbolInfo=allTjLayerContent.cartographydata;
@@ -886,9 +888,9 @@ function renderSlider() {
             elem: '#symbolOpacity1'
             // ,input: true //输入框
             ,diabled:"false"
-            ,change:function (value) {
-                symbolOpacitySliderValue=value;
-            }
+           ,change:function (value) {
+               symbolOpacitySliderValue=value;
+           }
         });
 
         slider.render({
@@ -900,7 +902,7 @@ function renderSlider() {
             }
         });
 
-        slider.render({
+       slider.render({
             elem: '#classNum'
             // ,input: true //输入框
             ,diabled:"false"
@@ -908,9 +910,9 @@ function renderSlider() {
             ,step:1
             ,min:1 //最小值
             ,max:7 //最大值
-            ,change:function (value) {
-                classNumSliderValue=value;
-            }
+           ,change:function (value) {
+               classNumSliderValue=value;
+           }
         });
     })
 }
@@ -1062,7 +1064,7 @@ function getTableTree(){
         type: 'post',
         url:"./servlet/fileUploadServlet",
         dataType:"json",
-        async:"false",
+        async:false,
         data:{ "inputType":"localDatabase"},
         success: function (data) { //返回json结果
             //alert(data);
@@ -1107,7 +1109,7 @@ function displayTableTree(treeElement,createTree){
                     type: 'post',
                     url:"./servlet/fileUploadServlet",
                     dataType:"json",
-                    async:"false",
+                    async:false,
                     data:{ "tableName":nodeName, "inputType":"column"},
                     success: function (data) { //返回json结果(表头)
                         //tableFields = JSON.parse(data);
@@ -1195,7 +1197,7 @@ function submitFields(){
                 }else if(tjPanel2.fieldsNum==1){
                     tjPanel2.timeId = item;
                 }else {tjPanel2.fieldsName.push(item);}
-                tjPanel2.fieldsNum++
+                    tjPanel2.fieldsNum++
             });
             tjPanel2.fieldsNum = tjPanel2.fieldsNum - 2;
 
@@ -1208,14 +1210,21 @@ function submitFields(){
 
 function initTjLayer(allTjLayerContent, tjType, regionParamVar) {
     var url;
+    $("#legend-container .legend").remove();
     if (tjType == "chartLayerData"){
+
         var num = 0;
-        for (var i=0; i<map.graphicsLayerIds.length; i++){
-            if (map.getLayer(map.graphicsLayerIds[i]).name == "chartGLayer")
-                num++;
+        if (editFlag == 0){ //新添加图层时
+            for (var i=0; i<map.graphicsLayerIds.length; i++) {
+                if (map.getLayer(map.graphicsLayerIds[i]).name == "chartGLayer")
+                    num++;
+            }
+            chartLayerNum = num + 1;
         }
-        chartLayerNum = num + 1;
-        console.log(chartLayerNum);
+        else if (editFlag == 1){ //编辑图层时
+                chartLayerNum = 1;
+        }
+        console.log("chartLayerNum: " + chartLayerNum);
     }
     if (tjPanel2.tabId=="1"){
         url= "./servlet/fileUploadServlet?allTjLayerContent=" + encodeURI(allTjLayerContent);
@@ -1236,9 +1245,25 @@ function initTjLayer(allTjLayerContent, tjType, regionParamVar) {
             console.log(url);
             if (data.type==="chartLayer"){
                 doChartLayer(data, allTjLayerContent);
+                if (editFlag == 1){  //编辑图层时，重新生成组合图例
+                    var cLN = 0;
+                    for (var i=0; i<map.graphicsLayerIds.length; i++){
+                        if (map.getLayer(map.graphicsLayerIds[i]).name == "chartGLayer"){
+                            var thisLayer = map.getLayer(map.graphicsLayerIds[i]);
+                            cLN++;
+                            var zoomLevel = map.getZoom();
+                            if (zoomLevel < 9)
+                                changeLayerOnZoom(thisLayer, "chartLayerData", "1", cLN);
+                            else
+                                changeLayerOnZoom(thisLayer, "chartLayerData", "2", cLN);
+                        }
+                    }
+                    editFlag = 0;
+                }
                 return;
             }
             console.log(data);
+            editFlag = 0;
             var classLegend = data.classLegend;
             field_cn = fieldsOrIndi;
             console.log(field_cn);
@@ -1262,39 +1287,37 @@ function initTjLayer(allTjLayerContent, tjType, regionParamVar) {
             //     graphicLayer.setOpacity(0.95);
             // }
             // else {
-            //map.removeLayer(baseLayerHB);
-            var flag = 0;
-            for (var i = 0; i < map.graphicsLayerIds.length; i++) {
-                console.log(tjLayerName);
-                if ((map.getLayer(map.graphicsLayerIds[i])).id == tjLayerName) {
-                    var layer = map.getLayer(map.graphicsLayerIds[i]);
-                    layer.clear();//清空所有graphics
-                    for (var i=0;i<classGraphics.length;i++){
-                        layer.add(classGraphics[i]);
+                //map.removeLayer(baseLayerHB);
+                var flag = 0;
+                for (var i = 0; i < map.graphicsLayerIds.length; i++) {
+                    console.log(tjLayerName);
+                    if ((map.getLayer(map.graphicsLayerIds[i])).id == tjLayerName) {
+                        var layer = map.getLayer(map.graphicsLayerIds[i]);
+                        layer.clear();//清空所有graphics
+                        for (var i=0;i<classGraphics.length;i++){
+                            layer.add(classGraphics[i]);
+                        }
+                        layer.content = allTjLayerContent;
+                        flag = 1;
+                        layer.setOpacity(0.95);
+                        break;
                     }
-                    layer.content = allTjLayerContent;
-                    flag = 1;
-                    layer.setOpacity(0.95);
-                    break;
                 }
-            }
-            if(flag==0){
-                var graphicLayer = new esri.layers.GraphicsLayer();
-                graphicLayer.name = "classGLayer";
-                graphicLayer.id = tjLayerName;
-                graphicLayer.content = allTjLayerContent;
-                //Graphic(geometry,symbol,attributes,infoTemplate)-->infoTemlate为弹出窗体,用以显示信息
-                for (var i=0;i<classGraphics.length;i++){
-                    // classGraphics[i].geometry.spatialReference= {
-                    //     "wkid": 4326}
-                    graphicLayer.add(classGraphics[i]);
+                if(flag==0){
+                    var graphicLayer = new esri.layers.GraphicsLayer();
+                    graphicLayer.name = "classGLayer";
+                    graphicLayer.id = tjLayerName;
+                    graphicLayer.content = allTjLayerContent;
+                    //Graphic(geometry,symbol,attributes,infoTemplate)-->infoTemlate为弹出窗体,用以显示信息
+                    for (var i=0;i<classGraphics.length;i++){
+                        graphicLayer.add(classGraphics[i]);
+                    }
+                    map.addLayer(graphicLayer);
+                    graphicLayer.setOpacity(0.95);
                 }
-                map.addLayer(graphicLayer);
-                graphicLayer.setOpacity(0.95);
-            }
-            // map.removeLayer(baseLayerHB);
-            // graphicLayer.setOpacity(0.9);
-            // refreshChartLyr(indi);
+                // map.removeLayer(baseLayerHB);
+                // graphicLayer.setOpacity(0.9);
+                // refreshChartLyr(indi);
             // }
 
             //添加鼠标响应事件
@@ -1412,12 +1435,14 @@ function changeLayerOnZoom(thisLayer, tjType, regionParamVar, chartLayerN) {
     $.ajax({
         type: 'POST',
         url: url,
-        async: "false",
+        async: false,
         dataType: "json",
         // data:{"inputType":"test"},
         data: {"inputType": tjType, "regionParam": regionParamVar, "chartLayerNum": chartLayerN},
         success: function (data) {
             if (data.type==="chartLayer"){
+                if (editFlag == 1) //如果当前的操作是编辑或删除图层，得到图例url
+                    chartImg_url = "data:image/png;base64," + data.chartLegend;
                 var xOffset = parseInt(JSON.parse(thisLayer.content).cartographydata.xoffset);
                 var yOffset = parseInt(JSON.parse(thisLayer.content).cartographydata.yoffset);
                 zoomGraphics = initChartLayer(data.charts, xOffset, yOffset);
@@ -1432,6 +1457,8 @@ function changeLayerOnZoom(thisLayer, tjType, regionParamVar, chartLayerN) {
                 zoomOutFlag = 0;
             }
             else {
+                if (editFlag == 1) //如果当前的操作是编辑或删除图层，得到图例url
+                    classifyImg_url = "data:image/png;base64," + data.classLegend;
                 zoomGraphics = initClassLayer(data.classDataArray);
                 // console.log(zoomGraphics);
                 // var layer = thisZoomLayer;
@@ -1497,7 +1524,6 @@ function initClassLayer (classGraphics) {
         function(Color,SimpleFillSymbol,SimpleLineSymbol,webMercatorUtils) {
             for(var i=0;i<classGraphics.length;i++){
                 //var color = Color.fromRgb("rgb(202,0,19)")可以直接用传输过来的字符串构造:FillSymbol(color,outline,type)
-               // classGraphics[i].geometry.spatialReference={wkid: 4326};
                 var polygon = new esri.geometry.Polygon(classGraphics[i].geometry);
                 var polygonXY = webMercatorUtils.geographicToWebMercator(polygon); //经纬度转墨卡托
                 var color = new Color.fromRgb(classGraphics[i].color);
@@ -1524,7 +1550,7 @@ refreshChartLyr = function(indicators){
     var DC = "0,0"+"," + map.width + "," + map.height;
     //获取符号定制参数
     var values = getAllValues();
-    console.log(values);
+    // console.log(values);
     var chartID = values[0];
     var color = values[1];
     var size = values[2];
@@ -1743,7 +1769,7 @@ function OtherDatabase(){
             $.ajax({
                 type: 'post',
                 url:"./servlet/fileUploadServlet",
-                async:"false",
+                async:false,
                 dataType:"json",
                 data:{"inputType":"APIData","apiUrl": data.field.dataAddress},
                 success: function (data) { //返回tabletree
@@ -1920,7 +1946,9 @@ var colorTable={
 function doChartLayer(data, allChartLayerContent){
     indi = fieldsOrIndi;
     console.log(indi);
-    chartImg_url= "data:image/png;base64," + data.chartLegend;
+    if (editFlag == 0)
+        chartImg_url= "data:image/png;base64," + data.chartLegend;
+
     // if(legendFlag!=0 && legendFlag == 'chart'){
     //     $("#chartLegend").click();                   //触发chartlegend的点击事件
     // }
@@ -1952,40 +1980,41 @@ function doChartLayer(data, allChartLayerContent){
     //     }
     //     map.addLayer(graphicLayer);
     // } else {
-    var flag = 0;// 用于判断是否有画图图层
-    for (var i = 0; i < map.graphicsLayerIds.length; i++) {
-        if ((map.getLayer(map.graphicsLayerIds[i])).id == tjLayerName) {
-            var layer = map.getLayer(map.graphicsLayerIds[i]);
-            layer.clear();//清空所有graphics
-            // dojo.disconnect(mouseMove);
-            // dojo.disconnect(mouseOut);
-            for (var i=0;i<graphics.length;i++){
-                layer.add(graphics[i]);
+        var flag = 0;// 用于判断是否有画图图层
+        for (var i = 0; i < map.graphicsLayerIds.length; i++) {
+            if ((map.getLayer(map.graphicsLayerIds[i])).id == tjLayerName) {
+                var layer = map.getLayer(map.graphicsLayerIds[i]);
+                layer.clear();//清空所有graphics
+                // dojo.disconnect(mouseMove);
+                // dojo.disconnect(mouseOut);
+                for (var i=0;i<graphics.length;i++){
+                    layer.add(graphics[i]);
+                }
+                layer.content = allChartLayerContent;
+                layer.legend = chartImg_url;
+                // console.log(tjLayerName);
+                // layer.setId = tjLayerName;
+                flag = 0;
             }
-            layer.content = allTjLayerContent;
-            layer.legend = chartImg_url;
-            // console.log(tjLayerName);
-            // layer.setId = tjLayerName;
-            flag = 0;
+            else// 第一个不是chart图层
+            {
+                flag = 1;
+            }
         }
-        else// 第一个不是chart图层
-        {
-            flag = 1;
-        }
-    }
     //
-    if (flag == 1)// 现有图层中没有画图图层
-    {
-        var graphicLayer = new esri.layers.GraphicsLayer();
-        graphicLayer.name = "chartGLayer";
-        graphicLayer.id = tjLayerName;
-        graphicLayer.content = allChartLayerContent;
-        graphicLayer.legend = chartImg_url;
-        for (var i=0;i<graphics.length;i++){
-            graphicLayer.add(graphics[i]);
+        if (flag == 1)// 现有图层中没有画图图层
+        {
+            var graphicLayer = new esri.layers.GraphicsLayer();
+            graphicLayer.name = "chartGLayer";
+            graphicLayer.id = tjLayerName;
+            graphicLayer.content = allChartLayerContent;
+            graphicLayer.legend = chartImg_url;
+            for (var i=0;i<graphics.length;i++){
+                graphicLayer.add(graphics[i]);
+            }
+            map.addLayer(graphicLayer);
+            map.reorderLayer(graphicLayer, map.graphicsLayerIds.length-1);
         }
-        map.addLayer(graphicLayer);
-    }
 
     // }
     //添加鼠标响应事件
@@ -2016,8 +2045,8 @@ function doChartLayer(data, allChartLayerContent){
                     // if (parseInt(JSON.parse(chartLayer.content).cartographydata.xoffset) != 0 || parseInt(JSON.parse(chartLayer.content).cartographydata.yoffset) != 0)
                     //     symbol.setOffset(parseInt(JSON.parse(chartLayer.content).cartographydata.xoffset), parseInt(JSON.parse(chartLayer.content).cartographydata.yoffset));
                     //g.setSymbol(symbol);
-                    /* g.symbol.height = 1.15*g.symbol.height;
-                     g.symbol.width = 1.15*g.symbol.width;*/
+                   /* g.symbol.height = 1.15*g.symbol.height;
+                    g.symbol.width = 1.15*g.symbol.width;*/
                     var symbol=g.symbol;
                     symbol.height = 1.15*symbol.height;
                     symbol.width = 1.15*symbol.width;
@@ -2039,7 +2068,7 @@ function doChartLayer(data, allChartLayerContent){
                 var g = evt.graphic;
                 //var symbol = new esri.symbol.PictureMarkerSymbol(chartImg,chartWidth,chartHeight);
                 // if (parseInt(JSON.parse(chartLayer.content).cartographydata.xoffset) != 0 || parseInt(JSON.parse(chartLayer.content).cartographydata.yoffset) != 0)
-                //symbol.setOffset(parseInt(JSON.parse(chartLayer.content).cartographydata.xoffset), parseInt(JSON.parse(chartLayer.content).cartographydata.yoffset));
+                    //symbol.setOffset(parseInt(JSON.parse(chartLayer.content).cartographydata.xoffset), parseInt(JSON.parse(chartLayer.content).cartographydata.yoffset));
                 // console.log(symbol);
                 var symbol=g.symbol;
                 symbol.height = symbol.height/1.15;
