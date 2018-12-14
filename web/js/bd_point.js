@@ -55,7 +55,7 @@ layui.use(['layer','upload'], function(){
         exts: 'json|geojson', //只允许上传压缩文件
         // bindAction: '#shpLoadConfirmBtn',
         done: function(res){
-            console.log(res);
+            // console.log(res);
             swal({
                 title: "数据上传成功",
                 text: "请在图层控件中选择查看！",
@@ -196,7 +196,7 @@ layui.use(['layer','upload'], function(){
                             }
                         },
                         {
-                            name: '高',
+                            name: '强',
                             type: 'map',
                             mapType: 'none',
                             hoverable: false,
