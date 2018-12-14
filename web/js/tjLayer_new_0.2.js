@@ -1291,7 +1291,7 @@ function initTjLayer(allTjLayerContent, tjType, regionParamVar) {
                 var flag = 0;
                 for (var i = 0; i < map.graphicsLayerIds.length; i++) {
                     console.log(tjLayerName);
-                    if ((map.getLayer(map.graphicsLayerIds[i])).id == tjLayerName) {
+                    if ((map.getLayer(map.graphicsLayerIds[i])).id == oldTjLayerName) {
                         var layer = map.getLayer(map.graphicsLayerIds[i]);
                         layer.clear();//清空所有graphics
                         for (var i=0;i<classGraphics.length;i++){
@@ -1977,7 +1977,7 @@ function doChartLayer(data, allChartLayerContent){
     // } else {
         var flag = 0;// 用于判断是否有画图图层
         for (var i = 0; i < map.graphicsLayerIds.length; i++) {
-            if ((map.getLayer(map.graphicsLayerIds[i])).id == tjLayerName) {
+            if ((map.getLayer(map.graphicsLayerIds[i])).id == oldTjLayerName) {
                 var layer = map.getLayer(map.graphicsLayerIds[i]);
                 layer.clear();//清空所有graphics
                 // dojo.disconnect(mouseMove);

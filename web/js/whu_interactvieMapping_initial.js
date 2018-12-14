@@ -62,6 +62,7 @@ var tjLayerName = ""; //统计图层名作为layer的id
 var zoomFlag = 0; //是否已下钻
 var fieldsOrIndi = "";
 var field_cn = "";
+var oldTjLayerName;
 $(document).ready(function() {
     findDimensions();
     $("#mapContainer").height(winHeight);
@@ -873,6 +874,7 @@ function doMap() {
                                             '          </div>',
                                             yes:function (index,layero) {
                                                 console.log("OK2");
+                                                oldTjLayerName = treeNode.name;
                                                 tjLayerName = $("input[ name='tjLayerName1' ]").val();
 
                                                 allTjLayerContent = {
@@ -2153,6 +2155,7 @@ function addModelLayUI(mapName) {
                                             '          </div>',
                                             yes:function (index,layero) {
                                                 console.log("OK2");
+                                                oldTjLayerName = treeNode.name;
                                                 tjLayerName = $("input[ name='tjLayerName1' ]").val();
 
                                                 allTjLayerContent = {
