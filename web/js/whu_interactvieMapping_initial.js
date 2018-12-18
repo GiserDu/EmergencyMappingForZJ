@@ -63,7 +63,7 @@ var tjLayerName = ""; //统计图层名作为layer的id
 var zoomFlag = 0; //是否已下钻
 var fieldsOrIndi = "";
 var field_cn = "";
-var oldTjLayerName;
+var treeNodeUrl; //记录统计图层节点的原始图层名（即graphicslayer的id）
 $(document).ready(function() {
     findDimensions();
     $("#mapContainer").height(winHeight);
@@ -133,8 +133,8 @@ $(document).ready(function() {
             });
 
             // 加载浙江行政区划底图
-            zjBaseLayer = new ArcGISDynamicMapServiceLayer("http://47.96.162.249:6080/arcgis/rest/services/zjmap/ZJ_regions/MapServer",{});
-            zjBaseLayer.setVisibleLayers([0]);
+            zjBaseLayer = new ArcGISDynamicMapServiceLayer("http://47.96.162.249:6080/arcgis/rest/services/zjmap/ZJ_regions33/MapServer",{});
+            zjBaseLayer.setVisibleLayers([1]);
 
             map.addLayer(zjBaseLayer);
             require(['esri/geometry/Point'],function(EsriPoint){
@@ -162,14 +162,14 @@ $(document).ready(function() {
                 var zoomLevel = map.getZoom();
                 if  (zoomFlag == 0){
                     if (zoomLevel > 8){
-                        zjBaseLayer.setVisibleLayers([4]);
+                        zjBaseLayer.setVisibleLayers([0]);
                         onZoomInLevelAbove10();
                         zoomFlag = 1;
                     }
                 }
                 else if (zoomFlag == 1){
                     if (zoomLevel < 9){
-                        zjBaseLayer.setVisibleLayers([0]);
+                        zjBaseLayer.setVisibleLayers([1]);
                         onZoomInLevelBelow10();
                         zoomFlag = 0;
                     }
@@ -525,7 +525,7 @@ function doMap() {
                                                 if (tjLayerName != "") {
                                                     var newNode = {
                                                         name: tjLayerName,
-                                                        url: "123",
+                                                        url: tjLayerName,
                                                         // dom: tjLayertest,
                                                         // cartographydata: tjPanel3,
                                                         allContent: allTjLayerContent,
@@ -883,8 +883,9 @@ function doMap() {
                                             '          </div>',
                                             yes:function (index,layero) {
                                                 console.log("OK2");
-                                                oldTjLayerName = treeNode.name;
                                                 tjLayerName = $("input[ name='tjLayerName1' ]").val();
+                                                var oldTjName = treeNode.name;
+                                                treeNodeUrl = treeNode.url;
 
                                                 allTjLayerContent = {
                                                     "name": tjLayerName,
@@ -919,6 +920,9 @@ function doMap() {
                                                     fieldsOrIndi = allTjLayerContent.statisticdata.fieldsName;
                                                     allTjLayerContent = JSON.stringify(allTjLayerContent);
                                                     console.log(allTjLayerContent);
+                                                    if (tjLayerName != oldTjName){
+                                                        tjLayerName = oldTjName;
+                                                    }
                                                     var zoomLevel = map.getZoom();
                                                     if (zoomLevel < 9)
                                                         initTjLayer(allTjLayerContent, tjType, "1");
@@ -983,15 +987,16 @@ function doMap() {
                             treeNode.getParentNode().isParent=true;
                             treeObj.refresh();
                             //删除节点时将地图上的图层也删去
-
                             if(map&&(map.getLayer(treeNode.name))) {
                                 var thisLayer = map.getLayer(treeNode.name);
                                 var thisTjLayerType = thisLayer.name;
-                                switch (thisTjLayerType){
+                                map.removeLayer(thisLayer);
+
+                                switch (thisTjLayerType) {
                                     case "chartGLayer":
                                         var chartFlag = 0;
-                                        for (var i=0; i<map.graphicsLayerIds.length; i++){
-                                            if (map.getLayer(map.graphicsLayerIds[i]).name == "chartGLayer"){
+                                        for (var i = 0; i < map.graphicsLayerIds.length; i++) {
+                                            if (map.getLayer(map.graphicsLayerIds[i]).name == "chartGLayer") {
                                                 chartFlag = 1;
                                                 break;
                                             }
@@ -1002,8 +1007,8 @@ function doMap() {
                                         break;
                                     case "classGLayer":
                                         var classFlag = 0;
-                                        for (var i=0; i<map.graphicsLayerIds.length; i++){
-                                            if (map.getLayer(map.graphicsLayerIds[i]).name == "classGLayer"){
+                                        for (var i = 0; i < map.graphicsLayerIds.length; i++) {
+                                            if (map.getLayer(map.graphicsLayerIds[i]).name == "classGLayer") {
                                                 classFlag = 1;
                                                 break;
                                             }
@@ -1013,7 +1018,6 @@ function doMap() {
                                         $("#legend-container .legend").remove();
                                         break;
                                 }
-                                map.removeLayer(thisLayer);
                                 //删除节点时，调整组合图例的内容
                                 editFlag = 1;
                                 switch (thisTjLayerType){
@@ -1039,7 +1043,7 @@ function doMap() {
                                                 if (zoomLevel < 9)
                                                     changeLayerOnZoom(thisLayer, "classLayerData", "1", 1);
                                                 else
-                                                    changeLayerOnZoom(thisLayer, "chlassLayerData", "2", 1);
+                                                    changeLayerOnZoom(thisLayer, "classLayerData", "2", 1);
                                             }
                                         }
                                         break;
@@ -1357,6 +1361,7 @@ function sweetAlert1(mapName) {
             //移除所有图层
             map.removeAllLayers();
             //将清将清空graphics的图层加上，因为后面还要标绘。
+
             map.addLayer(polygonFeatureLayer);
             map.addLayer(polylineFeatureLayer);
             map.addLayer(pointFeatureLayer);
@@ -1385,7 +1390,9 @@ function sweetAlert1(mapName) {
                     }
                     map.addLayer(baseMap[i]);
     
-                });});
+                });
+                map.addLayer(zjBaseLayer);
+            });
             $("#legend-container .legend").remove();
             indi = [];
             field_cn = "";
@@ -1499,7 +1506,9 @@ function addModelLayUI(mapName) {
         layerNodes_Model[2].children[i].dataType="templateData"
     }
     //为模板中的统计图层初始化
-
+    for (var i=0,l=layerNodes_Model[3].children.length;i<l;i++){ //记录作为graphicsLayerId的节点原始名称
+        layerNodes_Model[3].children[i].url = layerNodes_Model[3].children[i].name;
+    }
     for(var i=0;i<statisticLayer_Model.modules.length;i++){
         if (statisticLayer_Model.modules[i].cartographydata.type == "2") {
             layerNodes_Model[3].children[i].checked = true;
@@ -1789,7 +1798,7 @@ function addModelLayUI(mapName) {
                                                 if (tjLayerName != "") {
                                                     var newNode = {
                                                         name: tjLayerName,
-                                                        url: "123",
+                                                        url: tjLayerName, //记录作为graphicsLayerId的节点原始名称
                                                         // allContent: allTjLayerContent,
                                                         spatialdata:tjPanel1,
                                                         statisticdata:tjPanel2,
@@ -2164,8 +2173,9 @@ function addModelLayUI(mapName) {
                                             '          </div>',
                                             yes:function (index,layero) {
                                                 console.log("OK2");
-                                                oldTjLayerName = treeNode.name;
                                                 tjLayerName = $("input[ name='tjLayerName1' ]").val();
+                                                var oldTjName = treeNode.name;
+                                                treeNodeUrl = treeNode.url;
 
                                                 allTjLayerContent = {
                                                     "name": tjLayerName,
@@ -2201,6 +2211,8 @@ function addModelLayUI(mapName) {
                                                     fieldsOrIndi = allTjLayerContent.statisticdata.fieldsName;
                                                     allTjLayerContent = JSON.stringify(allTjLayerContent);
                                                     // console.log(allTjLayerContent);
+                                                    if (tjLayerName != oldTjName)
+                                                        tjLayerName = oldTjName;
                                                     var zoomLevel = map.getZoom();
                                                     if (zoomLevel < 9)
                                                         initTjLayer(allTjLayerContent, tjType, "1");
@@ -2273,15 +2285,16 @@ function addModelLayUI(mapName) {
                             treeNode.getParentNode().isParent=true;
                             treeObj.refresh();
                             //删除节点时将地图上的图层也删去
-
                             if(map&&(map.getLayer(treeNode.name))) {
                                 var thisLayer = map.getLayer(treeNode.name);
                                 var thisTjLayerType = thisLayer.name;
-                                switch (thisTjLayerType){
+                                map.removeLayer(thisLayer);
+
+                                switch (thisTjLayerType) {
                                     case "chartGLayer":
                                         var chartFlag = 0;
-                                        for (var i=0; i<map.graphicsLayerIds.length; i++){
-                                            if (map.getLayer(map.graphicsLayerIds[i]).name == "chartGLayer"){
+                                        for (var i = 0; i < map.graphicsLayerIds.length; i++) {
+                                            if (map.getLayer(map.graphicsLayerIds[i]).name == "chartGLayer") {
                                                 chartFlag = 1;
                                                 break;
                                             }
@@ -2292,8 +2305,8 @@ function addModelLayUI(mapName) {
                                         break;
                                     case "classGLayer":
                                         var classFlag = 0;
-                                        for (var i=0; i<map.graphicsLayerIds.length; i++){
-                                            if (map.getLayer(map.graphicsLayerIds[i]).name == "classGLayer"){
+                                        for (var i = 0; i < map.graphicsLayerIds.length; i++) {
+                                            if (map.getLayer(map.graphicsLayerIds[i]).name == "classGLayer") {
                                                 classFlag = 1;
                                                 break;
                                             }
@@ -2303,7 +2316,6 @@ function addModelLayUI(mapName) {
                                         $("#legend-container .legend").remove();
                                         break;
                                 }
-                                map.removeLayer(thisLayer);
                                 //删除节点时，调整组合图例的内容
                                 editFlag = 1;
                                 switch (thisTjLayerType){
@@ -2329,7 +2341,7 @@ function addModelLayUI(mapName) {
                                                 if (zoomLevel < 9)
                                                     changeLayerOnZoom(thisLayer, "classLayerData", "1", 1);
                                                 else
-                                                    changeLayerOnZoom(thisLayer, "chlassLayerData", "2", 1);
+                                                    changeLayerOnZoom(thisLayer, "classLayerData", "2", 1);
                                             }
                                         }
                                         break;
@@ -2493,7 +2505,9 @@ function blank_btnClick() {
                      }
                      map.addLayer(baseMap[i]);
      
-                 });});
+                 });
+                map.addLayer(zjBaseLayer);
+            });
             //清空之前交互制图中添加的图层节点
             var treeObj = $.fn.zTree.getZTreeObj("doMapTree");
             if (treeObj){
@@ -2610,6 +2624,32 @@ function layerEdit() {
                 var thisLayer = map.getLayer(treeNodes[0].mapId);
                 var newLayerIndex = treeNodes[0].getParentNode().children.length - nodeIndex - 1;
                 map.reorderLayer(thisLayer, newLayerIndex);
+                $("#legend-container .legend").remove();
+                var classDropFlag = 0;
+                if (treeNodes[0].cartographydata){
+                    if (treeNodes[0].cartographydata.type == "2")
+                        classDropFlag = 1;
+                }
+                else if (treeNodes[0].allContent.cartographydata){
+                    if (treeNodes[0].allContent.cartographydata.type == "2")
+                        classDropFlag = 1;
+                }
+                if (classDropFlag == 1){
+                    editFlag = 1;
+                    for (var i=map.graphicsLayerIds.length-1; i>=0; i--){
+                        if (map.getLayer(map.graphicsLayerIds[i]).name == "classGLayer"){
+                            var thisLayer = map.getLayer(map.graphicsLayerIds[i])
+                            var zoom = map.getZoom();
+                            if (zoom < 9)
+                                changeLayerOnZoom(thisLayer, "classLayerData", "1", 1);
+                            else
+                                changeLayerOnZoom(thisLayer, "classLayerData", "2", 1);
+                            break;
+                        }
+                    }
+                    editFlag = 0;
+                    classDropFlag = 0;
+                }
             }
             else if (baseMap.length){
                 if (treeNodes[0].name == "地理底图"){ //暂未实现底图节点的移动
@@ -2827,8 +2867,8 @@ function layerEdit() {
         }
         if (allTjNodes){
             for (var k=0; k<allTjNodes.length; k++){
-                if (map.graphicsLayerIds[i] == allTjNodes[k].name){
-                    allTjNodes[k].mapId = allTjNodes[k].name;
+                if (map.graphicsLayerIds[i] == allTjNodes[k].url){
+                    allTjNodes[k].mapId = allTjNodes[k].url;
                     featureLayerNodes.push(allTjNodes[k]);
                 }
             }

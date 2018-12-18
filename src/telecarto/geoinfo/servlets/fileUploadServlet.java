@@ -126,10 +126,14 @@ public class fileUploadServlet extends HttpServlet {
                     case "column":
                         String tableName = request.getParameter("tableName");
                         MysqlAccessBean mysql2 = new MysqlAccessBean();
+                        MysqlAccessBean mysql3 = new MysqlAccessBean();
                         String sql2 = "select COLUMN_NAME from information_schema.COLUMNS WHERE TABLE_NAME LIKE '" + tableName + "' AND COLUMN_NAME NOT LIKE '年份'";
+                        String sql3 = "select DISTINCT 年份 FROM " + tableName;
                         StringBuffer colomnName1 = new StringBuffer();
+                        StringBuffer yearColomn1 = new StringBuffer();
                         try{
                             ResultSet resultSet4 = mysql2.query(sql2);
+                            ResultSet resultSet5 = mysql3.query(sql3);
                             int i = 0;
                             while (resultSet4.next()){
                                 colomnName1.append("\"" + i + "\": \"" + resultSet4.getString(1) + "\",");
@@ -139,7 +143,17 @@ public class fileUploadServlet extends HttpServlet {
                             colomnName1.insert(0, "{");
                             colomnName1.insert(colomnName1.length(), "}");
                             String colomnName = colomnName1.toString();
+                            int j = 0;
+                            while (resultSet5.next()){
+                                yearColomn1.append("\"" + j + "\": \"" + resultSet5.getString(1) + "\",");
+                                j++;
+                            }
+                            yearColomn1.deleteCharAt(yearColomn1.length()-1);
+                            yearColomn1.insert(0, "{");
+                            yearColomn1.insert(yearColomn1.length(), "}");
+                            String yearColomn = yearColomn1.toString();
                             message.put("tableField", colomnName);
+                            message.put("yearColomn", yearColomn);
                         }
                         catch (Exception e) {
                             e.printStackTrace();

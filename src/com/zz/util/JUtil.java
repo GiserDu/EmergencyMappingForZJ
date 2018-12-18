@@ -428,7 +428,7 @@ public class JUtil {
 					" ON region_info_copy1.citycode=" + tableName + ".`" + spatialID + "` " +
 					"WHERE" +
 					"\tregion_info_copy1.class =" + regionParam +
-					" AND " + tableName + ".`年份`= "+ year + " ORDER BY citycode";
+					" AND " + tableName + ".`年份` LIKE '"+ year + "' ORDER BY citycode";
 		}
 		else{
 			sql = "SELECT" +
@@ -439,7 +439,7 @@ public class JUtil {
 					" ON region_info_copy1.coutcode=" + tableName + ".`" + spatialID + "` " +
 					"WHERE" +
 					"\tregion_info_copy1.class =" + regionParam +
-					" AND " + tableName + ".`年份`= "+ year + " ORDER BY coutcode";
+					" AND " + tableName + ".`年份` LIKE '"+ year + "' ORDER BY coutcode";
 		}
 
 

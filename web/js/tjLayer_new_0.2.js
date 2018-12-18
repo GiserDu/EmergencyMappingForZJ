@@ -13,7 +13,7 @@ var allTjLayerContent={};
 // 制图范围数据的json格式
 // var tjPanel1={"tabID":"1","identityField":"value","regionData":"","fileName":""};
 var tjPanel1={};
-var tjPanel2 = {"tabId":"1","dataAddress":"","tableName":"","spatialId":"","timeId":"","tableFields":[],"fieldsName":[],"fieldsNum":0};
+var tjPanel2 = {"tabId":"1","dataAddress":"","tableName":"","spatialId":"","timeId":"","tableFields":[],"fieldsName":[],"fieldsNum":0,"yearColomn":[]};
 //tjPanel3中有一个key是type，1表示统计图表，2表示分级符号
 var tjPanel3={};
 var zoomOutFlag = 0;
@@ -380,13 +380,18 @@ function modifytjMenuLayer_new(allTjLayerContent) {
         //==================================================
         var statisticInfo=allTjLayerContent.statisticdata;
         var symbolInfo=allTjLayerContent.cartographydata;
+        var year = statisticInfo.timeId;
+        var fieldsNum = statisticInfo.fieldsNum;
 
         // 复原第二个面板的信息
-        $("#tab"+allTjLayerContent.statisticdata.tabId).click();
+        if (allTjLayerContent.statisticdata.tabId != 1)
+            $("#tab"+allTjLayerContent.statisticdata.tabId).click();
         tjPanel2.tableName = allTjLayerContent.statisticdata.tableName;
         $("input[name='dataAddress']").val(allTjLayerContent.statisticdata.dataAddress);
-        displayFields($("#fieldslist"+allTjLayerContent.statisticdata.tabId),allTjLayerContent.statisticdata.tableFields);
+        displayFields($("#fieldslist"+allTjLayerContent.statisticdata.tabId),allTjLayerContent.statisticdata.tableFields, allTjLayerContent.statisticdata.yearColomn);
         $("#spatialId"+allTjLayerContent.statisticdata.tabId).siblings(".layui-form-select").find("dd[lay-value="+ allTjLayerContent.statisticdata.spatialId+"]").click();
+        if (allTjLayerContent.statisticdata.timeId != year)
+            allTjLayerContent.statisticdata.timeId = year;
         $("#timeId"+allTjLayerContent.statisticdata.tabId).siblings(".layui-form-select").find("dd[lay-value="+ allTjLayerContent.statisticdata.timeId+"]").click();
         $.each(allTjLayerContent.statisticdata.fieldsName,function(index,item){
             $("#fieldslist"+allTjLayerContent.statisticdata.tabId).find("input[value="+item+"]").next().click();
@@ -443,89 +448,108 @@ function modifytjMenuLayer_new(allTjLayerContent) {
                     elem.parent().prev().addClass("layui-this");
 
                 } else if (selectedIndexNum == 1) {
-                    $("#tjPanel-content2").hide();
-                    $("#tjPanel-content3").hide();
-                    $("#tjPanel-content4").show();
-
-                    var isSymbolLoaded = $("#tjPanel-content4").attr("isloaded");
-                    if (isSymbolLoaded == "false") {
-                        initTjGraduatedSymbol();
-                        $("#tjPanel-content4").attr("isloaded", "true");
+                    if (fieldsNum > 1){
+                        alert("这是一个统计图层，请选择多个指标！");
+                        elem.parent().removeClass("layui-this");
+                        elem.parent().prev().addClass("layui-this");
                     }
-                    ;
-                    listenOnSymbolTitleClick();
-                    // form.render();
+                    else {
+                        $("#tjPanel-content2").hide();
+                        $("#tjPanel-content3").hide();
+                        $("#tjPanel-content4").show();
 
-                    var selectedModelName = "界限等分模型";
-                    var isColorInverse = false;
-                    var imgSrc = './assets/imgs/gradeIcon/9/4.jpg';
-                    var color1 = '#FFFEE3';
-                    var color2 = '#00935B';
-
-                    var colors = symbolInfo.colors;
-
-                    if (type == 2) {
-                        selectedModelName = symbolInfo.modelName;
-                        isColorInverse = symbolInfo.isColorInverse;
-                        imgSrc = symbolInfo.colorSolutionSrc;
-                        if (isColorInverse) {
-                            color1 = hexify(colors[symbolInfo.classNumSliderValue - 1]);
-                            color2 = hexify(colors[0]);
-                        } else {
-                            color1 = hexify(colors[0]);
-                            color2 = hexify(colors[symbolInfo.classNumSliderValue - 1]);
+                        var isSymbolLoaded = $("#tjPanel-content4").attr("isloaded");
+                        if (isSymbolLoaded == "false") {
+                            initTjGraduatedSymbol();
+                            $("#tjPanel-content4").attr("isloaded", "true");
                         }
+                        ;
+                        listenOnSymbolTitleClick();
+                        // form.render();
+
+                        var selectedModelName = "界限等分模型";
+                        var isColorInverse = false;
+                        var imgSrc = './assets/imgs/gradeIcon/9/4.jpg';
+                        var color1 = '#FFFEE3';
+                        var color2 = '#00935B';
+
+                        if (symbolInfo.colors instanceof Array)
+                            var colors = symbolInfo.colors;
+                        else
+                            var colors = symbolInfo.colors.split(";");
+
+                        if (type == 2) {
+                            selectedModelName = symbolInfo.modelName;
+                            isColorInverse = symbolInfo.isColorInverse;
+                            imgSrc = symbolInfo.colorSolutionSrc;
+                            if (isColorInverse) {
+                                color1 = hexify(colors[symbolInfo.classNumSliderValue - 1]);
+                                color2 = hexify(colors[0]);
+                            } else {
+                                color1 = hexify(colors[0]);
+                                color2 = hexify(colors[symbolInfo.classNumSliderValue - 1]);
+                            }
+                        }
+
+                        $("#model").siblings("div.layui-form-select").find("dl").find("dd[lay-value=" + selectedModelName + "]").click();
+
+                        if (isColorInverse) {
+                            $('#isColorInverse').prop('checked', true);
+                            $('#isColorInverse').next().addClass('layui-form-checked');
+                        }
+
+                        $("#color-selected>.select_title>img").attr("src", imgSrc);
+                        $("#color-selected>.select_title>img").attr("color1", color1);
+                        $("#color-selected>.select_title>img").attr("color2", color2);
+
+                        setSlidersValue(symbolSizeSliderValue,symbolOpacitySliderValue,symbolOpacitySliderValue,classNumSliderValue);
                     }
 
-                    $("#model").siblings("div.layui-form-select").find("dl").find("dd[lay-value=" + selectedModelName + "]").click();
-
-                    if (isColorInverse) {
-                        $('#isColorInverse').prop('checked', true);
-                        $('#isColorInverse').next().addClass('layui-form-checked');
-                    }
-
-                    $("#color-selected>.select_title>img").attr("src", imgSrc);
-                    $("#color-selected>.select_title>img").attr("color1", color1);
-                    $("#color-selected>.select_title>img").attr("color2", color2);
-
-                    setSlidersValue(symbolSizeSliderValue,symbolOpacitySliderValue,symbolOpacitySliderValue,classNumSliderValue);
 
                 } else {
-                    // $(".tjPanel-content").html(html3);
-                    $("#tjPanel-content2").hide();
-                    $("#tjPanel-content3").show();
-                    $("#tjPanel-content4").hide();
-
-                    var isSymbolLoaded = $("#tjPanel-content3").attr("isloaded");
-                    if (isSymbolLoaded == "false") {
-                        initTjChartSymbol();
-                        $("#tjPanel-content3").attr("isloaded", "true");
+                    if (fieldsNum == 1){
+                        alert("这是一个分级图层，请只选择一个指标！");
+                        elem.parent().removeClass("layui-this");
+                        elem.parent().prev().addClass("layui-this");
                     }
-                    ;
-                    listenOnSymbolTitleClick();
+                    else {
+                        // $(".tjPanel-content").html(html3);
+                        $("#tjPanel-content2").hide();
+                        $("#tjPanel-content3").show();
+                        $("#tjPanel-content4").hide();
 
-                    var chartID = '010101';
-                    var solutionSrc = 'assets/imgs/gradeIcon/10/6.jpg';
-                    var solutionName="青黄色系";
+                        var isSymbolLoaded = $("#tjPanel-content3").attr("isloaded");
+                        if (isSymbolLoaded == "false") {
+                            initTjChartSymbol();
+                            $("#tjPanel-content3").attr("isloaded", "true");
+                        }
+                        ;
+                        listenOnSymbolTitleClick();
 
-                    if (type == 1) {
-                        chartID = symbolInfo.chartID;
-                        solutionName=symbolInfo.colorName;
+                        var chartID = '010101';
+                        var solutionSrc = 'assets/imgs/gradeIcon/10/6.jpg';
+                        var solutionName="青黄色系";
 
-                        var solutionSrc = symbolInfo.colorSolutionSrc;
+                        if (type == 1) {
+                            chartID = symbolInfo.chartID;
+                            solutionName=symbolInfo.colorName;
 
-                        $("#xOffset").val(symbolInfo.xoffset);
-                        $("#yOffset").val(symbolInfo.yoffset);
+                            var solutionSrc = symbolInfo.colorSolutionSrc;
+
+                            $("#xOffset").val(symbolInfo.xoffset);
+                            $("#yOffset").val(symbolInfo.yoffset);
+                        }
+                        var chartSrc = "assets/imgs/chartIcon/" + chartID + ".png";
+                        $("#chart-selected>.select_title>img").attr("src", chartSrc);
+
+                        $("#color-solution>.select_title>img").attr("src", solutionSrc);
+                        $("#color-solution>.select_title>img").attr("name", solutionName);
+
+                        setSlidersValue(symbolSizeSliderValue,symbolOpacitySliderValue,symbolOpacitySliderValue,classNumSliderValue);
+                        // form.render();
+                        userDefineChartColor();
                     }
-                    var chartSrc = "assets/imgs/chartIcon/" + chartID + ".png";
-                    $("#chart-selected>.select_title>img").attr("src", chartSrc);
 
-                    $("#color-solution>.select_title>img").attr("src", solutionSrc);
-                    $("#color-solution>.select_title>img").attr("name", solutionName);
-
-                    setSlidersValue(symbolSizeSliderValue,symbolOpacitySliderValue,symbolOpacitySliderValue,classNumSliderValue);
-                    // form.render();
-                    userDefineChartColor();
                 }
             }
         });
@@ -1103,6 +1127,24 @@ function displayTableTree(treeElement,createTree){
                     case "经济专题":
                         nodeName = "economy";
                         break;
+                    case "放心农贸市场":
+                        nodeName = "agri_product";
+                        break;
+                    case "景区厕所改造":
+                        nodeName = "washroom_scenic";
+                        break;
+                    case "居家养老中心":
+                        nodeName = "old_people";
+                        break;
+                    case "农村厕所改造":
+                        nodeName = "washroom_countryside";
+                        break;
+                    case "一般地灾隐患综合治理":
+                        nodeName = "disaster_normal";
+                        break;
+                    case "重大地灾隐患综合治理":
+                        nodeName = "disaster_important";
+                        break;
                 }
                 tjPanel2.tableName = nodeName;
                 $.ajax({
@@ -1115,8 +1157,9 @@ function displayTableTree(treeElement,createTree){
                         //tableFields = JSON.parse(data);
                         //tableFields = $.parseJSON(data);
                         tableFields = data.tableField;
+                        var yearColomn = data.yearColomn;
                         // displayFields(fieldslist,tableFields);
-                        displayFields(fieldslist,tableFields);
+                        displayFields(fieldslist, tableFields, yearColomn);
                     },
                     error:function(){
                         alert("sorry1!")
@@ -1140,8 +1183,9 @@ function displayTableTree(treeElement,createTree){
 }
 
 //渲染字段
-function displayFields(fieldslist,tableFields){
+function displayFields(fieldslist, tableFields, yearColomn){
     tjPanel2.tableFields = tableFields;
+    tjPanel2.yearColomn = yearColomn;
     layui.use(['form'],function() {
         var form = layui.form;
         fieldslist.empty();
@@ -1163,7 +1207,28 @@ function displayFields(fieldslist,tableFields){
                 fieldslist.append('<input type="checkbox" name="'+item+'" title="'+item+'" value="'+item+'">');
             }
         });
+        var timeId = $("");
+        if(tjPanel2.tabId == "1"){
+            timeId = $("#timeId1");
+        }else if(tjPanel2.tabId == "2"){
+            timeId = $("#timeId2");
+        }else if(tjPanel2.tabId == "3"){
+            timeId = $("#timeId3");
+        };
+        timeId.empty();
+        $.each(yearColomn, function(index,item) {
+            if(index=="0"){
+                timeId.append('<option selected="" value="'+item+'">'+item+'</option>');
+                tjPanel2.timeId = item;
+            }else {
+                timeId.append('<option value="'+item+'">'+item+'</option>');
+                // fieldslist.append('<input type="checkbox" name="'+item+'" title="'+item+'" value="'+item+'">');
+            }
+        });
         form.render();
+        form.on('select(timeId)', function (data) {
+            tjPanel2.timeId = data.value;
+        });
         form.on('select(spatialId)', function(data){
             //console.log(data.value); //得到被选中的值
             tjPanel2.spatialId = data.value;
@@ -1241,7 +1306,7 @@ function initTjLayer(allTjLayerContent, tjType, regionParamVar) {
         // data:{"inputType":"test"},
         data:{"inputType": tjType, "regionParam": regionParamVar, "chartLayerNum": chartLayerNum},
         success: function (data) {
-            tjLayerName=JSON.parse(allTjLayerContent).name;
+            // tjLayerName=JSON.parse(allTjLayerContent).name;
             console.log(url);
             if (data.type==="chartLayer"){
                 doChartLayer(data, allTjLayerContent);
@@ -1291,15 +1356,33 @@ function initTjLayer(allTjLayerContent, tjType, regionParamVar) {
                 var flag = 0;
                 for (var i = 0; i < map.graphicsLayerIds.length; i++) {
                     console.log(tjLayerName);
-                    if ((map.getLayer(map.graphicsLayerIds[i])).id == oldTjLayerName) {
+                    if ((map.getLayer(map.graphicsLayerIds[i])).id == treeNodeUrl) {
                         var layer = map.getLayer(map.graphicsLayerIds[i]);
                         layer.clear();//清空所有graphics
                         for (var i=0;i<classGraphics.length;i++){
                             layer.add(classGraphics[i]);
                         }
+                        if (layer.name != "classGLayer"){
+                            layer.name = "classGLayer";
+                            // var cLN = 0;
+                            // for (var i=0; i<map.graphicsLayerIds.length; i++){
+                            //     if (map.getLayer(map.graphicsLayerIds[i]).name == "chartGLayer"){
+                            //         var thisLayer = map.getLayer(map.graphicsLayerIds[i]);
+                            //         cLN++;
+                            //         var zoomLevel = map.getZoom();
+                            //         if (zoomLevel < 9)
+                            //             changeLayerOnZoom(thisLayer, "chartLayerData", "1", cLN);
+                            //         else
+                            //             changeLayerOnZoom(thisLayer, "chartLayerData", "2", cLN);
+                            //     }
+                            // }
+                            // if (cLN == 0)
+                            //     chartImg_url = "";
+                        }
                         layer.content = allTjLayerContent;
                         flag = 1;
                         layer.setOpacity(0.95);
+                        treeNodeUrl = "";
                         break;
                     }
                 }
@@ -1342,10 +1425,14 @@ function initTjLayer(allTjLayerContent, tjType, regionParamVar) {
                             rgnCode = g.attributes.rng_code;
                             // console.log(g.symbol);
                             polyColor = g.symbol.color;
+                            // polyOutline = {"color":"{r: 255, g: 245, b: 238, a: 1}",
+                            //     "style":"solid",
+                            //     "width":1}
                             polyOutline = g.symbol.outline;
                             polyStyle = g.symbol.style;
                             var outline = new esri.symbol.SimpleLineSymbol(esri.symbol.SimpleFillSymbol.STYLE_SOLID,new esri.Color([92,68,187]),3);
-                            var symbol = new esri.symbol.SimpleFillSymbol(polyStyle,outline,polyColor);
+                            var symbol = g.symbol;
+                            symbol.outline = outline;
                             g.setSymbol(symbol);
 
                             //var fieldNameClass = (JSON.parse(classLayer.content)).statisticdata.fieldsName[0];
@@ -1363,7 +1450,8 @@ function initTjLayer(allTjLayerContent, tjType, regionParamVar) {
                     });
                     dojo.connect(classLayer, "onMouseOut", function mouseOut(evt) {
                         var g = evt.graphic;
-                        var symbol = new esri.symbol.SimpleFillSymbol(polyStyle,polyOutline,polyColor);
+                        var symbol = g.symbol;
+                        symbol.outline = polyOutline;
                         // console.log(symbol);
                         g.setSymbol(symbol);
                         map.infoWindow.hide();
@@ -1960,14 +2048,15 @@ function doChartLayer(data, allChartLayerContent){
     var indiNum = charts[0].attributes.indiNum;//所选指标数目
     // console.log(charts);
     var graphics = new Array();
-    var xOffset,yOffset;
-    if($.isEmptyObject(tjPanel3)){
-        xOffset = 0;
-        yOffset = 0;
-    }else {
-        xOffset = parseInt(tjPanel3.xoffset);
-        yOffset = parseInt(tjPanel3.yoffset);
-    }
+    var xOffset = parseInt((JSON.parse(allChartLayerContent).cartographydata).xoffset);
+    var yOffset = parseInt((JSON.parse(allChartLayerContent).cartographydata).yoffset);
+    // if($.isEmptyObject(tjPanel3)){
+    //     xOffset = 0;
+    //     yOffset = 0;
+    // }else {
+    //     xOffset = parseInt(tjPanel3.xoffset);
+    //     yOffset = parseInt(tjPanel3.yoffset);
+    // }
     graphics = initChartLayer(charts, xOffset, yOffset);
     // charts.forEach(alert);
     // if (map.graphicsLayerIds.length == 0) {
@@ -1982,7 +2071,7 @@ function doChartLayer(data, allChartLayerContent){
     // } else {
         var flag = 0;// 用于判断是否有画图图层
         for (var i = 0; i < map.graphicsLayerIds.length; i++) {
-            if ((map.getLayer(map.graphicsLayerIds[i])).id == oldTjLayerName) {
+            if ((map.getLayer(map.graphicsLayerIds[i])).id == treeNodeUrl) {
                 var layer = map.getLayer(map.graphicsLayerIds[i]);
                 layer.clear();//清空所有graphics
                 // dojo.disconnect(mouseMove);
@@ -1990,18 +2079,32 @@ function doChartLayer(data, allChartLayerContent){
                 for (var i=0;i<graphics.length;i++){
                     layer.add(graphics[i]);
                 }
+                if (layer.name != "chartGLayer"){
+                    layer.name = "chartGLayer";
+                }
                 layer.content = allChartLayerContent;
                 layer.legend = chartImg_url;
                 // console.log(tjLayerName);
                 // layer.setId = tjLayerName;
                 flag = 0;
+                treeNodeUrl = "";
             }
             else// 第一个不是chart图层
             {
                 flag = 1;
             }
         }
-    //
+    // for (var i=map.graphicsLayerIds.length-1; i>=0; i--){
+    //     if (map.getLayer(map.graphicsLayerIds[i]).name == "classGLayer"){
+    //         var thisLayer = map.getLayer(map.graphicsLayerIds[i]);
+    //         var zoomLevel = map.getZoom();
+    //         if (zoomLevel < 9)
+    //             changeLayerOnZoom(thisLayer, "classLayerData", "1", 1);
+    //         else
+    //             changeLayerOnZoom(thisLayer, "classLayerData", "2", 1);
+    //         break;
+    //     }
+    // }
         if (flag == 1)// 现有图层中没有画图图层
         {
             var graphicLayer = new esri.layers.GraphicsLayer();
@@ -2154,7 +2257,7 @@ var originalTjLayerContent='<div class="tjPanel" id="tjPanel">\n' +
     '                                            <div class="layui-field-box" style="padding: 5px;">\n' +
     '                                                <div class="layui-row layui-col-space10">\n' +
     '                                                    <div class="layui-col-md12">\n' +
-    '                                                        <ul class="tabletree" style="text-align:center" id="treedemo1"></ul>\n' +
+    '                                                        <ul class="tabletree" style="text-align:left" id="treedemo1"></ul>\n' +
     '                                                    </div>\n' +
     '                                                </div>\n' +
     '                                            </div>\n' +
@@ -2175,9 +2278,6 @@ var originalTjLayerContent='<div class="tjPanel" id="tjPanel">\n' +
     '                                                    <div class="layui-input-inline">\n' +
     '                                                        <select class="timeId" name="timeId" lay-filter="timeId"\n' +
     '                                                                id="timeId1">\n' +
-    '                                                            <option value="2016">2016</option>\n' +
-    '                                                            <option value="2017">2017</option>\n' +
-    '                                                            <option value="2018">2018</option>\n' +
     '                                                        </select>\n' +
     '                                                    </div>\n' +
     '                                                </div>'+
@@ -2217,9 +2317,6 @@ var originalTjLayerContent='<div class="tjPanel" id="tjPanel">\n' +
     '                                                    <div class="layui-input-inline">\n' +
     '                                                        <select class="timeId" name="timeId" lay-filter="timeId"\n' +
     '                                                                id="timeId2">\n' +
-    '                                                            <option value="2016">2016</option>\n' +
-    '                                                            <option value="2017">2017</option>\n' +
-    '                                                            <option value="2018">2018</option>\n' +
     '                                                        </select>\n' +
     '                                                    </div>\n' +
     '                                                </div>'+
@@ -2259,9 +2356,6 @@ var originalTjLayerContent='<div class="tjPanel" id="tjPanel">\n' +
     '                                                    <div class="layui-input-inline">\n' +
     '                                                        <select class="timeId" name="timeId" lay-filter="timeId"\n' +
     '                                                                id="timeId3">\n' +
-    '                                                            <option value="2016">2016</option>\n' +
-    '                                                            <option value="2017">2017</option>\n' +
-    '                                                            <option value="2018">2018</option>\n' +
     '                                                        </select>\n' +
     '                                                    </div>\n' +
     '                                                </div>'+
