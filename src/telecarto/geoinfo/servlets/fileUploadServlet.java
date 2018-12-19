@@ -173,187 +173,11 @@ public class fileUploadServlet extends HttpServlet {
                     case "chartLayerData":
                         doChartLayer(request,response);
                         break;
+                    case "classLayerData":
+                        System.out.println("绘制分级");
+                        doClassLayer(request,response);
                     default:
-                        System.out.println("其他");
-                        MysqlAccessBean mysql = new MysqlAccessBean();
-                        String sql = "";
-                        ResultSet resultSet2;
-                        JSONObject dataJson = JSONObject.fromObject(request.getParameter("allTjLayerContent"));
-                        JSONObject statisticdataJson=JSONObject.fromObject(dataJson.getJSONObject("statisticdata"));
-                        String classTableName = statisticdataJson.getString("tableName");
-                        String spatialId = statisticdataJson.getString("spatialId");
-                        JSONArray fieldsNameArray=statisticdataJson.getJSONArray("fieldsName");
-                        String fieldsNames=statisticdataJson.getString("fieldsName");
-                        String year = statisticdataJson.getString("timeId");
-//                        String year = "2016";
-                        StringBuffer fieldsNamesBuffer = new StringBuffer(fieldsNames);
-                        fieldsNamesBuffer.delete(0, 2);
-                        fieldsNamesBuffer.delete(fieldsNamesBuffer.length()-2, fieldsNamesBuffer.length());
-                        System.out.println(fieldsNamesBuffer);
-//                        String regionClass="1";
-                        String dataFieldName=fieldsNamesBuffer.toString();
-                        String fieldNameCN=dataFieldName;
-
-                        JSONObject cartographydataJson=JSONObject.fromObject(dataJson.getJSONObject("cartographydata"));
-
-                        int breakNum = Integer.parseInt(cartographydataJson.getString("classNumSliderValue"));
-                        String breakMethod=cartographydataJson.getString("modelName");
-                        String ip = NetworkUtil.getIpAddr(request);
-                        String regionParam = request.getParameter("regionParam");
-
-                        String color = cartographydataJson.getString("colors");
-                        String  colors[]= color.trim().split(";");
-                        System.out.println(colors);
-                        //根据输入行政等级class，确立
-                        if (regionParam.equals("1")){
-                            sql="SELECT\n" +
-                                    "\tregion_info_copy1.citycode, region_info_copy1.name, region_info_copy1.x, region_info_copy1.y, region_info_copy1.json, " + classTableName + ".`" + dataFieldName +"`" +
-                                    "\tFROM\n" +
-                                    "\tregion_info_copy1\n" +
-                                    "LEFT JOIN\t"+ classTableName +"\n" +
-                                    "ON region_info_copy1.citycode="+ classTableName +".`"+ spatialId +"`\n" +
-                                    "WHERE\n" +
-                                    "\tregion_info_copy1.class = " + regionParam +" AND "+ classTableName +".`年份` LIKE '" + year +"'";
-                        }
-                        else if (regionParam.equals("2")){
-                            sql="SELECT\n" +
-                                    "\tregion_info_copy1.coutcode, region_info_copy1.name, region_info_copy1.x, region_info_copy1.y, region_info_copy1.json, " + classTableName + ".`" + dataFieldName +"`" +
-                                    "\tFROM\n" +
-                                    "\tregion_info_copy1\n" +
-                                    "LEFT JOIN\t"+ classTableName +"\n" +
-                                    "ON region_info_copy1.coutcode="+ classTableName +".`"+ spatialId +"`\n" +
-                                    "WHERE\n" +
-                                    "\tregion_info_copy1.class = " + regionParam +" AND "+ classTableName +".`年份` LIKE '" + year +"'";
-                        }
-
-                        //sql_select = "LEFT JOIN "+ tableName +" t2 ON t1.RGN_CODE = t2.RGN_CODE WHERE t1.RGN_CODE LIKE '"+Param+"' AND t1.RGN_CODE!= '"+regionParam+"' AND t2.YEAR = '" + year + "'";
-                        //sql_select = "LEFT JOIN "+ tableName +" t2 ON t1.RGN_CODE = t2.RGN_CODE WHERE t1.RGN_CLASS = '" + regionParam + "' AND t2.YEAR = '" + year + "'";
-                        //sql = "SELECT t1.RGN_CODE,t1.RGN_NAME,t1.GEOMETRY,t1.REGION_X,t1.REGION_Y,t2."+ fieldName +" FROM region t1 " + sql_select;
-                        // sql = "SELECT t1.RGN_CODE,t1.RGN_NAME,t1.GEOMETRY,t1.REGION_X,t1.REGION_Y,t2."+ fieldName +" FROM region t1 " + sql_select;
-
-                        try {
-                            resultSet2 = mysql.query(sql);
-                            ArrayList<ClassData> classList = new ArrayList<>();
-                            while (resultSet2.next()) {
-                                ClassData classData = new ClassData(resultSet2.getString(1),resultSet2.getString(2),
-                                        resultSet2.getString(3),resultSet2.getString(4),resultSet2.getString(5),resultSet2.getString(6),fieldNameCN);
-                                classList.add(classData);
-                            }
-                            double maxValue =  Double.parseDouble(classList.get(0).getData());
-                            double minValue = Double.parseDouble(classList.get(0).getData());
-                            for (int i=0;i<classList.size();i++){
-                                if(Double.parseDouble(classList.get(i).getData())>maxValue){
-                                    maxValue = Double.parseDouble(classList.get(i).getData());
-                                }
-                                if(Double.parseDouble(classList.get(i).getData())<minValue){
-                                    minValue = Double.parseDouble(classList.get(i).getData());
-                                }
-                            }
-                            //采用对应的分类方法,根据各区域的数据值进行分类,并赋予颜色
-                            Classifiter classifiter = new Classifiter();
-                            JSONArray classDataArray = classifiter.getClassIntervalJson(minValue,maxValue,breakNum,classList,colors,breakMethod);
-                            JSONObject classObject = new JSONObject();
-                            //绘制分级图图例
-                            double []classInterval = classifiter.getIntervals(minValue,maxValue,breakNum,breakMethod);
-                            int width = 225;
-                            int height = 21 * breakNum+45;
-                            BufferedImage image = new BufferedImage(width, height,
-                                    BufferedImage.TYPE_INT_RGB);
-                            Graphics2D g2d = image.createGraphics();
-
-                            g2d.setColor(Color.white);
-
-                            g2d.fillRect(0,0,image.getWidth(),image.getHeight());
-                            g2d.dispose();
-
-                            g2d = image.createGraphics();
-                            //文字抗锯齿化处理
-                            g2d.setRenderingHint(SunHints.KEY_ANTIALIASING, SunHints.VALUE_ANTIALIAS_ON);
-
-                            Font font = new Font("黑体", Font.PLAIN, 17);
-                            g2d.setFont(font);
-                            g2d.setColor(Color.black);
-
-                            // 获取图例标题的像素范围对象
-                            double fontWidth = imageUtil.getTitleSize(g2d,font,fieldNameCN);
-                            int stringWidth = new BigDecimal(fontWidth).setScale(0, BigDecimal.ROUND_HALF_UP).intValue();
-                            int startX = new BigDecimal((225.0 - stringWidth)/2).setScale(0, BigDecimal.ROUND_HALF_UP).intValue();
-                            if(startX>0){
-                                g2d.drawString(fieldNameCN, startX, 25);
-                            }
-                            else {
-                                g2d.setFont(new Font("黑体", Font.PLAIN, 16));
-                                fontWidth = imageUtil.getTitleSize(g2d,font,fieldNameCN);
-                                stringWidth = new BigDecimal(fontWidth).setScale(0, BigDecimal.ROUND_HALF_UP).intValue();
-                                startX = new BigDecimal((225 - stringWidth)/2).setScale(0, BigDecimal.ROUND_HALF_UP).intValue();
-                                g2d.drawString(fieldNameCN, startX, 25);
-                            }
-
-//            g2d.drawString("分级图图例", 40, 25);
-                            font = new Font("", Font.PLAIN, 13);
-                            g2d.setFont(font);
-
-                            for (int i=0;i<colors.length;i++){
-                                String temp = colors[i].substring(colors[i].indexOf("(") + 1, colors[i].indexOf(")"));
-                                String[] rgbTemp = temp.trim().split(",");
-                                //绘制空心矩形(色块边线)
-                                g2d.setColor(Color.black);
-                                g2d.drawRect(20,i*21+37,28,16);
-                                //设置颜色-->色块
-                                g2d.setColor(new Color(Integer.parseInt(rgbTemp[0].trim()), Integer
-                                        .parseInt(rgbTemp[1].trim()), Integer.parseInt(rgbTemp[2].trim())));
-                                //绘制实心矩形色块
-                                g2d.fillRect(21,i*21+37+1,27,15);
-                                //设置颜色-->文字
-                                g2d.setColor(Color.black);
-                                if(i == 0){
-                                    String legendStr = "< " + classInterval[0];
-                                    g2d.drawString(legendStr, 55, i*21+39+12);
-                                }
-                                else if(i==colors.length-1){
-                                    String legendStr = ">= " + classInterval[i-1];
-                                    g2d.drawString(legendStr, 55, i*21+39+12);
-                                }
-                                else {
-                                    String legendStr;
-                                    legendStr = classInterval[i-1] + " ~ " + classInterval[i];
-                                    g2d.drawString(legendStr, 55, i*21+39+12);
-                                }
-                            }
-                            g2d.dispose();
-                            //图例图片转码为base64
-                            BASE64Encoder encoderLegend = new sun.misc.BASE64Encoder();
-                            ByteArrayOutputStream baosLegend = new ByteArrayOutputStream();
-                            ImageIO.setUseCache(false);
-                            ImageIO.write(image, "png", baosLegend);
-                            byte[] bytesLegend = baosLegend.toByteArray();
-                            String imgStreamLegend = encoderLegend.encodeBuffer(bytesLegend).trim();
-                            //输出分级图图例到本地
-                            String tempFilePath = getServletContext().getRealPath("/") + "printMap/" + ip.replaceAll("\\.","-");
-                            File fileSavepath = new File(tempFilePath);
-                            if(!fileSavepath.exists()){
-                                fileSavepath.mkdirs();
-                            }
-                            String imgPath = tempFilePath + "/"+"classLegend.png";
-                            ImageIO.write(image, "png", new File(imgPath));
-
-                            //传输JSON分级grapgics数组到前端
-                            classObject.put("classDataArray",classDataArray);
-                            classObject.put("fieldName", fieldNameCN);
-                            //classObject.put("dataSource",dataSource);
-                            classObject.put("classLegend",imgStreamLegend.replaceAll("[\\s*\t\n\r]", ""));
-                            PrintWriter out = response.getWriter();
-                            out.print(classObject);
-                            out.flush();
-                            out.close();
-                        }
-                        catch (Exception e) {
-                            e.printStackTrace();
-                        }
-                        finally {
-                            mysql.close();
-                        }
-
+                        System.out.print("其他数据");
                 }
 
                 PrintWriter writer = response.getWriter();
@@ -376,7 +200,8 @@ public class fileUploadServlet extends HttpServlet {
                     String value = item.getString("UTF-8");
                     //value = new String(value.getBytes("iso8859-1"),"UTF-8");
                     System.out.println(name + "=" + value);
-                }else{//如果fileitem中封装的是上传文件
+                }else{
+                    //如果fileitem中封装的是上传文件
                     //得到上传的文件名称，
                     String filename = item.getName();
                     System.out.println(filename);
@@ -584,20 +409,7 @@ public class fileUploadServlet extends HttpServlet {
     //制作统计图表
     public void doChartLayer(HttpServletRequest request, HttpServletResponse response) throws IOException {
         String ip = NetworkUtil.getIpAddr(request);
-        String statisticJson="{\n" +
-            "\t  \"nav\": \"nav2\",\n" +
-            "\t  \"tabId\": \"1\",\n" +
-            "\t  \"dataAddress\": \"\",\n" +
-            "\t  \"tableName\": \"population\",\n" +
-            "\t  \"spatialId\": \"id\",\n" +
-            "\t  \"fieldsName\": [\n" +
-            "\t\t\n" +
-            "\t\t\"总人口数（万）\",\n" +
-            "\t\t\"男性人口数（万）\",\n" +
-            "\t\t\"女性人口数（万）\",\n" +
-            "\t  ],\n" +
-            "\t  \"fieldsNum\": 5\n" +
-            "\t}";
+
         //获得空间数据各个指标
 //        JSONObject spatialdataJson=JSONObject.fromObject(request.getParameter("spatialdata"));//空间数据json对象
 //
@@ -886,5 +698,180 @@ public class fileUploadServlet extends HttpServlet {
         writer.close();
 
     }
+    //处理分级底色
+    public void doClassLayer(HttpServletRequest request, HttpServletResponse response){
+        MysqlAccessBean mysql = new MysqlAccessBean();
+        String sql = "";
+        ResultSet resultSet2;
+        JSONObject dataJson = JSONObject.fromObject(request.getParameter("allTjLayerContent"));
+        JSONObject statisticdataJson=JSONObject.fromObject(dataJson.getJSONObject("statisticdata"));
+        String classTableName = statisticdataJson.getString("tableName");
+        String spatialId = statisticdataJson.getString("spatialId");
 
+        String fieldsNames = statisticdataJson.getString("fieldsName");
+//                        String year = statisticdataJson.getString("year");
+        String year = "2016";
+        StringBuffer fieldsNamesBuffer = new StringBuffer(fieldsNames);
+        fieldsNamesBuffer.delete(0, 2);
+        fieldsNamesBuffer.delete(fieldsNamesBuffer.length()-2, fieldsNamesBuffer.length());
+        System.out.println(fieldsNamesBuffer);
+//                        String regionClass="1";
+        String dataFieldName=fieldsNamesBuffer.toString();
+        String fieldNameCN=dataFieldName;
+
+        JSONObject cartographydataJson=JSONObject.fromObject(dataJson.getJSONObject("cartographydata"));
+
+        int breakNum = Integer.parseInt(cartographydataJson.getString("classNumSliderValue"));
+        String breakMethod=cartographydataJson.getString("modelName");
+        String ip = NetworkUtil.getIpAddr(request);
+        String regionParam = request.getParameter("regionParam");
+
+        String color = cartographydataJson.getString("colors");
+        String  colors[]= color.trim().split(";");
+        System.out.println(colors);
+        //根据输入行政等级class，确立
+        if (regionParam.equals("1")){
+            sql="SELECT\n" +
+                    "\tregion_info_copy1.citycode, region_info_copy1.name, region_info_copy1.x, region_info_copy1.y, region_info_copy1.json, " + classTableName + ".`" + dataFieldName +"`" +
+                    "\tFROM\n" +
+                    "\tregion_info_copy1\n" +
+                    "LEFT JOIN\t"+ classTableName +"\n" +
+                    "ON region_info_copy1.citycode="+ classTableName +".`"+ spatialId +"`\n" +
+                    "WHERE\n" +
+                    "\tregion_info_copy1.class = " + regionParam +" AND "+ classTableName +".`年份` LIKE '" + year +"'";
+        }
+        else if (regionParam.equals("2")){
+            sql="SELECT\n" +
+                    "\tregion_info_copy1.coutcode, region_info_copy1.name, region_info_copy1.x, region_info_copy1.y, region_info_copy1.json, " + classTableName + ".`" + dataFieldName +"`" +
+                    "\tFROM\n" +
+                    "\tregion_info_copy1\n" +
+                    "LEFT JOIN\t"+ classTableName +"\n" +
+                    "ON region_info_copy1.coutcode="+ classTableName +".`"+ spatialId +"`\n" +
+                    "WHERE\n" +
+                    "\tregion_info_copy1.class = " + regionParam +" AND "+ classTableName +".`年份` LIKE '" + year +"'";
+        }
+
+
+        try {
+            resultSet2 = mysql.query(sql);
+            ArrayList<ClassData> classList = new ArrayList<>();
+            while (resultSet2.next()) {
+                ClassData classData = new ClassData(resultSet2.getString(1),resultSet2.getString(2),
+                        resultSet2.getString(3),resultSet2.getString(4),resultSet2.getString(5),resultSet2.getString(6));
+                classList.add(classData);
+            }
+            double maxValue =  Double.parseDouble(classList.get(0).getData());
+            double minValue = Double.parseDouble(classList.get(0).getData());
+            for (int i=0;i<classList.size();i++){
+                if(Double.parseDouble(classList.get(i).getData())>maxValue){
+                    maxValue = Double.parseDouble(classList.get(i).getData());
+                }
+                if(Double.parseDouble(classList.get(i).getData())<minValue){
+                    minValue = Double.parseDouble(classList.get(i).getData());
+                }
+            }
+            //采用对应的分类方法,根据各区域的数据值进行分类,并赋予颜色
+            Classifiter classifiter = new Classifiter();
+            JSONArray classDataArray = classifiter.getClassIntervalJson(minValue,maxValue,breakNum,classList,colors,breakMethod);
+            JSONObject classObject = new JSONObject();
+            //绘制分级图图例
+            double []classInterval = classifiter.getIntervals(minValue,maxValue,breakNum,breakMethod);
+            int width = 225;
+            int height = 21 * breakNum+45;
+            BufferedImage image = new BufferedImage(width, height,
+                    BufferedImage.TYPE_INT_RGB);
+            Graphics2D g2d = image.createGraphics();
+
+            g2d.setColor(Color.white);
+
+            g2d.fillRect(0,0,image.getWidth(),image.getHeight());
+            g2d.dispose();
+
+            g2d = image.createGraphics();
+            //文字抗锯齿化处理
+            g2d.setRenderingHint(SunHints.KEY_ANTIALIASING, SunHints.VALUE_ANTIALIAS_ON);
+
+            Font font = new Font("黑体", Font.PLAIN, 17);
+            g2d.setFont(font);
+            g2d.setColor(Color.black);
+
+            // 获取图例标题的像素范围对象
+            double fontWidth = imageUtil.getTitleSize(g2d,font,fieldNameCN);
+            int stringWidth = new BigDecimal(fontWidth).setScale(0, BigDecimal.ROUND_HALF_UP).intValue();
+            int startX = new BigDecimal((225.0 - stringWidth)/2).setScale(0, BigDecimal.ROUND_HALF_UP).intValue();
+            if(startX>0){
+                g2d.drawString(fieldNameCN, startX, 25);
+            }
+            else {
+                g2d.setFont(new Font("黑体", Font.PLAIN, 16));
+                fontWidth = imageUtil.getTitleSize(g2d,font,fieldNameCN);
+                stringWidth = new BigDecimal(fontWidth).setScale(0, BigDecimal.ROUND_HALF_UP).intValue();
+                startX = new BigDecimal((225 - stringWidth)/2).setScale(0, BigDecimal.ROUND_HALF_UP).intValue();
+                g2d.drawString(fieldNameCN, startX, 25);
+            }
+
+//            g2d.drawString("分级图图例", 40, 25);
+            font = new Font("", Font.PLAIN, 13);
+            g2d.setFont(font);
+
+            for (int i=0;i<colors.length;i++){
+                String temp = colors[i].substring(colors[i].indexOf("(") + 1, colors[i].indexOf(")"));
+                String[] rgbTemp = temp.trim().split(",");
+                //绘制空心矩形(色块边线)
+                g2d.setColor(Color.black);
+                g2d.drawRect(20,i*21+37,28,16);
+                //设置颜色-->色块
+                g2d.setColor(new Color(Integer.parseInt(rgbTemp[0].trim()), Integer
+                        .parseInt(rgbTemp[1].trim()), Integer.parseInt(rgbTemp[2].trim())));
+                //绘制实心矩形色块
+                g2d.fillRect(21,i*21+37+1,27,15);
+                //设置颜色-->文字
+                g2d.setColor(Color.black);
+                if(i == 0){
+                    String legendStr = "< " + classInterval[0];
+                    g2d.drawString(legendStr, 55, i*21+39+12);
+                }
+                else if(i==colors.length-1){
+                    String legendStr = ">= " + classInterval[i-1];
+                    g2d.drawString(legendStr, 55, i*21+39+12);
+                }
+                else {
+                    String legendStr;
+                    legendStr = classInterval[i-1] + " ~ " + classInterval[i];
+                    g2d.drawString(legendStr, 55, i*21+39+12);
+                }
+            }
+            g2d.dispose();
+            //图例图片转码为base64
+            BASE64Encoder encoderLegend = new sun.misc.BASE64Encoder();
+            ByteArrayOutputStream baosLegend = new ByteArrayOutputStream();
+            ImageIO.setUseCache(false);
+            ImageIO.write(image, "png", baosLegend);
+            byte[] bytesLegend = baosLegend.toByteArray();
+            String imgStreamLegend = encoderLegend.encodeBuffer(bytesLegend).trim();
+            //输出分级图图例到本地
+            String tempFilePath = getServletContext().getRealPath("/") + "printMap/" + ip.replaceAll("\\.","-");
+            File fileSavepath = new File(tempFilePath);
+            if(!fileSavepath.exists()){
+                fileSavepath.mkdirs();
+            }
+            String imgPath = tempFilePath + "/"+"classLegend.png";
+            ImageIO.write(image, "png", new File(imgPath));
+
+            //传输JSON分级grapgics数组到前端
+            classObject.put("classDataArray",classDataArray);
+            //classObject.put("dataSource",dataSource);
+            classObject.put("classLegend",imgStreamLegend.replaceAll("[\\s*\t\n\r]", ""));
+            PrintWriter out = response.getWriter();
+            out.print(classObject);
+            out.flush();
+            out.close();
+        }
+        catch (Exception e) {
+            e.printStackTrace();
+        }
+        finally {
+            mysql.close();
+        }
+    }
 }

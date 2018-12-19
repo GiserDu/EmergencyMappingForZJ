@@ -47,27 +47,16 @@ public class chartLayerFromAPIServlet extends HttpServlet {
         response.setContentType("text/javascript;charset=UTF-8");//返回json格式的数据
         request.setCharacterEncoding("UTF-8");//设置服务器端对前端传输数据的解码方式!!!
 
-
         String ip = NetworkUtil.getIpAddr(request);
-//
-//        String chartid = request.getParameter("CHARTID");// 专题符号id
-//        String widthstring = request.getParameter("WIDTH");// 符号长宽
-//        String heightstring = request.getParameter("WIDTH");
-//        String URL="";
-//       // String regionParam = request.getParameter("regionParam");
-//
-////		String islabelString = request.getParameter("ISLABEL");
-//       // String islabelString = "false";
-//        // String yearString = request.getParameter("year");
-//
-//        String chartData = request.getParameter("CHARTDATA");
-//        System.out.println("chart data: "+chartData);
-//        String[] arr = chartData.split(",");
-//        System.out.println(arr);
-//        String thematicData = arr[0];
+
         JSONObject dataJson = JSONObject.fromObject(request.getParameter("allTjLayerContent"));
         JSONObject statisticdataJson=JSONObject.fromObject(dataJson.getJSONObject("statisticdata"));
-        String fieldsNames=statisticdataJson.getString("fieldsName");
+        //String tabID=statisticdataJson.getString("tabId");
+        JSONArray fieldsNamesJArr=statisticdataJson.getJSONArray("fieldsName");
+        String[] fieldsNamesArr=new String[fieldsNamesJArr.size()];
+        for (int j = 0; j < fieldsNamesJArr.size(); j++) {
+            fieldsNamesArr[j] = (String) fieldsNamesJArr.get(j);
+        }
 
 //获得画图数据各指标
 
@@ -77,10 +66,6 @@ public class chartLayerFromAPIServlet extends HttpServlet {
         String chartID0=cartographydataJson.getString("chartID");
         String chartid = chartID0.substring(1, 6);
         System.out.println(chartid);
-//        String chartID="10101";
-//        JSONArray colorArray=cartographydataJson.getJSONArray("colors");
-//        int symbolSize=cartographydataJson.getInt("symbolSizeSliderValue");
-
 
 
         int width = cartographydataJson.getInt("symbolSizeSliderValue");// 符号长宽
@@ -88,26 +73,24 @@ public class chartLayerFromAPIServlet extends HttpServlet {
         int height= cartographydataJson.getInt("symbolSizeSliderValue");
 //        String regionParam = "1";
 
-        String url=statisticdataJson.getString("dataAddress");;
-        String[] arr = fieldsNames.split(",");
+        String url=statisticdataJson.getString("dataAddress");
+        String spatialId=statisticdataJson.getString("spatialId");
+
+
         //根据所选指标的数目进行不同的色彩配置(有几个指标配置几个色彩渐变)
         String colorRampSchema1 = cartographydataJson.getString("colorName");
-
     	System.out.println(colorRampSchema1);
-        //String colorString="15538980;2498916;15855872";
-        String colorString = ColorUtil.getColorScheme(arr.length ,colorRampSchema1);
+
+        String colorString = ColorUtil.getColorScheme(fieldsNamesArr.length ,colorRampSchema1);
         String[] colors = colorString.split(";");
         int[] fieldColors = new int[colors.length]; // 专题符号颜色
         for (int i = 0; i < fieldColors.length; i++) {
             fieldColors[i] = Integer.parseInt(colors[i]);
         }
 
-
         ChartStyleFactory chartStyleFactory = new ChartStyleFactory();
         ChartStyle chartStyle = chartStyleFactory.createcChartStyle(chartid);// 通过工厂模式实例化符号样式类
-        //设置符号宽高
-//        int width = Integer.parseInt(widthstring);
-//        int height = Integer.parseInt(heightstring);
+
         //根据符号ID加载符号样式
         String dir = "assets/";
         String chartPath = dir + chartid + ".xml";
@@ -117,7 +100,6 @@ public class chartLayerFromAPIServlet extends HttpServlet {
         ChartDataPara chartDataPara = new ChartDataPara();
         String yearString="";
 
-
         chartDataPara.setFieldColor(fieldColors);
         chartDataPara.setWidth(width);
         chartDataPara.setHeight(height);
@@ -125,20 +107,24 @@ public class chartLayerFromAPIServlet extends HttpServlet {
 
         //输入apiURL返回数据resultString
         //解析API返回的数据resultString，
+        IndicatorData[] indicatorDatas;
 
+        //API数据处理
         String resultString= JUtil.getResultStrFromAPI(url);
-        IndicatorData[] indicatorDatas = JUtil.getIndicatorDataFromAPi(resultString);
+        indicatorDatas = JUtil.getIndicatorDataFromAPi(resultString,fieldsNamesArr,spatialId);
         double[][] coordinatesXY= JUtil.getXYFromAPi(resultString);
 //        String[] xStrings = ReadRegionData.getRegonX();
 //        String[] yStrings = ReadRegionData.getRegonY();
         chartDataPara.initialAsAPI(indicatorDatas);// 初始化专题符号层参数
-        //
+
+
+
+
         double[] maxValues = JUtil.maxValues(indicatorDatas);
         double[] minValues = JUtil.minValues(indicatorDatas);
         double[] averageValues = JUtil.averageValues(indicatorDatas);
         double[] scales = JUtil.scales(indicatorDatas, width);
         chartDataPara.setScales(scales);
-
 
         //生成图例
         ChartFactory chartFactoryLegend = new ChartFactory();

@@ -15,13 +15,13 @@ public class ClassData {
     public ClassData(){
 
     }
-    public ClassData(String name,String code,String region_x,String region_y,String geometry,String data,String label){
-        this.rgn_code = code;
+    public ClassData(String name,String code,String region_x,String region_y,String geometry,String data){
         this.rgn_name = name;
-        this.geometry = geometry;
-        this.thematic_data = data;
+        this.rgn_code = code;
         this.region_x = region_x;
         this.region_y = region_y;
+        this.geometry = geometry;
+        this.thematic_data = data;
         this.label = label;
 //        this.dataSource = dataSource;
     }

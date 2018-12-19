@@ -10,7 +10,7 @@ import java.util.ArrayList;
  * Created by Administrator on 2017/10/30.
  */
 public class Classifiter {
-    public JSONArray getClassIntervalJson(double minValue, double maxValue, int breakNum, ArrayList<ClassData> classList,String[] colors,String model){
+    public static JSONArray getClassIntervalJson(double minValue, double maxValue, int breakNum, ArrayList<ClassData> classList,String[] colors,String model){
         double[] classInterval = getIntervals(minValue,maxValue,breakNum,model);
 //        if(breakNum>1){
 //            switch (model){
@@ -29,7 +29,7 @@ public class Classifiter {
         return classiFiter(classList,colors,classInterval);
     }
 
-    public double[] getIntervals(double minValue, double maxValue, int breakNum,String model){
+    public static double[] getIntervals(double minValue, double maxValue, int breakNum,String model){
         double[] classInterval = null;
         if(breakNum>1){
             switch (model){
@@ -57,7 +57,7 @@ public class Classifiter {
 //        return classInterval;
 //    }
 
-    public JSONArray classiFiter(ArrayList<ClassData> classList,String[] colors,double[] classInterval){
+    public static JSONArray classiFiter(ArrayList<ClassData> classList,String[] colors,double[] classInterval){
         JSONArray classDataArray = new JSONArray();
         for (int i=0;i<classList.size();i++){
             JSONObject classObject = new JSONObject();

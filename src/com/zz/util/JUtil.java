@@ -3,10 +3,7 @@ package com.zz.util;
 import com.zz.bglayer.Arith;
 import com.zz.bglayer.ModelPrim;
 import com.zz.chart.chartstyle.ChartDataPara;
-import com.zz.chart.data.IndicatorData;
-import com.zz.chart.data.JConnection;
-import com.zz.chart.data.ReadRegionData;
-import com.zz.chart.data.ReadThematicData;
+import com.zz.chart.data.*;
 import jxl.read.biff.BiffException;
 import net.sf.json.JSONObject;
 import telecarto.data.util.*;
@@ -96,7 +93,7 @@ public class JUtil {
 	 *param: resultStr 输入的json字符串
 	 *return: indicatorDatas 指标数组
 	 */
-	public static IndicatorData[] getIndicatorDataFromAPi(String resultStr){
+	public static IndicatorData[] getIndicatorDataFromAPi(String resultStr,String[] fieldNames,String spatialIdFiled){
 		System.out.println("1");
 
 		Map<String, Class> classMap = new HashMap<String, Class>();
@@ -121,14 +118,19 @@ public class JUtil {
 			ArrayList<Double> proValue=new ArrayList<Double>();
 			coordinateXY[i]=featList.get(i).getGeometry().getCoordinates();
 			String regionName=null;
+
 			for (Map.Entry<String, String> entry : map.entrySet()) {
-				if (!entry.getKey().equals("市")){
-					proName.add(entry.getKey()) ;
-					//String value=entry.getValue().toString();
-					proValue.add(Double.parseDouble(String.valueOf(entry.getValue())) ) ;
+				if (entry.getKey().equals(spatialIdFiled)){
+					regionName=entry.getValue();
 				}
 				else {
-					regionName=entry.getValue();
+					for(int j=0;j<fieldNames.length;j++){
+						if (entry.getKey().equals(fieldNames[j])){
+							proName.add(entry.getKey()) ;
+							//String value=entry.getValue().toString();
+							proValue.add(Double.parseDouble(String.valueOf(entry.getValue())) ) ;
+						}
+					}
 				}
 			}
 			proName.trimToSize();
@@ -183,6 +185,134 @@ public class JUtil {
 		return coordinateXY;
 	}
 
+	/**通过API获得分级数据
+	 *param: resultStr 输入的json字符串
+	 *param: spatialIdFiled 空间标识字段
+	 *return: ClassData[] 分级数据数组
+	 */
+	public static ArrayList<ClassData> getClassDataFromAPI(String resultStr, String dataFieldName,String spatialIdFiled) throws SQLException {
+		MysqlAccessBean mysqlClassData = new MysqlAccessBean();
+		ResultSet resultSet;
+		Map<String, Class> classMap = new HashMap<String, Class>();
+		classMap.put("features", FeaturesFromAPI.class);
+		//ArrayList<String> regionName=new ArrayList<String>();//
+		String regionName,sql;
+		JSONObject jsonObject = JSONObject.fromObject(resultStr);
+
+		//转为对象时，如果是list或map等需要添加类映射，即指定list或map中的对象类
+		DataFromAPi dataFromAPi = (DataFromAPi) JSONObject.toBean(jsonObject, DataFromAPi.class,classMap);
+
+		//遍历dataFromAPi进行要素属性数据读取
+		ArrayList<FeaturesFromAPI> featList=dataFromAPi.getFeatures();
+		ArrayList<ClassData> classList = new ArrayList<>();
+		ArrayList<String> dataFieldList = new ArrayList<>();
+		for(int i=0;i<featList.size();i++)	{
+			HashMap<String, String> map = (HashMap<String, String>) featList.get(i).getProperties();
+			for (Map.Entry<String, String> entry : map.entrySet()) {
+				if (entry.getKey().equals(spatialIdFiled)) {
+					regionName=entry.getValue();
+					sql= "SELECT\n" +
+							"region_info_copy1.citycode, region_info_copy1.name, region_info_copy1.x, region_info_copy1.y, region_info_copy1.json\n" +
+							"FROM \n" +
+							"region_info_copy1 \n" +
+							"WHERE \n" +
+							"region_info_copy1.name = '"+regionName +"';";
+					resultSet =mysqlClassData.query(sql);
+
+					while (resultSet.next()) {
+						ClassData classData = new ClassData(resultSet.getString(1),resultSet.getString(2),
+								resultSet.getString(3),resultSet.getString(4),resultSet.getString(5),"");
+						classList.add(classData);
+					}
+				}
+				if(entry.getKey().equals(dataFieldName)) {
+					try {
+						dataFieldList.add(String.valueOf( entry.getValue()));
+					}catch (Exception e){
+						e.printStackTrace();
+					}
+
+				}
+			}
+		}
+		//赋值
+		for(int i=0;i<classList.size();i++){
+			classList.get(i).setData(dataFieldList.get(i));
+		}
+
+		//根据regionName查询geometry并新建ClassData(String name,String code,String region_x,String region_y,String geometry,String data)
+
+		return classList;
+	}
+
+	/**通过Excel获得指标数据
+	 *param: resultStr 输入的json字符串
+	 *return: indicatorDatas 指标数组
+	 */
+	public static IndicatorData[] getIndicatorDataFromExcel(String resultStr,String[] fieldNames,String spatialIdFiled){
+
+		Map<String, Class> classMap = new HashMap<String, Class>();
+		classMap.put("features", FeaturesFromAPI.class);
+
+		JSONObject jsonObject = JSONObject.fromObject(resultStr);
+
+		//转为对象时，如果是list或map等需要添加类映射，即指定list或map中的对象类
+		DataFromAPi dataFromAPi = (DataFromAPi) JSONObject.toBean(jsonObject, DataFromAPi.class,classMap);
+		System.out.println(dataFromAPi);
+		//构建indicatorData数组， IndicatorData包括三个属性，
+		// 即单个要素的自变量domainAxis：2016，指标名称数组names[],指标值数组[]；
+
+		ArrayList<IndicatorData> featArrList = new ArrayList<IndicatorData>();//新建要素属性指标数据动态数组
+		//遍历dataFromAPi进行要素属性数据读取
+		ArrayList<FeaturesFromAPI> featList=dataFromAPi.getFeatures();
+		//遍历dataFromAPi进行要素空间坐标数据读取,二维数组存储坐标，第一个经度，第二个纬度。
+		double[][] coordinateXY=new double[featList.size()][2];
+		for(int i=0;i<featList.size();i++)	{
+
+			HashMap<String, String> map = (HashMap<String, String>) featList.get(i).getProperties();
+			ArrayList<String> proName=new ArrayList<String>();
+			ArrayList<Double> proValue=new ArrayList<Double>();
+			coordinateXY[i]=featList.get(i).getGeometry().getCoordinates();
+			String regionName=null;
+
+			for (Map.Entry<String, String> entry : map.entrySet()) {
+				if (entry.getKey().equals(spatialIdFiled)){
+					regionName=entry.getValue();
+				}
+				else {
+					for(int j=0;j<fieldNames.length;j++){
+						if (entry.getKey().equals(fieldNames[j])){
+							proName.add(entry.getKey()) ;
+							//String value=entry.getValue().toString();
+							proValue.add(Double.parseDouble(String.valueOf(entry.getValue())) ) ;
+						}
+					}
+				}
+			}
+			proName.trimToSize();
+			proValue.trimToSize();
+
+			String[] nameStrs = (String[] )proName.toArray(new String[proName.size()]);
+
+			//Double动态数组转为double数组
+			double[] valueDbls=new double[proValue.size()];
+			for(int j=0;j<proValue.size();j++){
+				valueDbls[j] = proValue.get(j).doubleValue();
+			}
+
+			IndicatorData indicatorData = new IndicatorData(regionName, nameStrs, valueDbls);
+			System.out.println(featList.get(i));
+			featArrList.add(indicatorData);
+		}
+		//
+
+		IndicatorData[] indicatorDatas = (IndicatorData[])featArrList.toArray(new IndicatorData[1]);
+		//IndicatorData indicatorData = new IndicatorData(year, dataNameStrings, value);
+		Map<IndicatorData[],double[][]> indiAndXY =new HashMap<>();
+		indiAndXY.put(indicatorDatas,coordinateXY);
+
+		return indicatorDatas;
+	}
 
 	/**
 	 * com.ny.mapç¨ è²å½©è½¬æ¢æ¹æ³,è½¬æ¢ærgbæ°ç»æ¨¡å¼
@@ -447,7 +577,6 @@ public class JUtil {
 		MysqlAccessBean mysql = new MysqlAccessBean();
 		try {
 			resultSet2 = mysql.query(sql);
-
 
 			//遍历每一行的查询结果
 			while (resultSet2.next()) {

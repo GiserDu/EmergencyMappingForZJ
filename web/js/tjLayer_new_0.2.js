@@ -1211,7 +1211,7 @@ function displayFields(fieldslist, tableFields, yearColomn){
         if(tjPanel2.tabId == "1"){
             timeId = $("#timeId1");
         }else if(tjPanel2.tabId == "2"){
-            timeId = $("#timeId2");
+            //timeId = $("#timeId2");
         }else if(tjPanel2.tabId == "3"){
             timeId = $("#timeId3");
         };
@@ -1259,12 +1259,12 @@ function submitFields(){
                 //console.log(index,item);
                 if(tjPanel2.fieldsNum==0){
 
-                }else if(tjPanel2.fieldsNum==1){
+                }else if(tjPanel2.fieldsNum==1 && tjPanel2.tabId==1){
                     tjPanel2.timeId = item;
                 }else {tjPanel2.fieldsName.push(item);}
                     tjPanel2.fieldsNum++
             });
-            tjPanel2.fieldsNum = tjPanel2.fieldsNum - 2;
+            tjPanel2.fieldsNum = tjPanel2.fieldsName.length;
 
             console.log(tjPanel2);
             $("#selectMappingTemplate").click();
@@ -1294,10 +1294,14 @@ function initTjLayer(allTjLayerContent, tjType, regionParamVar) {
     if (tjPanel2.tabId=="1"){
         url= "./servlet/fileUploadServlet?allTjLayerContent=" + encodeURI(allTjLayerContent);
     }else if(tjPanel2.tabId=="2"){
-        url= "./servlet/chartLayerFromAPIServlet?allTjLayerContent="+ encodeURIComponent(allTjLayerContent);
+        if(tjType=="chartLayerData"){
+            url= "./servlet/chartLayerFromAPIServlet?allTjLayerContent="+ encodeURIComponent(allTjLayerContent);
+        }else if (tjType=="classLayerData"){
+            url= "./servlet/ClassLayerServletForZJ?allTjLayerContent="+ encodeURIComponent(allTjLayerContent)
+        }
     }
 
-    console.log(tjType);
+    console.log(tjPanel2+"____"+tjType);
     $.ajax({
         type: 'POST',
         url: url,
@@ -2312,14 +2316,6 @@ var originalTjLayerContent='<div class="tjPanel" id="tjPanel">\n' +
     '                                                    <select class="spatialId" name="spatialId" lay-filter="spatialId" id="spatialId2"></select>\n' +
     '                                                </div>\n' +
     '                                            </div>\n' +
-    '                                            <div class="layui-form-item">\n' +
-    '                                                    <label class="layui-form-label" style="width:unset;margin-left:20%">时间唯一标识</label>\n' +
-    '                                                    <div class="layui-input-inline">\n' +
-    '                                                        <select class="timeId" name="timeId" lay-filter="timeId"\n' +
-    '                                                                id="timeId2">\n' +
-    '                                                        </select>\n' +
-    '                                                    </div>\n' +
-    '                                                </div>'+
     '                                            <div class="layui-form-item" id="fieldslist2"></div>\n' +
     '                                            <div class="layui-form-item">\n' +
     '                                                <button class="layui-btn" lay-submit="" lay-filter="fields">下一步</button>\n' +

@@ -94,7 +94,10 @@
         <servlet-name>ClassLayerServletForZJ</servlet-name>
         <servlet-class>com.zz.servlet.ClassLayerServletForZJ</servlet-class>
     </servlet>
-
+    <servlet>
+        <servlet-name>drawFromExcelServlet</servlet-name>
+        <servlet-class>com.zz.servlet.drawFromExcelServlet</servlet-class>
+    </servlet>
 
     <servlet-mapping>
         <servlet-name>GetAdministrativeRegion</servlet-name>
@@ -164,5 +167,10 @@
         <servlet-name>ClassLayerServletForZJ</servlet-name>
         <url-pattern>/servlet/ClassLayerServletForZJ</url-pattern>
     </servlet-mapping>
+    <servlet-mapping>
+        <servlet-name>drawFromExcelServlet</servlet-name>
+        <url-pattern>/servlet/drawFromExcelServlet</url-pattern>
+    </servlet-mapping>
+
 
 </web-app>

@@ -398,8 +398,7 @@ public class ReadGeojson {
             urlConnection.setRequestProperty("User-Agent", "Mozilla/4.0 (compatible; MSIE 5.0; Windows NT; DigExt)");
             urlConnection.setRequestProperty("ContentType","application/json;charset=utf-8");
             // System.out.println(urlConnection.getInputStream());
-            BufferedReader in = new BufferedReader(
-                    new InputStreamReader(urlConnection.getInputStream(),"UTF-8"));
+            BufferedReader in = new BufferedReader(new InputStreamReader(urlConnection.getInputStream(),"UTF-8"));
 
             String lines;
             while((lines = in.readLine()) != null)
