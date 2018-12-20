@@ -5,6 +5,7 @@ import telecarto.geoinfo.db.DBManager;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
+import java.util.ArrayList;
 
 public class ReadRegionData {
 
@@ -29,8 +30,8 @@ public class ReadRegionData {
 	public  ReadRegionData() {
 
 	}
-
-	public static void doReadRegionData_ZJ(String regionParam){
+	//浙江本地数据库数据源查询，按行政区域类别查询
+	public static void doReadRegionDataByRegionParam(String regionParam){
 		//regionParam=1时,调取第一级行政区(17个地州市)
 		ParamTemp = regionParam;
 		JConnection jConnection = new JConnection();
@@ -93,6 +94,56 @@ public class ReadRegionData {
 
 
 	}
+	//按照行政区域单个查询
+	public static void doReadRegionDataByEachRegion(String[] regionNames){
+
+		JConnection jConnection = new JConnection();
+
+		ArrayList<String > regonCodeList=new ArrayList<>();
+		ArrayList<String > regonXList=new ArrayList<>();
+		ArrayList<String > regonYList=new ArrayList<>();
+		ArrayList<String > regonClassList=new ArrayList<>();
+		ArrayList<String > regonNameList=new ArrayList<>();
+
+		//sql_select = "WHERE name = '" + regionName + "'";
+		//sql = "SELECT citycode,x,y,class,name FROM region_info_copy1 " + sql_select + "ORDER BY citycode";
+		//sql1 = "SELECT COUNT(citycode) FROM region_info_copy1 " +sql_select;
+		try {
+			Connection connection = DBManager.getConnection();
+
+			ResultSet resultSet;
+
+			PreparedStatement pst = connection.prepareStatement( "SELECT citycode,x,y,class,name FROM region_info_copy1 "  +
+					" WHERE name =  ? ");
+			for(int i=0;i<regionNames.length;i++){
+				pst.setString(1, regionNames[i]);
+				resultSet=pst.executeQuery();
+				while (resultSet.next()) {
+					regonCodeList.add( resultSet.getString(1)) ;
+					regonXList.add(resultSet.getString(2)) ;
+					regonYList.add(resultSet.getString(3)) ;
+					regonClassList.add( resultSet.getString(4));
+					regonNameList.add(resultSet.getString(5));
+				}
+			}
+			pst.close();
+			//list转Array
+			regonCode= regonCodeList.toArray(new String[regonCodeList.size()]);
+			regonX= regonXList.toArray(new String[regonXList.size()]);
+			regonY= regonYList.toArray(new String[regonYList.size()]);
+			regonClass= regonClassList.toArray(new String[regonClassList.size()]);
+			regonName= regonNameList.toArray(new String[regonNameList.size()]);
+
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+		finally {
+			jConnection.close();
+		}
+
+
+	}
+
 	public static void doReadRegionData(String regionParam){
 		//regionParam=1时,调取第一级行政区(17个地州市)
 		ParamTemp = regionParam;

@@ -13,7 +13,7 @@ var allTjLayerContent={};
 // 制图范围数据的json格式
 // var tjPanel1={"tabID":"1","identityField":"value","regionData":"","fileName":""};
 var tjPanel1={};
-var tjPanel2 = {"tabId":"1","dataAddress":"","tableName":"","spatialId":"","timeId":"","tableFields":[],"fieldsName":[],"fieldsNum":0,"yearColomn":[]};
+var tjPanel2 = {"tabId":1,"dataAddress":"","excelAddress":"","tableName":"","spatialId":"","timeId":"","tableFields":[],"fieldsName":[],"fieldsNum":0,"yearColomn":[]};
 //tjPanel3中有一个key是type，1表示统计图表，2表示分级符号
 var tjPanel3={};
 var zoomOutFlag = 0;
@@ -26,6 +26,7 @@ var legendFlag = 0;
 var classifyImg_url = undefined;//分级统计图图例的url
 var chartLayerNum = 1; //当前添加的统计图层数量
 var editFlag = 0; //当前是否是统计图层编辑
+var excelAddress="";
 
 // 图例按钮的事件
 $("#map-legend").bind({
@@ -392,7 +393,7 @@ function modifytjMenuLayer_new(allTjLayerContent) {
         $("#spatialId"+allTjLayerContent.statisticdata.tabId).siblings(".layui-form-select").find("dd[lay-value="+ allTjLayerContent.statisticdata.spatialId+"]").click();
         if (allTjLayerContent.statisticdata.timeId != year)
             allTjLayerContent.statisticdata.timeId = year;
-        $("#timeId"+allTjLayerContent.statisticdata.tabId).siblings(".layui-form-select").find("dd[lay-value="+ allTjLayerContent.statisticdata.timeId+"]").click();
+        $("#timeId"+allTjLayerContent.statisticdata.tabId).siblings(".layui-form-select").find("dd[lay-value=\'"+ allTjLayerContent.statisticdata.timeId+"\']").click();
         $.each(allTjLayerContent.statisticdata.fieldsName,function(index,item){
             $("#fieldslist"+allTjLayerContent.statisticdata.tabId).find("input[value="+item+"]").next().click();
         });
@@ -575,7 +576,7 @@ function constructTjJson11() {
     }
 
     tjPanel1={
-        "tabID":"1",
+        "tabID":1,
         "identityField":"value",
         "regionDataName":selectedRegionName,
         "regionDataValue":selectedValues,
@@ -589,7 +590,7 @@ function constructTjJson12() {
     // 获得用户选取的空间标识的字段
     var identityField=$('#userDataField option:selected').val();;
     tjPanel1={
-        "tabID":"2",
+        "tabID":2,
         "identityField":identityField,
         "regionDataName":"",
         "regionDataValue":"",
@@ -1041,7 +1042,7 @@ function opentjPanel2(){
             tjPanel2.tableName = "";
             OtherDatabase();
         }else if(tjPanel2.tabId==3){
-            tjPanel2.dataAddress="";
+            tjPanel2.dataAddress=excelAddress;
             EXCELupload();
         }
         element.on('tab(nav2)', function(data){
@@ -1190,11 +1191,11 @@ function displayFields(fieldslist, tableFields, yearColomn){
         var form = layui.form;
         fieldslist.empty();
         var spatialIdentity = $("");
-        if(tjPanel2.tabId == "1"){
+        if(tjPanel2.tabId == 1){
             spatialIdentity = $("#spatialId1");
-        }else if(tjPanel2.tabId == "2"){
+        }else if(tjPanel2.tabId == 2){
             spatialIdentity = $("#spatialId2");
-        }else if(tjPanel2.tabId == "3"){
+        }else if(tjPanel2.tabId == 3){
             spatialIdentity = $("#spatialId3");
         };
         spatialIdentity.empty();
@@ -1208,11 +1209,11 @@ function displayFields(fieldslist, tableFields, yearColomn){
             }
         });
         var timeId = $("");
-        if(tjPanel2.tabId == "1"){
+        if(tjPanel2.tabId == 1){
             timeId = $("#timeId1");
-        }else if(tjPanel2.tabId == "2"){
+        }else if(tjPanel2.tabId == 2){
             //timeId = $("#timeId2");
-        }else if(tjPanel2.tabId == "3"){
+        }else if(tjPanel2.tabId == 3){
             timeId = $("#timeId3");
         };
         timeId.empty();
@@ -1257,12 +1258,28 @@ function submitFields(){
             tjPanel2.fieldsNum = 0;
             $.each(data.field, function(index,item){
                 //console.log(index,item);
-                if(tjPanel2.fieldsNum==0){
-
-                }else if(tjPanel2.fieldsNum==1 && tjPanel2.tabId==1){
-                    tjPanel2.timeId = item;
-                }else {tjPanel2.fieldsName.push(item);}
-                    tjPanel2.fieldsNum++
+                switch(tjPanel2.tabId)
+                {
+                    case 1://本地数据库面板
+                        if(tjPanel2.fieldsNum==1){tjPanel2.timeId=item}
+                        if(tjPanel2.fieldsNum>1){tjPanel2.fieldsName.push(item)}
+                        break;
+                    case 2://API数据面板
+                        if(tjPanel2.fieldsNum>=1){tjPanel2.fieldsName.push(item)}
+                        break;
+                    case 3://Excel数据面板
+                        if(tjPanel2.fieldsNum==1){tjPanel2.timeId=item}
+                        if(tjPanel2.fieldsNum>1){tjPanel2.fieldsName.push(item)}
+                        break;
+                    default:
+                        break;
+                }
+                // if(tjPanel2.fieldsNum==0){
+                //
+                // }else if(tjPanel2.fieldsNum==1 && tjPanel2.tabId==1){
+                //     tjPanel2.timeId = item;
+                // }else {tjPanel2.fieldsName.push(item);}
+                tjPanel2.fieldsNum++
             });
             tjPanel2.fieldsNum = tjPanel2.fieldsName.length;
 
@@ -1291,15 +1308,30 @@ function initTjLayer(allTjLayerContent, tjType, regionParamVar) {
         }
         console.log("chartLayerNum: " + chartLayerNum);
     }
-    if (tjPanel2.tabId=="1"){
-        url= "./servlet/fileUploadServlet?allTjLayerContent=" + encodeURI(allTjLayerContent);
-    }else if(tjPanel2.tabId=="2"){
-        if(tjType=="chartLayerData"){
-            url= "./servlet/chartLayerFromAPIServlet?allTjLayerContent="+ encodeURIComponent(allTjLayerContent);
-        }else if (tjType=="classLayerData"){
-            url= "./servlet/ClassLayerServletForZJ?allTjLayerContent="+ encodeURIComponent(allTjLayerContent)
-        }
+    switch (tjPanel2.tabId){
+        case 1:
+            url= "./servlet/fileUploadServlet?allTjLayerContent=" + encodeURI(allTjLayerContent);
+            break;
+        case 2:
+            if(tjType=="chartLayerData"){
+                url= "./servlet/chartLayerFromAPIServlet?allTjLayerContent="+ encodeURIComponent(allTjLayerContent);
+            }else if (tjType=="classLayerData"){
+                url= "./servlet/ClassLayerServletForZJ?allTjLayerContent="+ encodeURIComponent(allTjLayerContent)
+            }
+            break;
+        case 3:
+            url="./servlet/drawFromExcelServlet?allTjLayerContent="+ encodeURIComponent(allTjLayerContent)
+            break;
     }
+    // if (tjPanel2.tabId==1){
+    //     url= "./servlet/fileUploadServlet?allTjLayerContent=" + encodeURI(allTjLayerContent);
+    // }else if(tjPanel2.tabId==2){
+    //     if(tjType=="chartLayerData"){
+    //         url= "./servlet/chartLayerFromAPIServlet?allTjLayerContent="+ encodeURIComponent(allTjLayerContent);
+    //     }else if (tjType=="classLayerData"){
+    //         url= "./servlet/ClassLayerServletForZJ?allTjLayerContent="+ encodeURIComponent(allTjLayerContent)
+    //     }
+    // }
 
     console.log(tjPanel2+"____"+tjType);
     $.ajax({
@@ -1834,7 +1866,7 @@ refreshChartLyr = function(indicators){
 function initClassInfoTemplate(attributes) {
     // var attrString = classIndex + ":" + attributes.data;
 
-    var attrString = '<p><strong>区域名称 : </strong>' + attributes.rgn_code + '</p>';
+    var attrString = '<p><strong>区域名称 : </strong>' + attributes.rgn_name + '</p>';
     attrString += '<p><strong>'+ attributes.label +' : </strong>' + attributes.data + '</p>';
     attrString += '<p><strong>分级级别 : </strong>' + attributes.rgn_class + '</p>';
     // attrString += '<p><strong>数据来源 : </strong>' + dataSource + '</p>';
@@ -1905,14 +1937,13 @@ function EXCELupload(){
                 //上传成功，渲染字段
 
                 var tableFields=new Array();
-
                 tjPanel2.tableName = $(".layui-inline.layui-upload-choose").html();
-
+                tjPanel2.excelAddress=res["excelAddress"];
                 tableFields=res["tableFields"];//tableFields为指标数组
                 //构造
                 //var tableFields = {"0":"id","1":"username","2":"email","3":"sex","4":"city","5":"sign","6":"experience","7":"ip","8":"logins","9":"joinTime"};
-
-                displayFields($("#fieldslist3"),tableFields);
+                var yearColomn = res.yearColomn;
+                displayFields($("#fieldslist3"),tableFields,yearColomn);
 
                 //提交选择的字段
                 submitFields();

@@ -91,6 +91,23 @@ public class ChartDataPara {
 
 		this.setDomainAxisUnit("年");
 	}
+	public void initial_ZJExcel(String[] themeData,String tempSource){
+		String[] temp = themeData;
+
+		String[] fu = new String[temp.length];
+
+		for (int i = 0; i < temp.length; i++) {
+			String tempFieldName=temp[i];
+			int startIndex=tempFieldName.indexOf("（");
+			fu[i]=tempFieldName.substring(startIndex);//截取单位
+		}
+
+		this.setFieldName(temp); //指标名
+		this.setFieldUnits(fu);//单位
+		this.setFieldSource(tempSource);//单位
+
+		this.setDomainAxisUnit("年");
+	}
 
 	public void initialAsAPI(IndicatorData[] indicatorDatas){
 //		String[] temp = themeData.split(",");

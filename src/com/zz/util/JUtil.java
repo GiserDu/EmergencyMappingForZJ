@@ -212,7 +212,7 @@ public class JUtil {
 				if (entry.getKey().equals(spatialIdFiled)) {
 					regionName=entry.getValue();
 					sql= "SELECT\n" +
-							"region_info_copy1.citycode, region_info_copy1.name, region_info_copy1.x, region_info_copy1.y, region_info_copy1.json\n" +
+							" region_info_copy1.name, region_info_copy1.citycode,region_info_copy1.x, region_info_copy1.y, region_info_copy1.json\n" +
 							"FROM \n" +
 							"region_info_copy1 \n" +
 							"WHERE \n" +
@@ -221,7 +221,7 @@ public class JUtil {
 
 					while (resultSet.next()) {
 						ClassData classData = new ClassData(resultSet.getString(1),resultSet.getString(2),
-								resultSet.getString(3),resultSet.getString(4),resultSet.getString(5),"");
+								resultSet.getString(3),resultSet.getString(4),resultSet.getString(5),"",dataFieldName);
 						classList.add(classData);
 					}
 				}

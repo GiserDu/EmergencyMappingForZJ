@@ -276,7 +276,14 @@ public class fileUploadServlet extends HttpServlet {
             compressProcess(message,request);
         }else if (type.equals("xls") || type.equals("xlsx")){
 
-            ExcelProcess.doReadExcel(saveFilePath);
+            ExcelProcess.doReadExcelForFiledsName(saveFilePath);
+            String relativeExcelPath = "http://" + request.getServerName() //服务器地址
+                    + ":"
+                    + request.getServerPort()		 //端口号
+                    + request.getContextPath()     //项目名称
+                    + saveFilePath.substring(saveFilePath.lastIndexOf("\\uploadFile"));
+            message.put("excelAddress",relativeExcelPath);
+            message.put("yearColomn",ExcelProcess.getTimeNames());
             message.put("tableFields",ExcelProcess.getFieldNames());
 //            JSONArray jsonObject = JSONArray.fromObject(ExcelProcess.getFieldNames());
 //            String jsonStr = jsonObject.toString();
@@ -284,40 +291,6 @@ public class fileUploadServlet extends HttpServlet {
         }else {
             System.out.print("不支持的数据格式");
         }
-
-//        String fileName = "";
-//        String shpFilePath="";
-//        String fileDic=saveFilePath.substring(0, saveFilePath.lastIndexOf('.'));
-//        File file = new File(fileDic);
-//        File[] tempList = file.listFiles();
-//        //解压输出文件路径，遍历寻找shp文件
-//        for (int i = 0; i < tempList.length; i++) {
-//            if (tempList[i].isFile()) {
-//                System.out.println("文     件："+tempList[i]);
-//                fileName = tempList[i].getName();
-//                if(fileName.substring(fileName.lastIndexOf('.')+1).equals("shp")){
-//                    shpFilePath=tempList[i].getPath();
-//                }
-//                System.out.println("文件名："+fileName);
-//        }
-//            if (tempList[i].isDirectory()) {
-//                System.out.println("文件夹："+tempList[i]);
-//            }
-//        }
-//
-//        //gdal实现shp转geojson
-//        shpToGeojson.shpToGeojson(shpFilePath,shpFilePath.replace(".shp",".json"));
-//        String fieldsName= shpToGeojson.readShpFields(shpFilePath);
-//        message.put("fieldsName",fieldsName);
-//
-//        String outJsonPath=shpFilePath.replace(".shp",".json");
-//
-//        String relativeJsonPath = "http://" + request.getServerName() //服务器地址
-//                + ":"
-//                + request.getServerPort()		 //端口号
-//                + request.getContextPath()     //项目名称
-//                + outJsonPath.substring(outJsonPath.lastIndexOf("\\uploadFile"));
-//        message.put("geoJsonURL",relativeJsonPath);
 
         PrintWriter writer = response.getWriter();
         writer.print(message);
@@ -368,6 +341,7 @@ public class fileUploadServlet extends HttpServlet {
         }
         return dir;
     }
+    //解压缩shp文件并转geojson
     private void compressProcess(JSONObject message, HttpServletRequest request) throws IOException {
 
         String fileName = "";
@@ -447,17 +421,14 @@ public class fileUploadServlet extends HttpServlet {
         String chartID0=cartographydataJson.getString("chartID");
         String chartID = chartID0.substring(1, 6);
         System.out.println(chartID);
-//        String chartID="10101";
-//        JSONArray colorArray=cartographydataJson.getJSONArray("colors");
-//        int symbolSize=cartographydataJson.getInt("symbolSizeSliderValue");
+
         String tempSource="本地数据库";
 
         // String wcString = request.getParameter("wc");
         //String dcString = request.getParameter("dc");
         //String chartid = request.getParameter("chartID");// 专题符号id
         int width = cartographydataJson.getInt("symbolSizeSliderValue");// 符号长宽
-//        int width=80;
-//        int height=80;
+
         int height= cartographydataJson.getInt("symbolSizeSliderValue");
 //        String regionParam = "1";
 
@@ -537,7 +508,7 @@ public class fileUploadServlet extends HttpServlet {
         //
         //ArrayList<String > regionData=new ArrayList();
         IndicatorData[] indicatorDatas = JUtil.getIndicatorData_ZJ(tableName, fieldsName, regionParam, spatialId, year);
-        ReadRegionData.doReadRegionData_ZJ(regionParam);
+        ReadRegionData.doReadRegionDataByRegionParam(regionParam);
         double[] maxValues = JUtil.maxValues(indicatorDatas);
         double[] minValues = JUtil.minValues(indicatorDatas);
         double[] averageValues = JUtil.averageValues(indicatorDatas);
@@ -732,7 +703,7 @@ public class fileUploadServlet extends HttpServlet {
         //根据输入行政等级class，确立
         if (regionParam.equals("1")){
             sql="SELECT\n" +
-                    "\tregion_info_copy1.citycode, region_info_copy1.name, region_info_copy1.x, region_info_copy1.y, region_info_copy1.json, " + classTableName + ".`" + dataFieldName +"`" +
+                    "\t region_info_copy1.name,region_info_copy1.citycode, region_info_copy1.x, region_info_copy1.y, region_info_copy1.json, " + classTableName + ".`" + dataFieldName +"`" +
                     "\tFROM\n" +
                     "\tregion_info_copy1\n" +
                     "LEFT JOIN\t"+ classTableName +"\n" +
@@ -742,7 +713,7 @@ public class fileUploadServlet extends HttpServlet {
         }
         else if (regionParam.equals("2")){
             sql="SELECT\n" +
-                    "\tregion_info_copy1.coutcode, region_info_copy1.name, region_info_copy1.x, region_info_copy1.y, region_info_copy1.json, " + classTableName + ".`" + dataFieldName +"`" +
+                    "\tregion_info_copy1.name, region_info_copy1.coutcode, region_info_copy1.x, region_info_copy1.y, region_info_copy1.json, " + classTableName + ".`" + dataFieldName +"`" +
                     "\tFROM\n" +
                     "\tregion_info_copy1\n" +
                     "LEFT JOIN\t"+ classTableName +"\n" +
@@ -757,7 +728,7 @@ public class fileUploadServlet extends HttpServlet {
             ArrayList<ClassData> classList = new ArrayList<>();
             while (resultSet2.next()) {
                 ClassData classData = new ClassData(resultSet2.getString(1),resultSet2.getString(2),
-                        resultSet2.getString(3),resultSet2.getString(4),resultSet2.getString(5),resultSet2.getString(6));
+                        resultSet2.getString(3),resultSet2.getString(4),resultSet2.getString(5),resultSet2.getString(6),dataFieldName);
                 classList.add(classData);
             }
             double maxValue =  Double.parseDouble(classList.get(0).getData());
