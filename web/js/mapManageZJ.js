@@ -94,7 +94,6 @@ function compare (propertyName) {
 // 更新地图视图
 function refreshMaps() {
     $(".gallery-row").html('');
-    // $(".icon.info").tooltip('destroy');
     for (var i in tempSelfList){
         if(tempSelfList[i].picture ===""){
             tempSelfList[i].picture = "image/default-map.jpg";
