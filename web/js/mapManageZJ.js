@@ -109,6 +109,11 @@ function refreshMaps() {
         $(".icon.edit").tooltip();
         $(".icon.trash").tooltip();
     }
+    // 点击专题图，进入专题图浏览页面
+    $(".img-responsive").click(function () {
+        // 获取到地图id值
+        console.log($(this).attr('mapid'));
+    });
 }
 
 // 按地图标签筛选
@@ -224,11 +229,11 @@ $(document).on('mouseleave','.img-box',function(e){
     $(this).find(".description").css("visibility","hidden");
 });
 
-// 点击专题图，进入专题图浏览页面
-$(".img-responsive").click(function () {
-    // 获取到地图id值
-    console.log($(this).attr('mapid'));
-});
+// // 点击专题图，进入专题图浏览页面
+// $(".img-responsive").click(function () {
+//     // 获取到地图id值
+//     console.log($(this).attr('mapid'));
+// });
 
 // 点击编辑地图按钮，进入专题地图编辑页面
 $(document).on('click','.icon.edit',function(e){
