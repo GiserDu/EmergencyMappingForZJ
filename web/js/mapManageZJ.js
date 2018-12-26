@@ -249,7 +249,8 @@ $(document).on('click','.icon.info',function(e){
 
 // 我要制图按钮点击事件
 $(".to-mapping").click(function () {
-    window.open("http://www.baidu.com");
+    mappingPageType = 0;
+    window.location.href = "interactiveMapping.html";
 });
 
 function setModalValue(e) {
