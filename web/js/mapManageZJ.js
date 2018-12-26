@@ -232,11 +232,7 @@ $(document).on('mouseleave','.img-box',function(e){
     $(this).find(".description").css("visibility","hidden");
 });
 
-// // 点击专题图，进入专题图浏览页面
-// $(".img-responsive").click(function () {
-//     // 获取到地图id值
-//     console.log($(this).attr('mapid'));
-// });
+
 
 // 点击编辑地图按钮，进入专题地图编辑页面
 $(document).on('click','.icon.edit',function(e){
@@ -252,7 +248,8 @@ $(document).on('click','.icon.info',function(e){
 
 // 我要制图按钮点击事件
 $(".to-mapping").click(function () {
-    window.open("interactiveMapping.html");
+    window.localStorage.mappingPageType="blank"; //记录当前制图页面的类别 blank：普通制图；edit：用户地图编辑；readOnly：用户地图查看
+    window.location.href="interactiveMapping.html";
 });
 
 function setModalValue(e) {
