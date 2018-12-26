@@ -198,7 +198,6 @@ public class fileUploadServlet extends HttpServlet {
                     String name = item.getFieldName();
                     //解决普通输入项的数据的中文乱码问题
                     String value = item.getString("UTF-8");
-                    //value = new String(value.getBytes("iso8859-1"),"UTF-8");
                     System.out.println(name + "=" + value);
                 }else{
                     //如果fileitem中封装的是上传文件

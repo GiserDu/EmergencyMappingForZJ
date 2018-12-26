@@ -51,25 +51,27 @@ public class GetThematicMapServlet extends HttpServlet {
 		response.setContentType("text/html;charset=UTF-8");
 		response.setCharacterEncoding("UTF-8");
 		String type = request.getParameter("type");
+		String user_id= request.getParameter("user_id");
 		MysqlAccessBean mysql = null;
 		ResultSet resultSet;
 		//初始化后台管理页面(按照前端的格式进行组织)
 		if(type.equals("initManage")){
 			try {
 				mysql = new MysqlAccessBean();
-				String sql = "SELECT ID,MAP_NAME,MAP_URL,DISPLAY,DESCRIPE,CLASS FROM thematic_maps";
+				String sql = "SELECT map_id,map_name,map_tag,map_info, submit_time,edit_time,picture FROM user_map where user_id=\'"+user_id+"\'";
+
 				resultSet = mysql.query(sql);
 				JSONArray mapArray = new JSONArray();
 				while (resultSet.next()) {
 					JSONObject mapObject = new JSONObject();
-					mapObject.put("mapID",resultSet.getInt(1));
-					mapObject.put("name",resultSet.getString(2));
-					mapObject.put("isDisplay",resultSet.getString(4));
-					String mapURL = resultSet.getString(3) + "/TileGroup0/0-0-0.jpg";
-					mapObject.put("src",mapURL);
-					String description = resultSet.getString(5);
-					mapObject.put("description",description);
-					mapObject.put("thematicClass",resultSet.getString(6));
+					mapObject.put("map_id",resultSet.getString("map_id"));
+					mapObject.put("map_name",resultSet.getString("map_name"));
+					mapObject.put("map_tag",resultSet.getString("map_tag"));
+					mapObject.put("map_info",resultSet.getString("map_info"));
+					mapObject.put("submit_time",resultSet.getString("submit_time"));
+					mapObject.put("edit_time",resultSet.getString("edit_time"));
+					mapObject.put("picture",resultSet.getString("picture"));
+					//mapObject.put("thematicClass",resultSet.getString(6));
 					mapArray.add(mapObject);
 				}
 

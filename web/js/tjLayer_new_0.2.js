@@ -1323,15 +1323,7 @@ function initTjLayer(allTjLayerContent, tjType, regionParamVar) {
             url="./servlet/drawFromExcelServlet?allTjLayerContent="+ encodeURIComponent(allTjLayerContent)
             break;
     }
-    // if (tjPanel2.tabId==1){
-    //     url= "./servlet/fileUploadServlet?allTjLayerContent=" + encodeURI(allTjLayerContent);
-    // }else if(tjPanel2.tabId==2){
-    //     if(tjType=="chartLayerData"){
-    //         url= "./servlet/chartLayerFromAPIServlet?allTjLayerContent="+ encodeURIComponent(allTjLayerContent);
-    //     }else if (tjType=="classLayerData"){
-    //         url= "./servlet/ClassLayerServletForZJ?allTjLayerContent="+ encodeURIComponent(allTjLayerContent)
-    //     }
-    // }
+
 
     console.log(tjPanel2+"____"+tjType);
     $.ajax({
