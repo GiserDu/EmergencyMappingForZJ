@@ -3,14 +3,14 @@
  */
 //测试数据
 var allMapList=[
-    {"map_id":1,"map_name":"利川市地理国情普查图","map_tag":"地质灾害工作部署图","map_info":"该图于2016年编制完成，属于我国第一次地理国情普查成果之一","submit_time":"2018-12-24 20:52:44","edit_time":"2018-12-25 20:52:44","picture":""},
-    {"map_id":2,"map_name":"东宝区单位面积河流分析图","map_tag":"地质灾害工作进展图","map_info":"该图于2016年编制完成，属于我国第一次地理国情普查成果之一","submit_time":"2018-12-21 20:52:44","edit_time":"2018-12-23 20:52:44","picture":""},
-    {"map_id":3,"map_name":"东宝区植被覆盖面积统计图","map_tag":"地质灾害工作部署图","map_info":"该图于2016年编制完成，属于我国第一次地理国情普查成果之一","submit_time":"2018-12-13 20:52:44","edit_time":"2018-12-22 20:52:44","picture":""},
-    {"map_id":4,"map_name":"交通便利度指数图","map_tag":"隐患点分布图","map_info":"该图于2016年编制完成，属于我国第一次地理国情普查成果之一","submit_time":"2018-12-21 20:52:44","edit_time":"2018-12-24 20:52:44","picture":""},
-    {"map_id":5,"map_name":"交通发育指数","map_tag":"地质灾害工作部署图","map_info":"该图于2016年编制完成，属于我国第一次地理国情普查成果之一","submit_time":"2018-12-10 20:52:44","edit_time":"2018-12-20 20:52:44","picture":""},
-    {"map_id":6,"map_name":"交通优势度指数图","map_tag":"隐患点分布图","map_info":"该图于2016年编制完成，属于我国第一次地理国情普查成果之一","submit_time":"2018-12-15 20:52:44","edit_time":"2018-12-19 20:52:44","picture":""},
-    {"map_id":7,"map_name": "中学教育资源可达性分析图","map_tag":"避让搬迁分布图","map_info":"该图于2016年编制完成，属于我国第一次地理国情普查成果之一","submit_time":"2018-12-12 20:52:44","edit_time":"2018-12-18 20:52:44","picture": ""},
-    {"map_id":8,"map_name": "小学教育资源可达性分析图","map_tag":"避让搬迁分布图","map_info":"该图于2016年编制完成，属于我国第一次地理国情普查成果之一","submit_time":"2018-12-12 20:52:44","edit_time":"2018-12-18 20:52:44","picture": ""}
+    // {"map_id":1,"map_name":"利川市地理国情普查图","map_tag":"地质灾害工作部署图","map_info":"该图于2016年编制完成，属于我国第一次地理国情普查成果之一","submit_time":"2018-12-24 20:52:44","edit_time":"2018-12-25 20:52:44","picture":""},
+    // {"map_id":2,"map_name":"东宝区单位面积河流分析图","map_tag":"地质灾害工作进展图","map_info":"该图于2016年编制完成，属于我国第一次地理国情普查成果之一","submit_time":"2018-12-21 20:52:44","edit_time":"2018-12-23 20:52:44","picture":""},
+    // {"map_id":3,"map_name":"东宝区植被覆盖面积统计图","map_tag":"地质灾害工作部署图","map_info":"该图于2016年编制完成，属于我国第一次地理国情普查成果之一","submit_time":"2018-12-13 20:52:44","edit_time":"2018-12-22 20:52:44","picture":""},
+    // {"map_id":4,"map_name":"交通便利度指数图","map_tag":"隐患点分布图","map_info":"该图于2016年编制完成，属于我国第一次地理国情普查成果之一","submit_time":"2018-12-21 20:52:44","edit_time":"2018-12-24 20:52:44","picture":""},
+    // {"map_id":5,"map_name":"交通发育指数","map_tag":"地质灾害工作部署图","map_info":"该图于2016年编制完成，属于我国第一次地理国情普查成果之一","submit_time":"2018-12-10 20:52:44","edit_time":"2018-12-20 20:52:44","picture":""},
+    // {"map_id":6,"map_name":"交通优势度指数图","map_tag":"隐患点分布图","map_info":"该图于2016年编制完成，属于我国第一次地理国情普查成果之一","submit_time":"2018-12-15 20:52:44","edit_time":"2018-12-19 20:52:44","picture":""},
+    // {"map_id":7,"map_name": "中学教育资源可达性分析图","map_tag":"避让搬迁分布图","map_info":"该图于2016年编制完成，属于我国第一次地理国情普查成果之一","submit_time":"2018-12-12 20:52:44","edit_time":"2018-12-18 20:52:44","picture": ""},
+    // {"map_id":8,"map_name": "小学教育资源可达性分析图","map_tag":"避让搬迁分布图","map_info":"该图于2016年编制完成，属于我国第一次地理国情普查成果之一","submit_time":"2018-12-12 20:52:44","edit_time":"2018-12-18 20:52:44","picture": ""}
 ]
 // var allMapList = [];//全部专题图(有后台时使用)
 var tempSelfList = [];//模板页显示专题图实际列表
@@ -155,69 +155,72 @@ $(".form-control.search-key").bind("input propertychange",function(event){
 });
 
 // 无后台版(测试用)
-function initMapList(){
-    tempSelfList = allMapList;
-    searchResultList = allMapList;
-    filterResultList = allMapList;
-    // 动态生成地图标签下拉列表
-    var mapTags = new Set();
-    mapTags.add("全部专题图类别");
-    for(let item of allMapList){
-        mapTags.add(item.map_tag);
-    }
-    $('.selectpicker.map-tag').html('');
-    for(let tag of mapTags.keys()){
-        $('.selectpicker.map-tag').append('<option>'+tag+'</option>');
-    }
-    sortFilter("时间顺序");
-    refreshMaps();
+// function initMapList(){
+//     tempSelfList = allMapList;
+//     searchResultList = allMapList;
+//     filterResultList = allMapList;
+//     // 动态生成地图标签下拉列表
+//     var mapTags = new Set();
+//     mapTags.add("全部专题图类别");
+//     for(let item of allMapList){
+//         mapTags.add(item.map_tag);
+//     }
+//     $('.selectpicker.map-tag').html('');
+//     for(let tag of mapTags.keys()){
+//         $('.selectpicker.map-tag').append('<option>'+tag+'</option>');
+//     }
+//     sortFilter("时间顺序");
+//     refreshMaps();
+// }
+
+//（有后台版）先清空gallery-row，然后循环添加图片的div，最后添加添加图片的div
+function initMapList() {
+    var type = "initManage";
+    var init_url = "./servlet/GetThematicMapServlet?type=" + type;
+    $.ajax({
+        url: init_url,
+        type: 'POST',
+        dataType: 'json',
+        data:{user_id:"testUser1"},//暂时把user_id写死
+
+        cache:false,
+        async:false,//设置为同步操作就可以给全局变量赋值成功
+        scriptCharset: 'utf-8',
+        success: function (data) {
+            // console.log(data);
+            allMapList = data;
+            tempSelfList = allMapList;
+            searchResultList = allMapList;
+            filterResultList = allMapList;
+                // 动态生成地图标签下拉列表
+                var mapTags = new Set();
+                mapTags.add("全部专题图类别");
+                for(let item of allMapList){
+                    mapTags.add(item.map_tag);
+                }
+                $('.selectpicker.map-tag').html('');
+                for(let tag of mapTags.keys()){
+                    $('.selectpicker.map-tag').append('<option>'+tag+'</option>');
+                }
+            sortFilter("时间顺序");
+            refreshMaps();
+        },
+        error: function (xhr, status, errMsg) {
+            console.log(errMsg);
+            swal({
+                title: "初始化失败",
+                text: "信息初始化失败!",
+                type: "warning",
+                showCancelButton: false,
+                confirmButtonText: "确定",
+                closeOnConfirm: false,
+                closeOnCancel: false
+            });
+
+        }
+    });
 }
 
-// （有后台版）先清空gallery-row，然后循环添加图片的div，最后添加添加图片的div
-// function initMapList() {
-//     var type = "initManage";
-//     var init_url = "./servlet/GetThematicMapServlet?type=" + type;
-//     $.ajax({
-//         url: init_url,
-//         type: 'POST',
-//         dataType: 'json',
-//         cache:false,
-//         // async:false,//设置为同步操作就可以给全局变量赋值成功
-//         scriptCharset: 'utf-8',
-//         success: function (data) {
-//             // console.log(data);
-//             allMapList = data;
-//             tempSelfList = allMapList;
-//             searchResultList = allMapList;
-//             filterResultList = allMapList;
-//                 // 动态生成地图标签下拉列表
-//                 var mapTags = new Set();
-//                 mapTags.add("全部专题图类别");
-//                 for(let item of allMapList){
-//                     mapTags.add(item.map_tag);
-//                 }
-//                 $('.selectpicker.map-tag').html('');
-//                 for(let tag of mapTags.keys()){
-//                     $('.selectpicker.map-tag').append('<option>'+tag+'</option>');
-//                 }
-//             sortFilter("时间顺序");
-//             refreshMaps();
-//         },
-//         error: function (xhr, status, errMsg) {
-//             console.log(errMsg);
-//             swal({
-//                 title: "初始化失败",
-//                 text: "信息初始化失败!",
-//                 type: "warning",
-//                 showCancelButton: false,
-//                 confirmButtonText: "确定",
-//                 closeOnConfirm: false,
-//                 closeOnCancel: false
-//             });
-//
-//         }
-//     });
-// }
 
 $(document).on('mouseenter','.img-box',function(e){
     $(this).find(".icon").css("visibility","visible");
@@ -229,11 +232,7 @@ $(document).on('mouseleave','.img-box',function(e){
     $(this).find(".description").css("visibility","hidden");
 });
 
-// // 点击专题图，进入专题图浏览页面
-// $(".img-responsive").click(function () {
-//     // 获取到地图id值
-//     console.log($(this).attr('mapid'));
-// });
+
 
 // 点击编辑地图按钮，进入专题地图编辑页面
 $(document).on('click','.icon.edit',function(e){
@@ -249,8 +248,8 @@ $(document).on('click','.icon.info',function(e){
 
 // 我要制图按钮点击事件
 $(".to-mapping").click(function () {
-    mappingPageType = 0;
-    window.location.href = "interactiveMapping.html";
+    window.localStorage.mappingPageType="blank"; //记录当前制图页面的类别 blank：普通制图；edit：用户地图编辑；readOnly：用户地图查看
+    window.location.href="interactiveMapping.html";
 });
 
 function setModalValue(e) {

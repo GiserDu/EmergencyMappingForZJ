@@ -20,6 +20,21 @@ body {
     left: 20px;
     border-radius: 5px 5px 0 0;
 }
+#map-upload{
+    top: 121px;
+    left: 20px;
+
+}
+.layui-upload-img {
+    width: 160px;
+    height: 120px;
+    margin: 0 10px 10px 0;
+}
+.layui-upload {
+    display: flex;
+    align-items: center;
+    justify-content: space-around;
+}
 h1,h2,h3,h4,h5,h6{
     font-family: "Microsoft YaHei";
 }
@@ -451,11 +466,9 @@ input[type="checkbox"]{
     color: black;
 }
 
-#map-save-Modal{
-    display: none;
-}
+
 #map-legend{
-    top: 122px;
+    top: 152px;
     left: 20px;
     border-radius: 0 0 5px 5px;
 }

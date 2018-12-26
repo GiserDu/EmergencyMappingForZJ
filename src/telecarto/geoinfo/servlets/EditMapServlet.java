@@ -1,5 +1,8 @@
 package telecarto.geoinfo.servlets;
 
+
+import net.sf.json.JSONObject;
+import telecarto.geoinfo.db.DBManager;
 import telecarto.geoinfo.db.MysqlAccessBean;
 
 import javax.servlet.ServletException;
@@ -8,9 +11,10 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
 import java.io.PrintWriter;
-import java.sql.Date;
+import java.sql.*;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
+
 
 public class EditMapServlet extends HttpServlet {
 
@@ -40,17 +44,25 @@ public class EditMapServlet extends HttpServlet {
 	 * @throws IOException if an error occurred
 	 */
 	public void doGet(HttpServletRequest request, HttpServletResponse response)
-			throws ServletException, IOException {
-
+			throws IOException {
 		response.setContentType("text/html;charset=UTF-8");
 		response.setCharacterEncoding("UTF-8");
 		String description;
 		String name;
 		String display;
 		String mapClass;
+		String type = request.getParameter("type");
+		if(type.equals("mapInfoUpload")){
+			mapInfoSubmit(request,response);
+		}else if(type.equals("imageUpload")){
+			PrintWriter out = response.getWriter();
+			out.println("已上传，服务器不作处理");
+			out.flush();
+			out.close();
+		}
 		String mapID = request.getParameter("id");
 		int id = Integer.parseInt(mapID);
-		String type = request.getParameter("type");
+
 		MysqlAccessBean mysql = null;
 		if(type.equals("edit")){//编辑专题图
 			description = request.getParameter("description");
@@ -124,5 +136,38 @@ public class EditMapServlet extends HttpServlet {
 	public void init() throws ServletException {
 		// Put your code here
 	}
+	//地图信息提交
+	public void mapInfoSubmit(HttpServletRequest request, HttpServletResponse response) throws IOException {
+		String mapTitle=request.getParameter("mapTitle");
+		String mapTag=request.getParameter("mapTag");
+		String mapInfo=request.getParameter("mapInfo");
+		String treeNodes=request.getParameter("treeNodes");
+		String userId=request.getParameter("userId");
+		String picture64=request.getParameter("picture64");
+		//链接数据库
+		ResultSet resultSet;
+		Connection connection = DBManager.getConnection();
+		PreparedStatement pst= null;
+		try {
+			pst = connection.prepareStatement( "INSERT INTO user_map (map_name,map_tag,map_info,map_param,user_id, picture)" +
+                    " VALUES (?, ?, ?,?,?,?)");
 
+		pst.setString(1, mapTitle);
+		pst.setString(2, mapTag);
+		pst.setString(3, mapInfo);
+		pst.setString(4, treeNodes);
+		pst.setString(5, userId);
+		pst.setString(6, picture64);
+
+		pst.execute();
+		pst.close();
+		} catch (SQLException e) {
+			e.printStackTrace();
+		}
+		PrintWriter out = response.getWriter();
+		out.println("112");
+		out.flush();
+		out.close();
+	}
 }
+

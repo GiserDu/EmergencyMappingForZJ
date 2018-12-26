@@ -91,9 +91,6 @@ public class ClassLayerServletForZJ extends HttpServlet {
         String url=statisticdataJson.getString("dataAddress");
 
 
-        MysqlAccessBean mysql = new MysqlAccessBean();
-        String sql = "";
-        ResultSet resultSet2;
         ArrayList<ClassData> classList=new ArrayList<>();
        // if (inputType.equals("APIData")){
             //根据输入空间字段，获得该字段值，并查询数据库获取其geometry
