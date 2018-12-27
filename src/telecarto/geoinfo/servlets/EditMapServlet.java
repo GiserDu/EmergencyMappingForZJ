@@ -1,6 +1,7 @@
 package telecarto.geoinfo.servlets;
 
 
+import net.sf.json.JSONArray;
 import net.sf.json.JSONObject;
 import telecarto.geoinfo.db.DBManager;
 import telecarto.geoinfo.db.MysqlAccessBean;
@@ -51,14 +52,51 @@ public class EditMapServlet extends HttpServlet {
 		String name;
 		String display;
 		String mapClass;
+
+		ResultSet resultSet;
 		String type = request.getParameter("type");
 		if(type.equals("mapInfoUpload")){
-			mapInfoSubmit(request,response);
+			String map_id=request.getParameter("map_id");
+			if (map_id.equals("")){
+				//提交新专题图
+				mapInfoSubmit(request,response);
+			}else {
+
+				//查询已有专题图信息
+				MysqlAccessBean mysql1 = null;
+				try {
+					mysql1 = new MysqlAccessBean();
+					String sql = "SELECT map_name,map_tag,map_info, submit_time,edit_time,picture FROM user_map where map_id="+map_id;
+
+					resultSet = mysql1.query(sql);
+					JSONObject mapObject = new JSONObject();
+					while (resultSet.next()) {
+						mapObject.put("map_name",resultSet.getString("map_name"));
+						mapObject.put("map_tag",resultSet.getString("map_tag"));
+						mapObject.put("map_info",resultSet.getString("map_info"));
+						mapObject.put("picture",resultSet.getString("picture"));
+						//mapObject.put("thematicClass",resultSet.getString(6));
+					}
+
+					PrintWriter out = response.getWriter();
+					out.println(mapObject);
+					out.flush();
+					out.close();
+				}
+				catch (Exception e) {
+					e.printStackTrace();
+				}
+				finally {
+					mysql1.close();
+				}
+			}
+			return;
 		}else if(type.equals("imageUpload")){
 			PrintWriter out = response.getWriter();
 			out.println("已上传，服务器不作处理");
 			out.flush();
 			out.close();
+			return;
 		}
 		String mapID = request.getParameter("id");
 		int id = Integer.parseInt(mapID);
