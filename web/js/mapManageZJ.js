@@ -113,6 +113,9 @@ function refreshMaps() {
     $(".img-responsive").click(function () {
         // 获取到地图id值
         console.log($(this).attr('mapid'));
+        localStorage.setItem("userMapId", $(this).attr('mapid'));
+        localStorage.setItem("mappingType", "readOnly");
+        window.location.href = "interactiveMapping.html";
     });
 }
 
@@ -238,6 +241,9 @@ $(document).on('mouseleave','.img-box',function(e){
 $(document).on('click','.icon.edit',function(e){
     // 获取到地图id值
     console.log($(this).parent().find("img").attr("mapid"));
+    localStorage.setItem("userMapId", $(this).parent().find("img").attr("mapid"));
+    localStorage.setItem("mappingType", "edit");
+    window.location.href = "interactiveMapping.html";
 });
 
 // 点击地图详情按钮(为动态生成的元素绑定事件-->必须采用on函数的方式)
@@ -248,7 +254,7 @@ $(document).on('click','.icon.info',function(e){
 
 // 我要制图按钮点击事件
 $(".to-mapping").click(function () {
-    window.localStorage.mappingPageType="blank"; //记录当前制图页面的类别 blank：普通制图；edit：用户地图编辑；readOnly：用户地图查看
+    localStorage.setItem("mappingType", "blank"); //记录当前制图页面的类别 blank：普通制图；edit：用户地图编辑；readOnly：用户地图查看
     window.location.href="interactiveMapping.html";
 });
 

@@ -64,6 +64,8 @@ var zoomFlag = 0; //是否已下钻
 var fieldsOrIndi = "";
 var field_cn = "";
 var treeNodeUrl; //记录统计图层节点的原始图层名（即graphicslayer的id）
+var mappingPageType = 0; //记录当前制图页面的类别 0(blank)：普通制图；1(edit)：用户地图编辑；2(readOnly)：用户地图查看
+var isSaved = 0; //记录用户的制图操作是否已保存 0：未保存；1：已保存
 $(document).ready(function() {
     findDimensions();
     $("#mapContainer").height(winHeight);
@@ -177,30 +179,56 @@ $(document).ready(function() {
         });
         });
     }
-    layui.use('layer', function () {
-        var layer1 = layui.layer;
-        layer1.open({
-            title: '制图模板选择',
-            skin: "layui-layer-lan",
-            type: 2,
-            shade: 0,
-            resize: false,
-            area: ["600px","500px"],
-            // btn: ['按钮1','按钮2','按钮3'],
-            content: 'indexMini_zj.html',
-            success: function (layero, index) {
-                $("#layui-layer-iframe1").css("height",'456px');
-            },
-            yes: function(index, layero) {//确定后执行回调
+    switch (localStorage.getItem("mappingType")){
+        case "blank":
+            mappingPageType = 0;
+            break;
+        case "edit":
+            mappingPageType = 1;
+            break;
+        case "readOnly":
+            mappingPageType = 2;
+            break;
+    }
+    if (mappingPageType == 0){
+        layui.use('layer', function () {
+            var layer1 = layui.layer;
+            layer1.open({
+                title: '制图模板选择',
+                skin: "layui-layer-lan",
+                type: 2,
+                shade: 0,
+                resize: false,
+                area: ["600px","500px"],
+                // btn: ['按钮1','按钮2','按钮3'],
+                content: 'indexMini_zj.html',
+                success: function (layero, index) {
+                    $("#layui-layer-iframe1").css("height",'456px');
+                },
+                yes: function(index, layero) {//确定后执行回调
 
-            },
-            cancel: function(index, layero){
-                blank_btnClick();
-            }
+                },
+                cancel: function(index, layero){
+                    blank_btnClick();
+                }
+            });
         });
-    });
-
-
+    }
+    else {
+        $("#templateMap").css("display", "none");
+        var userMapId = localStorage.getItem("userMapId");
+        addModelLayUI(userMapId);
+    }
+    if (mappingPageType == 2)
+        isSaved = 1;
+    else if (mappingPageType == 1)
+        $("#plotButton").css("display", "none");
+    window.onbeforeunload=function(e) {
+        var unloads = isSaved;
+        if (unloads == 0) {
+            return "您确定要退出页面吗？";
+        }
+    }
 });
 //框选定位
 $("#RecNav").click(function () {
@@ -987,8 +1015,8 @@ function doMap() {
                             treeNode.getParentNode().isParent=true;
                             treeObj.refresh();
                             //删除节点时将地图上的图层也删去
-                            if(map&&(map.getLayer(treeNode.name))) {
-                                var thisLayer = map.getLayer(treeNode.name);
+                            if(map&&(map.getLayer(treeNode.url))) {
+                                var thisLayer = map.getLayer(treeNode.url);
                                 var thisTjLayerType = thisLayer.name;
                                 map.removeLayer(thisLayer);
 
@@ -1411,6 +1439,7 @@ function sweetAlert1(mapName) {
 
 //为每个制图模板添加弹出框
 function addModelLayUI(mapName) {
+    var userMapName;
     //根据本地存储获取模板
     (function getTemplate() {
         var disaster_status = localStorage.getItem("disaster_status");
@@ -1419,7 +1448,11 @@ function addModelLayUI(mapName) {
         var template_theme = localStorage.getItem("template_theme");
         var template_map = localStorage.getItem("template_map");
         // $("#mapNameInfo").html(template_map);
-        var url = "./servlet/GetTemplateLayer?disasterStatus="+disaster_status+"&disasterType="+disaster_type+"&templateScale="+template_scale+"&templateTheme="+template_theme+"&templateMap="+template_map+"&queryType=queryLayer";
+        var url = "";
+        if (mappingPageType == 0)
+            url = "./servlet/GetTemplateLayer?disasterStatus="+disaster_status+"&disasterType="+disaster_type+"&templateScale="+template_scale+"&templateTheme="+template_theme+"&templateMap="+template_map+"&queryType=queryLayer&mapId=null";
+        else
+            url = "./servlet/GetTemplateLayer?disasterStatus=null&disasterType=null&templateScale=null&templateTheme=null&templateMap=null&mapId=" + mapName + "&queryType=userMap";
         $.ajax({
             url: url,
             type: 'GET',
@@ -1431,35 +1464,70 @@ function addModelLayUI(mapName) {
             success: function (data) {
                 //str=data[0]["SIX_LZJTU_LAYER"].slice(1,data[0]["SIX_LZJTU_LAYER"].length-4);
                 var jsonStr;
-                if ((typeof data[0]["SIX_LZJTU_LAYER"])==="string"&&!(data[0]["SIX_LZJTU_LAYER"]==="")&&!(data[0]["SIX_LZJTU_LAYER"].toLowerCase()==="null")) {
-                    //要考虑到字符串string为空的情况
-                    try{
-                        str=eval("(" + data[0]["SIX_LZJTU_LAYER"] + ")");
+                if (mappingPageType == 0){
+                    if ((typeof data[0]["SIX_LZJTU_LAYER"])==="string"&&!(data[0]["SIX_LZJTU_LAYER"]==="")&&!(data[0]["SIX_LZJTU_LAYER"].toLowerCase()==="null")) {
+                        //要考虑到字符串string为空的情况
+                        try{
+                            str=eval("(" + data[0]["SIX_LZJTU_LAYER"] + ")");
+                            jsonStr=str[0];
+                        }
+                        catch(e){
+                            alert("数据库中模板格式错误");
+                            // console.log(e);
+                        }
+                    }else if ((typeof data[0]["SIX_LZJTU_LAYER"])==="object"&&!(data[0]["SIX_LZJTU_LAYER"]===null)){
+                        //要考虑到object为空的情况
+                        str=data[0]["SIX_LZJTU_LAYER"];
                         jsonStr=str[0];
                     }
-                    catch(e){
+                    try{
+                        //if(jsonStr&&jsonStr.featureLayer&&jsonStr.featureLayer.modules&&jsonStr.featureLayer.modules.length&&jsonStr.featureLayer.modules[0].name)
+                        if(jsonStr)
+                        {
+                            template=jsonStr;
+                        }else{
+                            // console.log(jsonStr)
+                            alert("数据库中模板为空或格式错误，使用缺省模板")
+                        }
+                        // console.log(template);
+                        return;
+                    }catch (e) {
                         alert("数据库中模板格式错误");
                         // console.log(e);
                     }
-                }else if ((typeof data[0]["SIX_LZJTU_LAYER"])==="object"&&!(data[0]["SIX_LZJTU_LAYER"]===null)){
-                    //要考虑到object为空的情况
-                    str=data[0]["SIX_LZJTU_LAYER"];
-                    jsonStr=str[0];
                 }
-                try{
-                    //if(jsonStr&&jsonStr.featureLayer&&jsonStr.featureLayer.modules&&jsonStr.featureLayer.modules.length&&jsonStr.featureLayer.modules[0].name)
-                    if(jsonStr)
-                    {
-                        template=jsonStr;
-                    }else{
-                        // console.log(jsonStr)
-                        alert("数据库中模板为空或格式错误，使用缺省模板")
+                else {
+                    userMapName = data[0]["userMapName"];
+                    if ((typeof data[0]["userMapParam"])==="string"&&!(data[0]["userMapParam"]==="")&&!(data[0]["userMapParam"].toLowerCase()==="null")) {
+                        //要考虑到字符串string为空的情况
+                        try{
+                            str=eval("(" + data[0]["userMapParam"] + ")");
+                            jsonStr=str;
+                        }
+                        catch(e){
+                            alert("数据库中模板格式错误");
+                            // console.log(e);
+                        }
+                    }else if ((typeof data[0]["userMapParam"])==="object"&&!(data[0]["userMapParam"]===null)){
+                        //要考虑到object为空的情况
+                        str=data[0]["userMapParam"];
+                        jsonStr=str;
                     }
-                    // console.log(template);
-                    return;
-                }catch (e) {
-                    alert("数据库中模板格式错误");
-                    // console.log(e);
+                    try{
+                        //if(jsonStr&&jsonStr.featureLayer&&jsonStr.featureLayer.modules&&jsonStr.featureLayer.modules.length&&jsonStr.featureLayer.modules[0].name)
+                        if(jsonStr)
+                        {
+                            template=jsonStr;
+                        }else{
+                            // console.log(jsonStr)
+                            alert("数据库中模板为空或格式错误，使用缺省模板")
+                        }
+                        // console.log(template);
+                        return;
+                    }catch (e) {
+                        alert("数据库中模板格式错误");
+                        // console.log(e);
+                    }
                 }
             },
             error: function (xhr, status, errMsg) {
@@ -1478,68 +1546,74 @@ function addModelLayUI(mapName) {
     var statisticLayer_Model= template.statisticLayer
     //修改底图节点_暂时不用
 
-    var layerNodes_Model=[
-        {id:1, pId:0, name:"地理底图", open:true, "nocheck":true,children:[
+    if (mappingPageType == 0){
+        var layerNodes_Model=[
+            {id:1, pId:0, name:"地理底图", open:true, "nocheck":true,children:[
                 {id:102, name:"矢量图",url:"http://t0.tianditu.cn/vec_w/wmts?SERVICE=WMTS&REQUEST=GetTile&VERSION=1.0.0&LAYER=vec&STYLE=default&TILEMATRIXSET=w&FORMAT=tiles&TILECOL=${col}&TILEROW=${row}&TILEMATRIX=${level},http://t2.tianditu.cn/cva_w/wmts?SERVICE=WMTS&REQUEST=GetTile&VERSION=1.0.0&LAYER=cva&STYLE=default&TILEMATRIXSET=w&FORMAT=tiles&TILECOL=${col}&TILEROW=${row}&TILEMATRIX=${level}",mapType:"WebTiledLayer",checked:true},
                 {id:102, name:"影像图",url:"http://t6.tianditu.gov.cn/DataServer?T=img_w&x=${col}&y=${row}&l=${level},http://t2.tianditu.cn/cva_w/wmts?SERVICE=WMTS&REQUEST=GetTile&VERSION=1.0.0&LAYER=cva&STYLE=default&TILEMATRIXSET=w&FORMAT=tiles&TILECOL=${col}&TILEROW=${row}&TILEMATRIX=${level}",mapType:"WebTiledLayer"},
-                   /*{id:101,name:"新疆矢量图",url:"http://106.124.138.198:8080/OneMapServer/rest/services/XJ_VECTOR/MapServer,http://106.124.138.198:8080/OneMapServer/rest/services/XJ_POI/MapServer",checked:true}*/
-              // {id:101, name:"专项矢量图",url:"http://qk.casm.ac.cn:9090/geowinmap/ds?serviceproviderid=map.cachedtms&serviceid=gettile&tilename=map&y=${row}&x=${col}&z=${level}",mapType:"WebTiledLayer"},
+                /*{id:101,name:"新疆矢量图",url:"http://106.124.138.198:8080/OneMapServer/rest/services/XJ_VECTOR/MapServer,http://106.124.138.198:8080/OneMapServer/rest/services/XJ_POI/MapServer",checked:true}*/
+                // {id:101, name:"专项矢量图",url:"http://qk.casm.ac.cn:9090/geowinmap/ds?serviceproviderid=map.cachedtms&serviceid=gettile&tilename=map&y=${row}&x=${col}&z=${level}",mapType:"WebTiledLayer"},
                 //{id:102, name:"专项影像图",url:"http://qk.casm.ac.cn:9090/geowinmap/ds?serviceproviderid=map.cachedtms&serviceid=gettile&tilename=sate&y=${row}&x=${col}&z=${level}",mapType:"WebTiledLayer"}
             ]},
-    
-        {id:2, pId:0, name:"专题服务图层",isParent:true, open:true,children:[], "nocheck":true},
-    
-        {id:3, pId:0, name:"要素图层", isParent:true,open:true,children:[], "nocheck":true},
-        {id:4, pId:0, name:"统计图层", isParent:true,open:true,children:[], "nocheck":true}
-    
-    ];
 
-    /*增加专题服务图层节点*/
-    layerNodes_Model[1].children=serviceLayer_Model.modules;
-    //增加要素图层
-    layerNodes_Model[2].children=featureLayer_Model.modules;
-    //增加统计图层
-     layerNodes_Model[3].children=statisticLayer_Model.modules;
+            {id:2, pId:0, name:"专题服务图层",isParent:true, open:true,children:[], "nocheck":true},
 
-    //添加模板数据标识属性 templateData 或 urlFeatureData
-    for (var i=0,l=layerNodes_Model[2].children.length;i<l;i++){
-        layerNodes_Model[2].children[i].dataType="templateData"
-    }
-    //为模板中的统计图层初始化
-    for (var i=0,l=layerNodes_Model[3].children.length;i<l;i++){ //记录作为graphicsLayerId的节点原始名称
-        layerNodes_Model[3].children[i].url = layerNodes_Model[3].children[i].name;
-    }
-    for(var i=0;i<statisticLayer_Model.modules.length;i++){
-        if (statisticLayer_Model.modules[i].cartographydata.type == "2") {
+            {id:3, pId:0, name:"要素图层", isParent:true,open:true,children:[], "nocheck":true},
+            {id:4, pId:0, name:"统计图层", isParent:true,open:true,children:[], "nocheck":true}
+
+        ];
+
+        /*增加专题服务图层节点*/
+        layerNodes_Model[1].children=serviceLayer_Model.modules;
+        //增加要素图层
+        layerNodes_Model[2].children=featureLayer_Model.modules;
+        //增加统计图层
+        layerNodes_Model[3].children=statisticLayer_Model.modules;
+
+        //添加模板数据标识属性 templateData 或 urlFeatureData
+        for (var i=0,l=layerNodes_Model[2].children.length;i<l;i++){
+            layerNodes_Model[2].children[i].dataType="templateData"
+        }
+        //为模板中的统计图层初始化
+        for (var i=0,l=layerNodes_Model[3].children.length;i<l;i++){ //记录作为graphicsLayerId的节点原始名称
+            layerNodes_Model[3].children[i].url = layerNodes_Model[3].children[i].name;
             layerNodes_Model[3].children[i].checked = true;
-            tjLayerName=statisticLayer_Model.modules[i]["name"];
-            var tjType = "classLayerData";
-            fieldsOrIndi = statisticLayer_Model.modules[i].statisticdata.fieldsName;
-            var str=JSON.stringify(statisticLayer_Model.modules[i])
-            var zoomLevel = map.getZoom();
-            if (zoomLevel < 9)
-                initTjLayer(str, tjType, "1");
-            else
-                initTjLayer(str, tjType, "2");
+        }
+        for(var i=0;i<statisticLayer_Model.modules.length;i++){
+            if (statisticLayer_Model.modules[i].cartographydata.type == "2") {
+                // layerNodes_Model[3].children[i].checked = true;
+                tjLayerName=statisticLayer_Model.modules[i]["name"];
+                var tjType = "classLayerData";
+                fieldsOrIndi = statisticLayer_Model.modules[i].statisticdata.fieldsName;
+                var str=JSON.stringify(statisticLayer_Model.modules[i])
+                var zoomLevel = map.getZoom();
+                if (zoomLevel < 9)
+                    initTjLayer(str, tjType, "1");
+                else
+                    initTjLayer(str, tjType, "2");
                 break;
+            }
         }
-    }
-    for(var i=0;i<statisticLayer_Model.modules.length;i++){
-        if (statisticLayer_Model.modules[i].cartographydata.type == "1") {
-            layerNodes_Model[3].children[i].checked = true;
-            tjLayerName=statisticLayer_Model.modules[i]["name"];
-            var tjType = "chartLayerData";
-            fieldsOrIndi = statisticLayer_Model.modules[i].statisticdata.fieldsName;
-            var str=JSON.stringify(statisticLayer_Model.modules[i])
-            var zoomLevel = map.getZoom();
-            if (zoomLevel < 9)
-                initTjLayer(str, tjType, "1");
-            else
-                initTjLayer(str, tjType, "2");
-            break;
+        for(var i=0;i<statisticLayer_Model.modules.length;i++){
+            if (statisticLayer_Model.modules[i].cartographydata.type == "1") {
+                // layerNodes_Model[3].children[i].checked = true;
+                tjLayerName=statisticLayer_Model.modules[i]["name"];
+                var tjType = "chartLayerData";
+                fieldsOrIndi = statisticLayer_Model.modules[i].statisticdata.fieldsName;
+                var str=JSON.stringify(statisticLayer_Model.modules[i])
+                var zoomLevel = map.getZoom();
+                if (zoomLevel < 9)
+                    initTjLayer(str, tjType, "1");
+                else
+                    initTjLayer(str, tjType, "2");
+                break;
+            }
         }
     }
 
+
+    else if (mappingPageType == 1 || mappingPageType == 2)
+        layerNodes_Model = template;
 
     doMapping_Template(layerNodes_Model)
     function doMapping_Template(layerNodes_Model) {
@@ -1574,6 +1648,8 @@ function addModelLayUI(mapName) {
             }
         };
         function addHoverDom(treeId, treeNode) {
+            if (mappingPageType == 2)
+                return;
             var aObj = $("#" + treeNode.tId + "_a");
             //首先判断是否是父节点
             if(treeNode.isParent){
@@ -2285,8 +2361,8 @@ function addModelLayUI(mapName) {
                             treeNode.getParentNode().isParent=true;
                             treeObj.refresh();
                             //删除节点时将地图上的图层也删去
-                            if(map&&(map.getLayer(treeNode.name))) {
-                                var thisLayer = map.getLayer(treeNode.name);
+                            if(map&&(map.getLayer(treeNode.url))) {
+                                var thisLayer = map.getLayer(treeNode.url);
                                 var thisTjLayerType = thisLayer.name;
                                 map.removeLayer(thisLayer);
 
@@ -2395,11 +2471,21 @@ function addModelLayUI(mapName) {
 
     }
 
+    function layerTitle() {
+        var title;
+        if (mappingPageType == 0)
+            title = mapName;
+        else if (mappingPageType == 1)
+            title = "编辑：" + userMapName;
+        else
+            title = "查看：" + userMapName;
+        return title;
+    }
     layui.use('layer', function () {
         var tTreeLayer = layui.layer;
         console.log(mapName);
         tTreeLayer.open({
-            title: mapName,
+            title: layerTitle(),
             skin: "layui-layer-lan",
             type: 1,
             shade: 0,
@@ -2409,6 +2495,65 @@ function addModelLayUI(mapName) {
             area: ['250', '400px'],
             // btn: ['编辑图层'],
             content: $('#complexLayer_Template'),
+            success: function (index, layero) {
+
+                if (mappingPageType == 1 || mappingPageType == 2){
+                    var treeObj = $.fn.zTree.getZTreeObj("doMapTree_Template");
+                    var nodes = treeObj.getNodesByParam("isParent", true, null);
+                    var checkedNodes1 = nodes[1].children;
+                    var checkedNodes2 = nodes[2].children;
+                    var checkedNodes3 = nodes[3].children;
+                    for (var i=0; i<checkedNodes1.length; i++)
+                        treeObj.checkNode(checkedNodes1[i], true, false, true);
+                    for (var j=0; j<checkedNodes2.length; j++)
+                        treeObj.checkNode(checkedNodes2[j], true, false, true);
+                    for (var k=0; k<checkedNodes3.length; k++)
+                        treeObj.checkNode(checkedNodes3[k], true, false, true);
+                    // treeObj.setEditable(false);
+                    for(var i=0;i<checkedNodes3.length;i++){
+                        if (checkedNodes3[i].cartographydata.type == "2") {
+                            // layerNodes_Model[3].children[i].checked = true;
+                            tjLayerName=checkedNodes3[i]["name"];
+                            var tjType = "classLayerData";
+                            fieldsOrIndi = checkedNodes3[i].statisticdata.fieldsName;
+                            var tjLayerContent = {};
+                            tjLayerContent.name = tjLayerName;
+                            tjLayerContent.spatialdata = checkedNodes3[i].spatialdata;
+                            tjLayerContent.statisticdata = checkedNodes3[i].statisticdata;
+                            tjLayerContent.cartographydata = checkedNodes3[i].cartographydata;
+                            var str=JSON.stringify(tjLayerContent);
+                            var zoomLevel = map.getZoom();
+                            if (zoomLevel < 9)
+                                initTjLayer(str, tjType, "1");
+                            else
+                                initTjLayer(str, tjType, "2");
+                            break;
+                        }
+                    }
+                    for(var i=0;i<checkedNodes3.length;i++){
+                        if (checkedNodes3[i].cartographydata.type == "1") {
+                            // layerNodes_Model[3].children[i].checked = true;
+                            tjLayerName=checkedNodes3[i]["name"];
+                            var tjType = "chartLayerData";
+                            fieldsOrIndi = checkedNodes3[i].statisticdata.fieldsName;
+                            var tjLayerContent = {};
+                            tjLayerContent.name = tjLayerName;
+                            tjLayerContent.spatialdata = checkedNodes3[i].spatialdata;
+                            tjLayerContent.statisticdata = checkedNodes3[i].statisticdata;
+                            tjLayerContent.cartographydata = checkedNodes3[i].cartographydata;
+                            var str=JSON.stringify(tjLayerContent);
+                            var zoomLevel = map.getZoom();
+                            if (zoomLevel < 9)
+                                initTjLayer(str, tjType, "1");
+                            else
+                                initTjLayer(str, tjType, "2");
+                            break;
+                        }
+                    }
+                }
+
+
+            },
             yes: function(index, layero) {//确定后执行回调
 
             },

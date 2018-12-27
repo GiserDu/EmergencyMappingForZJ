@@ -34,6 +34,7 @@ public class GetTemplateLayer extends HttpServlet {
         System.out.println("112");
 
         try {
+
             String disasterType = request.getParameter("disasterType");
             System.out.println(disasterType);
             String disasterStatus = request.getParameter("disasterStatus").toString();
@@ -46,6 +47,8 @@ public class GetTemplateLayer extends HttpServlet {
             System.out.println(templateMap);
             String queryType = request.getParameter("queryType").toString();
             System.out.println(queryType);
+            String userMapId = request.getParameter("mapId").toString();
+            System.out.println(userMapId);
             String disasterTable = "";
             byte var8 = -1;
             switch(disasterType.hashCode()) {
@@ -110,7 +113,11 @@ public class GetTemplateLayer extends HttpServlet {
             String sql = "";
             if (queryType.equals("queryLayer")) {
                 sql ="SELECT SIX_LZJTU_LAYER FROM "+disasterType+" WHERE SIX_LZJTU_STATUS ='"+disasterStatus+"' AND SIX_LZJTU_MAP = '"+templateMap+"' AND  SIX_LZJTU_SCALE = '"+templateScale+"' AND SIX_LZJTU_MAPGROUP = '"+templateTheme+"'";
-            } else {
+            }
+            else if (queryType.equals("userMap")){
+                sql = "SELECT map_name, map_param FROM user_map WHERE map_id =" + userMapId;
+            }
+            else {
                 String disasterGroup = request.getParameter("disasterGroup").toString();
                 sql = "SELECT SIX_LZJTU_MAP,SIX_LZJTU_SCALE,SIX_LZJTU_MAPLOC FROM " + disasterType + " where SIX_LZJTU_STATUS='" + disasterStatus + "' and SIX_LZJTU_MAPGROUP='" + disasterGroup + "' ORDER BY SIX_LZJTU_MAP";
             }
@@ -126,7 +133,14 @@ public class GetTemplateLayer extends HttpServlet {
                     String layercontentstr= resultSet.getString(1);
                     layercontentstr=layercontentstr.replace("，", ",");
                     mapObject.put("SIX_LZJTU_LAYER", layercontentstr);
-                } else {
+                }
+                else if (queryType.equals("userMap")){
+                    String layerContentStr = resultSet.getString(2);
+                    layerContentStr = layerContentStr.replace("，", ",");
+                    mapObject.put("userMapName", resultSet.getString(1));
+                    mapObject.put("userMapParam", layerContentStr);
+                }
+                else {
                     mapObject.put("SIX_LZJTU_MAP", resultSet.getString(1));
                     mapObject.put("SIX_LZJTU_SCALE", resultSet.getString(2));
                     mapObject.put("SIX_LZJTU_MAPLOC", resultSet.getString(3));

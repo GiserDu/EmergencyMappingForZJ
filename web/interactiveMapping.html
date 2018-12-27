@@ -101,7 +101,7 @@
         </div>-->
 
             <button id="templateMap" type="button" class="btn btn-default">制图模板</button>
-            <div class="btn-group">
+            <div class="btn-group" id="plotButton">
                 <button type="button" class="btn btn-default dropdown-toggle"
                         data-toggle="dropdown">
                     标绘 <span class="caret"></span>
@@ -125,7 +125,7 @@
                     <li><a class="fa fa-tags" href="#" id="measurePlot" onclick="addMeasureInteraction()">&nbsp&nbsp测量</a></li>
                 </ul>
             </div>
-            <div class="btn-group">
+            <div class="btn-group" style="display: none">
                 <button type="button" class="btn btn-default dropdown-toggle" data-toggle="dropdown" aria-expanded="false">
                     大数据制图 <span class="caret"></span>
                 </button>
@@ -141,7 +141,7 @@
                     </li>
                 </ul>
             </div>
-            <!--<button id="mapLayerOrder" type="button" class="btn btn-default" onclick="layerEdit()">图层排序</button>-->
+            <a id="userPage" type="button" class="btn btn-default" href="mapManageZJ.html">我的专题图</a>
         </div>
         <a id="backHome" href="http://118.178.118.176:6702/platform-main/index.html;jsessionid=76C72639D986CF14D2E0A5FA4D60A9D7?tdsourcetag=s_pctim_aiomsg" type="button" class="btn btn-default  fa  fa-home"></a>
     </div>
