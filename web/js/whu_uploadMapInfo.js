@@ -58,7 +58,7 @@ $("#uploadBt").click(function (e) {
         var thisLayer = map.getLayer(featureNodes[i].url);
         if (thisLayer){
             console.log(thisLayer.renderer.symbol.type);
-            featureNodes[i].style = thisLayer.renderer;
+            featureNodes[i].style = thisLayer.renderer.symbol;
         }
     }
     thisTree.refresh();
