@@ -178,6 +178,8 @@ $(".form-control.search-key").bind("input propertychange",function(event){
 
 //（有后台版）先清空gallery-row，然后循环添加图片的div，最后添加添加图片的div
 function initMapList() {
+    //清空mapId
+    window.localStorage.removeItem("mapId")
     var type = "initManage";
     var init_url = "./servlet/GetThematicMapServlet?type=" + type;
     $.ajax({
@@ -320,7 +322,7 @@ $(document).on('click','.trash',function(e){
                                 title: "操作成功",
                                 text: "该专题图已经被删除!",
                                 // type: "success",
-                                imageUrl:"images/success.png",
+                                imageUrl:"image/success.png",
                                 imageWidth:40,
                                 imageHeight:40,
                                 animation:false,

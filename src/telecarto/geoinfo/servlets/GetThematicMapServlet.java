@@ -58,7 +58,7 @@ public class GetThematicMapServlet extends HttpServlet {
 		if(type.equals("initManage")){
 			try {
 				mysql = new MysqlAccessBean();
-				String sql = "SELECT map_id,map_name,map_tag,map_info, submit_time,edit_time,picture FROM user_map where user_id=\'"+user_id+"\'";
+				String sql = "SELECT map_id,map_name,map_tag,map_info, submit_time,edit_time,picture FROM user_map where is_deleted=\"0\" and user_id=\'"+user_id+"\'";
 
 				resultSet = mysql.query(sql);
 				JSONArray mapArray = new JSONArray();

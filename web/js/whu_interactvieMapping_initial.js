@@ -231,6 +231,9 @@ $(document).ready(function() {
             return "您确定要退出页面吗？";
         }
     }
+    window.onunload= function(){
+        window;
+    }
 });
 //框选定位
 $("#RecNav").click(function () {

@@ -1,6 +1,7 @@
 package telecarto.geoinfo.servlets;
 
 
+import com.zz.chart.data.ClassData;
 import net.sf.json.JSONArray;
 import net.sf.json.JSONObject;
 import telecarto.geoinfo.db.DBManager;
@@ -15,6 +16,7 @@ import java.io.PrintWriter;
 import java.sql.*;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
+import java.util.ArrayList;
 
 
 public class EditMapServlet extends HttpServlet {
@@ -48,10 +50,6 @@ public class EditMapServlet extends HttpServlet {
 			throws IOException {
 		response.setContentType("text/html;charset=UTF-8");
 		response.setCharacterEncoding("UTF-8");
-		String description;
-		String name;
-		String display;
-		String mapClass;
 
 		ResultSet resultSet;
 		String type = request.getParameter("type");
@@ -61,8 +59,17 @@ public class EditMapServlet extends HttpServlet {
 				//提交新专题图
 				mapInfoSubmit(request,response);
 			}else {
-
+				//提交编辑后的专题图信息
+				mapInfoUpdate(request,response,map_id);
+			}
+		}else if(type.equals("imageUpload")){
+			PrintWriter out = response.getWriter();
+			out.println("已上传，服务器不作处理");
+			out.flush();
+			out.close();
+		}else if(type.equals("mapInfoQuery")) {
 				//查询已有专题图信息
+				String map_id=request.getParameter("map_id");
 				MysqlAccessBean mysql1 = null;
 				try {
 					mysql1 = new MysqlAccessBean();
@@ -90,50 +97,14 @@ public class EditMapServlet extends HttpServlet {
 					mysql1.close();
 				}
 			}
-			return;
-		}else if(type.equals("imageUpload")){
-			PrintWriter out = response.getWriter();
-			out.println("已上传，服务器不作处理");
-			out.flush();
-			out.close();
-			return;
-		}
-		String mapID = request.getParameter("id");
-		int id = Integer.parseInt(mapID);
-
-		MysqlAccessBean mysql = null;
-		if(type.equals("edit")){//编辑专题图
-			description = request.getParameter("description");
-			name = request.getParameter("name");
-			display = request.getParameter("display");
-			mapClass = request.getParameter("mapClass");
-			try{
-				int flag;
-				mysql = new MysqlAccessBean();
-				Date time= new Date(new java.util.Date().getTime());
-				DateFormat simpleDateFormat= new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");   //创建一个格式化日期对象
-				String punchTime = simpleDateFormat.format(time);   //格式化后的时间
-
-				String sql = "UPDATE thematic_maps SET MAP_NAME = '" + name + "', DISPLAY = '" + display +
-						"',DESCRIPE = '" + description + "',DATE='"+punchTime+"',CLASS='"+mapClass+"' WHERE ID = "+ id +"";
-				flag = mysql.update(sql);
-				PrintWriter out = response.getWriter();
-				out.println(flag);
-				out.flush();
-				out.close();
-			}
-			catch (Exception e) {
-				e.printStackTrace();
-			}
-			finally {
-				mysql.close();
-			}
-		}
-		else {//删除专题图
+		else if (type.equals("delete")){//删除专题图
+			MysqlAccessBean mysql = null;
 			try {
+				String mapID = request.getParameter("id");
+				int id = Integer.parseInt(mapID);
 				int flag;
 				mysql = new MysqlAccessBean();
-				String sql = "DELETE FROM thematic_maps WHERE ID = "+ id +"";
+				String sql = "UPDATE `user_map` SET `is_deleted`='1' WHERE `map_id`= "+ id +"";
 				flag = mysql.update(sql);
 
 				PrintWriter out = response.getWriter();
@@ -188,24 +159,81 @@ public class EditMapServlet extends HttpServlet {
 		PreparedStatement pst= null;
 		try {
 			pst = connection.prepareStatement( "INSERT INTO user_map (map_name,map_tag,map_info,map_param,user_id, picture)" +
-                    " VALUES (?, ?, ?,?,?,?)");
+					" VALUES (?, ?, ?,?,?,?)");
 
-		pst.setString(1, mapTitle);
-		pst.setString(2, mapTag);
-		pst.setString(3, mapInfo);
-		pst.setString(4, treeNodes);
-		pst.setString(5, userId);
-		pst.setString(6, picture64);
-
-		pst.execute();
-		pst.close();
+			pst.setString(1, mapTitle);
+			pst.setString(2, mapTag);
+			pst.setString(3, mapInfo);
+			pst.setString(4, treeNodes);
+			pst.setString(5, userId);
+			pst.setString(6, picture64);
+			pst.execute();
+			pst.close();
 		} catch (SQLException e) {
 			e.printStackTrace();
 		}
+		JSONObject message=new JSONObject();
+		message.put("message","后台已上传入数据库");
 		PrintWriter out = response.getWriter();
-		out.println("112");
+		out.print(message);
 		out.flush();
 		out.close();
+	}
+	//地图信息更新
+	public void mapInfoUpdate(HttpServletRequest request, HttpServletResponse response,String map_id) throws IOException {
+		int flag=-1;
+		String mapTitle=request.getParameter("mapTitle");
+		String mapTag=request.getParameter("mapTag");
+		String mapInfo=request.getParameter("mapInfo");
+		String treeNodes=request.getParameter("treeNodes");
+		String userId=request.getParameter("userId");
+		String picture64=request.getParameter("picture64");
+		//链接数据库
+		MysqlAccessBean mysql = null;
+		try {
+			int id = Integer.parseInt(map_id);
+			Connection connection = DBManager.getConnection();
+			PreparedStatement pst=connection.prepareStatement( "UPDATE `user_map` SET " +
+					"map_name=?," +
+					"map_tag=?," +
+					"map_info=?," +
+					"map_param=?," +
+					"user_id=?," +
+					"picture=? " +
+					"WHERE `map_id`=?");
+//			String sql = "UPDATE `user_map` SET " +
+//					"'map_name'="+mapTitle+"," +
+//					"'map_tag'="+mapTag+"," +
+//					"'map_info'="+mapInfo+","+
+//					"'map_param'="+treeNodes+","+
+//					"'user_id'="+userId+","+
+//					"'picture'="+picture64+","+
+//					"WHERE `map_id`= "+ id ;
+			pst.setString(1, mapTitle);
+			pst.setString(2, mapTag);
+			pst.setString(3, mapInfo);
+			pst.setString(4, treeNodes);
+			pst.setString(5, userId);
+			pst.setString(6, picture64);
+			pst.setInt(7, id);
+
+			pst.executeUpdate();
+			pst.close();
+			connection.close();
+
+			//flag = mysql.update(sql);
+			JSONObject resultFlag=new JSONObject();
+			resultFlag.put("flag",flag);
+			PrintWriter out = response.getWriter();
+			out.print(resultFlag);
+			out.flush();
+			out.close();
+
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+
+
 	}
 }
 

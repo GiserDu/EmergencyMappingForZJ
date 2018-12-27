@@ -4,35 +4,35 @@ var isPictureUpload=false;
 // $('#editable-select').editableSelect({ effects: 'slide' });
 //专题图保存模态框出现前触发
 $('#map-upload-Modal').on('show.bs.modal', function () {
-
+    //生成地图标签
+    var mapTagsStr=window.localStorage.getItem("map_tag");
+    mapTagJson=JSON.parse(mapTagsStr);
+    $("#editable-select").html("");
+    for(var i in mapTagJson) {
+        if(i>0) $("#editable-select").append('<option value='+mapTagJson[i]+' >' + mapTagJson[i] + '</option>');
+    }
+    $('#editable-select').editableSelect({ effects: 'slide' ,filter: false  });
     // 根据map_id判断当前地图是否存在
     // window.localStorage.setItem("mapId", "9");
     var map_id = window.localStorage.getItem("mapId");
     //后台交互判断是否存在当前地图
+    if (map_id===null) return;
     $.ajax({
         type: 'post',
         url: "./servlet/EditMapServlet",
         dataType: "json",
         async: false,
         data: {
-            "type": "mapInfoUpload",
+            "type": "mapInfoQuery",
             "map_id": map_id
         },
         success: function (data) { //返回json结果
-            var mapTagsStr=window.localStorage.getItem("map_tag");
-            mapTagJson=JSON.parse(mapTagsStr);
-            $("#editable-select").html("");
-            for(var i in mapTagJson) {
-                if(i>0) $("#editable-select").append('<option value='+mapTagJson[i]+' >' + mapTagJson[i] + '</option>');
-            }
-            $('#editable-select').editableSelect({ effects: 'slide' });
+
             $("#editable-select").find("option:contains('"+data.map_tag+"')").attr("selected",true);
             $("#mapTitle_Upload").val(data.map_name);
             $("#editable-select").val(data.map_tag);
             $("#mapInfo_Upload").val(data.map_info);
             $('#demo1')[0].src = data.picture;
-
-
 
 
         }
@@ -66,18 +66,18 @@ $("#uploadBt").click(function (e) {
     var treeNodes=JSON.stringify(treeNodes);
     var userId="testUser1";
     var picture64=$('#demo1')[0].src;
+    var map_id = window.localStorage.getItem("mapId");
 
-    var servletUrl="./servlet/EditMapServlet";
-    //缩略图上传
-
+//参数上传
     $.ajax({
         type: 'post',
-        url:servletUrl,
+        url:"./servlet/EditMapServlet",
         dataType:"json",
         async:false,
-        data:{ "type":"mapInfoUpload","map_id":"","mapTitle":mapTitle,"mapTag":mapTag,"mapInfo":mapInfo,"treeNodes":treeNodes,"picture64":picture64,"userId":userId},
+        data:{ "type":"mapInfoUpload","map_id":map_id,"mapTitle":mapTitle,"mapTag":mapTag,"mapInfo":mapInfo,"treeNodes":treeNodes,"picture64":picture64,"userId":userId},
         success: function (data) { //返回json结果
-            alert("已保存");
+            alert("保存成功");
+            window.location.href="mapManageZJ.html";
             isSaved = 1;
         }
 
