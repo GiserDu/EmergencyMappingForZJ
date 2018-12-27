@@ -464,7 +464,7 @@ function doMap() {
                                 // content:"<div><p>要素名称：<input id='newFLName'></input></p><br/><p>要素地址：<input id='newFLAds'></input></p></div>",
                                 content: "<div id='zeo'><p style='padding-left: 12px'>要素名称：<input id='newFLName'></input></p><br/><p class='FLS_p'><input id='textLayer' name='layer' value='text' type='radio' onclick='changeSource(this)'/>服务地址：<input id='newFLAds' disabled></input></p>"
 
-                                + "<br/><p class='tree_p'><input id='buttonLayer' name='layer' value='button' type='radio' onclick='changeSource(this)' />专题服务：<button id='selectButton' onclick='openTreeWindow()' class='layui-btn layui-btn-sm layui-btn-disabled' disabled>选择要素</button></p></div>",
+                                + "<br/><p class='tree_p' style='display: none'><input id='buttonLayer' name='layer' value='button' type='radio' onclick='changeSource(this)' />专题服务：<button id='selectButton' onclick='openTreeWindow()' class='layui-btn layui-btn-sm layui-btn-disabled' disabled>选择要素</button></p></div>",
 
                                 yes: function(index, layero) {//（第一个按钮，即确认）确定后执行回调
 
@@ -729,7 +729,7 @@ function doMap() {
                                 btn: ['确认','修改要素样式'],
                                 //content:"<div><p>要素名称：<input id='editFLName' value='"+treeNode.name+"'></input></p><br/><p>要素地址：<input id='editFLAds' value='"+treeNode.url+"'></input></p></div>",
                                 content: "<div id='zeo'><p style='padding-left: 12px'>要素名称：<input id='editFLName' value='"+treeNode.name+"'onchange='nameChange()'></input></p><br/><p class='FLS_p'><input id='textLayer' name='layer' value='text' type='radio' onclick='changeSource(this)' "+treeNode.textLayerChecked+"/>服务地址：<input id='editFLAds' "+treeNode.textLayerDisabled+" value='"+treeNode.url+"'onchange='addressChange()'></input></p>"
-                                + "<br/><p class='tree_p'><input id='buttonLayer' name='layer' value='button' type='radio' onclick='changeSource(this)' "+treeNode.buttonLayerChecked+"/>专题服务：<button id='selectButton' onclick='openSelectedTree(getThisPath)' class='layui-btn layui-btn-sm' "+treeNode.buttonLayerDisabled+">选择要素</button></p></div>",
+                                + "<br/><p class='tree_p' style='display: none'><input id='buttonLayer' name='layer' value='button' type='radio' onclick='changeSource(this)' "+treeNode.buttonLayerChecked+"/>专题服务：<button id='selectButton' onclick='openSelectedTree(getThisPath)' class='layui-btn layui-btn-sm' "+treeNode.buttonLayerDisabled+">选择要素</button></p></div>",
                                 success: function (layero, index) {
                                     document.getElementById("selectButton").innerHTML = getThisTheme;
                                     if (treeNode.textLayerChecked == "checked")
@@ -1776,7 +1776,7 @@ function addModelLayUI(mapName) {
                                 // content:"<div><p>要素名称：<input id='newFLName'></input></p><br/><p>要素地址：<input id='newFLAds'></input></p></div>",
                                 content: "<div id='zeo'><p style='padding-left: 12px'>要素名称：<input id='newFLName'></input></p><br/><p class='FLS_p'><input id='textLayer' name='layer' value='text' type='radio' onclick='changeSource(this)'/>服务地址：<input id='newFLAds' disabled></input></p>"
 
-                                + "<br/><p class='tree_p'><input id='buttonLayer' name='layer' value='button' type='radio' onclick='changeSource(this)' />专题服务：<button id='selectButton' onclick='openTreeWindow()' class='layui-btn layui-btn-sm layui-btn-disabled' disabled>选择要素</button></p></div>",
+                                + "<br/><p class='tree_p' style='display: none'><input id='buttonLayer' name='layer' value='button' type='radio' onclick='changeSource(this)' />专题服务：<button id='selectButton' onclick='openTreeWindow()' class='layui-btn layui-btn-sm layui-btn-disabled' disabled>选择要素</button></p></div>",
 
                                 yes: function(index, layero) {//确定后执行回调
 
@@ -2062,7 +2062,7 @@ function addModelLayUI(mapName) {
                                 content: "<div id='zeo'>" +
                                 "<p style='padding-left: 12px'>要素名称：<input id='editFLName' value='"+treeNode.name+"'onchange='nameChange()'></input></p>" +
                                 "<br/><p class='FLS_p'><input id='textLayer' name='layer' value='text' type='radio' onclick='changeSource(this)' "+treeNode.textLayerChecked+"/>服务地址：<input id='editFLAds' "+treeNode.textLayerDisabled+" value='"+((treeNode.data)?treeNode.data:treeNode.url)+"'></input></p>"
-                                + "<br/><p class='tree_p'><input id='buttonLayer' name='layer' value='button' type='radio' onclick='changeSource(this)' "+treeNode.buttonLayerChecked+"/>专题服务：<button id='selectButton' onclick='openSelectedTree(getThisPath)' class='layui-btn layui-btn-sm' "+treeNode.buttonLayerDisabled+">选择要素</button></p></div>",
+                                + "<br/><p class='tree_p' style='display: none'><input id='buttonLayer' name='layer' value='button' type='radio' onclick='changeSource(this)' "+treeNode.buttonLayerChecked+"/>专题服务：<button id='selectButton' onclick='openSelectedTree(getThisPath)' class='layui-btn layui-btn-sm' "+treeNode.buttonLayerDisabled+">选择要素</button></p></div>",
                                 success: function (layero, index) {
                                     if  (treeNode.buttonLayerDisabled=="undisabled")
                                         document.getElementById("selectButton").innerHTML = getThisTheme;
@@ -2509,28 +2509,21 @@ function addModelLayUI(mapName) {
             success: function (index, layero) {
 
                 if (mappingPageType == 1 || mappingPageType == 2){
+                    if (map.getLayer("studyAreaLayer"))
+                        map.removeLayer(map.getLayer("studyAreaLayer"));
+                    if (mappingPageType == 1){
+                        if (map.getLayer("pointPlotLayer"))
+                            map.removeLayer(map.getLayer("pointPlotLayer"));
+                        if (map.getLayer("linePlotLayer"))
+                            map.removeLayer(map.getLayer("linePlotLayer"));
+                        if (map.getLayer("polygonPlotLayer"))
+                            map.removeLayer(map.getLayer("polygonPlotLayer"));
+                    }
                     var treeObj = $.fn.zTree.getZTreeObj("doMapTree_Template");
                     var nodes = treeObj.getNodesByParam("isParent", true, null);
                     var checkedNodes1 = nodes[1].children;
                     var checkedNodes2 = nodes[2].children;
                     var checkedNodes3 = nodes[3].children;
-                    if (checkedNodes1.length){
-                        for (var i=0; i<checkedNodes1.length; i++){
-                            checkedNodes1[i].checked = false;
-                            treeObj.checkNode(checkedNodes1[i], true, false, true);
-                        }
-                    }
-                    for (var j=0; j<checkedNodes2.length; j++){
-                        checkedNodes2[j].checked = false;
-                        treeObj.checkNode(checkedNodes2[j], true, false, true);
-                    }
-
-                    for (var k=0; k<checkedNodes3.length; k++){
-                        checkedNodes3[k].checked = false;
-                        treeObj.checkNode(checkedNodes3[k], true, false, true);
-                    }
-
-                    // treeObj.setEditable(false);
                     for(var i=0;i<checkedNodes3.length;i++){
                         var content;
                         if (checkedNodes3[i].allContent)
@@ -2556,6 +2549,23 @@ function addModelLayUI(mapName) {
                             break;
                         }
                     }
+                    if (checkedNodes1.length){
+                        for (var i=0; i<checkedNodes1.length; i++){
+                            checkedNodes1[i].checked = false;
+                            treeObj.checkNode(checkedNodes1[i], true, false, true);
+                        }
+                    }
+                    for (var j=0; j<checkedNodes2.length; j++){
+                        checkedNodes2[j].checked = false;
+                        treeObj.checkNode(checkedNodes2[j], true, false, true);
+                    }
+
+                    for (var k=0; k<checkedNodes3.length; k++){
+                        checkedNodes3[k].checked = false;
+                        treeObj.checkNode(checkedNodes3[k], true, false, true);
+                    }
+
+                    // treeObj.setEditable(false);
                     for(var i=0;i<checkedNodes3.length;i++){
                         var content;
                         if (checkedNodes3[i].allContent)
@@ -2964,7 +2974,7 @@ function layerEdit() {
     var allTjNodes;
     var serviceLayerNodes = new Array(); //当前在map中的地图图层
     var featureLayerNodes = new Array(); //当前在map中的graphic图层
-    if (typeFlag == 0){
+    if (typeFlag == 0 || mappingPageType != 0){
         treeObj = $.fn.zTree.getZTreeObj("doMapTree_Template");
     }
     else if (typeFlag == 1)
@@ -3123,20 +3133,22 @@ $("#templateMap").click(function () {
 //图层check事件
 function layerOncheck(treeId, treeNode) {
     //如果没有创建图例，先创建图例
-    if(!iMLegendCreated){
-        require([
-            "esri/dijit/Legend",
-            "dojo/domReady!"
-        ], function(
-            Legend
-        ) {
-            iMLegend = new Legend({
-                autoUpdate:true,
-                map: map
-            }, "iMLegendDiv");
-            iMLegend.startup();
-            iMLegendCreated = true;
-        })
+    if (mappingPageType == 0){
+        if(!iMLegendCreated){
+            require([
+                "esri/dijit/Legend",
+                "dojo/domReady!"
+            ], function(
+                Legend
+            ) {
+                iMLegend = new Legend({
+                    autoUpdate:true,
+                    map: map
+                }, "iMLegendDiv");
+                iMLegend.startup();
+                iMLegendCreated = true;
+            })
+        }
     }
     if(treeNode.isParent){
         return;
@@ -3353,10 +3365,7 @@ function layerOncheck(treeId, treeNode) {
                                 switch (layer.geometryType) {
                                     case "esriGeometryPoint":
                                         if(treeNode.style){
-                                            if (mappingPageType == 0)
-                                                simpleJson_point.symbol = treeNode.style.render;
-                                            else
-                                                simpleJson_point.symbol = treeNode.style;
+                                            simpleJson_point.symbol = treeNode.style.render;
                                         }
                                         rend = new SimpleRenderer(simpleJson_point)
                                         break;
@@ -3476,22 +3485,24 @@ function layerOncheck(treeId, treeNode) {
                                     ], function (SimpleRenderer) {
                                         switch (layer.geometryType) {
                                             case "esriGeometryPoint":
-                                                if (treeNode.style)
-                                                    rend = treeNode.style;
-                                                else
+                                                // if (treeNode.style)
+                                                //     rend = treeNode.style;
+                                                // else
                                                     // simpleJson_point.symbol = treeNode.style;
                                                 // simpleJson_point.symbol = {"url":"data:image/png;base64,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","type":"esriPMS","height":26.666666,"width":26.666666,"size":16,"xoffset":0,"yoffset":0}
-                                                    rend = new SimpleRenderer(simpleJson_point);
+                                                rend = new SimpleRenderer(simpleJson_point);
+                                                if (treeNode.style)
+                                                    rend.symbol = treeNode.style;
                                                 break;
                                             case "esriGeometryPolyline":
+                                                rend = new SimpleRenderer(simpleJson_line);
                                                 if (treeNode.style)
-                                                    simpleJson_line.symbol = treeNode.style;
-                                                rend = new SimpleRenderer(simpleJson_line)
+                                                    rend.symbol = treeNode.style;
                                                 break;
                                             case "esriGeometryPolygon":
+                                                rend = new SimpleRenderer(simpleJson_polygon);
                                                 if (treeNode.style)
-                                                    simpleJson_polygon.symbol = treeNode.style;
-                                                rend = new SimpleRenderer(simpleJson_polygon)
+                                                    rend.symbol = treeNode.style;
                                                 break;
                                         }
                                         layer.setRenderer(rend);
