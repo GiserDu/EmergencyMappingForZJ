@@ -113,7 +113,7 @@ function refreshMaps() {
     $(".img-responsive").click(function () {
         // 获取到地图id值
         console.log($(this).attr('mapid'));
-        localStorage.setItem("userMapId", $(this).attr('mapid'));
+        localStorage.setItem("mapId", $(this).attr('mapid'));
         localStorage.setItem("mappingType", "readOnly");
         window.location.href = "interactiveMapping.html";
     });
@@ -243,7 +243,7 @@ $(document).on('mouseleave','.img-box',function(e){
 $(document).on('click','.icon.edit',function(e){
     // 获取到地图id值
     console.log($(this).parent().find("img").attr("mapid"));
-    localStorage.setItem("userMapId", $(this).parent().find("img").attr("mapid"));
+    localStorage.setItem("mapId", $(this).parent().find("img").attr("mapid"));
     localStorage.setItem("mappingType", "edit");
     window.location.href = "interactiveMapping.html";
 });

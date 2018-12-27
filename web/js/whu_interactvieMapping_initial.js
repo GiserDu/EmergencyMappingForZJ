@@ -219,8 +219,10 @@ $(document).ready(function() {
         var userMapId = localStorage.getItem("userMapId");
         addModelLayUI(userMapId);
     }
-    if (mappingPageType == 2)
+    if (mappingPageType == 2) {
         isSaved = 1;
+        $("#map-upload").css("display", "none");
+    }
     else if (mappingPageType == 1)
         $("#plotButton").css("display", "none");
     window.onbeforeunload=function(e) {
@@ -2174,7 +2176,10 @@ function addModelLayUI(mapName) {
                                     }
                                     var layerID;
                                     if(treeNode.textLayerChecked==="checked"){
-                                        layerID = treeNode.data;
+                                        if (mappingPageType == 0)
+                                            layerID = treeNode.data;
+                                        else
+                                            layerID = treeNode.url;
                                     }else if (treeNode.buttonLayerChecked==="checked"){
                                         layerID = treeNode.thematicData.id;
                                     }
@@ -2227,7 +2232,10 @@ function addModelLayUI(mapName) {
                                 content:originalTjLayerContent,
                                 success: function(layero,index){
                                     // modifytjMenuLayer(treeNode.cartographydata);
-                                    modifytjMenuLayer_new(treeNode);
+                                    if (mappingPageType == 0)
+                                        modifytjMenuLayer_new(treeNode);
+                                    else
+                                        modifytjMenuLayer_new(treeNode.allContent);
 
                                     // var newNode={name:$("#newFLName").val(),url:$("#newFLAds").val()};
 
@@ -2503,24 +2511,34 @@ function addModelLayUI(mapName) {
                     var checkedNodes1 = nodes[1].children;
                     var checkedNodes2 = nodes[2].children;
                     var checkedNodes3 = nodes[3].children;
-                    for (var i=0; i<checkedNodes1.length; i++)
-                        treeObj.checkNode(checkedNodes1[i], true, false, true);
-                    for (var j=0; j<checkedNodes2.length; j++)
+                    if (checkedNodes1.length){
+                        for (var i=0; i<checkedNodes1.length; i++){
+                            checkedNodes1[i].checked = false;
+                            treeObj.checkNode(checkedNodes1[i], true, false, true);
+                        }
+                    }
+                    for (var j=0; j<checkedNodes2.length; j++){
+                        checkedNodes2[j].checked = false;
                         treeObj.checkNode(checkedNodes2[j], true, false, true);
-                    for (var k=0; k<checkedNodes3.length; k++)
+                    }
+
+                    for (var k=0; k<checkedNodes3.length; k++){
+                        checkedNodes3[k].checked = false;
                         treeObj.checkNode(checkedNodes3[k], true, false, true);
+                    }
+
                     // treeObj.setEditable(false);
                     for(var i=0;i<checkedNodes3.length;i++){
-                        if (checkedNodes3[i].cartographydata.type == "2") {
+                        if (checkedNodes3[i].allContent.cartographydata.type == "2") {
                             // layerNodes_Model[3].children[i].checked = true;
                             tjLayerName=checkedNodes3[i]["name"];
                             var tjType = "classLayerData";
-                            fieldsOrIndi = checkedNodes3[i].statisticdata.fieldsName;
+                            fieldsOrIndi = checkedNodes3[i].allContent.statisticdata.fieldsName;
                             var tjLayerContent = {};
                             tjLayerContent.name = tjLayerName;
-                            tjLayerContent.spatialdata = checkedNodes3[i].spatialdata;
-                            tjLayerContent.statisticdata = checkedNodes3[i].statisticdata;
-                            tjLayerContent.cartographydata = checkedNodes3[i].cartographydata;
+                            tjLayerContent.spatialdata = checkedNodes3[i].allContent.spatialdata;
+                            tjLayerContent.statisticdata = checkedNodes3[i].allContent.statisticdata;
+                            tjLayerContent.cartographydata = checkedNodes3[i].allContent.cartographydata;
                             var str=JSON.stringify(tjLayerContent);
                             var zoomLevel = map.getZoom();
                             if (zoomLevel < 9)
@@ -2531,16 +2549,16 @@ function addModelLayUI(mapName) {
                         }
                     }
                     for(var i=0;i<checkedNodes3.length;i++){
-                        if (checkedNodes3[i].cartographydata.type == "1") {
+                        if (checkedNodes3[i].allContent.cartographydata.type == "1") {
                             // layerNodes_Model[3].children[i].checked = true;
                             tjLayerName=checkedNodes3[i]["name"];
                             var tjType = "chartLayerData";
-                            fieldsOrIndi = checkedNodes3[i].statisticdata.fieldsName;
+                            fieldsOrIndi = checkedNodes3[i].allContent.statisticdata.fieldsName;
                             var tjLayerContent = {};
                             tjLayerContent.name = tjLayerName;
-                            tjLayerContent.spatialdata = checkedNodes3[i].spatialdata;
-                            tjLayerContent.statisticdata = checkedNodes3[i].statisticdata;
-                            tjLayerContent.cartographydata = checkedNodes3[i].cartographydata;
+                            tjLayerContent.spatialdata = checkedNodes3[i].allContent.spatialdata;
+                            tjLayerContent.statisticdata = checkedNodes3[i].allContent.statisticdata;
+                            tjLayerContent.cartographydata = checkedNodes3[i].allContent.cartographydata;
                             var str=JSON.stringify(tjLayerContent);
                             var zoomLevel = map.getZoom();
                             if (zoomLevel < 9)

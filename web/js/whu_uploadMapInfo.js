@@ -6,7 +6,7 @@ var isPictureUpload=false;
 $('#map-upload-Modal').on('show.bs.modal', function () {
 
     // 根据map_id判断当前地图是否存在
-    window.localStorage.setItem("mapId", "9");
+    // window.localStorage.setItem("mapId", "9");
     var map_id = window.localStorage.getItem("mapId");
     //后台交互判断是否存在当前地图
     $.ajax({
@@ -61,8 +61,8 @@ $("#uploadBt").click(function (e) {
         async:false,
         data:{ "type":"mapInfoUpload","map_id":"","mapTitle":mapTitle,"mapTag":mapTag,"mapInfo":mapInfo,"treeNodes":treeNodes,"picture64":picture64,"userId":userId},
         success: function (data) { //返回json结果
-            alert("已保存")
-
+            alert("已保存");
+            isSaved = 1;
         }
 
     });
