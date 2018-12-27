@@ -202,6 +202,8 @@ function initMapList() {
                 for(let tag of mapTags.keys()){
                     $('.selectpicker.map-tag').append('<option>'+tag+'</option>');
                 }
+                var mapTagsStr=JSON.stringify(Array.from(mapTags));
+                window.localStorage.setItem("map_tag",mapTagsStr);
             sortFilter("时间顺序");
             refreshMaps();
         },

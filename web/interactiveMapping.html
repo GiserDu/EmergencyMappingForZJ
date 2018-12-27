@@ -6,6 +6,7 @@
     <!--阿里的可视化库-->
     <script src="https://gw.alipayobjects.com/os/antv/pkg/_antv.g2-3.3.2/dist/g2.min.js"></script>
     <script src="js/echarts.js"></script>
+
     <link href="css/reset.css" rel="stylesheet">
     <link href="css/bootstrap.min.css" rel="stylesheet">
     <link href='css/fonts.css' rel='stylesheet' type='text/css'>
@@ -23,7 +24,7 @@
 
     <link rel="stylesheet" href="css/formSelects-v4.css">
     <link href="css/tjLayer_new_0.2.css" rel="stylesheet">
-
+    <link rel="stylesheet" type="text/css" href="css/jquery-editable-select.min.css">
     <style type="text/css">
         .esriLegendServiceLabel{
             display: none;
@@ -149,6 +150,9 @@
     <div id="map-save" class="right-top-bottom" title="打印">
         <span class="glyphicon glyphicon-print" data-toggle="modal" data-target="#map-save-Modal"></span>
     </div>
+    <div id="map-upload" class="right-top-bottom" title="保存">
+        <span class="glyphicon glyphicon-floppy-save" data-toggle="modal" data-target="#map-upload-Modal"></span>
+    </div>
     <div id="map-legend" class="right-top-bottom" title="图例">
         <span class="glyphicon glyphicon-th"></span>
     </div>
@@ -238,19 +242,89 @@
             </div>
         </div>
     </div>
+    <div class="modal fade in" id="map-upload-Modal" tabindex="-1" style="z-index: 9999" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true" >
+        <div class="modal-dialog" role="document" style="width:470px;">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <button type="button" class="close" data-dismiss="modal" aria-hidden="true">
+                        ×
+                    </button>
+                    <label class="modal-title" id="uploadLabel">专题地图保存</label>
+                </div>
+                <div class="modal-body" style="padding:5px 40px;">
+                    <form class="form-horizontal" role="form">
+                        <div class="form-group" >
+                            <div class="input-div">
+                                <label class="control-label">地图名称</label>
+                                <input id="mapTitle_Upload" type="text" class="form-control" placeholder="请输入地图名称" style="width:410px;">
+                            </div>
+                        </div>
+                        <div class="form-group">
+                            <label class="control-label " style="float:left">地图标签</label>
+                            <select class="form-control" placeholder="请输入地图标签" id="editable-select" style="width:410px;">
+
+                            </select>
+                            <!--<select id="mapTag_Init" class="form-control" style="width:410px;">-->
+                                <!--&lt;!&ndash;<option value="pdf">pdf</option>&ndash;&gt;-->
+                                <!--<option value="地质灾害工作部署图">地质灾害工作部署图</option>-->
+                                <!--<option value="地质灾害工作进展图">地质灾害工作进展图</option>-->
+                                <!--<option value="隐患点分布图">隐患点分布图</option>-->
+                                <!--<option value="避让搬迁分布图">避让搬迁分布图</option>-->
+                            <!--</select>-->
+                        </div>
+                        <!--<div class="form-group" style="margin-bottom: 16px">-->
+                            <!--<div class="input-div">-->
+                                <!--<label class="control-label ">或手动输入地图标签</label>-->
+                                <!--<input id="mapTag_Add" type="text"  class="form-control" placeholder="请手动输入地图标签" style="width:410px;">-->
+                            <!--</div>-->
+                        <!--</div>-->
+                        <div class="form-group" style="margin-bottom: 16px">
+                            <div class="input-div">
+                                <label class="control-label ">地图描述</label>
+                                <!--<input id="copyrightText" type="text" class="form-control" placeholder="请输入地图描述信息" style="width:410px;">-->
+                                <textarea id="mapInfo_Upload" class="form-control" placeholder="请输入地图描述信息" style="width:410px;" rows="3"></textarea>
+                            </div>
+                        </div>
+                        <div class="form-group" style="margin-bottom: 16px">
+                            <div class="layui-upload">
+                                <button type="button" class="layui-btn" id="test1">上传专题图封面</button>
+                                <div class="layui-upload-list">
+                                    <img class="layui-upload-img" id="demo1">
+                                    <p id="demoText"></p>
+                                </div>
+                            </div>
+                            <!--<div class="input-div">-->
+                                <!--<label class="control-label " style="display: block">缩略图</label>-->
+                                <!--&lt;!&ndash;<input id="copyrightText" type="text" class="form-control" placeholder="请上传缩略图" style="width:78%;display: inline-block">&ndash;&gt;-->
+                                <!--&lt;!&ndash;<button type="button"  class="btn btn-default">浏览图片</button>&ndash;&gt;-->
+                                <!--<div class="input-group">-->
+                                <!--<input type="text" class="form-control">-->
+                                <!--<span class="input-group-btn">-->
+                                    <!--<button class="btn btn-default" type="button">浏览图片</button>-->
+                                <!--</span>-->
+                                <!--</div>-->
+                            <!--</div>-->
+                        </div>
+                        <div class="modal-footer">
+                            <button type="button" data-dismiss="modal" class="btn btn-default">关闭</button>
+                            <button type="button" data-dismiss="modal" class="btn btn-primary" id="uploadBt">保存</button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
     <div id="loading"  class="loading">正在输出...</div>
 
 </div>
 <div id="iMNameInfo"></div>
-<div id="LegendInfo"><div id="iMLegendDiv"></div></div>
-
-</div>
+<div id="LegendInfo"><div id="iMLegendDiv"></div></div></div>
 <script type="text/javascript" src="js/jquery-3.2.1.js"></script>
+<script src="js/jquery-editable-select.min.js"></script>
 <script src="js/layui/layui.js"></script>
 <script src="js/formSelects-v4-test.js"></script>
 <script src="js/tjLayer_new_0.2.js"></script>
 <script type="text/javascript" src="js/sweetalert_lib/sweetalert.min.js"></script>
-
 <script src="http://localhost:8080/EmergencyMapping1027/js/lib/arcgis_js_api/library/3.24/3.24/init.js"></script>
 <script type="text/javascript" src="js/Print.js"></script>
 <script src="js/plotIF.js"></script>
@@ -263,21 +337,12 @@
 <script src="js/ztreejs/jquery.ztree.excheck.js"></script>
 <script src="js/ztreejs/jquery.ztree.exedit.js"></script>
 <script type="text/javascript" src="js/bootstrap.min.js"></script>
-<!--<script src="js/layui/layui.js"></script>-->
 <script src="js/bootstrap-select.js"></script>
 <script src="js/whu_administrativeRegionSelection.js"></script>
+<script src="js/whu_uploadMapInfo.js"></script>
 <script src="js/terraformer.js"></script>
 <script src="js/terraformer-arcgis-parser.js"></script>
-<!--<script src="js/whu_statisticalInteractiveMapping.js"></script>-->
 
 
-<script>
-    layui.use('form', function(){
-        var form = layui.form;
-        //各种基于事件的操作，下面会有进一步介绍
-    });
-
-    // opentjMenuLayer();
-</script>
 </body>
 </html>
