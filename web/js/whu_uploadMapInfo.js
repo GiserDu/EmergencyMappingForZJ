@@ -46,7 +46,23 @@ $("#uploadBt").click(function (e) {
     var mapTag=$("#editable-select").val();
    // if (mapTag=="") mapTag=$("#mapTag_Init").val();
     var mapInfo=$("#mapInfo_Upload").val();
-    var treeNodes=$.fn.zTree.getZTreeObj("doMapTree").getNodes();
+
+    var thisTree;
+    if ($.fn.zTree.getZTreeObj("doMapTree"))
+        thisTree = $.fn.zTree.getZTreeObj("doMapTree");
+    else if ($.fn.zTree.getZTreeObj("doMapTree_Template"))
+        thisTree = $.fn.zTree.getZTreeObj("doMapTree_Template");
+    var parentNodes = thisTree.getNodesByParam("isParent", true, null);
+    var featureNodes = parentNodes[2].children;
+    for (var i=0; i<featureNodes.length; i++){
+        var thisLayer = map.getLayer(featureNodes[i].url);
+        if (thisLayer){
+            console.log(thisLayer.renderer.symbol.type);
+            featureNodes[i].style = thisLayer.renderer;
+        }
+    }
+    thisTree.refresh();
+    var treeNodes=thisTree.getNodes();
     var treeNodes=JSON.stringify(treeNodes);
     var userId="testUser1";
     var picture64=$('#demo1')[0].src;
