@@ -179,14 +179,15 @@ $(".form-control.search-key").bind("input propertychange",function(event){
 //（有后台版）先清空gallery-row，然后循环添加图片的div，最后添加添加图片的div
 function initMapList() {
     //清空mapId
-    window.localStorage.removeItem("mapId")
+    window.localStorage.removeItem("mapId");
+    window.localStorage.setItem("userId",$('.username a').text());
     var type = "initManage";
     var init_url = "./servlet/GetThematicMapServlet?type=" + type;
     $.ajax({
         url: init_url,
         type: 'POST',
         dataType: 'json',
-        data:{user_id:"testUser1"},//暂时把user_id写死
+        data:{user_id:$('.username a').text()},//暂时把user_id写死
 
         cache:false,
         async:false,//设置为同步操作就可以给全局变量赋值成功

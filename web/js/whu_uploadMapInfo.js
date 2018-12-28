@@ -64,7 +64,7 @@ $("#uploadBt").click(function (e) {
     thisTree.refresh();
     var treeNodes=thisTree.getNodes();
     var treeNodes=JSON.stringify(treeNodes);
-    var userId="testUser1";
+    var userId=window.localStorage.getItem("userId");
     var picture64=$('#demo1')[0].src;
     var map_id = window.localStorage.getItem("mapId");
 
@@ -77,6 +77,8 @@ $("#uploadBt").click(function (e) {
         data:{ "type":"mapInfoUpload","map_id":map_id,"mapTitle":mapTitle,"mapTag":mapTag,"mapInfo":mapInfo,"treeNodes":treeNodes,"picture64":picture64,"userId":userId},
         success: function (data) { //返回json结果
             alert("保存成功");
+            window.localStorage.removeItem("userId");
+            window.localStorage.removeItem("mapId")
             window.location.href="mapManageZJ.html";
             isSaved = 1;
         }

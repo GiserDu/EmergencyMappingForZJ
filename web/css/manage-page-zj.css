@@ -338,3 +338,8 @@ body{
 #mapDescription,#newMapDescription{
     resize: none;
 }
+
+.header-r{ position: absolute; top: 0; right: 40px;}
+.login-register{ float: right; height: 22px; margin-top: 17px;}
+.login-register>ul>li{ float: left; font-size: 14px; list-style: none}
+.login-register>ul>li a i{ float: left; display: inline-block; width: 21px; height: 21px; background: url(../assets/img/icon-user.png) no-repeat; margin: 0 10px 0 0; }

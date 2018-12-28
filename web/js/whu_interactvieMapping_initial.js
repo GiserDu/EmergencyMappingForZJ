@@ -3285,7 +3285,7 @@ function layerOncheck(treeId, treeNode) {
             }
         }
         if (treeNode.getParentNode().id===3) {//如果操作的是要素图层
-            var dataUrl_template= treeNode.data;
+            var dataUrl_template = treeNode.data;
             var lastDataUrl_template = treeNode.lastUrl;//
             var isChecked = !treeNode.checked;
             var dataUrl = treeNode.url;
@@ -3416,7 +3416,7 @@ function layerOncheck(treeId, treeNode) {
                             //如果服务地址不为空
                             //先判断上次存储的url代表的图层是否加载，如果加载了，则删去
                             //如果两次URL并没有发生改变,则不做操作
-                            if (dataUrl===lastDataUrl) {
+                            if (dataUrl===lastDataUrl && mappingPageType == 0) {
                                 return;
                             }
                             if (map && (map.getLayer(lastDataUrl))) {
