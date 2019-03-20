@@ -66,7 +66,7 @@ public class ExcelProcess {
 
     public static void main(String[] args){
         //String encoding = "GBK";
-        String excelPath="C:\\Users\\Administrator\\Desktop\\国家专项测试\\测试数据\\test.xlsx";
+        String excelPath="C:\\Users\\Administrator\\Desktop\\国家专项测试\\测试数据\\test.xls";
         doReadExcelForFiledsName(excelPath);
         System.out.print("测试");
    }

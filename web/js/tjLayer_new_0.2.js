@@ -1918,7 +1918,7 @@ function EXCELupload(){
             ,url: './servlet/fileUploadServlet'
             ,auto: false
             ,accept: 'file' //普通文件
-            ,exts: 'xlsx|xls' //文件类型
+            ,exts: 'xlsx|xls|CSV' //文件类型
             ,bindAction: '#EXCELupload'
             ,done: function(res){
                 console.log(res)
@@ -2271,7 +2271,7 @@ var originalTjLayerContent='<div class="tjPanel" id="tjPanel">\n' +
     '                <ul class="layui-tab-title">\n' +
     '                    <li class="layui-this" id="tab1">平台数据库</li>\n' +
     '                    <li id="tab2">API数据</li>\n' +
-    '                    <li id="tab3">上传EXCEL文件</li>\n' +
+    '                    <li id="tab3">上传统计数据</li>\n' +
     '                </ul>\n' +
     '                <div class="layui-tab-content">\n' +
     '                    <div class="layui-tab-item layui-show">\n' +
@@ -2354,7 +2354,7 @@ var originalTjLayerContent='<div class="tjPanel" id="tjPanel">\n' +
     '                        <form class="layui-form">\n' +
     '                            <div class="layui-upload-drag" style="margin-bottom: 10px;width: 400px;" id="EXCELupload1">\n' +
     '                                <i class="layui-icon layui-icon-upload-drag"></i>\n' +
-    '                                <p id="fileName">将文件拖拽到此处</p>\n' +
+    '                                <p id="fileName">将Excel/CSV文件拖拽到此处</p>\n' +
     '                            </div>\n' +
     '                            <button id="EXCELupload" type="button" class="layui-btn layui-input-inline" style="top:20px">开始上传</button>\n' +
     '                        </form>\n'+
@@ -2362,7 +2362,7 @@ var originalTjLayerContent='<div class="tjPanel" id="tjPanel">\n' +
     '                            <div class="layui-form-item">\n' +
     '                                <div class="layui-row layui-col-space10">\n' +
     '                                    <fieldset class="layui-elem-field" style="text-align:center">\n' +
-    '                                        <legend class="Panel2_Legend" style="font-size:14px">Excel表可选字段</legend>\n' +
+    '                                        <legend class="Panel2_Legend" style="font-size:14px">数据表可选字段</legend>\n' +
     '                                        <form class="layui-form" action="" lay-filter="">\n' +
     '                                            <div class="layui-form-item">\n' +
     '                                                <label class="layui-form-label" style="width:unset;margin-left: 20%;">空间唯一标识</label>\n' +

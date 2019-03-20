@@ -3,7 +3,6 @@ package telecarto.geoinfo.servlets;
 import net.sf.json.JSONArray;
 import net.sf.json.JSONObject;
 import telecarto.geoinfo.db.MysqlAccessBean;
-
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
