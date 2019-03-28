@@ -72,7 +72,7 @@ $(document).ready(function() {
     findDimensions();
     $("#mapContainer").height(winHeight);
     initMap();
-
+    createTimeSlider();
     //获取当前窗口尺寸
     function findDimensions() {
         //获取窗口宽度

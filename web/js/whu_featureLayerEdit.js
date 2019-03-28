@@ -34,7 +34,7 @@ var creatFeatureLayerEditPanel = function(){
     var html = [
         '<div class="map-marking-panel-head">',
         '<label id="map-featureLayer-panel-title">绘制点标注</label>',
-        '<i class="fa fa-close icon-close" onclick="closeFeatureLayerPanel()"></i>',
+        '<i class="fa fa-close" onclick="closeFeatureLayerPanel()" style="right:0px float:right;float: right;right: 0px;margin: 15px;" ></i>',
         '</div>',
         '<div class="map-marking-panel-container">',
         '<div id="map-featureLayer-panel-tip" class="map-marking-panel-tip">地图上待标注位置鼠标左键点击地图添加一个点标注，可填写名称、备注、图标，点击保存生效！</div>',
@@ -429,8 +429,8 @@ var selectedFeatureLayer = function (featureLayer,type) {
     thisFeatureLayer.type = type;
 
     document.getElementById('pointFeatureLayerIcon').src = rendererNow.url;
-    document.getElementById('pointFeatureLayer-height').value=rendererNow.height;
-    document.getElementById('pointFeatureLayer-width').value=rendererNow.width;
+    document.getElementById('pointFeatureLayer-height').value=Math.round(rendererNow.height);
+    document.getElementById('pointFeatureLayer-width').value=Math.round(rendererNow.width);
     document.getElementById('pointFeatureLayer-angle').value=rendererNow.angle;
     document.getElementById('pointFeatureLayer-xoffset').value=rendererNow.xoffset;
     document.getElementById('pointFeatureLayer-yoffset').value=rendererNow.yoffset;
@@ -518,7 +518,7 @@ var changeLineFeatureLayerStyle = function () {
     var border_colorHex = tinycolor(rendererNow.color).toHexString();
     document.getElementById('lineFeatureLayer-color').value = border_colorHex;
     document.getElementById('lineFeatureLayer-opacity').value = border_opacity;
-    document.getElementById('lineFeatureLayer-width').value = rendererNow.width;
+    document.getElementById('lineFeatureLayer-width').value = Math.round(rendererNow.width);
     var preview = document.getElementById('lineFeatureLayer-style-preview');
     preview.style.backgroundColor = rendererNow.color;
     preview.style.border = rendererNow.width + 'px solid ' + rendererNow.color
@@ -592,7 +592,7 @@ var changePolygonFeatureLayerStyle = function () {
     var border_colorHex = tinycolor(rendererNow.outline.color).toHexString();
     document.getElementById('polygonFeatureLayer-border-color').value = border_colorHex;
     document.getElementById('polygonFeatureLayer-border-opacity').value = border_opacity;
-    document.getElementById('polygonFeatureLayer-border-width').value = rendererNow.outline.width;
+    document.getElementById('polygonFeatureLayer-border-width').value = Math.round(rendererNow.outline.width);
     var fill_rgba = tinycolor(rendererNow.color).toRgb();
     var fill_opacity = fill_rgba.a;
     var fill_colorHex = tinycolor(rendererNow.color).toHexString();

@@ -56,7 +56,7 @@ function creatEditDiv() {
     var html2 = [
         '<div class="map-marking-panel-head">',
         '<label id="map-marking-panel-title">绘制点标注</label>',
-        '<i class="fa fa-close icon-close" onclick="closeMarkingPanel()"></i>',
+        '<i class="fa fa-close" onclick="closeMarkingPanel()" style="right:0px float:right;float: right;right: 0px;margin: 15px;" ></i>',
         '</div>',
         '<div class="map-marking-panel-container">',
         '<div id="map-marking-panel-tip" class="map-marking-panel-tip">地图上待标注位置鼠标左键点击地图添加一个点标注，可填写名称、备注、图标，点击保存生效！</div>',
