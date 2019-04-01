@@ -181,7 +181,22 @@ $(document).ready(function() {
         });
         });
     }
-    switch (localStorage.getItem("mappingType")){
+    var getUrlParams=function (url) {
+        //获取url后缀参数，返回参数对象,
+        var urlParamsObj={
+            "mappingType":"",
+            "mapId":"",
+        };
+        if(!window.location.search){
+            urlParamsObj.mappingType=0;
+        }else {
+            var paramsArr=url.split("?")[1].split("&");
+            urlParamsObj.mappingType =paramsArr[0].split("=")[1];
+            urlParamsObj.mapId=paramsArr[1].split("=")[1]
+        }
+        return urlParamsObj;
+    };
+    switch (getUrlParams(window.location.href).mappingType){
         case "blank":
             mappingPageType = 0;
             break;

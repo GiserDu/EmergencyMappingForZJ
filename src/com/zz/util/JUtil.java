@@ -5,6 +5,7 @@ import com.zz.bglayer.ModelPrim;
 import com.zz.chart.chartstyle.ChartDataPara;
 import com.zz.chart.data.*;
 import jxl.read.biff.BiffException;
+import net.sf.json.JSONArray;
 import net.sf.json.JSONObject;
 import telecarto.data.util.*;
 import telecarto.geoinfo.db.MysqlAccessBean;
@@ -25,6 +26,7 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.Iterator;
 import java.util.Map;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -88,17 +90,113 @@ public class JUtil {
 			e.printStackTrace();
 		}
 		return resultString;
+
 	};
+
+	public static IndicatorData[] getIndicatorDataFromAPiV2(String jsonStr){
+		/**
+		 * @author GiserDu
+		 * @date 2019-03-31 10:25
+		 * @description：根据浙江url返回的json数据 构造指标数据
+		  * @Param: jsonStr
+		 * @return com.zz.chart.data.IndicatorData[]  指标数组
+		*/
+		jsonStr="{\n" +
+				"\t\"isTimeArray\": \"\",\n" +
+				" \"time\": [\"firstDate\", \" secondDate\",……],——新\n" +
+				"\t\"features\": [{\n" +
+				"\t\t\t\"featureProperty \": {\n" +
+				"\t\t\t\t\"市\": \"杭州市\",\n" +
+				"\t\t\t\t\"隐患点\": [781, 387],\n" +
+				"\t\t\t\t\"避让搬迁\": [0, 4],\n" +
+				"\t\t\t\t\"工程治理\": [0, 3],\n" +
+				"\t\t\t\t\"区县\": [{\n" +
+				"\t\t\t\t\t\t\"区县名\": \"余杭区\",\n" +
+				"\t\t\t\t\t\t\"隐患点\": [781, 387],\n" +
+				"\t\t\t\t\t\t\"避让搬迁\": [0, 4],\n" +
+				"\t\t\t\t\t\t\"工程治理\": [0, 3]\n" +
+				"\t\t\t\t\t},\n" +
+				"\t\t\t\t\t{\n" +
+				"\t\t\t\t\t\t\"区县名\": \"上虞区 \",\n" +
+				"\t\t\t\t\t\t\"隐患点\": [781, 387],\n" +
+				"\t\t\t\t\t\t\"避让搬迁\": [0, 4],\n" +
+				"\t\t\t\t\t\t\"工程治理\": [0, 3]\n" +
+				"\t\t\t\t\t}\n" +
+				"\t\t\t\t]\n" +
+				"\t\t\t}\n" +
+				"\t\t},\n" +
+				"\t\t{\n" +
+				"\t\t\t\"featureProperty \": {\n" +
+				"\t\t\t\t\"市\": \"宁波市\",\n" +
+				"\t\t\t\t\"隐患点\": [276, 431],\n" +
+				"\t\t\t\t\"避让搬迁\": [0, 323],\n" +
+				"\t\t\t\t\"工程治理\": [0, 123],\n" +
+				"\t\t\t\t\"区县\": []\n" +
+				"\n" +
+				"\t\t\t}\n" +
+				"\t\t}\n" +
+				"\t]\n" +
+				"}\n";
+		JSONObject jsonObject = JSONObject.fromObject(jsonStr);
+		boolean isTimeArr=jsonObject.getBoolean("isTimeArray");
+		JSONArray timeArr=jsonObject.getJSONArray("Time");
+
+		ArrayList<IndicatorData> featArrList = new ArrayList<IndicatorData>();//新建要素属性指标数据动态数组
+
+		JSONArray featuresArr=jsonObject.getJSONArray("features");
+		for(int i=0;i<featuresArr.size();i++){
+			ArrayList<String> propertyName=new ArrayList<String>();//单个属性名称
+			ArrayList<JSONArray> propertyValueArr=new ArrayList<JSONArray>();//属性值数组
+//			ArrayList<Double> propertyValue=new ArrayList<Double>();//单个
+			JSONObject featurePropertyObj=featuresArr.getJSONObject(i);
+			String fieldName=featurePropertyObj.getString("市");//市名;
+			//迭代器遍历featurePropertyObj
+			Iterator<String > it=featurePropertyObj.keys();
+			while (it.hasNext()){
+				String key=it.next();
+				if(key.equals("市")){
+
+				}else if(!key.equals("区县")){//此时读取属性字段和值
+					propertyName.add(key);
+					propertyValueArr.add(featurePropertyObj.getJSONArray(key));
+
+				}else {//读取区县一级
+//					JSONArray featuresArr=jsonObject.getJSONArray("features");
+				}
+			}
+			//为单个行政区时间点构造indicator
+			String[] nameStrs = (String[] )propertyName.toArray(new String[propertyName.size()]);
+
+			//Double动态数组转为double数组
+//			double[] valueDbls=new double[propertyValue.size()];
+//			for(int j=0;j<propertyValue.size();j++){
+//				valueDbls[j] = propertyValue.get(j).doubleValue();
+//			}
+			for(int j=0;j<timeArr.size();j++){
+				double[] valueDbls=new double[propertyValueArr.size()];
+				for(int t=0;t<propertyValueArr.size();t++){
+					valueDbls[t] = propertyValueArr.get(t).getDouble(j);
+				}
+				IndicatorData indicatorData = new IndicatorData(fieldName, nameStrs, valueDbls);
+				indicatorData.setDataTime(timeArr.getString(j));
+				indicatorData.setRegionClass("市");
+				featArrList.add(indicatorData);//所有indicator不分类全部添加
+
+			}
+		}
+		IndicatorData[] indicatorDatas = (IndicatorData[])featArrList.toArray(new IndicatorData[1]);
+		return indicatorDatas;
+
+
+	}
+
 	/**通过API获得指标数据
 	 *param: resultStr 输入的json字符串
 	 *return: indicatorDatas 指标数组
 	 */
 	public static IndicatorData[] getIndicatorDataFromAPi(String resultStr,String[] fieldNames,String spatialIdFiled){
-		System.out.println("1");
-
 		Map<String, Class> classMap = new HashMap<String, Class>();
 		classMap.put("features", FeaturesFromAPI.class);
-
 		JSONObject jsonObject = JSONObject.fromObject(resultStr);
 
 		//转为对象时，如果是list或map等需要添加类映射，即指定list或map中的对象类

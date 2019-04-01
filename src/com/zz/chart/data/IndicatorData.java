@@ -7,9 +7,29 @@ package com.zz.chart.data;
  *
  */
 public class IndicatorData {
+	public String getDataTime() {
+		return dataTime;
+	}
+
+	public void setDataTime(String dataTime) {
+		this.dataTime = dataTime;
+	}
+
 	/**
 	 * 专题数据中的自变量
 	 */
+
+	private String dataTime=null;//指标时间点
+
+	public String getRegionClass() {
+		return regionClass;
+	}
+
+	public void setRegionClass(String regionClass) {
+		this.regionClass = regionClass;
+	}
+
+	private String regionClass=null;//指标行政级别
 	private String domainAxis = null;
 
 	public void setDomainAxis(String domainAxis) {
