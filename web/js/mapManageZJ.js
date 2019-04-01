@@ -18,8 +18,6 @@ var searchResultList = [];//查询结果
 var filterResultList = [];//筛选结果
 var filterTemp = [];//筛选临时存储
 
-var thematicMapID=0;
-
 
 initMapList();
 
@@ -115,7 +113,8 @@ function refreshMaps() {
         console.log($(this).attr('mapid'));
         localStorage.setItem("mapId", $(this).attr('mapid'));
         localStorage.setItem("mappingType", "readOnly");
-        window.location.href = "interactiveMapping.html";
+        window.location.href = "interactiveMapping.html"+"?"+"mappingType=readOnly&"+ "mapId="+$(this).attr('mapid');
+
     });
 }
 
@@ -187,8 +186,8 @@ function initMapList() {
         url: init_url,
         type: 'POST',
         dataType: 'json',
-        data:{user_id:$('.username a').text()},//暂时把user_id写死
-
+        //data:{user_id:$('.username a').text()},//暂时把user_id写死
+        data:{user_id:"testUser1"},//暂时把user_id写死
         cache:false,
         async:false,//设置为同步操作就可以给全局变量赋值成功
         scriptCharset: 'utf-8',
@@ -245,10 +244,12 @@ $(document).on('mouseleave','.img-box',function(e){
 // 点击编辑地图按钮，进入专题地图编辑页面
 $(document).on('click','.icon.edit',function(e){
     // 获取到地图id值
-    console.log($(this).parent().find("img").attr("mapid"));
-    localStorage.setItem("mapId", $(this).parent().find("img").attr("mapid"));
+    var tmpMapId=$(this).parent().find("img").attr("mapid")
+    console.log(tmpMapId);
+    localStorage.setItem("mapId", tmpMapId);
     localStorage.setItem("mappingType", "edit");
-    window.location.href = "interactiveMapping.html";
+    window.location.href = "interactiveMapping.html"+"?"+"mappingType=edit&"+ "mapId="+tmpMapId;
+
 });
 
 // 点击地图详情按钮(为动态生成的元素绑定事件-->必须采用on函数的方式)
@@ -260,7 +261,9 @@ $(document).on('click','.icon.info',function(e){
 // 我要制图按钮点击事件
 $(".to-mapping").click(function () {
     localStorage.setItem("mappingType", "blank"); //记录当前制图页面的类别 blank：普通制图；edit：用户地图编辑；readOnly：用户地图查看
-    window.location.href="interactiveMapping.html";
+    // window.location.href="interactiveMapping.html";
+    window.location.href = "interactiveMapping.html"+"?"+"mappingType=blank&"+ "mapId=";
+
 });
 
 function setModalValue(e) {

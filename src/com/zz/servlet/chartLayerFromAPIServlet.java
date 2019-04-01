@@ -62,11 +62,9 @@ public class chartLayerFromAPIServlet extends HttpServlet {
 
         JSONObject cartographydataJson=JSONObject.fromObject(dataJson.getJSONObject("cartographydata"));
         System.out.println(cartographydataJson);
-//        String type=cartographydataJson.getString("cartographydataJson");
         String chartID0=cartographydataJson.getString("chartID");
         String chartid = chartID0.substring(1, 6);
         System.out.println(chartid);
-
 
         int width = cartographydataJson.getInt("symbolSizeSliderValue");// 符号长宽
 
@@ -160,7 +158,6 @@ public class chartLayerFromAPIServlet extends HttpServlet {
         }
         String imgPath = fileSavepathMap + "/"+"chartLegend.png";
         ImageIO.write(bi, "png", new File(imgPath));
-
 
 
         /*单张图绘制,并进行最小闭包处理*/
