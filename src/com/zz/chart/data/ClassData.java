@@ -12,9 +12,11 @@ public class ClassData {
     private String region_y;
     private String dataSource;
     private String label;
-    public ClassData(){
 
-    }
+
+    private String dataTime;
+
+
     public ClassData(String name,String code,String region_x,String region_y,String geometry,String data,String label){
         this.rgn_name = name;
         this.rgn_code = code;
@@ -23,6 +25,7 @@ public class ClassData {
         this.geometry = geometry;
         this.thematic_data = data;
         this.label = label;
+
 //        this.dataSource = dataSource;
     }
     public String getLabel(){
@@ -72,5 +75,11 @@ public class ClassData {
     }
     public void setDataSource(String dataSource){
         this.dataSource = dataSource;
+    }
+    public String getDataTime() {
+        return dataTime;
+    }
+    public void setDataTime(String dataTime) {
+        this.dataTime = dataTime;
     }
 }

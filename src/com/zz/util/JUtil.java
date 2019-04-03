@@ -1,5 +1,6 @@
 package com.zz.util;
 
+import com.et.mvc.util.Json;
 import com.zz.bglayer.Arith;
 import com.zz.bglayer.ModelPrim;
 import com.zz.chart.chartstyle.ChartDataPara;
@@ -101,45 +102,10 @@ public class JUtil {
 		  * @Param: jsonStr
 		 * @return com.zz.chart.data.IndicatorData[]  指标数组
 		*/
-		jsonStr="{\n" +
-				"\t\"isTimeArray\": \"\",\n" +
-				" \"time\": [\"firstDate\", \" secondDate\",……],——新\n" +
-				"\t\"features\": [{\n" +
-				"\t\t\t\"featureProperty \": {\n" +
-				"\t\t\t\t\"市\": \"杭州市\",\n" +
-				"\t\t\t\t\"隐患点\": [781, 387],\n" +
-				"\t\t\t\t\"避让搬迁\": [0, 4],\n" +
-				"\t\t\t\t\"工程治理\": [0, 3],\n" +
-				"\t\t\t\t\"区县\": [{\n" +
-				"\t\t\t\t\t\t\"区县名\": \"余杭区\",\n" +
-				"\t\t\t\t\t\t\"隐患点\": [781, 387],\n" +
-				"\t\t\t\t\t\t\"避让搬迁\": [0, 4],\n" +
-				"\t\t\t\t\t\t\"工程治理\": [0, 3]\n" +
-				"\t\t\t\t\t},\n" +
-				"\t\t\t\t\t{\n" +
-				"\t\t\t\t\t\t\"区县名\": \"上虞区 \",\n" +
-				"\t\t\t\t\t\t\"隐患点\": [781, 387],\n" +
-				"\t\t\t\t\t\t\"避让搬迁\": [0, 4],\n" +
-				"\t\t\t\t\t\t\"工程治理\": [0, 3]\n" +
-				"\t\t\t\t\t}\n" +
-				"\t\t\t\t]\n" +
-				"\t\t\t}\n" +
-				"\t\t},\n" +
-				"\t\t{\n" +
-				"\t\t\t\"featureProperty \": {\n" +
-				"\t\t\t\t\"市\": \"宁波市\",\n" +
-				"\t\t\t\t\"隐患点\": [276, 431],\n" +
-				"\t\t\t\t\"避让搬迁\": [0, 323],\n" +
-				"\t\t\t\t\"工程治理\": [0, 123],\n" +
-				"\t\t\t\t\"区县\": []\n" +
-				"\n" +
-				"\t\t\t}\n" +
-				"\t\t}\n" +
-				"\t]\n" +
-				"}\n";
+
 		JSONObject jsonObject = JSONObject.fromObject(jsonStr);
 		boolean isTimeArr=jsonObject.getBoolean("isTimeArray");
-		JSONArray timeArr=jsonObject.getJSONArray("Time");
+		JSONArray timeArr=jsonObject.getJSONArray("time");
 
 		ArrayList<IndicatorData> featArrList = new ArrayList<IndicatorData>();//新建要素属性指标数据动态数组
 
@@ -149,19 +115,20 @@ public class JUtil {
 			ArrayList<JSONArray> propertyValueArr=new ArrayList<JSONArray>();//属性值数组
 //			ArrayList<Double> propertyValue=new ArrayList<Double>();//单个
 			JSONObject featurePropertyObj=featuresArr.getJSONObject(i);
-			String fieldName=featurePropertyObj.getString("市");//市名;
-			//迭代器遍历featurePropertyObj
+			String fieldName="";//迭代器遍历featurePropertyObj
 			Iterator<String > it=featurePropertyObj.keys();
 			while (it.hasNext()){
 				String key=it.next();
 				if(key.equals("市")){
+                    fieldName=featurePropertyObj.getString("市");//市名;
 
-				}else if(!key.equals("区县")){//此时读取属性字段和值
+                }else if(!key.equals("区县")){//此时读取属性字段和值
 					propertyName.add(key);
 					propertyValueArr.add(featurePropertyObj.getJSONArray(key));
 
 				}else {//读取区县一级
 //					JSONArray featuresArr=jsonObject.getJSONArray("features");
+                    featArrList.addAll(getFeatureProForQX(featurePropertyObj.getJSONArray("区县"),timeArr));
 				}
 			}
 			//为单个行政区时间点构造indicator
@@ -189,6 +156,53 @@ public class JUtil {
 
 
 	}
+	public static ArrayList<IndicatorData> getFeatureProForQX(JSONArray featuresArr,JSONArray timeArr){
+	    /**
+	     * @author GiserDu
+	     * @date 2019-04-01 09:51
+	     * @description：根据输入的属性值键值对，提取信息并存储到indicator中
+	      * @Param: featureArr json格式feature数组，每一个代表一个区县的属性数据，包括“区县名”以及其他属性键值对
+         *  @Param: timeArr  json格式的时间点数组
+	     * @return java.util.ArrayList<com.zz.chart.data.IndicatorData>
+	    */
+        ArrayList<IndicatorData> featArrList = new ArrayList<IndicatorData>();//新建要素属性指标数据动态数组
+        for(int i=0;i<featuresArr.size();i++){
+            ArrayList<String> propertyName=new ArrayList<String>();//单个属性名称
+            ArrayList<JSONArray> propertyValueArr=new ArrayList<JSONArray>();//属性值数组
+            JSONObject featurePropertyObj=featuresArr.getJSONObject(i);
+            String fieldName=featurePropertyObj.getString("区县名");//市名;
+
+            Iterator<String > it=featurePropertyObj.keys();
+            while (it.hasNext()){
+                String key=it.next();
+                if(!key.equals("区县名")){//此时读取属性字段和值
+                    propertyName.add(key);
+                    propertyValueArr.add(featurePropertyObj.getJSONArray(key));
+                }
+            }
+            //为单个行政区时间点构造indicator
+            String[] nameStrs = (String[] )propertyName.toArray(new String[propertyName.size()]);
+
+            //Double动态数组转为double数组
+//			double[] valueDbls=new double[propertyValue.size()];
+//			for(int j=0;j<propertyValue.size();j++){
+//				valueDbls[j] = propertyValue.get(j).doubleValue();
+//			}
+            for(int j=0;j<timeArr.size();j++){
+                double[] valueDbls=new double[propertyValueArr.size()];
+                for(int t=0;t<propertyValueArr.size();t++){
+                    valueDbls[t] = propertyValueArr.get(t).getDouble(j);
+                }
+                IndicatorData indicatorData = new IndicatorData(fieldName, nameStrs, valueDbls);
+                indicatorData.setDataTime(timeArr.getString(j));
+                indicatorData.setRegionClass("区县");
+                featArrList.add(indicatorData);//所有indicator不分类全部添加
+
+            }
+        }
+        return featArrList;
+
+    }
 
 	/**通过API获得指标数据
 	 *param: resultStr 输入的json字符串
@@ -289,7 +303,9 @@ public class JUtil {
 	 *return: ClassData[] 分级数据数组
 	 */
 	public static ArrayList<ClassData> getClassDataFromAPI(String resultStr, String dataFieldName,String spatialIdFiled) throws SQLException {
-		MysqlAccessBean mysqlClassData = new MysqlAccessBean();
+        //根据regionName查询geometry并新建ClassData(String name,String code,String region_x,String region_y,String geometry,String data)
+
+        MysqlAccessBean mysqlClassData = new MysqlAccessBean();
 		ResultSet resultSet;
 		Map<String, Class> classMap = new HashMap<String, Class>();
 		classMap.put("features", FeaturesFromAPI.class);
@@ -342,11 +358,159 @@ public class JUtil {
 
 		return classList;
 	}
+	public static ArrayList<ClassData> getClassDataFromAPIV2(String resultStr, String dataFieldName, String regionParam, JSONObject nameAtGeometry) throws SQLException {
+		/**
+		 * @description：根据浙江apiv2返回的字符串，生成分级数据
+		 * @Param: resultStr
+		 * @Param: dataFieldName 分级字段
+		 * @Param: nameAtGeometry JsonObject 名称到geometry的映射键值对。
+		 * @return java.util.ArrayList<com.zz.chart.data.ClassData>
+		 */
+		//根据regionName查询geometry并新建ClassData(String name,String code,String region_x,String region_y,String geometry,String data)
 
-	/**通过Excel获得指标数据
-	 *param: resultStr 输入的json字符串
-	 *return: indicatorDatas 指标数组
-	 */
+		MysqlAccessBean mysqlClassData = new MysqlAccessBean();
+		ResultSet resultSet = null;
+
+		JSONObject jsonObject = JSONObject.fromObject(resultStr);
+		//ArrayList<String> regionName=new ArrayList<String>();//
+		String sql;
+
+		//转为对象时，如果是list或map等需要添加类映射，即指定list或map中的对象类
+
+		//遍历dataFromAPi进行要素属性数据读取
+		JSONArray featList = jsonObject.getJSONArray("features");
+
+		ArrayList<ClassData> classList = new ArrayList<>();
+
+		for (int i = 0; i < featList.size(); i++) {
+			JSONObject eachCityProObj = featList.getJSONObject(i).getJSONObject("featureProperty ");
+			JSONArray timeArr1 = eachCityProObj.getJSONArray("time");
+			String fieldName=eachCityProObj.getString("市");
+			//获取市名，并查询空间数据
+			sql = "SELECT\n" +
+					" region_info_copy1.name, region_info_copy1.citycode,region_info_copy1.x, region_info_copy1.y, region_info_copy1.json\n" +
+					"FROM \n" +
+					"region_info_copy1 \n" +
+					"WHERE \n" +
+					"region_info_copy1.name = '" + fieldName + "';";
+			resultSet = mysqlClassData.query(sql);
+
+			//遍历查询属性值
+			Iterator<String> it = eachCityProObj.keys();
+			while (it.hasNext()) {
+				String key = it.next();
+
+				if (key.equals(dataFieldName) && regionParam.equals("1")) {
+					JSONArray propertyDataArr = eachCityProObj.getJSONArray(key);
+					while (resultSet.next()) {
+						for (int k = 0; k < propertyDataArr.size(); k++) {
+//							ClassData classData = new ClassData(resultSet.getString(1), resultSet.getString(2),
+//									resultSet.getString(3), resultSet.getString(4), resultSet.getString(5), propertyDataArr.getString(k), dataFieldName);
+							//geometry暂时不添加，构建json映射表再添加
+							ClassData classData = new ClassData(resultSet.getString(1), resultSet.getString(2),
+									resultSet.getString(3), resultSet.getString(4), "", propertyDataArr.getString(k), dataFieldName);
+							if(!nameAtGeometry.has(fieldName)){	//该映射关系不存在时才建立
+								nameAtGeometry.put(fieldName,resultSet.getString(5));
+							}
+							classData.setDataTime(timeArr1.getString(k));
+							classList.add(classData);
+						}
+					}
+
+				} else if (key.equals("区县") && regionParam.equals("2")) {//处理区县数据
+					JSONArray featQXArr=eachCityProObj.getJSONArray(key);
+					classList.addAll(getClassDataForQX(featQXArr,mysqlClassData,nameAtGeometry));
+
+				}
+
+			}
+//			for (Map.Entry<String, String> entry : map.entrySet()) {
+//				if (entry.getKey().equals(spatialIdFiled)) {
+//					regionName=entry.getValue();
+//					sql= "SELECT\n" +
+//							" region_info_copy1.name, region_info_copy1.citycode,region_info_copy1.x, region_info_copy1.y, region_info_copy1.json\n" +
+//							"FROM \n" +
+//							"region_info_copy1 \n" +
+//							"WHERE \n" +
+//							"region_info_copy1.name = '"+regionName +"';";
+//					resultSet =mysqlClassData.query(sql);
+//
+//					while (resultSet.next()) {
+//						ClassData classData = new ClassData(resultSet.getString(1),resultSet.getString(2),
+//								resultSet.getString(3),resultSet.getString(4),resultSet.getString(5),"",dataFieldName);
+//						classList.add(classData);
+//					}
+//				}
+//				if(entry.getKey().equals(dataFieldName)) {
+//					try {
+//						dataFieldList.add(String.valueOf( entry.getValue()));
+//					}catch (Exception e){
+//						e.printStackTrace();
+//					}
+//
+//				}
+//			}
+//		}
+//		//赋值
+//		for(int i=0;i<classList.size();i++){
+//			classList.get(i).setData(dataFieldList.get(i));
+//		}
+
+			//根据regionName查询geometry并新建ClassData(String name,String code,String region_x,String region_y,String geometry,String data)
+		}
+		return classList;
+	}
+	public static ArrayList<ClassData> getClassDataForQX(JSONArray featQXArr,MysqlAccessBean mysqlClassData ,JSONObject nameAtGeometry) throws SQLException {
+		ResultSet resultSet=null;
+		ArrayList<ClassData> classList = new ArrayList<>();
+		for(int i=0;i<featQXArr.size();i++){
+			ArrayList<String> propertyName=new ArrayList<>();//单个属性名称
+			ArrayList<JSONArray> propertyValueArr=new ArrayList<>();//属性值数组
+			JSONObject featurePropertyObj=featQXArr.getJSONObject(i);
+			String fieldName=featurePropertyObj.getString("区县名");//市名;
+			JSONArray timeArr=featurePropertyObj.getJSONArray("time");
+			String sql = "SELECT\n" +
+					" region_info_copy1.name, region_info_copy1.coutcode,region_info_copy1.x, region_info_copy1.y, region_info_copy1.json\n" +
+					"FROM \n" +
+					"region_info_copy1 \n" +
+					"WHERE \n" +
+					"region_info_copy1.name = '" + fieldName + "';";
+			resultSet = mysqlClassData.query(sql);
+
+
+			Iterator<String > it=featurePropertyObj.keys();
+			while (it.hasNext()){
+				String key=it.next();
+				if(!key.equals("区县名")){//此时读取属性字段和值
+					propertyName.add(key);
+					propertyValueArr.add(featurePropertyObj.getJSONArray(key));
+					JSONArray propertyDataArr = featurePropertyObj.getJSONArray(key);
+					while (resultSet.next()) {
+						for (int k = 0; k < propertyDataArr.size(); k++) {
+//							ClassData classData = new ClassData(resultSet.getString(1), resultSet.getString(2),
+//									resultSet.getString(3), resultSet.getString(4), resultSet.getString(5), propertyDataArr.getString(k), fieldName);
+							ClassData classData = new ClassData(resultSet.getString(1), resultSet.getString(2),
+									resultSet.getString(3), resultSet.getString(4), "", propertyDataArr.getString(k), fieldName);
+							if(!nameAtGeometry.has(fieldName)){	//该映射关系不存在时才建立
+								nameAtGeometry.put(fieldName,resultSet.getString(5));
+							}
+							classData.setDataTime(timeArr.getString(k));
+							classList.add(classData);
+						}
+					}
+				}
+			}
+
+		}
+		return classList;
+
+	}
+
+
+		/**通过Excel获得指标数据
+         *param: resultStr 输入的json字符串
+         *return: indicatorDatas 指标数组
+         */
 	public static IndicatorData[] getIndicatorDataFromExcel(String resultStr,String[] fieldNames,String spatialIdFiled){
 
 		Map<String, Class> classMap = new HashMap<String, Class>();
@@ -622,7 +786,6 @@ public class JUtil {
 //							IndicatorData indicatorData = new IndicatorData(yearData[j], dataNameStrings, value);
 //							list.add(indicatorData);
 //						}
-//
 //					}
 					IndicatorData indicatorData = new IndicatorData(year, dataNameStrings, value);
 					list.add(indicatorData);
@@ -1214,8 +1377,12 @@ public class JUtil {
 //		}
 //		System.out.println(colorsString);
 //		System.out.println("ok");
-		String testString = JUtil.getCnname("HL,RK_HSZ,RK_SW,RK_SZ,RK_ZY");
-		System.out.println(testString);
+//		String testString = JUtil.getCnname("HL,RK_HSZ,RK_SW,RK_SZ,RK_ZY");
+//		System.out.println(testString);
+		String url="http://zwdc.zjzwfw.gov.cn/CheckServer/rest/external/layerCountAPI?timeType=day&year=(2019_2019)&month=(1_3)&day=(1_31)";
+		String resultString= JUtil.getResultStrFromAPI(url);
+//		ArrayList<ClassData> classList = JUtil.getClassDataFromAPIV2(resultString,"点赞数","1");
+		return;
 	}
 }
 
