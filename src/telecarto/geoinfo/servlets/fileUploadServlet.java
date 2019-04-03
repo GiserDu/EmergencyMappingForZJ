@@ -170,6 +170,15 @@ public class fileUploadServlet extends HttpServlet {
                         message.put("apiCallbackData",ReadGeojson.getPropertiesName());
                         //获取API地址
                         break;
+                    case "APIDataV2":
+                        //浙江第二版api
+                        String apiUrlV2 = request.getParameter("apiUrl");
+
+                        ReadGeojson.doReadGeojsonForAPIV2(apiUrlV2);
+                        System.out.println(ReadGeojson.getPropertiesName());
+                        message.put("apiCallbackData",ReadGeojson.getPropertiesName());
+                        //获取API地址
+                        break;
                     case "chartLayerData":
                         doChartLayer(request,response);
                         break;

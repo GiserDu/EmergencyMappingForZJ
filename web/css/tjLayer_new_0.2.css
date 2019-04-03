@@ -49,9 +49,13 @@ body .tjLayerContent .layui-layer-content{
     display:inline-block;
     vertical-align: top;
     width:-webkit-calc(100% - 130px);/*减号前后要有空格，否则无效，减去的宽度必须计算清楚*/
+    width:-moz-calc(100% - 130px);
+    width: calc(100% - 130px);
     height: 100%;
     /*overflow-x: hidden;*/
     overflow-y: auto;
+
+
 }
 
 .tjPanel-content .layui-tab-title{

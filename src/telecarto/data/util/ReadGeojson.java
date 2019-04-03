@@ -1,5 +1,6 @@
 package telecarto.data.util;
 
+import com.zz.chart.data.IndicatorData;
 import net.sf.json.JSONArray;
 import net.sf.json.JSONObject;
 
@@ -27,8 +28,34 @@ public class ReadGeojson {
 
     private static List<String> propertiesName;
 
+    public  static void doReadGeojsonForAPIV2(String url) {
+        /**
+         * @description：输入url，解析返回字符串，获取键值对的 属性字段名称。浙江v2版本
+         * @Param: url
+         * @return void
+         */
+        String jsonStr = getResultStrFromAPI(url);
+        List<String> keys = new ArrayList<>();
+        JSONObject jsonObject = JSONObject.fromObject(jsonStr);
 
+        JSONArray featuresArr = jsonObject.getJSONArray("features");
+        JSONObject featurePropertyObj = featuresArr.getJSONObject(0).getJSONObject("featureProperty ");
+        Iterator<String> it = featurePropertyObj.keys();
+        //遍历所有键值对
+        while (it.hasNext()) {
+            String key = it.next();
+            if (!key.equals("区县") && !key.equals("市") && !key.equals("time")) {//此时读取属性字段和值
+                keys.add(key);
+            }
+        }
+        propertiesName = keys;
+    }
     public  static void doReadGeojson(String url){
+        /**
+         * @description：输入url，解析返回字符串，获取键值对的 属性字段名称
+          * @Param: url
+         * @return void
+        */
         String inputJson=getResultStrFromAPI(url);
         List<String> keys=new ArrayList<>();
         JSONObject myJson = JSONObject.fromObject(inputJson);
@@ -41,9 +68,6 @@ public class ReadGeojson {
         while(iterator.hasNext()){
             String key = (String) iterator.next();
             keys.add(key);
-            System.out.println(key);
-            String value = firstFeatPro.getString(key);
-            System.out.println(value);
         }
         propertiesName=keys;
     }
@@ -389,7 +413,7 @@ public class ReadGeojson {
 //					"    }" +
 //					"  ]" +
 //					"}";
-            String str = URLEncoder.encode("汇总-按市统计","utf-8");
+
             URL url = new URL(apiUrl2);
             //URL url = new URL("http://115.236.34.34:8668/api/v1/datasets/dizai/"+str+"?year=2017&month=9");
             //URL url = new URL("http://www.baidu.com");
@@ -416,16 +440,7 @@ public class ReadGeojson {
 
     };
     public static String chineseToUnicode(String url) {
-//        String result = "";
-//        for (int i = 0; i < str.length(); i++) {
-//            int chr1 = (char) str.charAt(i);
-//            if (chr1 >= 19968 && chr1 <= 171941) {//汉字范围 \u4e00-\u9fa5 (中文)
-//                result += "\\u" + Integer.toHexString(chr1);
-//            } else {
-//                result += str.charAt(i);
-//            }
-//        }
-//        return result;
+
         Pattern p = Pattern.compile("[\\u4e00-\\u9fa5]");
         //找到中文url中的中文
         Matcher m = p.matcher(url);

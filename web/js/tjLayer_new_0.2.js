@@ -1336,6 +1336,7 @@ function initTjLayer(allTjLayerContent, tjType, regionParamVar) {
         success: function (data) {
             // tjLayerName=JSON.parse(allTjLayerContent).name;
             console.log(url);
+            console.log(data);
             if (data.type==="chartLayer"){
                 doChartLayer(data, allTjLayerContent);
                 if (editFlag == 1){  //编辑图层时，重新生成组合图例
@@ -1547,7 +1548,22 @@ function initTjLayer(allTjLayerContent, tjType, regionParamVar) {
 function changeLayerOnZoom(thisLayer, tjType, regionParamVar, chartLayerN) {
     // var thisLayerContent = JSON.stringify(thisLayer.content);
     console.log(chartLayerN);
-    var url = "./servlet/fileUploadServlet?allTjLayerContent=" + encodeURI(thisLayer.content);
+    // var url = "./servlet/fileUploadServlet?allTjLayerContent=" + encodeURI(thisLayer.content);
+    switch (tjPanel2.tabId){
+        case 1:
+            url= "./servlet/fileUploadServlet?allTjLayerContent=" + encodeURI(thisLayer.content);
+            break;
+        case 2:
+            if(tjType=="chartLayerData"){
+                url= "./servlet/chartLayerFromAPIServlet?allTjLayerContent="+ encodeURIComponent(thisLayer.content);
+            }else if (tjType=="classLayerData"){
+                url= "./servlet/ClassLayerServletForZJ?allTjLayerContent="+ encodeURIComponent(thisLayer.content)
+            }
+            break;
+        case 3:
+            url="./servlet/drawFromExcelServlet?allTjLayerContent="+ encodeURIComponent(thisLayer.content)
+            break;
+    }
     $.ajax({
         type: 'POST',
         url: url,
@@ -1887,7 +1903,7 @@ function OtherDatabase(){
                 url:"./servlet/fileUploadServlet",
                 async:false,
                 dataType:"json",
-                data:{"inputType":"APIData","apiUrl": data.field.dataAddress},
+                data:{"inputType":"APIDataV2","apiUrl": data.field.dataAddress},
                 success: function (data) { //返回tabletree
                     //alert(data);
                     var tableFields = data.apiCallbackData;

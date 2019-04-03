@@ -96,8 +96,9 @@ public class ClassLayerServletForZJ extends HttpServlet {
             //根据输入空间字段，获得该字段值，并查询数据库获取其geometry
             String resultString= JUtil.getResultStrFromAPI(url);
             try {
-                 classList = JUtil.getClassDataFromAPI(resultString,dataFieldName,spatialId);
-
+//                 classList = JUtil.getClassDataFromAPI(resultString,dataFieldName,spatialId);
+                JSONObject nameAtGeometry=new JSONObject();
+                classList = JUtil.getClassDataFromAPIV2(resultString,dataFieldName,regionParam,nameAtGeometry);
                 double maxValue =  Double.parseDouble(classList.get(0).getData());
                 double minValue = Double.parseDouble(classList.get(0).getData());
                 for (int i=0;i<classList.size();i++){
@@ -120,6 +121,7 @@ public class ClassLayerServletForZJ extends HttpServlet {
                 //传输JSON分级grapgics数组到前端
                 classObject.put("classDataArray",classDataArray);
                 classObject.put("dataSource",url);
+                classObject.put("nameAtGeometry",nameAtGeometry);
                 classObject.put("classLegend",imgStreamLegend.replaceAll("[\\s*\t\n\r]", ""));
                 PrintWriter out = response.getWriter();
                 out.print(classObject);
