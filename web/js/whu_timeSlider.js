@@ -39,6 +39,7 @@ function createTimeSlider(graphicByDate,dateIndex) {
         var timeSlider = new TimeSlider({ style: "width: 100%;"}, dom.byId("timeSliderDiv"));
         timeSlider.setThumbCount(1);
         var timeExtent = new TimeExtent();
+        dateIndex = ForwardRankingDate(dateIndex);
         timeExtent.endTime = new Date(dateIndex[dateIndex.length-1]);
         timeExtent.startTime = new Date(dateIndex[0]);
         timeSlider.createTimeStopsByTimeInterval(timeExtent,1, TimeInfo.UNIT_DAYS);
@@ -73,7 +74,7 @@ function displayMapByTime(e,graphicByDate){
     var date = y+'-'+m+'-'+d;
     displayNow = graphicByDate[date];
     console.log(displayNow)
-    if(displayNow.length){
+    if(displayNow&&displayNow.length){
         for(var i=0;i<displayNow.length;i++){
             displayNow[i].show();
         }
@@ -122,3 +123,18 @@ function hasCreated(nameOf) {
         }
     }
 }
+
+//封装的日期排序方法
+function ForwardRankingDate(data) {
+    for (i = 0; i < data.length - 1; i++) {
+         for (j = 0; j < data.length - 1 - i; j++) {
+             console.log(Date.parse(data[j]));
+             if (Date.parse(data[j]) > Date.parse(data[j+1])) {
+                 var temp = data[j];
+                 data[j] = data[j + 1];
+                 data[j + 1] = temp;
+             }
+         }
+     }
+     return data;
+ }
