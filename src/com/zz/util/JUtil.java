@@ -398,12 +398,20 @@ public class JUtil {
 				if (key.equals(dataFieldName) && regionParam.equals("1")) {
 					JSONArray propertyDataArr = eachCityProObj.getJSONArray(key);
 					while (resultSet.next()) {
-						for (int k = 0; k < propertyDataArr.size(); k++) {
+						for (int k = 0; k < timeArr1.size(); k++) {
 //							ClassData classData = new ClassData(resultSet.getString(1), resultSet.getString(2),
 //									resultSet.getString(3), resultSet.getString(4), resultSet.getString(5), propertyDataArr.getString(k), dataFieldName);
 							//geometry暂时不添加，构建json映射表再添加
+                            String data;
+                            // 判断对应字段是否也是时间序列
+                            if(k>=propertyDataArr.size()){
+                                data=propertyDataArr.getString(propertyDataArr.size()-1);
+                            }
+                            else {
+                                data=propertyDataArr.getString(k);
+                            }
 							ClassData classData = new ClassData(resultSet.getString(1), resultSet.getString(2),
-									resultSet.getString(3), resultSet.getString(4), "", propertyDataArr.getString(k), dataFieldName);
+									resultSet.getString(3), resultSet.getString(4), "",data , dataFieldName);
 							if(!nameAtGeometry.has(fieldName)){	//该映射关系不存在时才建立
 								nameAtGeometry.put(fieldName,resultSet.getString(5));
 							}

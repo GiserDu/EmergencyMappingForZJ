@@ -74,7 +74,9 @@ $("#uploadBt").click(function (e) {
         url:"./servlet/EditMapServlet",
         dataType:"json",
         async:false,
-        data:{ "type":"mapInfoUpload","map_id":map_id,"mapTitle":mapTitle,"mapTag":mapTag,"mapInfo":mapInfo,"treeNodes":treeNodes,"picture64":picture64,"userId":userId},
+        // data:{ "type":"mapInfoUpload","map_id":map_id,"mapTitle":mapTitle,"mapTag":mapTag,"mapInfo":mapInfo,"treeNodes":treeNodes,"picture64":picture64,"userId":userId},
+        data:{ "type":"mapInfoUpload","map_id":map_id,"mapTitle":mapTitle,"mapTag":mapTag,"mapInfo":mapInfo,"treeNodes":treeNodes,"picture64":picture64,"userId":"testUser1"},
+
         success: function (data) { //返回json结果
             alert("保存成功");
             window.localStorage.removeItem("userId");

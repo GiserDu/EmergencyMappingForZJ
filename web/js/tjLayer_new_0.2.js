@@ -391,6 +391,7 @@ function modifytjMenuLayer_new(allTjLayerContent) {
             $("#tab"+allTjLayerContent.statisticdata.tabId).click();
         tjPanel2.tableName = allTjLayerContent.statisticdata.tableName;
         $("input[name='dataAddress']").val(allTjLayerContent.statisticdata.dataAddress);
+        $("select[name=thematicMapName]").val(allTjLayerContent.statisticdata.thematicMapName);
         displayFields($("#fieldslist"+allTjLayerContent.statisticdata.tabId),allTjLayerContent.statisticdata.tableFields, allTjLayerContent.statisticdata.yearColomn);
         $("#spatialId"+allTjLayerContent.statisticdata.tabId).siblings(".layui-form-select").find("dd[lay-value="+ allTjLayerContent.statisticdata.spatialId+"]").click();
         if (allTjLayerContent.statisticdata.timeId != year)

@@ -88,9 +88,10 @@ public class ClassLayerServletForZJ extends HttpServlet {
 
         String inputType = request.getParameter("inputType");
         String url=statisticdataJson.getString("dataAddress");
-
+        String legendName="";//图例标题名称
 
         ArrayList<ClassData> classList=new ArrayList<>();
+        ArrayList<ClassData> classListForParam2=new ArrayList<>();
        // if (inputType.equals("APIData")){
             //根据输入空间字段，获得该字段值，并查询数据库获取其geometry
             String resultString= JUtil.getResultStrFromAPI(url);
@@ -99,7 +100,8 @@ public class ClassLayerServletForZJ extends HttpServlet {
                 JSONObject nameAtGeometry=new JSONObject();
                 JSONObject isTimeSeries=new JSONObject();
                 isTimeSeries.put("isTimeSeries",false);
-                classList = JUtil.getClassDataFromAPIV2(resultString,dataFieldName,regionParam,nameAtGeometry,isTimeSeries);
+
+                //读取配置文件
                 String configpath = JUtil.GetWebInfPath()+"/prop/thematicMap.properties";
                 Properties pro = new Properties();
                 pro.load(new InputStreamReader(new BufferedInputStream(new FileInputStream(configpath)),"GBK"));
@@ -107,6 +109,7 @@ public class ClassLayerServletForZJ extends HttpServlet {
                 switch (thematicMapName){
                     case "101"://评价活跃度专题图处理
                         //获取人口数据
+                        classList = JUtil.getClassDataFromAPIV2(resultString,dataFieldName,regionParam,nameAtGeometry,isTimeSeries);
                         JSONObject popObj=JUtil.getThematicDataFromDatabase("population",
                                 "region","population_zj");
                         for(int i=0;i<classList.size();i++){
@@ -115,16 +118,29 @@ public class ClassLayerServletForZJ extends HttpServlet {
 //                            System.out.print(i);
                             classList.get(i).setData( String.valueOf(each_thematicData/each_popData*1000));
                         }
-
+                        legendName="评价活跃度";
                         break;
-                    case "102":
+                    case "102"://事项评价覆盖率专题图处理
+                        classList = JUtil.getClassDataFromAPIV2(resultString,"点评项目数",regionParam,nameAtGeometry,isTimeSeries);
+                        classListForParam2=JUtil.getClassDataFromAPIV2(resultString,"项目总数",regionParam,nameAtGeometry,isTimeSeries);
+                        for(int i=0;i<classList.size();i++){
+                            Double each_thematicData1=Double.parseDouble(classList.get(i).getData());
+                            Double each_thematicData2=Double.parseDouble(classListForParam2.get(i).getData());
+                            System.out.print(i);
+                            classList.get(i).setData( String.valueOf(each_thematicData1/each_thematicData2));
+                        }
+                        legendName="事项评价覆盖率";
                         break;
+                    default:
+                        classList = JUtil.getClassDataFromAPIV2(resultString,dataFieldName,regionParam,nameAtGeometry,isTimeSeries);
+                        legendName=dataFieldName;
                 }
                 double maxValue =  Double.parseDouble(classList.get(0).getData());
                 double minValue = Double.parseDouble(classList.get(0).getData());
                 for (int i=0;i<classList.size();i++){
                     if(Double.parseDouble(classList.get(i).getData())>maxValue){
                         maxValue = Double.parseDouble(classList.get(i).getData());
+                        System.out.print(i);
                     }
                     if(Double.parseDouble(classList.get(i).getData())<minValue){
                         minValue = Double.parseDouble(classList.get(i).getData());
@@ -136,7 +152,7 @@ public class ClassLayerServletForZJ extends HttpServlet {
                 double []classInterval = Classifiter.getIntervals(minValue,maxValue,breakNum,breakMethod);
 
                 //绘制分级图例
-                String imgStreamLegend=drawLegend(classInterval,breakNum,dataFieldName,colors,ip);
+                String imgStreamLegend=drawLegend(classInterval,breakNum,legendName,colors,ip);
                 JSONObject classObject = new JSONObject();
 
                 //传输JSON分级grapgics数组到前端

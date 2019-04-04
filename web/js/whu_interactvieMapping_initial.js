@@ -2358,8 +2358,6 @@ function addModelLayUI(mapName) {
         // if(doMapIndex_Template==0){
         layerNodesObj_Template=$.fn.zTree.init($("#doMapTree_Template"), setting, layerNodes_Model);
 
-        // doMapIndex_Template=1;
-        // }
 
     }
 
@@ -2421,6 +2419,7 @@ function addModelLayUI(mapName) {
                             tjLayerContent.spatialdata = content.spatialdata;
                             tjLayerContent.statisticdata = content.statisticdata;
                             tjLayerContent.cartographydata = content.cartographydata;
+                            tjPanel2.tabId= tjLayerContent.statisticdata.tabId;
                             var str=JSON.stringify(tjLayerContent);
                             var zoomLevel = map.getZoom();
                             if (zoomLevel < 9)
@@ -3969,6 +3968,7 @@ function submitWhenAdd(treeNode){
                         break;
                 }
                 fieldsOrIndi = allTjLayerContent.statisticdata.fieldsName;
+                tjPanel2.tabId=allTjLayerContent.statisticdata.tabId;
                 allTjLayerContent = JSON.stringify(allTjLayerContent);
                 console.log(allTjLayerContent);
                 var zoomLevel = map.getZoom();
