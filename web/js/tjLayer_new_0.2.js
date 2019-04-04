@@ -13,7 +13,7 @@ var allTjLayerContent={};
 // 制图范围数据的json格式
 // var tjPanel1={"tabID":"1","identityField":"value","regionData":"","fileName":""};
 var tjPanel1={};
-var tjPanel2 = {"tabId":1,"dataAddress":"","excelAddress":"","tableName":"","spatialId":"","timeId":"","tableFields":[],"fieldsName":[],"fieldsNum":0,"yearColomn":[]};
+var tjPanel2 = {"tabId":1,"dataAddress":"","excelAddress":"","tableName":"","spatialId":"","timeId":"","tableFields":[],"fieldsName":[],"thematicMapName":"" , "fieldsNum":0,"yearColomn":[]};
 //tjPanel3中有一个key是type，1表示统计图表，2表示分级符号
 var tjPanel3={};
 var zoomOutFlag = 0;
@@ -1266,6 +1266,7 @@ function submitFields(){
                         break;
                     case 2://API数据面板
                         if(tjPanel2.fieldsNum>=1){tjPanel2.fieldsName.push(item)}
+
                         break;
                     case 3://Excel数据面板
                         if(tjPanel2.fieldsNum==1){tjPanel2.timeId=item}
@@ -1282,7 +1283,7 @@ function submitFields(){
                 tjPanel2.fieldsNum++
             });
             tjPanel2.fieldsNum = tjPanel2.fieldsName.length;
-
+            tjPanel2.thematicMapName=$("#thematicMapName").val();
             console.log(tjPanel2);
             $("#selectMappingTemplate").click();
             return false;
@@ -1893,10 +1894,14 @@ function OtherDatabase(){
         var form = layui.form,
             element = layui.element;
         //链接数据库
+
+
         form.on('submit(otherdatabase)', function (data) {
             // layer.alert(JSON.stringify(data.field), {
             //     title: '最终的提交信息'
             // });
+            // $("#thematicMapName").value
+
             tjPanel2.dataAddress = data.field.dataAddress;
             $.ajax({
                 type: 'post',
@@ -2342,8 +2347,15 @@ var originalTjLayerContent='<div class="tjPanel" id="tjPanel">\n' +
     '                                <input type="text" name="dataAddress" lay-verify="dataAddress" autocomplete="off" placeholder="请输入数据链接地址" class="layui-input" style="width: 82%;display: unset;">\n' +
     '                                <button class="layui-btn" lay-submit="" lay-filter="otherdatabase" id="chooseDatabase">链接数据</button>\n' +
     '                            </div>\n' +
+                                '<select name="thematicMapName" id="thematicMapName" lay-verify="" lay-search>' +
+                                    '<option value="100">默认图种</option>' +
+                                    '<option value="101">评价活跃度专题图</option>' +
+                                    '<option value="102">事项评价覆盖率专题图</option>' +
+                                    '<option value="999" >其他</option>' +
+                                '</select>' +
     '                        </form>\n' +
-    '                        <form class="layui-form" action="" lay-filter="OtherDatabase2" id="OtherDatabase2">\n' +
+
+    '                        <form class="layui-form" style="margin-top: 10px" action="" lay-filter="OtherDatabase2" id="OtherDatabase2">\n' +
     '                            <div class="layui-form-item">\n' +
     '                                <div class="layui-row layui-col-space10">\n' +
     '                                    <fieldset class="layui-elem-field" style="text-align:center">\n' +

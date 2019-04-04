@@ -14,10 +14,7 @@ import telecarto.geoinfo.db.MysqlAccessBean;
 import java.awt.*;
 import java.awt.geom.Rectangle2D;
 import java.awt.image.BufferedImage;
-import java.io.BufferedReader;
-import java.io.IOException;
-import java.io.InputStreamReader;
-import java.io.UnsupportedEncodingException;
+import java.io.*;
 import java.net.HttpURLConnection;
 import java.net.URL;
 import java.net.URLEncoder;
@@ -25,10 +22,7 @@ import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.Iterator;
-import java.util.Map;
+import java.util.*;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -358,7 +352,7 @@ public class JUtil {
 
 		return classList;
 	}
-	public static ArrayList<ClassData> getClassDataFromAPIV2(String resultStr, String dataFieldName, String regionParam, JSONObject nameAtGeometry) throws SQLException {
+	public static ArrayList<ClassData> getClassDataFromAPIV2(String resultStr, String dataFieldName, String regionParam, JSONObject nameAtGeometry,JSONObject isTimeSeries) throws SQLException {
 		/**
 		 * @description：根据浙江apiv2返回的字符串，生成分级数据
 		 * @Param: resultStr
@@ -385,8 +379,9 @@ public class JUtil {
 		for (int i = 0; i < featList.size(); i++) {
 			JSONObject eachCityProObj = featList.getJSONObject(i).getJSONObject("featureProperty ");
 			JSONArray timeArr1 = eachCityProObj.getJSONArray("time");
+			if(timeArr1.size()>0) isTimeSeries.put("isTimeSeries",true);
 			String fieldName=eachCityProObj.getString("市");
-			//获取市名，并查询空间数据
+			//获取市名，并查询空间数据,和对应属性数据
 			sql = "SELECT\n" +
 					" region_info_copy1.name, region_info_copy1.citycode,region_info_copy1.x, region_info_copy1.y, region_info_copy1.json\n" +
 					"FROM \n" +
@@ -507,7 +502,29 @@ public class JUtil {
 	}
 
 
-		/**通过Excel获得指标数据
+	public static JSONObject getThematicDataFromDatabase(String thematicFiledName,String regionFieldName,String tableName) throws SQLException {
+		/**
+		 * @description：根据专题名查询数据库中的专题数据
+		  * @Param: thematicFiledName 专题名称
+		  * @Param: regionFieldName 空间字段名称
+		 * @Param: tableName 专题数据表名
+		 * @return net.sf.json.JSONObject
+		*/
+		JSONObject thematicJsObj=new JSONObject();
+		ResultSet resultSet;
+		MysqlAccessBean mysqlClassData = new MysqlAccessBean();
+
+		String sql = "SELECT\n" +regionFieldName+","+ thematicFiledName+
+				" FROM  " +tableName + "; ";
+		resultSet = mysqlClassData.query(sql);
+
+		while (resultSet.next()) {
+			thematicJsObj.put(resultSet.getString(1),resultSet.getString(2));
+		}
+
+		return thematicJsObj;
+	}
+	/**通过Excel获得指标数据
          *param: resultStr 输入的json字符串
          *return: indicatorDatas 指标数组
          */
@@ -1362,7 +1379,7 @@ public class JUtil {
 		return image;
 	}
 	
-	public static void main(String[] args) throws UnsupportedEncodingException, SQLException{
+	public static void main(String[] args) throws IOException, SQLException {
 //		Color color1 = new Color(64, 163, 220,1);
 //		Color color2 = new Color(146, 174, 69,1);
 //		Color color3 = new Color(167, 156, 203,1);
@@ -1379,10 +1396,17 @@ public class JUtil {
 //		System.out.println("ok");
 //		String testString = JUtil.getCnname("HL,RK_HSZ,RK_SW,RK_SZ,RK_ZY");
 //		System.out.println(testString);
-		String url="http://zwdc.zjzwfw.gov.cn/CheckServer/rest/external/layerCountAPI?timeType=day&year=(2019_2019)&month=(1_3)&day=(1_31)";
-		String resultString= JUtil.getResultStrFromAPI(url);
+//		String url="http://zwdc.zjzwfw.gov.cn/CheckServer/rest/external/layerCountAPI?timeType=day&year=(2019_2019)&month=(1_3)&day=(1_31)";
+//		String resultString= JUtil.getResultStrFromAPI(url);
 //		ArrayList<ClassData> classList = JUtil.getClassDataFromAPIV2(resultString,"点赞数","1");
-		return;
+		String configpath = "D:\\Workspaces\\EmergencyMapping1205\\EmergencyMappingForZJ\\EmergencyMappingForZJ\\web\\WEB-INF\\prop\\thematicMap.properties";
+//		InputStream ips = new FileInputStream(configpath,"");
+		Properties pro = new Properties();
+		pro.load(new InputStreamReader(new BufferedInputStream(new FileInputStream(configpath)),"GBK"));
+
+//		pro.load(ips);
+		String mapName = pro.getProperty("101");
+		System.out.print(mapName);
 	}
 }
 

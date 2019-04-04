@@ -22,14 +22,12 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.awt.*;
 import java.awt.image.BufferedImage;
-import java.io.ByteArrayOutputStream;
-import java.io.File;
-import java.io.IOException;
-import java.io.PrintWriter;
+import java.io.*;
 import java.math.BigDecimal;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.ArrayList;
+import java.util.Properties;
 
 @WebServlet(name = "ClassLayerServletForZJ")
 public class ClassLayerServletForZJ extends HttpServlet {
@@ -64,6 +62,7 @@ public class ClassLayerServletForZJ extends HttpServlet {
         JSONObject statisticdataJson=JSONObject.fromObject(dataJson.getJSONObject("statisticdata"));
         String classTableName = statisticdataJson.getString("tableName");
         String spatialId = statisticdataJson.getString("spatialId");
+        String thematicMapName=statisticdataJson.getString("thematicMapName");//专题图名称
 
         String fieldsNames=statisticdataJson.getString("fieldsName");
 //      String year = statisticdataJson.getString("year");
@@ -98,7 +97,29 @@ public class ClassLayerServletForZJ extends HttpServlet {
             try {
 //                 classList = JUtil.getClassDataFromAPI(resultString,dataFieldName,spatialId);
                 JSONObject nameAtGeometry=new JSONObject();
-                classList = JUtil.getClassDataFromAPIV2(resultString,dataFieldName,regionParam,nameAtGeometry);
+                JSONObject isTimeSeries=new JSONObject();
+                isTimeSeries.put("isTimeSeries",false);
+                classList = JUtil.getClassDataFromAPIV2(resultString,dataFieldName,regionParam,nameAtGeometry,isTimeSeries);
+                String configpath = JUtil.GetWebInfPath()+"/prop/thematicMap.properties";
+                Properties pro = new Properties();
+                pro.load(new InputStreamReader(new BufferedInputStream(new FileInputStream(configpath)),"GBK"));
+//                String mapCode = pro.getProperty("url");
+                switch (thematicMapName){
+                    case "101"://评价活跃度专题图处理
+                        //获取人口数据
+                        JSONObject popObj=JUtil.getThematicDataFromDatabase("population",
+                                "region","population_zj");
+                        for(int i=0;i<classList.size();i++){
+                            Double each_thematicData=Double.parseDouble(classList.get(i).getData());
+                            Double each_popData=Double.parseDouble(popObj.getString(classList.get(i).getName()));
+//                            System.out.print(i);
+                            classList.get(i).setData( String.valueOf(each_thematicData/each_popData*1000));
+                        }
+
+                        break;
+                    case "102":
+                        break;
+                }
                 double maxValue =  Double.parseDouble(classList.get(0).getData());
                 double minValue = Double.parseDouble(classList.get(0).getData());
                 for (int i=0;i<classList.size();i++){
@@ -121,6 +142,7 @@ public class ClassLayerServletForZJ extends HttpServlet {
                 //传输JSON分级grapgics数组到前端
                 classObject.put("classDataArray",classDataArray);
                 classObject.put("dataSource",url);
+                classObject.put("isTimeSeries",isTimeSeries.getBoolean("isTimeSeries"));
                 classObject.put("nameAtGeometry",nameAtGeometry);
                 classObject.put("classLegend",imgStreamLegend.replaceAll("[\\s*\t\n\r]", ""));
                 PrintWriter out = response.getWriter();
