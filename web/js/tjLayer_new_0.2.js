@@ -27,6 +27,8 @@ var classifyImg_url = undefined;//分级统计图图例的url
 var chartLayerNum = 1; //当前添加的统计图层数量
 var editFlag = 0; //当前是否是统计图层编辑
 var excelAddress="";
+var mouseMoveHandle;
+var mouseOutHandle;
 
 // 图例按钮的事件
 $("#map-legend").bind({
@@ -601,7 +603,6 @@ function constructTjJson12() {
 }
 
 // 构造符号的json
-
 function constructTjJson3() {
     var selectedIndexNum=tjPanel2.fieldsNum;
 
@@ -1292,6 +1293,9 @@ function submitFields(){
 }
 
 function initTjLayer(allTjLayerContent, tjType, regionParamVar) {
+    //先切断监听，防止重复监听
+    dojo.disconnect(mouseMoveHandle);
+    dojo.disconnect(mouseOutHandle);
     var url;
     $("#legend-container .legend").remove();
     if (tjType == "chartLayerData"){
@@ -1332,10 +1336,8 @@ function initTjLayer(allTjLayerContent, tjType, regionParamVar) {
         url: url,
         async:false,
         dataType:"json",
-        // data:{"inputType":"test"},
         data:{"inputType": tjType, "regionParam": regionParamVar, "chartLayerNum": chartLayerNum},
         success: function (data) {
-            // tjLayerName=JSON.parse(allTjLayerContent).name;
             console.log(url);
             console.log(data);
             if (data.type==="chartLayer"){
@@ -1363,26 +1365,15 @@ function initTjLayer(allTjLayerContent, tjType, regionParamVar) {
             field_cn = fieldsOrIndi;
             console.log(field_cn);
             classifyImg_url = "data:image/png;base64," + classLegend;
-            // if(legendFlag!=0 &&legendFlag == 'classify'){
-            //     $("#classifyLegend").click();                    //触发classifylegend的点击事件
-            // }
-            //ar dataSource = data.dataSource;
-            // console.log(data.dataClassArray);
+
+            //拼接坐标值
+            if(data.nameAtGeometry){
+                for(var i=0;i<data.classDataArray.length;i++){
+                    data.classDataArray[i].geometry = data.nameAtGeometry[data.classDataArray[i].attributes.rgn_name];
+                }
+            }
+
             var classGraphics = initClassLayer(data.classDataArray);
-            // if (map.graphicsLayerIds.length == 0) {
-            //     //可以为graphicLayer添加mouse-over,click等事件;
-            //     //map.removeLayer(baseLayerHB);
-            //     var graphicLayer = new esri.layers.GraphicsLayer();
-            //     graphicLayer.name = "classGLayer";
-            //     //Graphic(geometry,symbol,attributes,infoTemplate)-->infoTemlate为弹出窗体,用以显示信息
-            //     for (var i=0;i<classGraphics.length;i++){
-            //         graphicLayer.add(classGraphics[i]);
-            //     }
-            //     map.addLayer(graphicLayer);
-            //     graphicLayer.setOpacity(0.95);
-            // }
-            // else {
-                //map.removeLayer(baseLayerHB);
                 var flag = 0;
                 for (var i = 0; i < map.graphicsLayerIds.length; i++) {
                     console.log(tjLayerName);
@@ -1394,20 +1385,6 @@ function initTjLayer(allTjLayerContent, tjType, regionParamVar) {
                         }
                         if (layer.name != "classGLayer"){
                             layer.name = "classGLayer";
-                            // var cLN = 0;
-                            // for (var i=0; i<map.graphicsLayerIds.length; i++){
-                            //     if (map.getLayer(map.graphicsLayerIds[i]).name == "chartGLayer"){
-                            //         var thisLayer = map.getLayer(map.graphicsLayerIds[i]);
-                            //         cLN++;
-                            //         var zoomLevel = map.getZoom();
-                            //         if (zoomLevel < 9)
-                            //             changeLayerOnZoom(thisLayer, "chartLayerData", "1", cLN);
-                            //         else
-                            //             changeLayerOnZoom(thisLayer, "chartLayerData", "2", cLN);
-                            //     }
-                            // }
-                            // if (cLN == 0)
-                            //     chartImg_url = "";
                         }
                         layer.content = allTjLayerContent;
                         flag = 1;
@@ -1421,17 +1398,40 @@ function initTjLayer(allTjLayerContent, tjType, regionParamVar) {
                     graphicLayer.name = "classGLayer";
                     graphicLayer.id = tjLayerName;
                     graphicLayer.content = allTjLayerContent;
-                    //Graphic(geometry,symbol,attributes,infoTemplate)-->infoTemlate为弹出窗体,用以显示信息
+                    var dateIndex = [];//获取日期范围
+                    var graphicByDate = {};//用日期存储graphics
                     for (var i=0;i<classGraphics.length;i++){
-                        graphicLayer.add(classGraphics[i]);
+                        if(data.isTimeSeries){//如果是多时序图，先隐藏，而后按日期显示
+                            graphicLayer.add(classGraphics[i]);
+                            classGraphics[i].hide();
+                            var d = classGraphics[i].attributes.dataTime;
+                            //保存日期数组
+                            if(!dateIndex.includes(d)){
+                                dateIndex.push(d)
+                            }
+                            //保存按日期分类的graphic对象，分批show出来
+                            if(graphicByDate[classGraphics[i].attributes.dataTime]){
+                                graphicByDate[classGraphics[i].attributes.dataTime].push(classGraphics[i])
+                            }else{
+                                graphicByDate[classGraphics[i].attributes.dataTime] = [classGraphics[i]]
+                            }
+                            //最后将graphicLayer加到地图中
+                            if(i==classGraphics.length-1){
+                                map.addLayer(graphicLayer);
+                                graphicLayer.setOpacity(0.95);
+                                dateIndex.reverse();
+                                //按照时间序列显示
+                                createTimeSlider(graphicByDate,dateIndex);
+                            }
+                        }else{
+                            graphicLayer.add(classGraphics[i]);
+                            if(i==classGraphics.length-1){
+                                map.addLayer(graphicLayer);
+                                graphicLayer.setOpacity(0.95);
+                            }
+                        }
                     }
-                    map.addLayer(graphicLayer);
-                    graphicLayer.setOpacity(0.95);
                 }
-                // map.removeLayer(baseLayerHB);
-                // graphicLayer.setOpacity(0.9);
-                // refreshChartLyr(indi);
-            // }
 
             //添加鼠标响应事件
             var classLayer;
@@ -1448,16 +1448,16 @@ function initTjLayer(allTjLayerContent, tjType, regionParamVar) {
                     var polyColor;
                     var polyOutline;
                     var polyStyle;
-                    dojo.connect(classLayer, "onMouseOver", function mouseMove(evt) {
+                    //创建鼠标移入处理事件
+                    mouseMoveHandle = dojo.connect(classLayer, "onMouseOver",mouseMove);
+                    function mouseMove(evt) {
                         //这里动态赋予graphicinfoTemplate,如果在生成是就初始化会默认添加鼠标点击事件!!!
                         var g = evt.graphic;
                         if(rgnCode!= g.attributes.rng_code){
                             rgnCode = g.attributes.rng_code;
-                            // console.log(g.symbol);
+
                             polyColor = g.symbol.color;
-                            // polyOutline = {"color":"{r: 255, g: 245, b: 238, a: 1}",
-                            //     "style":"solid",
-                            //     "width":1}
+
                             polyOutline = g.symbol.outline;
                             polyStyle = g.symbol.style;
                             var outline = new esri.symbol.SimpleLineSymbol(esri.symbol.SimpleFillSymbol.STYLE_SOLID,new esri.Color([92,68,187]),3);
@@ -1465,7 +1465,6 @@ function initTjLayer(allTjLayerContent, tjType, regionParamVar) {
                             symbol.outline = outline;
                             g.setSymbol(symbol);
 
-                            //var fieldNameClass = (JSON.parse(classLayer.content)).statisticdata.fieldsName[0];
                             var content = initClassInfoTemplate(g.attributes);
                             var title = g.attributes.rgn_name;
                             map.infoWindow.setContent(content);
@@ -1477,68 +1476,20 @@ function initTjLayer(allTjLayerContent, tjType, regionParamVar) {
                         else {
                             return false;
                         }
-                    });
-                    dojo.connect(classLayer, "onMouseOut", function mouseOut(evt) {
+                    }
+                    //创建鼠标移出处理事件
+                    mouseOutHandle = dojo.connect(classLayer, "onMouseOut",mouseOut);
+                     function mouseOut(evt) {
                         var g = evt.graphic;
                         var symbol = g.symbol;
                         symbol.outline = polyOutline;
-                        // console.log(symbol);
                         g.setSymbol(symbol);
                         map.infoWindow.hide();
                         map.setMapCursor("default");
                         rgnCode = 0;
-                    });
-                    // mouseClickClassLyr = dojo.connect(classLayer, "onClick", function mouseOut(evt) {
-                    //     var g = evt.graphic;
-                    //     var codeParam = g.attributes.rgn_code;
-                    //     var rgn_name = g.attributes.rgn_name;
-                    //     // rgnName = g.attributes.rgn_name;
-                    //     var url;
-                    //     // var geometry = new Object();
-                    //     geometry.x = g.attributes.centerX;
-                    //     geometry.y = g.attributes.centerY;
-                    //
-                    //     for(i in cityArray){
-                    //         if(i==rgn_name){
-                    //             url=cityArray[i];
-                    //             rgnName = rgn_name;
-                    //         }
-                    //     }
-                    //     if(url===undefined){      //确保url不为空，默认为湖北省全图
-                    //         swal({
-                    //             title: "温馨提示",
-                    //             text: "您所选择的区域暂无相关数据",
-                    //             type: "info",
-                    //             showCancelButton: false,
-                    //             confirmButtonText: "确定",
-                    //             closeOnConfirm: false,
-                    //             closeOnCancel: false
-                    //         });
-                    //     }
-                    //     else {
-                    //         changeMap(url,geometry,9);
-                    //         regionParam = codeParam;
-                    //         // for (var i = 0; i < map.graphicsLayerIds.length; i++) {
-                    //         //     if ((map.getLayer(map.graphicsLayerIds[i])).name == "classGLayer") {
-                    //         //         var layer = map.getLayer(map.graphicsLayerIds[i]);
-                    //         //         map.removeLayer(layer);//清空所有graphics
-                    //         //         break;
-                    //         //     }
-                    //         // }
-                    //         refreshClassLyr(field,field_cn,table);
-                    //         if(indi.length !=0){
-                    //             refreshChartLyr(indi);
-                    //         }
-                    //         map.infoWindow.hide();
-                    //         map.setMapCursor("default");
-                    //         baseLayerURL = url;
-                    //     }
-                    // });
-                    // break;
+                    }
                 }
             }
-            // return data;
-
         },
         error:function(){
             alert("sorry!")
@@ -1592,11 +1543,40 @@ function changeLayerOnZoom(thisLayer, tjType, regionParamVar, chartLayerN) {
             else {
                 if (editFlag == 1) //如果当前的操作是编辑或删除图层，得到图例url
                     classifyImg_url = "data:image/png;base64," + data.classLegend;
+
+                //拼接坐标值
+                for(var i=0;i<data.classDataArray.length;i++){
+                    data.classDataArray[i].geometry = data.nameAtGeometry[data.classDataArray[i].attributes.rgn_name];
+                }
+
                 zoomGraphics = initClassLayer(data.classDataArray);
                 // console.log(zoomGraphics);
                 // var layer = thisZoomLayer;
                 thisLayer.clear();//清空所有graphics
+                var dateIndex = [];//获取日期范围
+                var graphicByDate = {};//用日期存储graphics
                 for (var i=0;i<zoomGraphics.length;i++){
+                    if(data.isTimeSeries){//如果是时序图层
+                        thisLayer.add(zoomGraphics[i]);
+                        zoomGraphics[i].hide();
+                        var d = zoomGraphics[i].attributes.dataTime;
+                        //保存日期数组
+                        if(!dateIndex.includes(d)){
+                            dateIndex.push(d)
+                        }
+                        //保存按日期分类的graphic对象，分批show出来
+                        if(graphicByDate[zoomGraphics[i].attributes.dataTime]){
+                            graphicByDate[zoomGraphics[i].attributes.dataTime].push(zoomGraphics[i])
+                        }else{
+                            graphicByDate[zoomGraphics[i].attributes.dataTime] = [zoomGraphics[i]]
+                        }
+                        //最后将graphicLayer加到地图中
+                        if(i==zoomGraphics.length-1){
+                            dateIndex.reverse();
+                            //按照时间序列显示
+                            createTimeSlider(graphicByDate,dateIndex);
+                        }
+                    }
                     thisLayer.add(zoomGraphics[i]);
                 }
                 // thisZoomLayer.content = allTjLayerContent;
@@ -1650,7 +1630,7 @@ function onZoomInLevelBelow10() {
 }
 
 //根据后台传输回来的数据进行面状graphic的生成,并进行ClassLayer的添加
-function initClassLayer (classGraphics) {
+function initClassLayer (classGraphics,data) {
     var graphicArray= new Array();
     // var infoTemplateArray= new Array();
     require(["esri/Color","esri/symbols/SimpleFillSymbol","esri/symbols/SimpleLineSymbol","esri/geometry/webMercatorUtils"],

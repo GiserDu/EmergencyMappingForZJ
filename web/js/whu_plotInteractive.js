@@ -149,7 +149,7 @@ $(document).ready(function() {
                 id:"pointPlotLayer"
 			});
 			pointFeatureLayer.setLabelingInfo([pointLabelClass]);
-           pointFeatureLayer.renderer.label="标绘点";
+            pointFeatureLayer.renderer.label="标绘点";
 			map.addLayer(pointFeatureLayer);
 			var polylineLayerDefinition = {
 				"geometryType": "esriGeometryPolyline",
@@ -1032,3 +1032,10 @@ var savePolygonStyle = function () {
         openPanelContent(['map-marking-panel', 'map-marking-info', 'map-marking-panel-tip'])
     }
 };
+
+$("#iMLegendDiv").on('DOMNodeInserted',function(){
+    //当修改节点时执行,修正图例，去掉标绘的图例
+    $("#iMLegendDiv_polygonPlotLayer").css('display','none');
+    $("#iMLegendDiv_linePlotLayer").css('display','none');
+    $("#iMLegendDiv_pointPlotLayer").css('display','none');
+});
