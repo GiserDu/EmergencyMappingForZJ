@@ -1641,7 +1641,7 @@ function initClassLayer (classGraphics,data) {
                 var polygon = new esri.geometry.Polygon(classGraphics[i].geometry);
                 var polygonXY = webMercatorUtils.geographicToWebMercator(polygon); //经纬度转墨卡托
                 var color = new Color.fromRgb(classGraphics[i].color);
-                var outline = new SimpleLineSymbol(SimpleFillSymbol.STYLE_SOLID,new Color([255,245,238]),1);
+                var outline = new SimpleLineSymbol(SimpleFillSymbol.STYLE_SOLID,new Color([139,58,58]),1);
                 var symbol = new SimpleFillSymbol(SimpleFillSymbol.STYLE_SOLID,outline,color);
                 var attributes = classGraphics[i].attributes;
                 var graphic = new esri.Graphic(polygonXY,symbol,attributes);

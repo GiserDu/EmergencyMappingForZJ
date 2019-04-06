@@ -15,7 +15,7 @@ function createTimeSlider(graphicByDate,dateIndex) {
         dom
     ) {
         $("#timeSliderInfo").css("display", "block");
-        if($("#timeSliderInfo").children().length>2){//先销毁，再创建
+        if($("#timeSliderInfo").children().length>1){//先销毁，再创建
             dijit.byId("timeSliderDiv").destroy();
             $("#timeSliderDiv").remove();
             var newDiv = document.createElement("div");
