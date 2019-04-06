@@ -81,7 +81,7 @@ function displayMapByTime(e,graphicByDate){
     }
 }
 function displayTimeInfo(e) {
-    var info = e.endTime.toUTCString();
+    var info = dateToString(e.endTime);
     require([
         "dojo/dom"
     ], function(dom){
@@ -138,3 +138,18 @@ function ForwardRankingDate(data) {
      }
      return data;
  }
+ 
+ //时间解析函数
+function dateToString(time) {
+    var d = time.getDate();
+    var m = time.getMonth()+1;
+    var y = time.getFullYear();
+    if(d<=9){
+        d = "0"+d
+    }
+    if(m<=9){
+        m = "0"+m
+    }
+    var date = y+'年-'+m+'月-'+d+'日';
+    return date;
+}
