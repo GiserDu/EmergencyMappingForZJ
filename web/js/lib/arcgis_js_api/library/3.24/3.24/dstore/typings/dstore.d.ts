@@ -238,12 +238,12 @@ declare module 'dstore/db/SQL' {
 	export = SQL;
 }
 
-declare module 'dstore/db/LocalStorage' {
+declare module 'dstore/db/sessionStorage' {
 	import LocalDB = require('dstore/LocalDB');
 
-	class LocalStorageDB<T> extends LocalDB<T> {}
+	class sessionStorageDB<T> extends LocalDB<T> {}
 
-	export = LocalStorageDB;
+	export = sessionStorageDB;
 }
 
 declare module 'dstore/Trackable' {

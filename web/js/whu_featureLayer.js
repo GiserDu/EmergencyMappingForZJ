@@ -204,7 +204,7 @@ var defaultStyle ={
     }
 }
 //模拟数据 根据尺度选择不同的模板
-var template_scale = localStorage.getItem("template_scale");
+var template_scale = sessionStorage.getItem("template_scale");
 var error = {};
 
 var template_name="";
@@ -222,11 +222,11 @@ switch (template_scale) {
 
 //通过后台获取模板（也就是后台每个表里six_lzjtu_layer里的json，如果为空，则使用缺省值）
 (function getTemplate() {
-    var disaster_status = localStorage.getItem("disaster_status");
-    var disaster_type = localStorage.getItem("disaster_type");
-    var template_scale = localStorage.getItem("template_scale");
-    var template_theme = localStorage.getItem("template_theme");
-    var template_map = localStorage.getItem("template_map");
+    var disaster_status = sessionStorage.getItem("disaster_status");
+    var disaster_type = sessionStorage.getItem("disaster_type");
+    var template_scale = sessionStorage.getItem("template_scale");
+    var template_theme = sessionStorage.getItem("template_theme");
+    var template_map = sessionStorage.getItem("template_map");
     $("#mapNameInfo").html(template_map);
     var url = "./servlet/GetTemplateLayer?disasterStatus="+disaster_status+"&disasterType="+disaster_type+"&templateScale="+template_scale+"&templateTheme="+template_theme+"&templateMap="+template_map+"&queryType=queryLayer";
     $.ajax({

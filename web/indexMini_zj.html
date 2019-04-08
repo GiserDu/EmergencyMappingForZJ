@@ -141,13 +141,13 @@
 		});
 		
 		$(".btn-info").click(function(){
-			localStorage.setItem("disaster_status","灾中");
-            localStorage.setItem("disaster_type","transport");
-            localStorage.setItem("regionParam","1");
-            localStorage.setItem("template_map",this.innerText);
-            localStorage.setItem("template_scale","区域");
-            localStorage.setItem("template_theme","应急信息");
-            localStorage.setItem("templateHome", "0");
+			sessionStorage.setItem("disaster_status","灾中");
+            sessionStorage.setItem("disaster_type","transport");
+            sessionStorage.setItem("regionParam","1");
+            sessionStorage.setItem("template_map",this.innerText);
+            sessionStorage.setItem("template_scale","区域");
+            sessionStorage.setItem("template_theme","应急信息");
+            sessionStorage.setItem("templateHome", "0");
 
             if(self!=top){
                 //关闭子窗口并弹出新的layUI

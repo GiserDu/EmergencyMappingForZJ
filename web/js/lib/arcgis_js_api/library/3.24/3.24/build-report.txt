@@ -68,7 +68,7 @@ info(100) Assumed module uses legacy loader API.
 	module: dojox/sql/_base
 	module: dojox/sql/_crypto
 	module: dojox/storage/AirDBStorageProvider
-	module: dojox/storage/AirEncryptedLocalStorageProvider
+	module: dojox/storage/AirEncryptedsessionStorageProvider
 	module: dojox/storage/AirFileStorageProvider
 	module: dojox/storage/BehaviorStorageProvider
 	module: dojox/storage/CookieStorageProvider
@@ -3030,13 +3030,13 @@ info(102) Optimizing module
 	module: dojox/sql/_base
 	module: dojox/sql/_crypto
 	module: dojox/storage/AirDBStorageProvider
-	module: dojox/storage/AirEncryptedLocalStorageProvider
+	module: dojox/storage/AirEncryptedsessionStorageProvider
 	module: dojox/storage/AirFileStorageProvider
 	module: dojox/storage/BehaviorStorageProvider
 	module: dojox/storage/CookieStorageProvider
 	module: dojox/storage/FlashStorageProvider
 	module: dojox/storage/GearsStorageProvider
-	module: dojox/storage/LocalStorageProvider
+	module: dojox/storage/sessionStorageProvider
 	module: dojox/storage/manager
 	module: dojox/storage/Provider
 	module: dojox/storage/WhatWGStorageProvider
@@ -3519,7 +3519,7 @@ info(102) Optimizing module
 	module: dstore/charting/StoreSeries
 	module: dstore/db/has
 	module: dstore/db/IndexedDB
-	module: dstore/db/LocalStorage
+	module: dstore/db/sessionStorage
 	module: dstore/db/SQL
 	module: dstore/legacy/DstoreAdapter
 	module: dstore/legacy/StoreAdapter

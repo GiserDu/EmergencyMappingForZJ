@@ -111,8 +111,8 @@ function refreshMaps() {
     $(".img-responsive").click(function () {
         // 获取到地图id值
         console.log($(this).attr('mapid'));
-        localStorage.setItem("mapId", $(this).attr('mapid'));
-        localStorage.setItem("mappingType", "readOnly");
+        sessionStorage.setItem("mapId", $(this).attr('mapid'));
+        sessionStorage.setItem("mappingType", "readOnly");
         window.location.href = "interactiveMapping.html"+"?"+"mappingType=readOnly&"+ "mapId="+$(this).attr('mapid');
 
     });
@@ -178,8 +178,8 @@ $(".form-control.search-key").bind("input propertychange",function(event){
 //（有后台版）先清空gallery-row，然后循环添加图片的div，最后添加添加图片的div
 function initMapList() {
     //清空mapId
-    window.localStorage.removeItem("mapId");
-    window.localStorage.setItem("userId",$('.username a').text());
+    window.sessionStorage.removeItem("mapId");
+    window.sessionStorage.setItem("userId",$('.username a').text());
     var type = "initManage";
     var init_url = "./servlet/GetThematicMapServlet?type=" + type;
     $.ajax({
@@ -208,7 +208,7 @@ function initMapList() {
                     $('.selectpicker.map-tag').append('<option>'+tag+'</option>');
                 }
                 var mapTagsStr=JSON.stringify(Array.from(mapTags));
-                window.localStorage.setItem("map_tag",mapTagsStr);
+                window.sessionStorage.setItem("map_tag",mapTagsStr);
             sortFilter("时间顺序");
             refreshMaps();
         },
@@ -246,8 +246,8 @@ $(document).on('click','.icon.edit',function(e){
     // 获取到地图id值
     var tmpMapId=$(this).parent().find("img").attr("mapid")
     console.log(tmpMapId);
-    localStorage.setItem("mapId", tmpMapId);
-    localStorage.setItem("mappingType", "edit");
+    sessionStorage.setItem("mapId", tmpMapId);
+    sessionStorage.setItem("mappingType", "edit");
     window.location.href = "interactiveMapping.html"+"?"+"mappingType=edit&"+ "mapId="+tmpMapId;
 
 });
@@ -260,7 +260,7 @@ $(document).on('click','.icon.info',function(e){
 
 // 我要制图按钮点击事件
 $(".to-mapping").click(function () {
-    localStorage.setItem("mappingType", "blank"); //记录当前制图页面的类别 blank：普通制图；edit：用户地图编辑；readOnly：用户地图查看
+    sessionStorage.setItem("mappingType", "blank"); //记录当前制图页面的类别 blank：普通制图；edit：用户地图编辑；readOnly：用户地图查看
     // window.location.href="interactiveMapping.html";
     window.location.href = "interactiveMapping.html"+"?"+"mappingType=blank&"+ "mapId=";
 

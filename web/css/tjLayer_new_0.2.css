@@ -27,7 +27,7 @@ body .tjLayerContent .layui-layer-content{
     box-sizing: border-box;
     display:inline-block;/*两个子元素都设置为inline-block*/
     vertical-align: top; /*两个inline-block的盒子，必须两个子元素都顶端对齐。*/
-    width:125px;
+    float: left;
     height: 100%;
     background-color: #393d49;
 }

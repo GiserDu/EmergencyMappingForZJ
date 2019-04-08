@@ -65,8 +65,8 @@ function findDimensions() {
 //构造主题
 function createRule() {
     $("#templateTypeList").empty();
-    var disaster_status = localStorage.getItem("disaster_status");
-    var disaster_type = localStorage.getItem("disaster_type");
+    var disaster_status = sessionStorage.getItem("disaster_status");
+    var disaster_type = sessionStorage.getItem("disaster_type");
     var url = "./servlet/GetTemplateContent?disasterStatus="+disaster_status+"&disasterType="+disaster_type+"&queryType=queryTheme";
     $.ajax({
         url: url,
@@ -97,10 +97,10 @@ function createRule() {
 
 //构造主题下的模板	
 function createImg(thistheme) {
-    localStorage.setItem("template_theme", thistheme);
+    sessionStorage.setItem("template_theme", thistheme);
     $("#LAY_demo2").empty();
-    var disaster_status = localStorage.getItem("disaster_status");
-    var disaster_type = localStorage.getItem("disaster_type");
+    var disaster_status = sessionStorage.getItem("disaster_status");
+    var disaster_type = sessionStorage.getItem("disaster_type");
     var url = "./servlet/GetTemplateContent?disasterStatus="+disaster_status+"&disasterType="+disaster_type+"&queryType=queryMaps&disasterGroup="+thistheme;
     $.ajax({
         url: url,
@@ -147,10 +147,10 @@ function createImg(thistheme) {
                 }else if(scale.indexOf("省")!=-1){
                     regionParam=1;
                 }
-                localStorage.setItem("regionParam", regionParam);
-                localStorage.setItem("template_scale", scale);
-                localStorage.setItem("template_map", map);
-                localStorage.setItem("templateHome", "1");
+                sessionStorage.setItem("regionParam", regionParam);
+                sessionStorage.setItem("template_scale", scale);
+                sessionStorage.setItem("template_map", map);
+                sessionStorage.setItem("templateHome", "1");
 
 
                 // window.location.href='Mapping.html';
@@ -178,14 +178,14 @@ function createImg(thistheme) {
 
 function searchImg(){
     var keywords = document.getElementById("inputSearch").value;
-    localStorage.setItem("template_name", keywords);
+    sessionStorage.setItem("template_name", keywords);
     if(keywords == '')
         alert("请输入关键字！");
     else{
         console.log(keywords);
         $("#LAY_demo2").empty();
-        var disaster_status = localStorage.getItem("disaster_status");
-        var disaster_type = localStorage.getItem("disaster_type");
+        var disaster_status = sessionStorage.getItem("disaster_status");
+        var disaster_type = sessionStorage.getItem("disaster_type");
         var url = "./servlet/GetTemplateContent?disasterStatus="+disaster_status+"&disasterType="+disaster_type+"&queryType=searchMaps&disasterName="+keywords;
         $.ajax({
             url: url,
@@ -232,9 +232,9 @@ function searchImg(){
                     }else if(scale.indexOf("省")!=-1){
                         regionParam=1;
                     }
-                    localStorage.setItem("regionParam", regionParam);
-                    localStorage.setItem("template_scale", scale);
-                    localStorage.setItem("template_map", map);
+                    sessionStorage.setItem("regionParam", regionParam);
+                    sessionStorage.setItem("template_scale", scale);
+                    sessionStorage.setItem("template_map", map);
                     window.location.href='Mapping.html';
 
 

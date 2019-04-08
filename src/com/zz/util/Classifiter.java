@@ -68,6 +68,8 @@ public class Classifiter {
             classObjectAttr.put("centerX",classList.get(i).getX());
             classObjectAttr.put("centerY",classList.get(i).getY());
             classObjectAttr.put("dataTime",classList.get(i).getDataTime());
+            classObjectAttr.put("otherDataLabel",classList.get(i).getOtherDataLabel());
+            classObjectAttr.put("otherDataValue",classList.get(i).getOtherDataValue());
             classObjectAttr.put("label",classList.get(i).getLabel());
             if(classInterval == null){
                 classObject.put("color",colors[0]);

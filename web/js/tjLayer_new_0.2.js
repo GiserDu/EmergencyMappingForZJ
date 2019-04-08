@@ -222,152 +222,6 @@ function opentjMenuLayer() {
     })
 }
 
-// 当用户修改时弹出的面板
-function modifytjMenuLayer(symbolInfo) {
-    var symPara1=0,
-        symPara2=0,
-        symPara3=0,
-        symPara4=0;
-
-    var type=parseInt(symbolInfo.type);
-    if(type==1){
-        symPara1=symbolInfo.symbolSizeSliderValue;
-        symPara2=symbolInfo.symbolOpacitySliderValue;
-        $("#xOffset").val(symbolInfo.xoffset);
-        $("#yOffset").val(symbolInfo.yoffset);
-
-    }else if(type==2){
-        symPara3=symbolInfo.symbolOpacitySliderValue;
-        symPara4=symbolInfo.classNumSliderValue;
-    }
-
-
-    layui.use(['layer','form','element'],function () {
-        var layer = layui.layer
-            ,element = layui.element
-            ,form=layui.form;
-
-        opentjPanel2();
-
-        //复原第二个面板
-        //获取select和checkbox
-        var select = $("input[class='layui-input layui-unselect']").val();
-        var checkboxes = $(fieldslist).find(".layui-form-checkbox.layui-form-checked");
-        var checkName = [];
-        $.each(checkboxes,function(index,item){
-            checkName.push($(item).find("span").html());
-        });
-        //重新渲染并赋值
-        form.render();
-        //方式一：保留dom
-        $("#spatialId"+tjPanel2.tabId).siblings("div.layui-form-select").find("dl").find("dd[lay-value="+select+"]").click();
-        $.each(checkName,function(index,item){
-            $("input[name="+item+"]").prop('checked', true);
-            $("input[name="+item+"]").next().addClass('layui-form-checked');
-        });
-        // //方式二：个别存值
-        // $("#spatialId"+tjPanel2.tabId).siblings("div.layui-form-select").find("dl").find("dd[lay-value="+ allTjLayerContent.statisticdata.spatialId+"]").click();
-        // $.each(allTjLayerContent.statisticdata.fieldsName,function(index,item){
-        //     $("input[name="+item+"]").prop('checked', true);
-        //     $("input[name="+item+"]").next().addClass('layui-form-checked');
-        // });
-
-        $("#fieldslist"+tjPanel2.tabId).next().find("button[lay-filter='fields']")[0].click();//辅助用户点击“下一步”，获取当前指标
-
-        // 复原第三个面板
-        // 获取分级模型的select
-        var selectedModelName=symbolInfo.modelName;
-        $("#model").siblings("div.layui-form-select").find("dl").find("dd[lay-value="+selectedModelName+"]").click();
-        var isColorInverse=symbolInfo.isColorInverse;
-        if(isColorInverse){
-            $('#isColorInverse').prop('checked', true);
-            $('#isColorInverse').next().addClass('layui-form-checked');
-        }
-        // ======================
-        listenOnSymbolTitleClick();
-
-        userDefineChartColor();
-        // ==========================
-
-        // var slidersValues=[1,2,3,4];
-        setSlidersValue(symPara1,symPara2,symPara3,symPara4);
-
-        element.on('nav(navDemo)', function(elem){
-            // console.log(elem);
-
-            var leftMenuName=elem.attr('name');
-            var selectedIndexNum;
-
-            if (leftMenuName=="selectStatistics") {
-                // $(".tjPanel-content").html(html2);
-
-                $("#tjPanel-content2").show();
-                $("#tjPanel-content3").hide();
-                $("#tjPanel-content4").hide();
-                // opentjPanel2();
-
-
-            } else if(leftMenuName=="selectMappingTemplate") {
-
-                $("#fieldslist"+tjPanel2.tabId).next().find("button[lay-filter='fields']")[0].click();//辅助用户点击“下一步”，获取当前指标
-
-                selectedIndexNum=tjPanel2.fieldsNum;
-
-                if (selectedIndexNum==0){
-                    alert('请选择统计指标');
-                    elem.parent().removeClass("layui-this");
-                    elem.parent().prev().addClass("layui-this");
-
-                } else if(selectedIndexNum==1){
-                    // $(".tjPanel-content").html(html4);
-
-                    $("#tjPanel-content2").hide();
-                    $("#tjPanel-content3").hide();
-                    $("#tjPanel-content4").show();
-
-                    var isSymbolLoaded=$("#tjPanel-content4").attr("isloaded");
-                    if (isSymbolLoaded=="false") {
-                        initTjGraduatedSymbol();
-                        $("#tjPanel-content4").attr("isloaded","true");
-                    };
-                    listenOnSymbolTitleClick();
-
-
-                    // initTjGraduatedSymbol();
-                    // renderSlider();
-                    // setSlidersValue(symbolSizeSliderValue,symbolOpacitySliderValue,symbolOpacitySliderValue,classNumSliderValue);
-                    // form.render();
-
-                    // clickAndLoadAllInfo();
-
-
-                }else {
-                    // $(".tjPanel-content").html(html3);
-                    $("#tjPanel-content2").hide();
-                    $("#tjPanel-content3").show();
-                    $("#tjPanel-content4").hide();
-
-                    var isSymbolLoaded=$("#tjPanel-content3").attr("isloaded");
-                    if (isSymbolLoaded=="false") {
-                        initTjChartSymbol();
-                        $("#tjPanel-content3").attr("isloaded","true");
-                    };
-                    listenOnSymbolTitleClick();
-
-                    // initTjChartSymbol();
-                    // renderSlider();
-                    // setSlidersValue(symbolSizeSliderValue,symbolOpacitySliderValue,symbolOpacitySliderValue,classNumSliderValue);
-                    form.render();
-                    userDefineChartColor();
-                    // clickAndLoadAllInfo();
-
-                }
-            }
-        });
-        element.render('nav');
-    })
-}
-
 // 当用户修改时弹出的面板_新_测试
 function modifytjMenuLayer_new(allTjLayerContent) {
     editFlag = 1;
@@ -392,6 +246,7 @@ function modifytjMenuLayer_new(allTjLayerContent) {
         tjPanel2.tableName = allTjLayerContent.statisticdata.tableName;
         $("input[name='dataAddress']").val(allTjLayerContent.statisticdata.dataAddress);
         $("select[name=thematicMapName]").val(allTjLayerContent.statisticdata.thematicMapName);
+        $("#chooseDatabase").click();
         displayFields($("#fieldslist"+allTjLayerContent.statisticdata.tabId),allTjLayerContent.statisticdata.tableFields, allTjLayerContent.statisticdata.yearColomn);
         $("#spatialId"+allTjLayerContent.statisticdata.tabId).siblings(".layui-form-select").find("dd[lay-value="+ allTjLayerContent.statisticdata.spatialId+"]").click();
         if (allTjLayerContent.statisticdata.timeId != year)
@@ -1439,12 +1294,6 @@ function initTjLayer(allTjLayerContent, tjType, regionParamVar) {
             for (var i = 0; i < map.graphicsLayerIds.length; i++) {
                 if ((map.getLayer(map.graphicsLayerIds[i])).name == "classGLayer") {
                     classLayer = map.getLayer(map.graphicsLayerIds[i]);
-                    //取消事件绑定
-                    /*if(mouseMoveClassLyr!=undefined && mouseOutClassLyr!=undefined){
-                        dojo.disconnect(mouseMoveClassLyr);
-                        dojo.disconnect(mouseOutClassLyr);
-                        // dojo.disconnect(mouseClickClassLyr);
-                    }*/
                     var rgnCode = 0;
                     var polyColor;
                     var polyOutline;
@@ -1858,6 +1707,9 @@ function initClassInfoTemplate(attributes) {
 
     var attrString = '<p><strong>区域名称 : </strong>' + attributes.rgn_name + '</p>';
     attrString += '<p><strong>'+ attributes.label +' : </strong>' + attributes.data + '</p>';
+    for(var i=0,len=attributes.otherDataLabel.length;i<len;i++){
+        attrString += '<p><strong>'+ attributes.otherDataLabel[i] +' : </strong>' + attributes.otherDataValue[i] + '</p>';
+    }
     attrString += '<p><strong>分级级别 : </strong>' + attributes.rgn_class + '</p>';
     // attrString += '<p><strong>数据来源 : </strong>' + dataSource + '</p>';
     // classifyImg_url = "data:image/png;base64," + classLegend;
@@ -1875,7 +1727,6 @@ function OtherDatabase(){
         var form = layui.form,
             element = layui.element;
         //链接数据库
-
 
         form.on('submit(otherdatabase)', function (data) {
             // layer.alert(JSON.stringify(data.field), {
@@ -2329,10 +2180,10 @@ var originalTjLayerContent='<div class="tjPanel" id="tjPanel">\n' +
     '                                <button class="layui-btn" lay-submit="" lay-filter="otherdatabase" id="chooseDatabase">链接数据</button>\n' +
     '                            </div>\n' +
                                 '<select name="thematicMapName" id="thematicMapName" lay-verify="" lay-search>' +
-                                    '<option value="100">默认图种</option>' +
+                                    '<option value="099">自定义图种</option>' +
                                     '<option value="101">评价活跃度专题图</option>' +
                                     '<option value="102">事项评价覆盖率专题图</option>' +
-                                    '<option value="999" >其他</option>' +
+
                                 '</select>' +
     '                        </form>\n' +
 

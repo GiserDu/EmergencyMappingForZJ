@@ -161,7 +161,7 @@ Use CSS with `.field-<fieldname>` (or custom `className`) selectors instead.
 The only time a `width` column property is supported is when using the
 [ColumnResizer](../components/extensions/ColumnResizer.md) extension, specifically
 for the purpose of allowing column sizes to be programmatically restored if they
-are persisted (e.g. via `localStorage`).  In all other cases, using CSS to set column widths
+are persisted (e.g. via `sessionStorage`).  In all other cases, using CSS to set column widths
 is heavily recommended.
 
 ### cellType, widgetClass
