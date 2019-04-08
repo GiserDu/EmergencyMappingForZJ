@@ -1,7 +1,6 @@
 var map;//没有使用var声明的变量，会成为全局对象window的属性,这里仅仅声明map为一个全局变量!
 var tb;//toolbar,绘制用
 var featureLayerTree;
-var baseLayerHB;
 var baseLayerURL;//用于进行矢量,影像底图切换时,保证当前行政区划底图的url
 var zjBaseLayer;
 var winWidth=0;
@@ -19,7 +18,6 @@ var doMapIndex_Template =0;//模板制图目录树表示
 var ARIndex=0;//行政区目录树表示，0表示为构造，1表示构造
 var studyAreaLayer;//制图区域
 var ServerLayerArr=[];//专题服务数组
-var iframeWinIndex //制图模板弹窗索引
 var layerNodesObj;
 var layerNodesObj_Template;// 模板制图树对象
 var selectedNode; //当前选择的要素节点
@@ -231,7 +229,8 @@ $(document).ready(function() {
     }
     else {
         $("#templateMap").css("display", "none");
-        var userMapId = localStorage.getItem("mapId");
+        // var userMapId = sessionStorage.getItem("mapId");
+        var userMapId=getUrlParams(window.location.href).mapId;
         addModelLayUI(userMapId);
     }
     if (mappingPageType == 2) {
@@ -240,6 +239,7 @@ $(document).ready(function() {
     }
     else if (mappingPageType == 1)
         $("#plotButton").css("display", "none");
+
     window.onbeforeunload=function(e) {
         var unloads = isSaved;
         if (unloads == 0) {
@@ -1265,7 +1265,7 @@ function sweetAlert1(mapName) {
             polylineFeatureLayer.clear();
             pointFeatureLayer.clear();
             //删除本地和缓存的标绘图形
-            deleteAllFeatureFromLocalstorage();
+            deleteAllFeatureFromsessionStorage();
             //移除所有图层
             map.removeAllLayers();
             //将清将清空graphics的图层加上，因为后面还要标绘。
@@ -1322,11 +1322,11 @@ function addModelLayUI(mapName) {
     var userMapName;
     //根据本地存储获取模板
     (function getTemplate() {
-        var disaster_status = localStorage.getItem("disaster_status");
-        var disaster_type = localStorage.getItem("disaster_type");
-        var template_scale = localStorage.getItem("template_scale");
-        var template_theme = localStorage.getItem("template_theme");
-        var template_map = localStorage.getItem("template_map");
+        var disaster_status = sessionStorage.getItem("disaster_status");
+        var disaster_type = sessionStorage.getItem("disaster_type");
+        var template_scale = sessionStorage.getItem("template_scale");
+        var template_theme = sessionStorage.getItem("template_theme");
+        var template_map = sessionStorage.getItem("template_map");
         // $("#mapNameInfo").html(template_map);
         var url = "";
         if (mappingPageType == 0)
@@ -2539,7 +2539,7 @@ function blank_btnClick() {
             polylineFeatureLayer.clear();
             pointFeatureLayer.clear();
             //删除本地和缓存的标绘图形
-            deleteAllFeatureFromLocalstorage();
+            deleteAllFeatureFromsessionStorage();
             //移除所有图层
             map.removeAllLayers();
             //将清将清空graphics的图层加上，因为后面还要标绘。

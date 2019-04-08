@@ -59,25 +59,25 @@ function stringDivider(str, width, spaceReplacer) {
 }
 
 /**
- * localstorage 储存对象
+ * sessionStorage 储存对象
  * @param {*} key 
  * @param {*} obj 对象
  */
-function localstorageSet(key, obj) {
+function sessionStorageSet(key, obj) {
     if (obj) {
         var save = JSON.stringify(obj);
-        localStorage.setItem(key, save);
+        sessionStorage.setItem(key, save);
     }
 }
 
 /**
- * localstorage 获取对象
+ * sessionStorage 获取对象
  * @param {*} key 
  */
-function localstorageGet(key) {
+function sessionStorageGet(key) {
     var out = null;
     if (key) {
-        var data = localStorage.getItem(key);
+        var data = sessionStorage.getItem(key);
         if (data) {
             out = JSON.parse(data);
         }

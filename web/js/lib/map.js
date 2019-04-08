@@ -205,7 +205,7 @@ window.onload = function () {
             document.getElementById('map-center').innerHTML = '地图视图中心点：' + formatDegree(lngLat[0], 0, 2) + '&nbsp;&nbsp;' + formatDegree(lngLat[1], 1, 2)
         });
         map.on('click', function (evt) {});
-        var arcgisFeatureCacheListCache = localstorageGet('arcgisFeatureCacheList');
+        var arcgisFeatureCacheListCache = sessionStorageGet('arcgisFeatureCacheList');
         if (arcgisFeatureCacheListCache) {
             var pointFeature = [];
             for (var index = 0; index < arcgisFeatureCacheListCache.length; index++) {
@@ -340,7 +340,7 @@ var addDrawInteraction = function (type) {
                     break
                 }
                 openPanelContent(['map-marking-panel', 'map-marking-info', 'map-marking-panel-tip']);
-                addFeatureToLocalstorage(lastDrawFeature)
+                addFeatureTosessionStorage(lastDrawFeature)
             })
         })
     }
@@ -430,7 +430,7 @@ var modifyFunc = function (graphic) {
             var feature = evt.graphic;
             var style = feature.attributes['style'];
             markStyle = style;
-            addFeatureToLocalstorage(feature)
+            addFeatureTosessionStorage(feature)
         })
     })
 };
@@ -468,7 +468,7 @@ var deleteFunc = function (graphic) {
             polygonFeatureLayer.remove(graphic);
             break
         }
-        deleteFeatureFromLocalstorage(graphic);
+        deleteFeatureFromsessionStorage(graphic);
         layer.close(layui_index)
     })
 };
@@ -777,7 +777,7 @@ var infoSave = function () {
     lastDrawFeature.attributes['style'] = markStyle;
     var obj1 = document.getElementById('map-marking-info');
     removeClass(obj1, "show");
-    addFeatureToLocalstorage(lastDrawFeature)
+    addFeatureTosessionStorage(lastDrawFeature)
 };
 var infoDelete = function () {
     if (lastDrawFeature) {
@@ -786,12 +786,12 @@ var infoDelete = function () {
     }
     openPanelContent(['map-marking-panel', 'map-marking-panel-tip'])
 };
-var addFeatureToLocalstorage = function (feature) {
+var addFeatureTosessionStorage = function (feature) {
     require(["esri/symbols/SimpleLineSymbol", "esri/symbols/SimpleFillSymbol", "esri/symbols/PictureMarkerSymbol", "esri/Color", ], function (SimpleLineSymbol, SimpleFillSymbol, PictureMarkerSymbol, Color) {
-        var arcgisFeatureCacheList = localstorageGet('arcgisFeatureCacheList');
+        var arcgisFeatureCacheList = sessionStorageGet('arcgisFeatureCacheList');
         if (!arcgisFeatureCacheList) {
             arcgisFeatureCacheList = [];
-            localstorageSet('arcgisFeatureCacheList', [])
+            sessionStorageSet('arcgisFeatureCacheList', [])
         };
         var saveFeature = null;
         var symbol = null;
@@ -834,15 +834,15 @@ var addFeatureToLocalstorage = function (feature) {
             if (!existed) {
                 arcgisFeatureCacheList.push(saveFeature)
             }
-            localstorageSet('arcgisFeatureCacheList', arcgisFeatureCacheList)
+            sessionStorageSet('arcgisFeatureCacheList', arcgisFeatureCacheList)
         }
         pointFeatureLayer.refresh();
         polylineFeatureLayer.refresh();
         polygonFeatureLayer.refresh()
     })
 };
-var deleteFeatureFromLocalstorage = function (feature) {
-    var arcgisFeatureCacheList = localstorageGet('arcgisFeatureCacheList');
+var deleteFeatureFromsessionStorage = function (feature) {
+    var arcgisFeatureCacheList = sessionStorageGet('arcgisFeatureCacheList');
     if (!arcgisFeatureCacheList) {
         return
     } else {
@@ -850,7 +850,7 @@ var deleteFeatureFromLocalstorage = function (feature) {
             var element = arcgisFeatureCacheList[index];
             if (element.id == feature.attributes['id']) {
                 arcgisFeatureCacheList.splice(index, 1);
-                localstorageSet('arcgisFeatureCacheList', arcgisFeatureCacheList);
+                sessionStorageSet('arcgisFeatureCacheList', arcgisFeatureCacheList);
                 break
             }
         }

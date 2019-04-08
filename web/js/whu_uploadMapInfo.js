@@ -5,7 +5,7 @@ var isPictureUpload=false;
 //专题图保存模态框出现前触发
 $('#map-upload-Modal').on('show.bs.modal', function () {
     //生成地图标签
-    var mapTagsStr=window.localStorage.getItem("map_tag");
+    var mapTagsStr=window.sessionStorage.getItem("map_tag");
     mapTagJson=JSON.parse(mapTagsStr);
     $("#editable-select").html("");
     for(var i in mapTagJson) {
@@ -13,8 +13,8 @@ $('#map-upload-Modal').on('show.bs.modal', function () {
     }
     $('#editable-select').editableSelect({ effects: 'slide' ,filter: false  });
     // 根据map_id判断当前地图是否存在
-    // window.localStorage.setItem("mapId", "9");
-    var map_id = window.localStorage.getItem("mapId");
+    // window.sessionStorage.setItem("mapId", "9");
+    var map_id = window.sessionStorage.getItem("mapId");
     //后台交互判断是否存在当前地图
     if (map_id===null) return;
     $.ajax({
@@ -64,9 +64,9 @@ $("#uploadBt").click(function (e) {
     thisTree.refresh();
     var treeNodes=thisTree.getNodes();
     var treeNodes=JSON.stringify(treeNodes);
-    var userId=window.localStorage.getItem("userId");
+    var userId=window.sessionStorage.getItem("userId");
     var picture64=$('#demo1')[0].src;
-    var map_id = window.localStorage.getItem("mapId");
+    var map_id = window.sessionStorage.getItem("mapId");
 
 //参数上传
     $.ajax({
@@ -79,8 +79,8 @@ $("#uploadBt").click(function (e) {
 
         success: function (data) { //返回json结果
             alert("保存成功");
-            window.localStorage.removeItem("userId");
-            window.localStorage.removeItem("mapId")
+            window.sessionStorage.removeItem("userId");
+            window.sessionStorage.removeItem("mapId")
             window.location.href="mapManageZJ.html";
             isSaved = 1;
         }

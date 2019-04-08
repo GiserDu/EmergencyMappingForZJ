@@ -1,5 +1,8 @@
 package com.zz.chart.data;
 
+
+import net.sf.json.JSONArray;
+
 /**
  * Created by Administrator on 2017/10/30.
  */
@@ -14,7 +17,28 @@ public class ClassData {
     private String label;
 
 
-    private String dataTime;
+    private String dataTime;//时序图数据
+    private JSONArray otherDataValue;
+    private JSONArray otherDataLabel;
+
+
+    public JSONArray getOtherDataValue() {
+        return otherDataValue;
+    }
+
+    public void setOtherDataValue(JSONArray otherDataValue) {
+        this.otherDataValue = otherDataValue;
+    }
+
+    public JSONArray getOtherDataLabel() {
+        return this.otherDataLabel;
+    }
+
+    public void setOtherDataLabel(JSONArray otherDataLabel) {
+        this.otherDataLabel = otherDataLabel;
+    }
+
+
 
 
     public ClassData(String name,String code,String region_x,String region_y,String geometry,String data,String label){
@@ -25,6 +49,8 @@ public class ClassData {
         this.geometry = geometry;
         this.thematic_data = data;
         this.label = label;
+        this.otherDataLabel=new JSONArray();
+        this.otherDataValue=new JSONArray();
 
 //        this.dataSource = dataSource;
     }

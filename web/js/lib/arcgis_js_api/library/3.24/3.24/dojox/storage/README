@@ -11,7 +11,7 @@ Credits
 	Brad Neuberg
 	Alex Russell
 
-LocalStorage, BehaviorStorage, CookieStorage:
+sessionStorage, BehaviorStorage, CookieStorage:
 	Jens Arps
 -------------------------------------------------------------------------------
 Project description
@@ -25,7 +25,7 @@ Dependencies:
 
 FlashStorageProvider requires the Flash player
 GearsStorageProvider requires the Gears extension
-LocalStorageProvider does not require any plugins but will run only in certain
+sessionStorageProvider does not require any plugins but will run only in certain
 browsers (see below)
 BehaviorStorageProvider does not require any plugins but will run only in IE 5+
 CookieStorageProvider has no requirements
@@ -53,7 +53,7 @@ These installation instructions are to use Dojo Storage in a web browser; at
 runtime, Dojo Storage will autodetect and use the best available storage
 option. This includes:
 
-  * localStorage: HTML 5 Web Browsers (Firefox 3+, Safari 4+, IE 8+)
+  * sessionStorage: HTML 5 Web Browsers (Firefox 3+, Safari 4+, IE 8+)
   * Google Gears (Plugin)
   * globalStorage (Firefox 2+)
   * userData Behavior (IE 5+)
@@ -84,7 +84,7 @@ IE 6 / IE7	GearsStorageProvider
 			BehaviorStorageProvider
 			CookieStorageProvider
 
-IE 8		LocalStorageProvider
+IE 8		sessionStorageProvider
 			GearsStorageProvider
 			FlashStorageProvider
 			BehaviorStorageProvider
@@ -93,7 +93,7 @@ IE 8		LocalStorageProvider
 Safari 3	FlashStorageProvider
 			CookieStorageProvider
 
-Safari 4	LocalStorageProvider
+Safari 4	sessionStorageProvider
 			FlashStorageProvider
 			CookieStorageProvider
 
@@ -105,11 +105,11 @@ Firefox 2	WhatWGStorageProvider (= globalStorage)
 			FlashStorageProvider
 			CookieStorageProvider
 
-Firefox 3	LocalStorageProvider
+Firefox 3	sessionStorageProvider
 			GearsStorageProvider
 			FlashStorageProvider
 			CookieStorageProvider
 
-Opera 10	LocalStorageProvider
+Opera 10	sessionStorageProvider
 			FlashStorageProvider
 			CookieStorageProvider

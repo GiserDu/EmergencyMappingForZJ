@@ -26,9 +26,9 @@ var mapExtentChange;
 var studyAreaLayer;
 
 $(document).ready(function() {
-    regionParam=localStorage.getItem("regionParam");
+    regionParam=sessionStorage.getItem("regionParam");
     //判断是否是应用示范
-    if(localStorage.getItem("templateHome")=="0"){
+    if(sessionStorage.getItem("templateHome")=="0"){
         $("#backHome").attr("href","index.html");
     }
 

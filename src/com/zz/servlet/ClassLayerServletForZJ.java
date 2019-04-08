@@ -113,10 +113,19 @@ public class ClassLayerServletForZJ extends HttpServlet {
                         JSONObject popObj=JUtil.getThematicDataFromDatabase("population",
                                 "region","population_zj");
                         for(int i=0;i<classList.size();i++){
-                            Double each_thematicData=Double.parseDouble(classList.get(i).getData());
-                            Double each_popData=Double.parseDouble(popObj.getString(classList.get(i).getName()));
+                            ClassData tmpClassData=classList.get(i);
+
+                            Double each_thematicData=Double.parseDouble(tmpClassData.getData());
+                            Double each_popData=Double.parseDouble(popObj.getString(tmpClassData.getName()));
+                            tmpClassData.getOtherDataValue().add(each_thematicData);
+                            tmpClassData.getOtherDataValue().add(each_popData);
+                            tmpClassData.getOtherDataLabel().add("评价人数");
+                            tmpClassData.getOtherDataLabel().add("人口数");
+
 //                            System.out.print(i);
-                            classList.get(i).setData( String.valueOf(each_thematicData/each_popData*1000));
+                            tmpClassData.setData( String.valueOf(each_thematicData/each_popData*1000));
+                            tmpClassData.setLabel("评价活跃度");
+                            classList.set(i,tmpClassData);
                         }
                         legendName="评价活跃度";
                         break;
@@ -124,10 +133,17 @@ public class ClassLayerServletForZJ extends HttpServlet {
                         classList = JUtil.getClassDataFromAPIV2(resultString,"点评项目数",regionParam,nameAtGeometry,isTimeSeries);
                         classListForParam2=JUtil.getClassDataFromAPIV2(resultString,"项目总数",regionParam,nameAtGeometry,isTimeSeries);
                         for(int i=0;i<classList.size();i++){
+
                             Double each_thematicData1=Double.parseDouble(classList.get(i).getData());
                             Double each_thematicData2=Double.parseDouble(classListForParam2.get(i).getData());
                             System.out.print(i);
                             classList.get(i).setData( String.valueOf(each_thematicData1/each_thematicData2));
+                            classList.get(i).setLabel("事项评价覆盖率");
+                            classList.get(i).getOtherDataValue().add(each_thematicData1);
+                            classList.get(i).getOtherDataValue().add(each_thematicData2);
+                            classList.get(i).getOtherDataLabel().add("评价的项目数");
+                            classList.get(i).getOtherDataLabel().add("项目总数");
+
                         }
                         legendName="事项评价覆盖率";
                         break;
