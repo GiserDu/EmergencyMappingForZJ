@@ -13,7 +13,7 @@ var allTjLayerContent={};
 // 制图范围数据的json格式
 // var tjPanel1={"tabID":"1","identityField":"value","regionData":"","fileName":""};
 var tjPanel1={};
-var tjPanel2 = {"tabId":1,"dataAddress":"","excelAddress":"","tableName":"","spatialId":"","timeId":"","tableFields":[],"fieldsName":[],"thematicMapName":"" , "fieldsNum":0,"yearColomn":[]};
+var tjPanel2 = {"tabId":1,"dataAddress":"","excelAddress":"","tableName":"","spatialId":"","timeId":"","tableFields":[],"fieldsName":[],"timeType":"","timeRange":"","thematicMapName":"" , "fieldsNum":0,"yearColomn":[]};
 //tjPanel3中有一个key是type，1表示统计图表，2表示分级符号
 var tjPanel3={};
 var zoomOutFlag = 0;
@@ -156,83 +156,67 @@ function opentjMenuLayer() {
             // console.log(elem);
             var leftMenuName=elem.attr('name');
             var selectedIndexNum;
+            var selectedTabID;
+            var thematicMapTypeVal;
 
             if (leftMenuName=="selectStatistics") {
-                // $(".tjPanel-content").html(html2);
 
                 $("#tjPanel-content2").show();
                 $("#tjPanel-content3").hide();
                 $("#tjPanel-content4").hide();
 
-                // opentjPanel2();
-                // form.render();
+                form.render();
 
             } else if(leftMenuName=="selectMappingTemplate") {
-                $("#fieldslist"+tjPanel2.tabId).next().find("button[lay-filter='fields']")[0].click();//辅助用户点击“下一步”，获取当前指标
 
-                // var a=$("#fieldslist"+tjPanel2.tabId).next().find("button")[0];
-                // a.click();
+                //判断是否有选取字段，辅助用户点击“下一步”，获取当前指标
+                if($("#fieldslist"+tjPanel2.tabId).next().length!=0){
+                    $("#fieldslist"+tjPanel2.tabId).next().find("button[lay-filter='fields']")[0].click();
+                }else {
+                    giveAddressToTjpanel2();
+                }
 
                 selectedIndexNum=tjPanel2.fieldsNum;
+                selectedTabID=tjPanel2.tabId;
+                thematicMapTypeVal=tjPanel2.thematicMapName[0];
 
-                if (selectedIndexNum==0){
-                    alert('请选择统计指标');
-                    elem.parent().removeClass("layui-this");
-                    elem.parent().prev().addClass("layui-this");
-
-                } else if(selectedIndexNum==1){
-                    // $(".tjPanel-content").html(html4);
-
-                    $("#tjPanel-content2").hide();
-                    $("#tjPanel-content3").hide();
-                    $("#tjPanel-content4").show();
-
-                    var isSymbolLoaded=$("#tjPanel-content4").attr("isloaded");
-                    if (isSymbolLoaded=="false") {
-                        initTjGraduatedSymbol();
-                        $("#tjPanel-content4").attr("isloaded","true");
-                    };
-                    listenOnSymbolTitleClick();
-
-                    setSlidersValue(symbolSizeSliderValue,symbolOpacitySliderValue,symbolOpacitySliderValue,classNumSliderValue);
-                    form.render();
-
-
-
-                }else {
-                    // $(".tjPanel-content").html(html3);
-                    $("#tjPanel-content2").hide();
-                    $("#tjPanel-content3").show();
-                    $("#tjPanel-content4").hide();
-
-                    var isSymbolLoaded=$("#tjPanel-content3").attr("isloaded");
-                    if (isSymbolLoaded=="false") {
-                        initTjChartSymbol();
-                        $("#tjPanel-content3").attr("isloaded","true");
-                    };
-                    listenOnSymbolTitleClick();
-
-                    setSlidersValue(symbolSizeSliderValue,symbolOpacitySliderValue,symbolOpacitySliderValue,classNumSliderValue);
-                    form.render();
-                    userDefineChartColor();
+                if (selectedTabID!=2 || (selectedTabID==2 & thematicMapTypeVal==0)){
+                    // $("#fieldslist"+tjPanel2.tabId).next().find("button[lay-filter='fields']")[0].click();//辅助用户点击“下一步”，获取当前指标
+                    if(selectedIndexNum==0){
+                        alert('请选择统计指标');
+                        elem.parent().removeClass("layui-this");
+                        elem.parent().prev().addClass("layui-this");
+                    }else if(selectedIndexNum==1){
+                        moveToGraduatedSymbol();
+                        form.render();
+                    }else {
+                        moveToChartSymbol();
+                        form.render();
+                    }
+                }else if(selectedTabID==2){
+                    // $("#apiTemplateClick").click();
+                    if (thematicMapTypeVal==1) {
+                        moveToGraduatedSymbol();
+                    }else if(thematicMapTypeVal==2){
+                        moveToChartSymbol();
+                    }
                 }
             }
         });
         element.render('nav');
     })
 }
-
 // 当用户修改时弹出的面板_新_测试
 function modifytjMenuLayer_new(allTjLayerContent) {
     editFlag = 1;
-    layui.use(['layer','form','element'],function () {
+    layui.use(['layer','form','element','laydate'],function () {
         var layer = layui.layer
             ,element = layui.element
-            ,form=layui.form;
+            ,form=layui.form
+            ,laydate=layui.laydate;
 
         opentjPanel2();
         form.render();
-
 
         //==================================================
         var statisticInfo=allTjLayerContent.statisticdata;
@@ -244,18 +228,36 @@ function modifytjMenuLayer_new(allTjLayerContent) {
         if (allTjLayerContent.statisticdata.tabId != 1)
             $("#tab"+allTjLayerContent.statisticdata.tabId).click();
         tjPanel2.tableName = allTjLayerContent.statisticdata.tableName;
-        $("input[name='dataAddress']").val(allTjLayerContent.statisticdata.dataAddress);
-        $("select[name=thematicMapName]").val(allTjLayerContent.statisticdata.thematicMapName);
-        $("#chooseDatabase").click();
-        displayFields($("#fieldslist"+allTjLayerContent.statisticdata.tabId),allTjLayerContent.statisticdata.tableFields, allTjLayerContent.statisticdata.yearColomn);
-        $("#spatialId"+allTjLayerContent.statisticdata.tabId).siblings(".layui-form-select").find("dd[lay-value="+ allTjLayerContent.statisticdata.spatialId+"]").click();
-        if (allTjLayerContent.statisticdata.timeId != year)
-            allTjLayerContent.statisticdata.timeId = year;
-        $("#timeId"+allTjLayerContent.statisticdata.tabId).siblings(".layui-form-select").find("dd[lay-value=\'"+ allTjLayerContent.statisticdata.timeId+"\']").click();
-        $.each(allTjLayerContent.statisticdata.fieldsName,function(index,item){
-            $("#fieldslist"+allTjLayerContent.statisticdata.tabId).find("input[value="+item+"]").next().click();
-        });
-        $("#fieldslist"+tjPanel2.tabId).next().find("button[lay-filter='fields']")[0].click();//辅助用户点击“下一步”，获取当前指标
+
+        if(allTjLayerContent.statisticdata.dataAddress.indexOf("?")!=-1){
+            $("input[name='dataAddress']").val(allTjLayerContent.statisticdata.dataAddress.split("?")[0]);
+        }
+
+        $("#thematicMapName").siblings(".layui-form-select").find("dd[lay-value="+ allTjLayerContent.statisticdata.thematicMapName+"]").click();
+        $("#timeType").siblings(".layui-form-select").find("dd[lay-value="+ allTjLayerContent.statisticdata.timeType+"]").click();
+        $("#date1").val(allTjLayerContent.statisticdata.timeRange);
+
+        if(allTjLayerContent.statisticdata.tabId==2 & allTjLayerContent.statisticdata.thematicMapName[0]!=0){
+            giveAddressToTjpanel2();
+        }else {
+            $("#chooseDatabase").click();
+            displayFields($("#fieldslist"+allTjLayerContent.statisticdata.tabId),allTjLayerContent.statisticdata.tableFields, allTjLayerContent.statisticdata.yearColomn);
+            $("#spatialId"+allTjLayerContent.statisticdata.tabId).siblings(".layui-form-select").find("dd[lay-value="+ allTjLayerContent.statisticdata.spatialId+"]").click();
+            if (allTjLayerContent.statisticdata.timeId != year)
+                allTjLayerContent.statisticdata.timeId = year;
+            $("#timeId"+allTjLayerContent.statisticdata.tabId).siblings(".layui-form-select").find("dd[lay-value=\'"+ allTjLayerContent.statisticdata.timeId+"\']").click();
+            $.each(allTjLayerContent.statisticdata.fieldsName,function(index,item){
+                $("#fieldslist"+allTjLayerContent.statisticdata.tabId).find("input[value="+item+"]").next().click();
+            });
+        }
+
+        // $("#fieldslist"+tjPanel2.tabId).next().find("button[lay-filter='fields']")[0].click();//辅助用户点击“下一步”，获取当前指标
+        //辅助用户点击“下一步”，获取当前指标
+        if($("#fieldslist"+tjPanel2.tabId).next().length!=0){
+            $("#fieldslist"+tjPanel2.tabId).next().find("button[lay-filter='fields']")[0].click();
+        }else {
+            giveAddressToTjpanel2();
+        }
 
         // 复原第三个面板的信息
         var type=parseInt(symbolInfo.type);
@@ -273,17 +275,12 @@ function modifytjMenuLayer_new(allTjLayerContent) {
             symPara4=symbolInfo.classNumSliderValue;
         }
 
-        // listenOnSymbolTitleClick();
-        //
-        // userDefineChartColor();
-        //
-        // setSlidersValue(symPara1,symPara2,symPara3,symPara4);
-        //=============================================================================================
-
         element.on('nav(navDemo)', function(elem){
             // console.log(elem);
             var leftMenuName=elem.attr('name');
             var selectedIndexNum;
+            var selectedTabID;
+            var selectedThematicMap;
 
             if (leftMenuName=="selectStatistics") {
                 // $(".tjPanel-content").html(html2);
@@ -292,129 +289,265 @@ function modifytjMenuLayer_new(allTjLayerContent) {
                 $("#tjPanel-content3").hide();
                 $("#tjPanel-content4").hide();
 
-                // opentjPanel2();
-                // form.render();
 
             } else if(leftMenuName=="selectMappingTemplate") {
-                $("#fieldslist" + tjPanel2.tabId).next().find("button[lay-filter='fields']")[0].click();//辅助用户点击“下一步”，获取当前指标
+                // $("#fieldslist" + tjPanel2.tabId).next().find("button[lay-filter='fields']")[0].click();//辅助用户点击“下一步”，获取当前指标
 
                 // selectedIndexNum=statisticInfo.fieldsNum;
                 selectedIndexNum = tjPanel2.fieldsNum;
+                selectedTabID=tjPanel2.tabId;
+                selectedThematicMap=tjPanel2.thematicMapName;
 
-                if (selectedIndexNum == 0) {
-                    alert('请选择统计指标');
-                    elem.parent().removeClass("layui-this");
-                    elem.parent().prev().addClass("layui-this");
-
-                } else if (selectedIndexNum == 1) {
-                    if (fieldsNum > 1){
-                        alert("这是一个统计图层，请选择多个指标！");
+                if (selectedTabID!=2  || (selectedTabID==2 & selectedThematicMap[0]==0)) {
+                    if(selectedIndexNum==0){
+                        alert('请选择统计指标');
                         elem.parent().removeClass("layui-this");
                         elem.parent().prev().addClass("layui-this");
-                    }
-                    else {
-                        $("#tjPanel-content2").hide();
-                        $("#tjPanel-content3").hide();
-                        $("#tjPanel-content4").show();
-
-                        var isSymbolLoaded = $("#tjPanel-content4").attr("isloaded");
-                        if (isSymbolLoaded == "false") {
-                            initTjGraduatedSymbol();
-                            $("#tjPanel-content4").attr("isloaded", "true");
+                    }else if (selectedIndexNum == 1) {
+                        if (fieldsNum > 1){
+                            alert("这是一个分级图层，请只选择一个指标！");
+                            elem.parent().removeClass("layui-this");
+                            elem.parent().prev().addClass("layui-this");
                         }
-                        ;
-                        listenOnSymbolTitleClick();
-                        // form.render();
+                        else {
+                            $("#tjPanel-content2").hide();
+                            $("#tjPanel-content3").hide();
+                            $("#tjPanel-content4").show();
 
-                        var selectedModelName = "界限等分模型";
-                        var isColorInverse = false;
-                        var imgSrc = './assets/imgs/gradeIcon/9/4.jpg';
-                        var color1 = '#FFFEE3';
-                        var color2 = '#00935B';
-
-                        if (symbolInfo.colors instanceof Array)
-                            var colors = symbolInfo.colors;
-                        else
-                            var colors = symbolInfo.colors.split(";");
-
-                        if (type == 2) {
-                            selectedModelName = symbolInfo.modelName;
-                            isColorInverse = symbolInfo.isColorInverse;
-                            imgSrc = symbolInfo.colorSolutionSrc;
-                            if (isColorInverse) {
-                                color1 = hexify(colors[symbolInfo.classNumSliderValue - 1]);
-                                color2 = hexify(colors[0]);
-                            } else {
-                                color1 = hexify(colors[0]);
-                                color2 = hexify(colors[symbolInfo.classNumSliderValue - 1]);
+                            var isSymbolLoaded = $("#tjPanel-content4").attr("isloaded");
+                            if (isSymbolLoaded == "false") {
+                                initTjGraduatedSymbol();
+                                $("#tjPanel-content4").attr("isloaded", "true");
                             }
+                            ;
+                            listenOnSymbolTitleClick();
+                            // form.render();
+
+                            var selectedModelName = "界限等分模型";
+                            var isColorInverse = false;
+                            var imgSrc = './assets/imgs/gradeIcon/9/4.jpg';
+                            var color1 = '#FFFEE3';
+                            var color2 = '#00935B';
+
+                            if (symbolInfo.colors instanceof Array)
+                                var colors = symbolInfo.colors;
+                            else
+                                var colors = symbolInfo.colors.split(";");
+
+                            if (type == 2) {
+                                selectedModelName = symbolInfo.modelName;
+                                isColorInverse = symbolInfo.isColorInverse;
+                                imgSrc = symbolInfo.colorSolutionSrc;
+                                if (isColorInverse) {
+                                    color1 = hexify(colors[symbolInfo.classNumSliderValue - 1]);
+                                    color2 = hexify(colors[0]);
+                                } else {
+                                    color1 = hexify(colors[0]);
+                                    color2 = hexify(colors[symbolInfo.classNumSliderValue - 1]);
+                                }
+                            }
+
+                            $("#model").siblings("div.layui-form-select").find("dl").find("dd[lay-value=" + selectedModelName + "]").click();
+
+                            if (isColorInverse) {
+                                $('#isColorInverse').prop('checked', true);
+                                $('#isColorInverse').next().addClass('layui-form-checked');
+                            }
+
+                            $("#color-selected>.select_title>img").attr("src", imgSrc);
+                            $("#color-selected>.select_title>img").attr("color1", color1);
+                            $("#color-selected>.select_title>img").attr("color2", color2);
+
+                            setSlidersValue(symbolSizeSliderValue,symbolOpacitySliderValue,symbolOpacitySliderValue,classNumSliderValue);
                         }
-
-                        $("#model").siblings("div.layui-form-select").find("dl").find("dd[lay-value=" + selectedModelName + "]").click();
-
-                        if (isColorInverse) {
-                            $('#isColorInverse').prop('checked', true);
-                            $('#isColorInverse').next().addClass('layui-form-checked');
+                    }else {
+                        if (fieldsNum > 1){
+                            alert("这是一个统计图层，请选择多个指标！");
+                            elem.parent().removeClass("layui-this");
+                            elem.parent().prev().addClass("layui-this");
                         }
+                        else {
+                            // $(".tjPanel-content").html(html3);
+                            $("#tjPanel-content2").hide();
+                            $("#tjPanel-content3").show();
+                            $("#tjPanel-content4").hide();
 
-                        $("#color-selected>.select_title>img").attr("src", imgSrc);
-                        $("#color-selected>.select_title>img").attr("color1", color1);
-                        $("#color-selected>.select_title>img").attr("color2", color2);
+                            var isSymbolLoaded = $("#tjPanel-content3").attr("isloaded");
+                            if (isSymbolLoaded == "false") {
+                                initTjChartSymbol();
+                                $("#tjPanel-content3").attr("isloaded", "true");
+                            }
+                            ;
+                            listenOnSymbolTitleClick();
 
-                        setSlidersValue(symbolSizeSliderValue,symbolOpacitySliderValue,symbolOpacitySliderValue,classNumSliderValue);
+                            var chartID = '010101';
+                            var solutionSrc = 'assets/imgs/gradeIcon/10/6.jpg';
+                            var solutionName="青黄色系";
+
+                            if (type == 1) {
+                                chartID = symbolInfo.chartID;
+                                solutionName=symbolInfo.colorName;
+
+                                var solutionSrc = symbolInfo.colorSolutionSrc;
+
+                                $("#xOffset").val(symbolInfo.xoffset);
+                                $("#yOffset").val(symbolInfo.yoffset);
+                            }
+                            var chartSrc = "assets/imgs/chartIcon/" + chartID + ".png";
+                            $("#chart-selected>.select_title>img").attr("src", chartSrc);
+
+                            $("#color-solution>.select_title>img").attr("src", solutionSrc);
+                            $("#color-solution>.select_title>img").attr("name", solutionName);
+
+                            setSlidersValue(symbolSizeSliderValue,symbolOpacitySliderValue,symbolOpacitySliderValue,classNumSliderValue);
+                            // form.render();
+                            userDefineChartColor();
+                        }
                     }
-
-
-                } else {
-                    if (fieldsNum == 1){
-                        alert("这是一个分级图层，请只选择一个指标！");
-                        elem.parent().removeClass("layui-this");
-                        elem.parent().prev().addClass("layui-this");
-                    }
-                    else {
-                        // $(".tjPanel-content").html(html3);
-                        $("#tjPanel-content2").hide();
-                        $("#tjPanel-content3").show();
-                        $("#tjPanel-content4").hide();
-
-                        var isSymbolLoaded = $("#tjPanel-content3").attr("isloaded");
-                        if (isSymbolLoaded == "false") {
-                            initTjChartSymbol();
-                            $("#tjPanel-content3").attr("isloaded", "true");
+                } else if (selectedTabID==2){
+                    if(selectedThematicMap[0]==1){
+                        if (fieldsNum > 1){
+                            alert("这是一个分级图层，请只选择一个指标！");
+                            elem.parent().removeClass("layui-this");
+                            elem.parent().prev().addClass("layui-this");
                         }
-                        ;
-                        listenOnSymbolTitleClick();
+                        else {
+                            $("#tjPanel-content2").hide();
+                            $("#tjPanel-content3").hide();
+                            $("#tjPanel-content4").show();
 
-                        var chartID = '010101';
-                        var solutionSrc = 'assets/imgs/gradeIcon/10/6.jpg';
-                        var solutionName="青黄色系";
+                            var isSymbolLoaded = $("#tjPanel-content4").attr("isloaded");
+                            if (isSymbolLoaded == "false") {
+                                initTjGraduatedSymbol();
+                                $("#tjPanel-content4").attr("isloaded", "true");
+                            }
+                            ;
+                            listenOnSymbolTitleClick();
+                            // form.render();
 
-                        if (type == 1) {
-                            chartID = symbolInfo.chartID;
-                            solutionName=symbolInfo.colorName;
+                            var selectedModelName = "界限等分模型";
+                            var isColorInverse = false;
+                            var imgSrc = './assets/imgs/gradeIcon/9/4.jpg';
+                            var color1 = '#FFFEE3';
+                            var color2 = '#00935B';
 
-                            var solutionSrc = symbolInfo.colorSolutionSrc;
+                            if (symbolInfo.colors instanceof Array)
+                                var colors = symbolInfo.colors;
+                            else
+                                var colors = symbolInfo.colors.split(";");
 
-                            $("#xOffset").val(symbolInfo.xoffset);
-                            $("#yOffset").val(symbolInfo.yoffset);
+                            if (type == 2) {
+                                selectedModelName = symbolInfo.modelName;
+                                isColorInverse = symbolInfo.isColorInverse;
+                                imgSrc = symbolInfo.colorSolutionSrc;
+                                if (isColorInverse) {
+                                    color1 = hexify(colors[symbolInfo.classNumSliderValue - 1]);
+                                    color2 = hexify(colors[0]);
+                                } else {
+                                    color1 = hexify(colors[0]);
+                                    color2 = hexify(colors[symbolInfo.classNumSliderValue - 1]);
+                                }
+                            }
+
+                            $("#model").siblings("div.layui-form-select").find("dl").find("dd[lay-value=" + selectedModelName + "]").click();
+
+                            if (isColorInverse) {
+                                $('#isColorInverse').prop('checked', true);
+                                $('#isColorInverse').next().addClass('layui-form-checked');
+                            }
+
+                            $("#color-selected>.select_title>img").attr("src", imgSrc);
+                            $("#color-selected>.select_title>img").attr("color1", color1);
+                            $("#color-selected>.select_title>img").attr("color2", color2);
+
+                            setSlidersValue(symbolSizeSliderValue,symbolOpacitySliderValue,symbolOpacitySliderValue,classNumSliderValue);
                         }
-                        var chartSrc = "assets/imgs/chartIcon/" + chartID + ".png";
-                        $("#chart-selected>.select_title>img").attr("src", chartSrc);
+                    }else if(selectedThematicMap[0]==2){
+                        if (fieldsNum > 1){
+                            alert("这是一个统计图层，请选择多个指标！");
+                            elem.parent().removeClass("layui-this");
+                            elem.parent().prev().addClass("layui-this");
+                        }
+                        else {
+                            // $(".tjPanel-content").html(html3);
+                            $("#tjPanel-content2").hide();
+                            $("#tjPanel-content3").show();
+                            $("#tjPanel-content4").hide();
 
-                        $("#color-solution>.select_title>img").attr("src", solutionSrc);
-                        $("#color-solution>.select_title>img").attr("name", solutionName);
+                            var isSymbolLoaded = $("#tjPanel-content3").attr("isloaded");
+                            if (isSymbolLoaded == "false") {
+                                initTjChartSymbol();
+                                $("#tjPanel-content3").attr("isloaded", "true");
+                            }
+                            ;
+                            listenOnSymbolTitleClick();
 
-                        setSlidersValue(symbolSizeSliderValue,symbolOpacitySliderValue,symbolOpacitySliderValue,classNumSliderValue);
-                        // form.render();
-                        userDefineChartColor();
+                            var chartID = '010101';
+                            var solutionSrc = 'assets/imgs/gradeIcon/10/6.jpg';
+                            var solutionName="青黄色系";
+
+                            if (type == 1) {
+                                chartID = symbolInfo.chartID;
+                                solutionName=symbolInfo.colorName;
+
+                                var solutionSrc = symbolInfo.colorSolutionSrc;
+
+                                $("#xOffset").val(symbolInfo.xoffset);
+                                $("#yOffset").val(symbolInfo.yoffset);
+                            }
+                            var chartSrc = "assets/imgs/chartIcon/" + chartID + ".png";
+                            $("#chart-selected>.select_title>img").attr("src", chartSrc);
+
+                            $("#color-solution>.select_title>img").attr("src", solutionSrc);
+                            $("#color-solution>.select_title>img").attr("name", solutionName);
+
+                            setSlidersValue(symbolSizeSliderValue,symbolOpacitySliderValue,symbolOpacitySliderValue,classNumSliderValue);
+                            // form.render();
+                            userDefineChartColor();
+                        }
                     }
-
                 }
             }
         });
         element.render('nav');
     });
 }
+
+//新建时进入分级符号面板
+function moveToGraduatedSymbol() {
+    $("#tjPanel-content2").hide();
+    $("#tjPanel-content3").hide();
+    $("#tjPanel-content4").show();
+
+    var isSymbolLoaded=$("#tjPanel-content4").attr("isloaded");
+    if (isSymbolLoaded=="false") {
+        initTjGraduatedSymbol();
+        $("#tjPanel-content4").attr("isloaded","true");
+    };
+    listenOnSymbolTitleClick();
+
+    setSlidersValue(symbolSizeSliderValue,symbolOpacitySliderValue,symbolOpacitySliderValue,classNumSliderValue);
+}
+
+//新建时进入统计符号面板
+function moveToChartSymbol() {
+    // $(".tjPanel-content").html(html3);
+    $("#tjPanel-content2").hide();
+    $("#tjPanel-content3").show();
+    $("#tjPanel-content4").hide();
+
+    var isSymbolLoaded=$("#tjPanel-content3").attr("isloaded");
+    if (isSymbolLoaded=="false") {
+        initTjChartSymbol();
+        $("#tjPanel-content3").attr("isloaded","true");
+    };
+    listenOnSymbolTitleClick();
+
+    setSlidersValue(symbolSizeSliderValue,symbolOpacitySliderValue,symbolOpacitySliderValue,classNumSliderValue);
+    // form.render();
+    // userDefineChartColor();
+}
+
 
 // 构造载入行政区划事件下的json
 function constructTjJson11() {
@@ -461,10 +594,11 @@ function constructTjJson12() {
 // 构造符号的json
 function constructTjJson3() {
     var selectedIndexNum=tjPanel2.fieldsNum;
+    var selectedThematicMap=tjPanel2.thematicMapName[0];
 
-    if(selectedIndexNum==null || selectedIndexNum==0){
+    if(selectedThematicMap==0 & (selectedIndexNum==null || selectedIndexNum==0)){
         alert("您还未选择用于制图的统计指标");
-    } else if(selectedIndexNum==1){
+    } else if(selectedIndexNum==1 || selectedThematicMap==1){
         // -----获得用户选择的有关分级符号的值-----
         var solutionSrc=$("#color-selected>.select_title>img").attr("src");
         var color1=$("#color-selected>.select_title>img").attr("color1");
@@ -493,7 +627,7 @@ function constructTjJson3() {
             "modelName":modelName,
             "symbolOpacitySliderValue":symbolOpacitySliderValue
         }
-    } else if(selectedIndexNum>1){
+    } else if(selectedIndexNum>1 || selectedThematicMap==2){
         // -----获得用户选择的有关统计符号的值-----
         var chartID = $("#chart-selected>.select_title>img").attr("src").slice(-10,-4);
         var colorName= $("#color-solution>.select_title>img").attr("name");
@@ -527,10 +661,11 @@ function constructTjJson3_modify(content) {
 
     var statisticInfo=content.statisticdata;
     var selectedIndexNum=statisticInfo.fieldsNum;
+    var selectedThematicMap=tjPanel2.thematicMapName[0];
 
-    if(selectedIndexNum==null || selectedIndexNum==0){
+    if(selectedThematicMap==0 & (selectedIndexNum==null || selectedIndexNum==0)){
         alert("您还未选择用于制图的统计指标");
-    } else if(selectedIndexNum==1){
+    } else if(selectedIndexNum==1 || selectedThematicMap==1){
         // -----获得用户选择的有关分级符号的值-----
         var solutionSrc=$("#color-selected>.select_title>img").attr("src");
         var color1=$("#color-selected>.select_title>img").attr("color1");
@@ -559,7 +694,7 @@ function constructTjJson3_modify(content) {
             "modelName":modelName,
             "symbolOpacitySliderValue":symbolOpacitySliderValue
         }
-    } else if(selectedIndexNum>1){
+    } else if(selectedIndexNum>1 || selectedThematicMap==1){
         // -----获得用户选择的有关统计符号的值-----
         var chartID = $("#chart-selected>.select_title>img").attr("src").slice(-10,-4);
         var colorName= $("#color-solution>.select_title>img").attr("name");
@@ -1107,44 +1242,48 @@ function submitFields(){
     layui.use(['form'],function(){
         var form = layui.form;
         form.on('submit(fields)', function (data) {
-            //console.log(data.field.database);
-            // layer.alert(JSON.stringify(data.field), {
-            //     title: '最终的提交信息'
-            // });
+
             tjPanel2.fieldsName = [];
             tjPanel2.fieldsNum = 0;
-            $.each(data.field, function(index,item){
-                //console.log(index,item);
-                switch(tjPanel2.tabId)
-                {
-                    case 1://本地数据库面板
-                        if(tjPanel2.fieldsNum==1){tjPanel2.timeId=item}
-                        if(tjPanel2.fieldsNum>1){tjPanel2.fieldsName.push(item)}
-                        break;
-                    case 2://API数据面板
-                        if(tjPanel2.fieldsNum>=1){tjPanel2.fieldsName.push(item)}
+            //不是API模板制图时执行
+            if(!$.isEmptyObject(data.field)){
+                $.each(data.field, function(index,item){
+                    switch(tjPanel2.tabId)
+                    {
+                        case 1://本地数据库面板
+                            if(tjPanel2.fieldsNum==1){tjPanel2.timeId=item}
+                            if(tjPanel2.fieldsNum>1){tjPanel2.fieldsName.push(item)}
+                            break;
+                        case 2://API数据面板
+                            if(tjPanel2.fieldsNum>=1){tjPanel2.fieldsName.push(item)}
+                            break;
+                        case 3://Excel数据面板
+                            if(tjPanel2.fieldsNum==1){tjPanel2.timeId=item}
+                            if(tjPanel2.fieldsNum>1){tjPanel2.fieldsName.push(item)}
+                            break;
+                        default:
+                            break;
+                    }
+                    tjPanel2.fieldsNum++
+                });
+            }
 
-                        break;
-                    case 3://Excel数据面板
-                        if(tjPanel2.fieldsNum==1){tjPanel2.timeId=item}
-                        if(tjPanel2.fieldsNum>1){tjPanel2.fieldsName.push(item)}
-                        break;
-                    default:
-                        break;
-                }
-                // if(tjPanel2.fieldsNum==0){
-                //
-                // }else if(tjPanel2.fieldsNum==1 && tjPanel2.tabId==1){
-                //     tjPanel2.timeId = item;
-                // }else {tjPanel2.fieldsName.push(item);}
-                tjPanel2.fieldsNum++
-            });
             tjPanel2.fieldsNum = tjPanel2.fieldsName.length;
             tjPanel2.thematicMapName=$("#thematicMapName").val();
+            tjPanel2.timeType=$("#timeType").val();
+            tjPanel2.timeRange=$("#date1").val();
             console.log(tjPanel2);
             $("#selectMappingTemplate").click();
             return false;
         });
+
+        //第二个api面板的下一步按钮事件
+        $(document).on('click','#apiTemplateClick',function(){
+            giveAddressToTjpanel2();
+            $("#selectMappingTemplate").click();
+        });
+
+
     })
 }
 
@@ -1723,24 +1862,121 @@ function initClassInfoTemplate(attributes) {
 
 //其他数据库
 function OtherDatabase(){
-    layui.use(["form","element"],function () {
+    layui.use(["form","element","laydate"],function () {
         var form = layui.form,
-            element = layui.element;
+            element = layui.element,
+            laydate = layui.laydate;
         //链接数据库
 
-        form.on('submit(otherdatabase)', function (data) {
-            // layer.alert(JSON.stringify(data.field), {
-            //     title: '最终的提交信息'
-            // });
-            // $("#thematicMapName").value
+        var timeType="";
+        //时间选择事件监听,根据年月日进行切换
+        laydate.render({
+            elem:'#date1',
+            type:'year',
+            range:true
+        });
+        form.on('select(timeType)',function (data) {
+            timeType=data.value;
+            if(timeType=="year"){
+                $("#date1").remove();
+                $("#dataRange").html(' <input type="text" name="date1" id="date1" autocomplete="off" class="layui-input">');
+                laydate.render({
+                    elem:'#date1',
+                    type:'year',
+                    range:true,
+                    format:'yyyy'
+                });
+            }else if(timeType=="month"){
+                $("#date1").remove();
+                $("#dataRange").html(' <input type="text" name="date1" id="date1" autocomplete="off" class="layui-input">');
+                laydate.render({
+                    elem:'#date1',
+                    type:'month',
+                    range:true,
+                    format:'yyyy-M'
+                });
+            }else {
+                $("#date1").remove();
+                $("#dataRange").html(' <input type="text" name="date1" id="date1" autocomplete="off" class="layui-input">');
+                laydate.render({
+                    elem:'#date1',
+                    type:'date',
+                    range:true,
+                    format:'yyyy-M-d'
+                });
+            }
+        });
 
-            tjPanel2.dataAddress = data.field.dataAddress;
+        //根据用户选择的图种类型判断是否要链接数据
+        form.on('select(thematicMapName)',function (data) {
+            var typeValue=data.value[0];
+            if(typeValue==0){
+                $("#OtherDatabase2").remove();
+                $("#fieldsDiv").remove();
+                $("#OtherDatabase1").after(
+                    '                        <form class="layui-form" style="margin-top: 10px" action="" lay-filter="OtherDatabase2" id="OtherDatabase2">\n' +
+                    '                            <div class="layui-form-item" style="text-align: right">\n' +
+                    '                                <button class="layui-btn" lay-submit="" lay-filter="otherdatabase" id="chooseDatabase">链接数据</button>\n' +
+                    '                            </div>\n' +
+                    '                            <div class="layui-form-item">\n' +
+                    '                                <div class="layui-row layui-col-space10" style="margin: 0px">\n' +
+                    '                                    <fieldset class="layui-elem-field" style="text-align:center">\n' +
+                    '                                        <legend class="Panel2_Legend" style="font-size:14px">数据表可选字段</legend>\n' +
+                    '                                        <form class="layui-form" action="" lay-filter="">\n' +
+                    '                                            <div class="layui-form-item">\n' +
+                    '                                                <label class="layui-form-label" style="width:unset;margin-left: 20%;">空间唯一标识</label>\n' +
+                    '                                                <div class="layui-input-inline">\n' +
+                    '                                                    <select class="spatialId" name="spatialId" lay-filter="spatialId" id="spatialId2"></select>\n' +
+                    '                                                </div>\n' +
+                    '                                            </div>\n' +
+                    '                                            <div class="layui-form-item" id="fieldslist2"></div>\n' +
+                    '                                            <div class="layui-form-item">\n' +
+                    '                                                <button class="layui-btn" lay-submit="" lay-filter="fields" id="fields">下一步</button>\n' +
+                    '                                                <button type="reset" class="layui-btn layui-btn-primary">重置</button>\n' +
+                    '                                            </div>\n' +
+                    '                                        </form>\n' +
+                    '                                    </fieldset>\n' +
+                    '                                </div>\n' +
+                    '                            </div>\n' +
+                    '                        </form>\n'
+                );
+                form.render();
+            }else {
+                $("#OtherDatabase2").remove();
+                $("#fieldsDiv").remove()
+                $("#OtherDatabase1").after(
+                    '                        <div id="fieldsDiv" style="text-align: right;margin-top: 10px">\n' +
+                    '                            <button class="layui-btn"  id="apiTemplateClick">下一步</button>\n' +
+                    '                        </div>\n'
+                );
+            }
+        });
+
+        form.on('submit(otherdatabase)', function (data) {
+
+            // tjPanel2.dataAddress = data.field.dataAddress;
+            timeType=$("#timeType").val();
+            var dataAddress=$("#dataAddress").val();
+            if(dataAddress==""){
+                alert("请输入API地址");
+            }
+            var dateValue=$("#date1").val().replace(RegExp(" ",'g'),"").split('-');
+            if(timeType=='year'){
+                tjPanel2.dataAddress = dataAddress+'?timeType='+timeType+'&year=('+dateValue[0]+'_'+dateValue[1]+')&month=( )&day=( )';
+            }else if(timeType=='month'){
+                tjPanel2.dataAddress = dataAddress+'?timeType='+timeType+'&year=('+dateValue[0]+'_'+dateValue[2]+')&month=('+dateValue[1]+'_'+dateValue[3]+')&day=( )';
+            }else if(timeType=='day'){
+                tjPanel2.dataAddress = dataAddress+'?timeType='+timeType+'&year=('+dateValue[0]+'_'+dateValue[3]+')&month=('+dateValue[1]+'_'+dateValue[4]+')&day=('+dateValue[2]+'_'+dateValue[5]+')'
+            }else {
+                //看一下default用哪种类型的
+            }
+
             $.ajax({
                 type: 'post',
                 url:"./servlet/fileUploadServlet",
                 async:false,
                 dataType:"json",
-                data:{"inputType":"APIDataV2","apiUrl": data.field.dataAddress},
+                data:{"inputType":"APIDataV2","apiUrl":tjPanel2.dataAddress},
                 success: function (data) { //返回tabletree
                     //alert(data);
                     var tableFields = data.apiCallbackData;
@@ -1751,14 +1987,49 @@ function OtherDatabase(){
                     alert("sorry2!")
                 }
             });
-
             //构造
             //var tableFields = {"0":"id","1":"username","2":"email","3":"sex","4":"city","5":"sign","6":"experience","7":"ip","8":"logins","9":"joinTime"};
-
-
             return false;
         });
     })
+}
+
+//当用户选择API的模板图种制图时，对于tjPanel2中相关字段的赋值
+function giveAddressToTjpanel2() {
+    var timeType=$("#timeType").val();
+    var dataAddress=$("#dataAddress").val();
+    if(dataAddress==""){
+        alert("请输入API地址");
+        return false;
+    }
+    var dateValue=$("#date1").val().replace(RegExp(" ",'g'),"").split('-');
+    if(timeType=='year'){
+        tjPanel2.dataAddress = dataAddress+'?timeType='+timeType+'&year=('+dateValue[0]+'_'+dateValue[1]+')&month=( )&day=( )';
+    }else if(timeType=='month'){
+        tjPanel2.dataAddress = dataAddress+'?timeType='+timeType+'&year=('+dateValue[0]+'_'+dateValue[2]+')&month=('+dateValue[1]+'_'+dateValue[3]+')&day=( )';
+    }else if(timeType=='day'){
+        tjPanel2.dataAddress = dataAddress+'?timeType='+timeType+'&year=('+dateValue[0]+'_'+dateValue[3]+')&month=('+dateValue[1]+'_'+dateValue[4]+')&day=('+dateValue[2]+'_'+dateValue[5]+')'
+    }else {
+        //看一下default用哪种类型的
+    }
+
+    $.ajax({
+        type: 'post',
+        url:"./servlet/fileUploadServlet",
+        async:false,
+        dataType:"json",
+        data:{"inputType":"APIDataV2","apiUrl":tjPanel2.dataAddress},
+        success: function (data) { //返回tabletree
+            tjPanel2.fieldsName="";
+            tjPanel2.thematicMapName=$("#thematicMapName").val();
+            tjPanel2.timeType=$("#timeType").val();
+            tjPanel2.timeRange=$("#date1").val();
+            console.log(tjPanel2);
+        },
+        error:function(){
+            alert("sorry2!")
+        }
+    });
 }
 
 //上传EXCEL文件
@@ -2174,22 +2445,40 @@ var originalTjLayerContent='<div class="tjPanel" id="tjPanel">\n' +
     '                        </form>\n' +
     '                    </div>\n' +
     '                    <div class="layui-tab-item" layui-filter="tjPanel22">\n' +
-    '                        <form class="layui-form" action="" lay-filter="OtherDatabase1" id="OtherDatabase1">\n' +
+    '                        <form class="layui-form layui-form-pane" action="" lay-filter="OtherDatabase1" id="OtherDatabase1">\n' +
     '                            <div class="layui-form-item" style="text-align:center">\n' +
-    '                                <input type="text" name="dataAddress" lay-verify="dataAddress" autocomplete="off" placeholder="请输入数据链接地址" class="layui-input" style="width: 82%;display: unset;">\n' +
-    '                                <button class="layui-btn" lay-submit="" lay-filter="otherdatabase" id="chooseDatabase">链接数据</button>\n' +
+    '                                <input type="text" id="dataAddress" name="dataAddress" lay-verify="dataAddress" autocomplete="off" placeholder="请输入数据链接地址" class="layui-input" style="width: 100%;display: unset;">\n' +
     '                            </div>\n' +
-                                '<select name="thematicMapName" id="thematicMapName" lay-verify="" lay-search>' +
-                                    '<option value="099">自定义图种</option>' +
-                                    '<option value="101">评价活跃度专题图</option>' +
-                                    '<option value="102">事项评价覆盖率专题图</option>' +
-
-                                '</select>' +
+    '                            <div class="layui-form-item">\n'+
+    '                                <div class="layui-inline" style="margin: 0;padding: 0;width: 100%">\n' +
+    '                                    <label class="layui-form-label">时间选择</label>\n' +
+    '                                        <div class="layui-input-inline" style="width: 11%">\n' +
+                    '                            <select lay-filter="timeType" name="timeType" id="timeType" lay-verify="" lay-search >' +
+                    '                                <option value="year">年</option>' +
+                    '                                <option value="month">月</option>' +
+                    '                                <option value="day">日</option>' +
+                    '                            </select>' +
+    '                                        </div>\n' +
+    '                                        <div class="layui-input-inline" id="dataRange" style="margin: 0;padding: 0;width: 66%">\n' +
+    '                                            <input type="text" name="date1" id="date1" autocomplete="off" class="layui-input">\n' +
+    '                                        </div>\n' +
+    '                                 </div>'+
+    '                            </div>'+
+    '                            <div class="layui-form-item">\n'+
+        '                            <select lay-filter="thematicMapName" name="thematicMapName" id="thematicMapName" lay-verify="" lay-search>' +
+        '                                <option value="099">自定义图种</option>' +
+        '                                <option value="101">评价活跃度专题图</option>' +
+        '                                <option value="102">事项评价覆盖率专题图</option>' +
+        '                            </select>' +
+    '                            </div>\n'+
     '                        </form>\n' +
 
     '                        <form class="layui-form" style="margin-top: 10px" action="" lay-filter="OtherDatabase2" id="OtherDatabase2">\n' +
+    '                            <div class="layui-form-item" style="text-align: right">\n' +
+    '                                <button class="layui-btn" lay-submit="" lay-filter="otherdatabase" id="chooseDatabase">链接数据</button>\n' +
+    '                            </div>\n' +
     '                            <div class="layui-form-item">\n' +
-    '                                <div class="layui-row layui-col-space10">\n' +
+    '                                <div class="layui-row layui-col-space10" style="margin: 0px">\n' +
     '                                    <fieldset class="layui-elem-field" style="text-align:center">\n' +
     '                                        <legend class="Panel2_Legend" style="font-size:14px">数据表可选字段</legend>\n' +
     '                                        <form class="layui-form" action="" lay-filter="">\n' +
@@ -2201,7 +2490,7 @@ var originalTjLayerContent='<div class="tjPanel" id="tjPanel">\n' +
     '                                            </div>\n' +
     '                                            <div class="layui-form-item" id="fieldslist2"></div>\n' +
     '                                            <div class="layui-form-item">\n' +
-    '                                                <button class="layui-btn" lay-submit="" lay-filter="fields">下一步</button>\n' +
+    '                                                <button class="layui-btn" lay-submit="" lay-filter="fields" id="fields">下一步</button>\n' +
     '                                                <button type="reset" class="layui-btn layui-btn-primary">重置</button>\n' +
     '                                            </div>\n' +
     '                                        </form>\n' +
@@ -2209,6 +2498,9 @@ var originalTjLayerContent='<div class="tjPanel" id="tjPanel">\n' +
     '                                </div>\n' +
     '                            </div>\n' +
     '                        </form>\n' +
+    // '                        <div class=" " style="text-align: right;margin-top: 10px">\n' +
+    // '                            <button class="layui-btn" lay-submit="" lay-filter="fields" id="fields">下一步</button>\n' +
+    // '                        </div>\n' +
     '                    </div>\n' +
     '                    <div class="layui-tab-item">\n' +
     '                        <form class="layui-form">\n' +
