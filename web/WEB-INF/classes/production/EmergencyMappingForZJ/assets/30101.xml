@@ -1,0 +1,30 @@
+
+<TChart>
+	<chartid>30101</chartid>
+	<bgpaint>
+		<BackgroundPaint>null</BackgroundPaint>
+		<OutlineVisible>false</OutlineVisible>
+		<DomainGridlinesVisible>false</DomainGridlinesVisible>
+		<RangeGridlinesVisible>false</RangeGridlinesVisible>
+		<DomainGridlinesStroke>0.2f</DomainGridlinesStroke>
+		<RangeGridlinesStroke>0.2f</RangeGridlinesStroke>
+	</bgpaint>
+	<renderer>
+		<BaseShapesVisible>true</BaseShapesVisible>
+		<DrawOutline>true</DrawOutline>
+		<UseFillPaint>true</UseFillPaint>
+		<BaseFillPaint>255,255,255</BaseFillPaint>
+		<OutlineStroke>0.0f</OutlineStroke>
+		<Stroke>1f</Stroke>
+		<BaseAreaAlpha>0.0f</BaseAreaAlpha>
+	</renderer>
+	<rangAxis>
+		<visible>true</visible>
+		<TickLabelsVisible>false</TickLabelsVisible>
+	</rangAxis>
+	<domainAxis>
+		<visible>false</visible>
+		<TickLabelsVisible>false</TickLabelsVisible>
+		<LowerMargin>0</LowerMargin>
+	</domainAxis>
+</TChart>

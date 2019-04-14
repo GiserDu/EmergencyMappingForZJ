@@ -1,0 +1,30 @@
+
+<TChart>
+	<chartid>20104</chartid>
+	<renderer>
+		<DrawBarOutline>false</DrawBarOutline>
+		<Outline>
+			<Paint>0,0,0,255</Paint>
+			<BasicStroke>1</BasicStroke>
+		</Outline>
+		<MinimumBarLength>10</MinimumBarLength>
+		<ItemMargin>5</ItemMargin>
+	</renderer>
+	<Transparent>255</Transparent>
+	<GroupsSpace>4</GroupsSpace>
+	<enumBarLayOutStyle>emNormal</enumBarLayOutStyle>
+	<enumBarShapeStyle>emSquareColumn</enumBarShapeStyle>
+	<IsCrack>false</IsCrack>
+	<CartesianAxis>
+		<ShowAxis>false</ShowAxis>
+		<ZLength>0</ZLength>
+	</CartesianAxis>
+	<Lable>
+		<bLabel>false</bLabel>
+		<ItemLabelFont>
+			<Name>宋体</Name>
+			<Size>3</Size>
+		</ItemLabelFont>
+		<ItemLabelPaint>0,0,0,255</ItemLabelPaint>
+	</Lable>
+</TChart>

@@ -1,0 +1,19 @@
+
+<TChart>
+	<chartid>60102</chartid>
+	<colorCenter>246,198,181</colorCenter>
+	<!-- 中间圆填充色 -->
+	<colorOutDraw>240,155,190</colorOutDraw>
+	<!-- 外面扇形边线绘制色 -->
+	<colorOutFill>240,155,190</colorOutFill>
+	<!-- 外面扇形填充色 -->
+	<ratioOffset>0.1</ratioOffset>
+	<!-- 下面扇形距离上方矩形间距占下面扇形半径的比 -->
+	<ratioInMax>0.8</ratioInMax>
+	<!-- 里面圆形半径最大占外面扇形半径的比 -->
+	<ratioCenterOffset>0.015</ratioCenterOffset>
+	<!-- 中间圆形与里面圆形半径之差占外面扇形半径的比 -->
+	<ratioUpDownUnitValue>1.05</ratioUpDownUnitValue>
+	<!-- 上方矩形单位边长表值与下方单位边长表值之比 -->
+	<isLabel>0</isLabel>
+</TChart>

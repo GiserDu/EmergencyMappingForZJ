@@ -1,0 +1,23 @@
+
+<TChart>
+	<chartid>10109</chartid>
+	<Plot>
+		<BackgroundAlpha>0</BackgroundAlpha>
+		<ForegroundAlpha>1f</ForegroundAlpha>
+		<OutlineVisible>false</OutlineVisible>
+		<SectionOutlinesVisible>false</SectionOutlinesVisible>
+		<BaseSectionOutlineStroke>0.1</BaseSectionOutlineStroke>
+		<BaseSectionOutlinePaint>0,0,0,255</BaseSectionOutlinePaint>
+		<Circular>true</Circular>
+		<StartAngle>0</StartAngle>
+		<Label>
+			<bLabel>false</bLabel>
+			<LabelLinkMargin>0</LabelLinkMargin>
+			<LabelGenerator>1</LabelGenerator>
+			<LabelGap>1</LabelGap>
+			<LabelFontName>Arial</LabelFontName>
+			<LabelFontPaint>0,0,0,255</LabelFontPaint>
+			<LabelFontSize>6</LabelFontSize>
+		</Label>
+	</Plot>
+</TChart>

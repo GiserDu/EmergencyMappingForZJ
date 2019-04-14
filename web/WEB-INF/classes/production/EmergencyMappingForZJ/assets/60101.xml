@@ -1,0 +1,13 @@
+
+<TChart>
+	<chartid>60101</chartid>
+	<path>person</path>
+	<hGap>5</hGap>
+	<vGap>5</vGap>
+	<arrange>1</arrange>
+	<!-- arrange=1(rectangle),2(triangle),11(single) -->
+	<perValue>0</perValue>
+	<!-- if perValue=0(=maxValue/10) -->
+	<perWidth>20</perWidth>
+	<perHeight>15</perHeight>
+</TChart>
