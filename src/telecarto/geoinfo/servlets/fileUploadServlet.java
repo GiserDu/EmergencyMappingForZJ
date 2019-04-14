@@ -68,18 +68,18 @@ public class fileUploadServlet extends HttpServlet {
         //消息提示
         JSONObject message = new JSONObject();
 
-        try{
+        try {
             //使用Apache文件上传组件处理文件上传步骤：
             //1、创建一个DiskFileItemFactory工厂
             DiskFileItemFactory factory = new DiskFileItemFactory();
             //设置工厂的缓冲区的大小，当上传的文件大小超过缓冲区的大小时，就会生成一个临时文件存放到指定的临时目录当中。
-            factory.setSizeThreshold(1024*100);//设置缓冲区的大小为100KB，如果不指定，那么缓冲区的大小默认是10KB
+            factory.setSizeThreshold(1024 * 100);//设置缓冲区的大小为100KB，如果不指定，那么缓冲区的大小默认是10KB
             //设置上传时生成的临时文件的保存目录
             factory.setRepository(tmpFile);
             //2、创建一个文件上传解析器
             ServletFileUpload upload = new ServletFileUpload(factory);
             //监听文件上传进度
-            upload.setProgressListener(new ProgressListener(){
+            upload.setProgressListener(new ProgressListener() {
                 public void update(long pBytesRead, long pContentLength, int arg2) {
                     System.out.println("文件大小为：" + pContentLength + ",当前已处理：" + pBytesRead);
                     /**
@@ -91,6 +91,7 @@ public class fileUploadServlet extends HttpServlet {
             //解决上传文件名的中文乱码
             upload.setHeaderEncoding("UTF-8");
             //3、判断提交上来的数据是否是上传表单的数据
+
             if(!ServletFileUpload.isMultipartContent(request)){
                 //按照传统方式获取数据，根据输入inputType判断上传数据方式
                 String inputType = request.getParameter("inputType");
@@ -172,6 +173,7 @@ public class fileUploadServlet extends HttpServlet {
                         break;
                     case "APIDataV2":
                         //浙江第二版api
+
                         String apiUrlV2 = request.getParameter("apiUrl");
 
                         ReadGeojson.doReadGeojsonForAPIV2(apiUrlV2);
@@ -188,7 +190,6 @@ public class fileUploadServlet extends HttpServlet {
                     default:
                         System.out.print("其他数据");
                 }
-
                 PrintWriter writer = response.getWriter();
                 writer.print(message);
                 writer.close();
@@ -269,7 +270,7 @@ public class fileUploadServlet extends HttpServlet {
 
             return;
         }catch (Exception e) {
-            message.put("message","文件上传失败！") ;
+            message.put("message","后台错误") ;
             e.printStackTrace();
         }
 
