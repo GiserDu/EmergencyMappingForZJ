@@ -10,8 +10,8 @@
     <link href="css/reset.css" rel="stylesheet">
     <link href="css/bootstrap.min.css" rel="stylesheet">
     <link href='css/fonts.css' rel='stylesheet' type='text/css'>
-    <link rel="stylesheet" href="http://localhost:8080/EmergencyMapping1027/js/lib/arcgis_js_api/library/3.24/3.24/esri/css/esri.css">
-    <link rel="stylesheet" href="http://localhost:8080/EmergencyMapping1027/js/lib/arcgis_js_api/library/3.24/3.24/dijit/themes/claro/claro.css">
+    <!--<link rel="stylesheet" href="http://localhost:8080/EmergencyMapping1027/js/lib/arcgis_js_api/library/3.24/3.24/esri/css/esri.css">-->
+    <!--<link rel="stylesheet" href="http://localhost:8080/EmergencyMapping1027/js/lib/arcgis_js_api/library/3.24/3.24/dijit/themes/claro/claro.css">-->
     <link href="css/whu_plot.css" rel="stylesheet">
     <link href="js/layui/css/layui.css" rel="stylesheet">
     <link rel="stylesheet" href="css/bootstrap-select.css">
@@ -30,6 +30,7 @@
             display: none;
         }
     </style>
+    <script type="text/javascript" src="js/whu_addCssAndJs.js";></script>
     <script>
         var dojoConfig = {
             packages: [{
@@ -263,20 +264,9 @@
                             <select class="form-control" placeholder="请输入地图标签" id="editable-select" style="width:410px;">
 
                             </select>
-                            <!--<select id="mapTag_Init" class="form-control" style="width:410px;">-->
-                                <!--&lt;!&ndash;<option value="pdf">pdf</option>&ndash;&gt;-->
-                                <!--<option value="地质灾害工作部署图">地质灾害工作部署图</option>-->
-                                <!--<option value="地质灾害工作进展图">地质灾害工作进展图</option>-->
-                                <!--<option value="隐患点分布图">隐患点分布图</option>-->
-                                <!--<option value="避让搬迁分布图">避让搬迁分布图</option>-->
-                            <!--</select>-->
+
                         </div>
-                        <!--<div class="form-group" style="margin-bottom: 16px">-->
-                            <!--<div class="input-div">-->
-                                <!--<label class="control-label ">或手动输入地图标签</label>-->
-                                <!--<input id="mapTag_Add" type="text"  class="form-control" placeholder="请手动输入地图标签" style="width:410px;">-->
-                            <!--</div>-->
-                        <!--</div>-->
+
                         <div class="form-group" style="margin-bottom: 16px">
                             <div class="input-div">
                                 <label class="control-label ">地图描述</label>
@@ -292,17 +282,7 @@
                                     <p id="demoText"></p>
                                 </div>
                             </div>
-                            <!--<div class="input-div">-->
-                                <!--<label class="control-label " style="display: block">缩略图</label>-->
-                                <!--&lt;!&ndash;<input id="copyrightText" type="text" class="form-control" placeholder="请上传缩略图" style="width:78%;display: inline-block">&ndash;&gt;-->
-                                <!--&lt;!&ndash;<button type="button"  class="btn btn-default">浏览图片</button>&ndash;&gt;-->
-                                <!--<div class="input-group">-->
-                                <!--<input type="text" class="form-control">-->
-                                <!--<span class="input-group-btn">-->
-                                    <!--<button class="btn btn-default" type="button">浏览图片</button>-->
-                                <!--</span>-->
-                                <!--</div>-->
-                            <!--</div>-->
+
                         </div>
                         <div class="modal-footer">
                             <button type="button" data-dismiss="modal" class="btn btn-default">关闭</button>
@@ -320,20 +300,24 @@
 <div id="LegendInfo"><div id="iMLegendDiv"></div></div>
 <!--<div class="claro" id="timeSliderInfo" style="bottom: 20px; position: relative; height:100px; width: 500px;position:  absolute;left: 50%;margin-left:  -250px; display: none"><span class="headerText">时间</span><div id="timeInfo" class="labelText"></div></div>-->
 <div class="claro" id="timeSliderInfo" style="bottom: 20px; position: relative; height:100px; width: 500px;position:  absolute;left: 50%;margin-left:  -250px; display: none"><div id="timeInfo" class="labelText"></div></div>
+
 <script type="text/javascript" src="js/jquery-3.2.1.js"></script>
+<script type="text/javascript" src="js/whu_config.js"></script>
 <script src="js/jquery-editable-select.min.js"></script>
 <script src="js/layui/layui.js"></script>
 <script src="js/formSelects-v4-test.js"></script>
 <script src="js/tjLayer_new_0.2.js"></script>
 <script type="text/javascript" src="js/sweetalert_lib/sweetalert.min.js"></script>
-<script src="http://localhost:8080/EmergencyMapping1027/js/lib/arcgis_js_api/library/3.24/3.24/init.js"></script>
+
+
+<!--<script src="http://localhost:8080/EmergencyMapping1027/js/lib/arcgis_js_api/library/3.24/3.24/init.js"></script>-->
 <script type="text/javascript" src="js/Print.js"></script>
 <script src="js/plotIF.js"></script>
 <script src="js/whu_featureLayerEdit.js"></script>
-<script src="js/whu_interactvieMapping_initial.js"></script>
+<!--<script src="js/whu_interactvieMapping_initial.js"></script>-->
 <script src="js/tinycolor.js"></script>
 <script src="js/common.js"></script>
-<script src="js/whu_plotInteractive.js"></script>
+<!--<script src="js/whu_plotInteractive.js"></script>-->
 <script src="js/ztreejs/jquery.ztree.core.js"></script>
 <script src="js/ztreejs/jquery.ztree.excheck.js"></script>
 <script src="js/ztreejs/jquery.ztree.exedit.js"></script>

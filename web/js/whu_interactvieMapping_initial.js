@@ -21,7 +21,6 @@ var ServerLayerArr=[];//专题服务数组
 var layerNodesObj;
 var layerNodesObj_Template;// 模板制图树对象
 var selectedNode; //当前选择的要素节点
-// var selectedID;
 var nodeTheme;
 var nodePath; //存储节点的路径
 var getThisTheme;
@@ -117,9 +116,8 @@ $(document).ready(function() {
                 var url=baseMapUrls[i];
                 switch (baseMapType){
                     case "WebTiledLayer":
-                        baseMap.push(new WebTiledLayer(url,{"id":url
-        }));
-        break;
+                        baseMap.push(new WebTiledLayer(url,{"id":url}));
+                        break;
                     case "ArcGISDynamicMapServiceLayer":
                         baseMap.push(new ArcGISDynamicMapServiceLayer(url,{"id":url}));
                         break;
@@ -3037,12 +3035,15 @@ function layerOncheck(treeId, treeNode) {
         if(treeNode.getParentNode().id==1){
             //地理底图
             if(treeNode.checked){
-                $.each(baseMap,function (i) {
-                    if(treeNode.url.indexOf(baseMap[i].url)!=-1){
-                        map.removeLayer(baseMap[i]);
-                    }
-
-                });
+                // $.each(baseMap,function (i) {
+                //     if(treeNode.url.indexOf(baseMap[i].url)!=-1){
+                //         map.removeLayer(baseMap[i]);
+                //     }
+                //
+                // });
+                //默认删除前两个
+                map.removeLayer(map.getLayer(map.layerIds[0]));
+                map.removeLayer(map.getLayer(map.layerIds[0]));
 
             }else {
                //控制底图只能显示一个
@@ -3051,12 +3052,16 @@ function layerOncheck(treeId, treeNode) {
                 for(var i=0;i<mateNote.length;i++){
                     if(mateNote[i].checked){
 
-                        $.each(baseMap,function (j) {
-                            if(mateNote[i].url.indexOf(baseMap[j].url)!=-1){
-                                map.removeLayer(baseMap[j]);
-                            }
-
-                        });
+                        // $.each(baseMap,function (j) {
+                        //     if(mateNote[i].url.indexOf(baseMap[j].url)!=-1){
+                        //         map.removeLayer(baseMap[j]);
+                        //     }
+                        //
+                        // });
+                        //默认删除前两个,保留
+                        while(map.layerIds[0]!="layer0"){
+                            map.removeLayer(map.getLayer(map.layerIds[0]));
+                        }
                         treeObj.checkNode(mateNote[i], false, true);
                     }
                 }
@@ -3068,12 +3073,17 @@ function layerOncheck(treeId, treeNode) {
                         var treeObj = $.fn.zTree.getZTreeObj(treeId);
                         treeObj.checkNode(mate[i], false, true);
                     }
-                    $.each(baseMap,function (i) {
-                        if(treeNode.url.indexOf(baseMap[i].url)!=-1){
-                            map.removeLayer(baseMap[i]);
-                        }
+                    // $.each(baseMap,function (i) {
+                    //     if(treeNode.url.indexOf(baseMap[i].url)!=-1){
+                    //         map.removeLayer(baseMap[i]);
+                    //     }
+                    //
+                    // });
+                    // //默认删除前两个
+                    while(map.layerIds[0]!="layer0"){
+                        map.removeLayer(map.getLayer(map.layerIds[0]));
+                }
 
-                    });
                     baseMap=new Array();
                     var urls=treeNode.url.split(",");
                 var baseMapType=treeNode.mapType;
