@@ -36,6 +36,7 @@ import java.math.BigDecimal;
 import java.sql.ResultSet;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Properties;
 import java.util.UUID;
 
 @WebServlet(name = "fileUploadServlet")
@@ -125,10 +126,18 @@ public class fileUploadServlet extends HttpServlet {
                         message.put("dataEx",dataEx);
                         break;
                     case "column":
+                        //查询对应数据库的字段名列表
                         String tableName = request.getParameter("tableName");
+                        String configpath = JUtil.GetWebInfPath() + "/prop/dbconpara.properties";
+                        InputStream ips = new FileInputStream(configpath);
+                        Properties pro = new Properties();
+                        pro.load(ips);
+                        String table_schema = pro.getProperty("table_schema");
+
+
                         MysqlAccessBean mysql2 = new MysqlAccessBean();
                         MysqlAccessBean mysql3 = new MysqlAccessBean();
-                        String sql2 = "select COLUMN_NAME from information_schema.COLUMNS WHERE TABLE_NAME LIKE '" + tableName + "' AND COLUMN_NAME NOT LIKE '年份'";
+                        String sql2 = "select COLUMN_NAME from information_schema.COLUMNS WHERE TABLE_NAME LIKE '" + tableName + "'And TABLE_SCHEMA LIKE '" + table_schema+"' AND COLUMN_NAME NOT LIKE '年份'";
                         String sql3 = "select DISTINCT 年份 FROM " + tableName;
                         StringBuffer colomnName1 = new StringBuffer();
                         StringBuffer yearColomn1 = new StringBuffer();
@@ -306,7 +315,6 @@ public class fileUploadServlet extends HttpServlet {
         writer.close();
 
 
-
     }
     public void destroy() {
         super.destroy(); // Just puts "destroy" string in log
@@ -406,7 +414,7 @@ public class fileUploadServlet extends HttpServlet {
         JSONObject dataJson = JSONObject.fromObject(request.getParameter("allTjLayerContent"));
         JSONObject statisticdataJson=JSONObject.fromObject(dataJson.getJSONObject("statisticdata"));
         System.out.println(statisticdataJson);
-//        JSONObject statisticdataJson=JSONObject.fromObject(statisticJson);
+
         String tabID_statisticdata=statisticdataJson.getString("tabId");    //空间数据来源标识ID，1-行政区划，2-上传shp
         String dataAddress=statisticdataJson.getString("dataAddress");
         String tableName=statisticdataJson.getString("tableName");
@@ -431,22 +439,12 @@ public class fileUploadServlet extends HttpServlet {
         String chartID = chartID0.substring(1, 6);
         System.out.println(chartID);
 
-        String tempSource="本地数据库";
 
-        // String wcString = request.getParameter("wc");
-        //String dcString = request.getParameter("dc");
-        //String chartid = request.getParameter("chartID");// 专题符号id
+
         int width = cartographydataJson.getInt("symbolSizeSliderValue");// 符号长宽
 
         int height= cartographydataJson.getInt("symbolSizeSliderValue");
-//        String regionParam = "1";
 
-//		String islabelString = request.getParameter("ISLABEL");
-        // String islabelString = "false";
-        // String yearString = request.getParameter("year");
-
-        //String chartData = request.getParameter("CHARTDATA");
-        //System.out.println("chart data: "+chartData);
         StringBuffer fieldsNamesStr = new StringBuffer(fieldsNames);
         fieldsNamesStr.deleteCharAt(0);
         fieldsNamesStr.deleteCharAt(fieldsNamesStr.length()-1);
@@ -504,18 +502,6 @@ public class fileUploadServlet extends HttpServlet {
         chartDataPara.setWidth(width);
         chartDataPara.setHeight(height);
 
-
-//        //输入apiURL返回数据resultString
-//        //解析API返回的数据resultString，
-//        String URL="";
-//        String resultString=JUtil.getResultStrFromAPI("");
-//        IndicatorData[] indicatorDatas = JUtil.getIndicatorDataFromAPi(resultString);
-//        double[][] coordinatesXY=JUtil.getXYFromAPi(resultString);
-////        String[] xStrings = ReadRegionData.getRegonX();
-////        String[] yStrings = ReadRegionData.getRegonY();
-//        chartDataPara.initialAsAPI(indicatorDatas);// 初始化专题符号层参数
-        //
-        //ArrayList<String > regionData=new ArrayList();
         IndicatorData[] indicatorDatas = JUtil.getIndicatorData_ZJ(tableName, fieldsName, regionParam, spatialId, year);
         ReadRegionData.doReadRegionDataByRegionParam(regionParam);
         double[] maxValues = JUtil.maxValues(indicatorDatas);
@@ -561,14 +547,7 @@ public class fileUploadServlet extends HttpServlet {
             g2d.dispose();
 
         }
-//        BufferedImage bufferedImage = new BufferedImage(bi.getWidth(),bi.getHeight(),BufferedImage.TYPE_INT_RGB);
-//        Graphics2D g2d = bufferedImage.createGraphics();
-////			g2d.setColor(new Color(247,247,247));
-//        g2d.setColor(Color.white);
-//        g2d.fillRect(0,0,bi.getWidth(),bi.getHeight());
-//        //把图例bi绘制到bufferedImage上
-//        g2d.drawImage(bi,0,0,bi.getWidth(),bi.getHeight(),null);
-//        g2d.dispose();
+
         //图例图片转码为base64
         BASE64Encoder encoderLegend = new BASE64Encoder();
         ByteArrayOutputStream baosLegend = new ByteArrayOutputStream();

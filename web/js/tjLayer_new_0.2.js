@@ -237,8 +237,10 @@ function modifytjMenuLayer_new(allTjLayerContent) {
         $("#timeType").siblings(".layui-form-select").find("dd[lay-value="+ allTjLayerContent.statisticdata.timeType+"]").click();
         $("#date1").val(allTjLayerContent.statisticdata.timeRange);
 
-        if(allTjLayerContent.statisticdata.tabId==2 & allTjLayerContent.statisticdata.thematicMapName[0]!=0){
-            giveAddressToTjpanel2();
+        if(allTjLayerContent.statisticdata.tabId==2 ){
+            if(allTjLayerContent.statisticdata.thematicMapName[0]){
+                giveAddressToTjpanel2();
+            }
         }else {
             $("#chooseDatabase").click();
             displayFields($("#fieldslist"+allTjLayerContent.statisticdata.tabId),allTjLayerContent.statisticdata.tableFields, allTjLayerContent.statisticdata.yearColomn);
@@ -658,7 +660,6 @@ function constructTjJson3() {
 
 // 当修改时创建json
 function constructTjJson3_modify(content) {
-
     var statisticInfo=content.statisticdata;
     var selectedIndexNum=statisticInfo.fieldsNum;
     var selectedThematicMap=tjPanel2.thematicMapName[0];
@@ -767,7 +768,8 @@ function initTjGraduatedSymbol() {
         "7" : [ "#eecca6", "#bcca99" ],
         "8" : [ "#FFFEE3", "#9f5f3b" ],
         "9" : [ "#fcebf1", "#6c5394" ],
-        "10" : [ "#edf6f1", "#558881" ]
+        "10" : [ "#edf6f1", "#558881" ],
+        "11":  ["#F9CFCF","#F98585" ]
     };
     colorSelecterInit(colorArray);
 

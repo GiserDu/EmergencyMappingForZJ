@@ -132,8 +132,8 @@ public class ClassLayerServletForZJ extends HttpServlet {
                     case "102"://事项评价覆盖率专题图处理
                         classList = JUtil.getClassDataFromAPIV2(resultString,"点评项目数",regionParam,nameAtGeometry,isTimeSeries);
                         classListForParam2=JUtil.getClassDataFromAPIV2(resultString,"项目总数",regionParam,nameAtGeometry,isTimeSeries);
-                        for(int i=0;i<classList.size();i++){
 
+                        for(int i=0;i<classList.size();i++){
                             Double each_thematicData1=Double.parseDouble(classList.get(i).getData());
                             Double each_thematicData2=Double.parseDouble(classListForParam2.get(i).getData());
                             System.out.print(i);
@@ -153,7 +153,9 @@ public class ClassLayerServletForZJ extends HttpServlet {
                 }
                 double maxValue =  Double.parseDouble(classList.get(0).getData());
                 double minValue = Double.parseDouble(classList.get(0).getData());
+                String testData="";
                 for (int i=0;i<classList.size();i++){
+                    testData=testData+classList.get(i).getData()+",";
                     if(Double.parseDouble(classList.get(i).getData())>maxValue){
                         maxValue = Double.parseDouble(classList.get(i).getData());
                         System.out.print(i);
