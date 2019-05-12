@@ -51,7 +51,8 @@ public class printMapServlet extends HttpServlet {
 		String imgURL = request.getParameter("img");
 		String layout = request.getParameter("layoutID");
 		String dpi = request.getParameter("dpi");
-		String printLegendFlag = request.getParameter("flag");//判断当前图例的状态
+		String statisticLegendFlag = request.getParameter("flag");//判断当前图例的状态
+		String legendSrc = request.getParameter("legendsrc");//要素图例base64
 
 		String strBackUrl = "http://" + request.getServerName() //服务器地址
 				+ ":"
@@ -60,7 +61,7 @@ public class printMapServlet extends HttpServlet {
 
 		String ipContext = ip.replaceAll("\\.","-");
 		String printSavePath = getServletContext().getRealPath("/") + "printMap/"+ ipContext ;
-		String printMapURL = imageUtil.getImgFromUrl(strBackUrl,ipContext,imgURL,printSavePath,printLegendFlag,layout,dpi);
+		String printMapURL = imageUtil.getImgFromUrl(strBackUrl,ipContext,imgURL,printSavePath,statisticLegendFlag,layout,dpi,legendSrc);
 		PrintWriter out = response.getWriter();
 		out.println(printMapURL);
 		out.flush();

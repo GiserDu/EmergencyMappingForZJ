@@ -3209,7 +3209,7 @@ function layerOncheck(treeId, treeNode) {
                             infoTemplate: infoTemplate,
                             id: dataUrl_template
                         });
-                        layer.on("load", function () {
+                        layer.on("load", function (evt) {
                             var simpleJson_line = {
                                 "type": "simple",
                                 "label": treeNode.name,
@@ -3273,20 +3273,35 @@ function layerOncheck(treeId, treeNode) {
                                         break;
                                 }
                                 layer.setRenderer(rend);
+                                if(evt.target.geometryType!="esriGeometryPoint"){
+
+                                    return;
+                                }
+                                if(evt.target.renderer.symbol.url.indexOf(".")!=0){
+                                    return;
+                                }
+                                // getBase64Image(evt.target.renderer.symbol.url).then(function (img) {
+                                //     var base64 = convertBase64(img);
+                                //     evt.target.renderer.symbol.setUrl(base64);
+                                //     evt.target.refresh();
+                                // }).catch(function (err) {
+                                //     console.log(err);
+                                // });
+                                pointPic2Base64(evt);
                             });
                         });
-                        layer.on("update", function(evt) {
-                            if(evt.target.geometryType!="esriGeometryPoint"){
-
-                                return;
-                            }
-                            if(evt.target.renderer.symbol.url.indexOf(".")!=0){
-                                return;
-                            }
-                            var base64= getBase64Image( evt.target.renderer.symbol.url);
-                            evt.target.renderer.symbol.setUrl(base64);
-                            evt.target.refresh();
-                        });
+                        // layer.on("update", function(evt) {
+                        //     if(evt.target.geometryType!="esriGeometryPoint"){
+                        //
+                        //         return;
+                        //     }
+                        //     if(evt.target.renderer.symbol.url.indexOf(".")!=0){
+                        //         return;
+                        //     }
+                        //     var base64= getBase64Image( evt.target.renderer.symbol.url);
+                        //     evt.target.renderer.symbol.setUrl(base64);
+                        //     evt.target.refresh();
+                        // });
                         map.addLayer(layer);
                     })
                 }
@@ -3330,7 +3345,7 @@ function layerOncheck(treeId, treeNode) {
                                     infoTemplate: infoTemplate,
                                     id: dataUrl
                                 });
-                                layer.on("load", function () {
+                                layer.on("load", function (evt) {
                                     var simpleJson_line = {
                                         "type": "simple",
                                         "label": treeNode.name,
@@ -3396,20 +3411,35 @@ function layerOncheck(treeId, treeNode) {
                                                 break;
                                         }
                                         layer.setRenderer(rend);
+                                        if(evt.target.geometryType!="esriGeometryPoint"){
+
+                                            return;
+                                        }
+                                        if(evt.target.renderer.symbol.url.indexOf(".")!=0){
+                                            return;
+                                        }
+                                        // getBase64Image(evt.target.renderer.symbol.url).then(function (img) {
+                                        //     var base64 = convertBase64(img);
+                                        //     evt.target.renderer.symbol.setUrl(base64);
+                                        //     evt.target.refresh();
+                                        // }).catch(function (err) {
+                                        //     console.log(err);
+                                        // });
+                                        pointPic2Base64(evt);
                                     });
                                 });
-                                layer.on("update", function(evt) {
-                                    if(evt.target.geometryType!="esriGeometryPoint"){
-
-                                        return;
-                                    }
-                                    if(evt.target.renderer.symbol.url.indexOf(".")!=0){
-                                        return;
-                                    }
-                                    var base64= getBase64Image( evt.target.renderer.symbol.url);
-                                    evt.target.renderer.symbol.setUrl(base64);
-                                    evt.target.refresh();
-                                });
+                                // layer.on("update", function(evt) {
+                                //     if(evt.target.geometryType!="esriGeometryPoint"){
+                                //
+                                //         return;
+                                //     }
+                                //     if(evt.target.renderer.symbol.url.indexOf(".")!=0){
+                                //         return;
+                                //     }
+                                //     var base64= getBase64Image( evt.target.renderer.symbol.url);
+                                //     evt.target.renderer.symbol.setUrl(base64);
+                                //     evt.target.refresh();
+                                // });
                                 map.addLayer(layer);
                             })
                         }
@@ -3613,7 +3643,7 @@ function layerOncheck_Template(treeId, treeNode) {
                                 infoTemplate: infoTemplate,
                                 id: dataUrl
                             });
-                            layer.on("load", function(){
+                            layer.on("load", function(evt){
                                 var simpleJson_line = {
                                     "type": "simple",
                                     "label": treeNode.name,
@@ -3673,20 +3703,35 @@ function layerOncheck_Template(treeId, treeNode) {
                                             break;
                                     }
                                     layer.setRenderer(rend);
+                                    if(evt.target.geometryType!="esriGeometryPoint"){
+
+                                        return;
+                                    }
+                                    if(evt.target.renderer.symbol.url.indexOf(".")!=0){
+                                        return;
+                                    }
+                                    // getBase64Image(evt.target.renderer.symbol.url).then(function (img) {
+                                    //     var base64 = convertBase64(img);
+                                    //     evt.target.renderer.symbol.setUrl(base64);
+                                    //     evt.target.refresh();
+                                    // }).catch(function (err) {
+                                    //     console.log(err);
+                                    // });
+                                    pointPic2Base64(evt);
                                 });
                             });
-                            layer.on("update", function(evt) {
-                                if(evt.target.geometryType!="esriGeometryPoint"){
-
-                                    return;
-                                }
-                                if(evt.target.renderer.symbol.url.indexOf(".")!=0){
-                                    return;
-                                }
-                                var base64= getBase64Image( evt.target.renderer.symbol.url);
-                                evt.target.renderer.symbol.setUrl(base64);
-                                evt.target.refresh();
-                            });
+                            // layer.on("update", function(evt) {
+                            //     if(evt.target.geometryType!="esriGeometryPoint"){
+                            //
+                            //         return;
+                            //     }
+                            //     if(evt.target.renderer.symbol.url.indexOf(".")!=0){
+                            //         return;
+                            //     }
+                            //     var base64= getBase64Image( evt.target.renderer.symbol.url);
+                            //     evt.target.renderer.symbol.setUrl(base64);
+                            //     evt.target.refresh();
+                            // });
                             map.addLayer(layer);
                         })
                     }
@@ -3838,7 +3883,7 @@ function addThematicLayer(treeNode) {
         featureLayer.on("click", function(evt) {
             map.infoWindow.setFeatures([evt.graphic]);
         });
-        featureLayer.on("update", function(evt) {
+        featureLayer.on("load", function(evt) {
             if(evt.target.geometryType!="esriGeometryPoint"){
 
               return;
@@ -3846,9 +3891,14 @@ function addThematicLayer(treeNode) {
           if(evt.target.renderer.symbol.url.indexOf(".")!=0){
                 return;
             }
-           var base64= getBase64Image( evt.target.renderer.symbol.url);
-            evt.target.renderer.symbol.setUrl(base64);
-            evt.target.refresh();
+            // getBase64Image(evt.target.renderer.symbol.url).then(function (img) {
+            //     var base64 = convertBase64(img);
+            //     evt.target.renderer.symbol.setUrl(base64);
+            //     evt.target.refresh();
+            // }).catch(function (err) {
+            //     console.log(err);
+            // });
+            pointPic2Base64(evt);
         });
     });
     map.on("layers-add-result", function(results) {
@@ -3911,10 +3961,24 @@ function addressChange(){
 function nameChange(treeNode) {
     nameChanged = true;
 }
-//图片转为base64
+
+
+// 获取点要素图标信息
 function getBase64Image(imgurl) {
-    var img = new Image();
-    img.src = imgurl;
+    return new Promise(function (resolve,reject) {
+        var img = new Image();
+        img.onload =function () {
+            resolve(this);
+        }
+        img.onerror=function (err) {
+            reject(err);
+        }
+        img.src = imgurl;
+    });
+}
+
+// 点要素图标相对路径转base64
+function convertBase64(img) {
     var canvas = document.createElement("canvas");
     canvas.width = img.width;
     canvas.height = img.height;
@@ -3923,6 +3987,16 @@ function getBase64Image(imgurl) {
     var ext = img.src.substring(img.src.lastIndexOf(".")+1).toLowerCase();
     var dataURL = canvas.toDataURL("image/"+ext);
     return dataURL;
+}
+
+function pointPic2Base64(evt) {
+    getBase64Image(evt.target.renderer.symbol.url).then(function (img) {
+        var base64 = convertBase64(img);
+        evt.target.renderer.symbol.setUrl(base64);
+        evt.target.refresh();
+    }).catch(function (err) {
+        console.log(err);
+    });
 }
 
 function submitWhenAdd(treeNode){
