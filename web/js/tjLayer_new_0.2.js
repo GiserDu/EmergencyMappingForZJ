@@ -225,8 +225,7 @@ function modifytjMenuLayer_new(allTjLayerContent) {
         var fieldsNum = statisticInfo.fieldsNum;
 
         // 复原第二个面板的信息
-        if (allTjLayerContent.statisticdata.tabId != 1)
-            $("#tab"+allTjLayerContent.statisticdata.tabId).click();
+        if (allTjLayerContent.statisticdata.tabId != 1) $("#tab"+allTjLayerContent.statisticdata.tabId).click();
         tjPanel2.tableName = allTjLayerContent.statisticdata.tableName;
 
         if(allTjLayerContent.statisticdata.dataAddress.indexOf("?")!=-1){
@@ -240,9 +239,10 @@ function modifytjMenuLayer_new(allTjLayerContent) {
         if(allTjLayerContent.statisticdata.tabId==2 ){
             if(allTjLayerContent.statisticdata.thematicMapName[0]){
                 giveAddressToTjpanel2();
+                $("#chooseDatabase").click();
             }
         }else {
-            $("#chooseDatabase").click();
+            // $("#chooseDatabase").click();
             displayFields($("#fieldslist"+allTjLayerContent.statisticdata.tabId),allTjLayerContent.statisticdata.tableFields, allTjLayerContent.statisticdata.yearColomn);
             $("#spatialId"+allTjLayerContent.statisticdata.tabId).siblings(".layui-form-select").find("dd[lay-value="+ allTjLayerContent.statisticdata.spatialId+"]").click();
             if (allTjLayerContent.statisticdata.timeId != year)
@@ -363,7 +363,7 @@ function modifytjMenuLayer_new(allTjLayerContent) {
                             setSlidersValue(symbolSizeSliderValue,symbolOpacitySliderValue,symbolOpacitySliderValue,classNumSliderValue);
                         }
                     }else {
-                        if (fieldsNum > 1){
+                        if (fieldsNum <= 1){
                             alert("这是一个统计图层，请选择多个指标！");
                             elem.parent().removeClass("layui-this");
                             elem.parent().prev().addClass("layui-this");
@@ -1092,7 +1092,7 @@ function getTableTree(){
             displayTableTree(treeElement,createTree);
         },
         error:function(){
-            alert("sorry!")
+            alert("获取本地数据库表名出错!")
         }
     });
     //构造
@@ -1157,7 +1157,7 @@ function displayTableTree(treeElement,createTree){
                         displayFields(fieldslist, tableFields, yearColomn);
                     },
                     error:function(){
-                        alert("sorry1!")
+                        alert("获取本地数据库表格属性字段出错!")
                     }
                 });
                 //构造
@@ -1281,11 +1281,9 @@ function submitFields(){
 
         //第二个api面板的下一步按钮事件
         $(document).on('click','#apiTemplateClick',function(){
-            giveAddressToTjpanel2();
+            // giveAddressToTjpanel2();
             $("#selectMappingTemplate").click();
         });
-
-
     })
 }
 
@@ -1483,7 +1481,7 @@ function initTjLayer(allTjLayerContent, tjType, regionParamVar) {
             }
         },
         error:function(){
-            alert("sorry!")
+            alert("请求统计符号出错，请检查后重试")
         }
     });
 }
@@ -1986,7 +1984,7 @@ function OtherDatabase(){
                     submitFields();
                 },
                 error:function(){
-                    alert("sorry2!")
+                    alert("请求API字段出错，请检查后重试!")
                 }
             });
             //构造
@@ -2022,14 +2020,14 @@ function giveAddressToTjpanel2() {
         dataType:"json",
         data:{"inputType":"APIDataV2","apiUrl":tjPanel2.dataAddress},
         success: function (data) { //返回tabletree
-            tjPanel2.fieldsName="";
+            tjPanel2.fieldsName=[];
             tjPanel2.thematicMapName=$("#thematicMapName").val();
             tjPanel2.timeType=$("#timeType").val();
             tjPanel2.timeRange=$("#date1").val();
             console.log(tjPanel2);
         },
         error:function(){
-            alert("sorry2!")
+            alert("请求API统计符号出错，请检查后重试")
         }
     });
 }

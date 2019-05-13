@@ -100,7 +100,8 @@ $(document).ready(function() {
                 //basemap:"dark-gray-vector",
                 logo:false,
                 center: [104,35],
-                zoom: 7
+                zoom: 7,
+                backgroundColor:"gray"
             });
 
                /* //配置代理
@@ -126,6 +127,7 @@ $(document).ready(function() {
                         break;
 
                 }
+                baseMap[i].setOpacity(0.6);
                 map.addLayer(baseMap[i]);
 
             });
@@ -312,6 +314,8 @@ $("#adminNav").click(function () {
 //空模板制图
 //TODO:增加统计图层配置，图层排序
 function doMap() {
+     layerNodesObj=undefined;
+     layerNodesObj_Template=undefined;// 模板制图树对象
     doMapping(layerNodes)
     //制图树实现函数
     function doMapping(layerNodes_InFunc) {
@@ -597,6 +601,7 @@ function doMap() {
                                         $.each(urls, function (i) {
                                             var url=urls[i];
                                             baseMap.push(new ArcGISTiledMapServiceLayer(url,{"id":url}));
+                                            baseMap[i].setOpacity(0.6);
                                             map.addLayer(baseMap[i]);
 
                                         });
@@ -1283,9 +1288,8 @@ function sweetAlert1(mapName) {
                     var url=baseMapUrls[i];
                     switch (baseMapType){
                         case "WebTiledLayer":
-                            baseMap.push(new WebTiledLayer(url,{"id":url
-            }));
-            break;
+                            baseMap.push(new WebTiledLayer(url,{"id":url}));
+                            break;
                         case "ArcGISDynamicMapServiceLayer":
                             baseMap.push(new ArcGISDynamicMapServiceLayer(url,{"id":url}));
                             break;
@@ -1294,6 +1298,7 @@ function sweetAlert1(mapName) {
                             break;
     
                     }
+                    baseMap[i].setOpacity(0.6);
                     map.addLayer(baseMap[i]);
     
                 });
@@ -1317,6 +1322,8 @@ function sweetAlert1(mapName) {
 
 //为每个制图模板添加弹出框
 function addModelLayUI(mapName) {
+    layerNodesObj=undefined;
+    layerNodesObj_Template=undefined;// 模板制图树对象
     var userMapName;
     //根据本地存储获取模板
     (function getTemplate() {
@@ -1418,10 +1425,10 @@ function addModelLayUI(mapName) {
     //利用template生成树节点
     //生成树
     //编辑节点
-    var baseLayer_Model=template.baseLayer
-    var featureLayer_Model=template.featureLayer
-    var serviceLayer_Model=template.serviceLayer
-    var statisticLayer_Model= template.statisticLayer
+    var baseLayer_Model=template.baseLayer;
+    var featureLayer_Model=template.featureLayer;
+    var serviceLayer_Model=template.serviceLayer;
+    var statisticLayer_Model= template.statisticLayer;
     //修改底图节点_暂时不用
 
     if (mappingPageType == 0){
@@ -1469,7 +1476,7 @@ function addModelLayUI(mapName) {
                 tjLayerName=statisticLayer_Model.modules[i]["name"];
                 var tjType = "classLayerData";
                 fieldsOrIndi = statisticLayer_Model.modules[i].statisticdata.fieldsName;
-                var str=JSON.stringify(statisticLayer_Model.modules[i])
+                var str=JSON.stringify(statisticLayer_Model.modules[i]);
                 var zoomLevel = map.getZoom();
                 if (zoomLevel < 9)
                     initTjLayer(str, tjType, "1");
@@ -1495,11 +1502,10 @@ function addModelLayUI(mapName) {
         }
     }
 
-
     else if (mappingPageType == 1 || mappingPageType == 2)
         layerNodes_Model = template;
 
-    doMapping_Template(layerNodes_Model)
+    doMapping_Template(layerNodes_Model);
     function doMapping_Template(layerNodes_Model) {
         var setting = {
             check: {
@@ -1860,6 +1866,7 @@ function addModelLayUI(mapName) {
                                         $.each(urls, function (i) {
                                             var url=urls[i];
                                             baseMap.push(new ArcGISTiledMapServiceLayer(url,{"id":url}));
+                                            baseMap[i].setOpacity(0.6);
                                             map.addLayer(baseMap[i]);
 
                                         });
@@ -2322,7 +2329,7 @@ function addModelLayUI(mapName) {
 
             }
 
-        };
+        }
         function removeHoverDom(treeId, treeNode) {
             if(treeNode.isParent){
                 $("#doMapAdd_" +treeNode.id).unbind().remove();
@@ -2332,7 +2339,7 @@ function addModelLayUI(mapName) {
                 $("#doMapRemove_" +treeNode.id).unbind().remove();
             }
 
-        };
+        }
 
         function beforeRename(treeId, treeNode, newName, isCancel) {
             //className = (className === "dark" ? "":"dark");
@@ -2353,9 +2360,10 @@ function addModelLayUI(mapName) {
               zTree.selectNode(treeNode);
               return confirm("确认删除 图层 -- " + treeNode.name + " 吗？");*/
         }
-        // if(doMapIndex_Template==0){
-        layerNodesObj_Template=$.fn.zTree.init($("#doMapTree_Template"), setting, layerNodes_Model);
-
+        // if(doMapIndex_Template==0) {
+            layerNodesObj_Template = $.fn.zTree.init($("#doMapTree_Template"), setting, layerNodes_Model);
+        //     doMapIndex_Template=1;
+        // }
 
     }
 
@@ -2379,6 +2387,7 @@ function addModelLayUI(mapName) {
             shade: 0,
             resize: true,
             maxmin:true,
+            offset: 'r',
             closeBtn:0,
             area: ['250', '400px'],
             // btn: ['编辑图层'],
@@ -2567,6 +2576,7 @@ function blank_btnClick() {
                              break;
      
                      }
+                     baseMap[i].setOpacity(0.6);
                      map.addLayer(baseMap[i]);
      
                  });
@@ -2592,6 +2602,8 @@ function blank_btnClick() {
             field_cn = "";
 
             doMap();
+
+
             if (blankFlag == 0)
                 blankClassNo = layer.index;
             blankFlag = 1;
@@ -3080,6 +3092,7 @@ function layerOncheck(treeId, treeNode) {
                     //
                     // });
                     // //默认删除前两个
+                    //layer0表示浙江底图
                     while(map.layerIds[0]!="layer0"){
                         map.removeLayer(map.getLayer(map.layerIds[0]));
                 }
@@ -3102,6 +3115,7 @@ function layerOncheck(treeId, treeNode) {
                                 break;
 
                         }
+                        baseMap[i].setOpacity(0.6);
                         map.addLayer(baseMap[i]);
 
                     });
@@ -3567,6 +3581,7 @@ function layerOncheck_Template(treeId, treeNode) {
                     $.each( urls, function (i) {
                         var url=urls[i];
                         baseMap.push(new ArcGISTiledMapServiceLayer(url,{"id":url}));
+                        baseMap[i].setOpacity(0.6);
                         map.addLayer(baseMap[i]);
 
                     });

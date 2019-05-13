@@ -65,14 +65,15 @@ public class ClassLayerServletForZJ extends HttpServlet {
         String thematicMapName=statisticdataJson.getString("thematicMapName");//专题图名称
 
         String fieldsNames=statisticdataJson.getString("fieldsName");
+        JSONArray dataFieldNames=statisticdataJson.getJSONArray("fieldsName");
 //      String year = statisticdataJson.getString("year");
-        String year = "2016";
-        StringBuffer fieldsNamesBuffer = new StringBuffer(fieldsNames);
-        fieldsNamesBuffer.delete(0, 2);
-        fieldsNamesBuffer.delete(fieldsNamesBuffer.length()-2, fieldsNamesBuffer.length());
-        System.out.println(fieldsNamesBuffer);
-//                        String regionClass="1";
-        String dataFieldName=fieldsNamesBuffer.toString();
+//        String year = "2016";
+//        StringBuffer fieldsNamesBuffer = new StringBuffer(fieldsNames);
+//        fieldsNamesBuffer.delete(0, 2);
+//        fieldsNamesBuffer.delete(fieldsNamesBuffer.length()-2, fieldsNamesBuffer.length());
+//        System.out.println(fieldsNamesBuffer);
+////                        String regionClass="1";
+//        String dataFieldName=fieldsNamesBuffer.toString();
 
 
         JSONObject cartographydataJson=JSONObject.fromObject(dataJson.getJSONObject("cartographydata"));
@@ -92,102 +93,100 @@ public class ClassLayerServletForZJ extends HttpServlet {
 
         ArrayList<ClassData> classList=new ArrayList<>();
         ArrayList<ClassData> classListForParam2=new ArrayList<>();
-       // if (inputType.equals("APIData")){
-            //根据输入空间字段，获得该字段值，并查询数据库获取其geometry
-            String resultString= JUtil.getResultStrFromAPI(url);
-            try {
-//                 classList = JUtil.getClassDataFromAPI(resultString,dataFieldName,spatialId);
-                JSONObject nameAtGeometry=new JSONObject();
-                JSONObject isTimeSeries=new JSONObject();
-                isTimeSeries.put("isTimeSeries",false);
 
-                //读取配置文件
-                String configpath = JUtil.GetWebInfPath()+"/prop/thematicMap.properties";
-                Properties pro = new Properties();
-                pro.load(new InputStreamReader(new BufferedInputStream(new FileInputStream(configpath)),"GBK"));
+        String resultString= JUtil.getResultStrFromAPI(url);
+        try {
+            JSONObject nameAtGeometry=new JSONObject();
+            JSONObject isTimeSeries=new JSONObject();
+            isTimeSeries.put("isTimeSeries",false);
+
+            //读取配置文件
+            String configpath = JUtil.GetWebInfPath()+"/prop/thematicMap.properties";
+            Properties pro = new Properties();
+            pro.load(new InputStreamReader(new BufferedInputStream(new FileInputStream(configpath)),"GBK"));
 //                String mapCode = pro.getProperty("url");
-                switch (thematicMapName){
-                    case "101"://评价活跃度专题图处理
-                        //获取人口数据
-                        classList = JUtil.getClassDataFromAPIV2(resultString,dataFieldName,regionParam,nameAtGeometry,isTimeSeries);
-                        JSONObject popObj=JUtil.getThematicDataFromDatabase("population",
-                                "region","population_zj");
-                        for(int i=0;i<classList.size();i++){
-                            ClassData tmpClassData=classList.get(i);
+            switch (thematicMapName){
+                case "101"://评价活跃度专题图处理
+                    //获取人口数据
+                    classList = JUtil.getClassDataFromAPIV2(resultString,"评价数",regionParam,nameAtGeometry,isTimeSeries);
+                    JSONObject popObj=JUtil.getThematicDataFromDatabase("population",
+                            "region","population_zj");
+                    for(int i=0;i<classList.size();i++){
+                        ClassData tmpClassData=classList.get(i);
 
-                            Double each_thematicData=Double.parseDouble(tmpClassData.getData());
-                            Double each_popData=Double.parseDouble(popObj.getString(tmpClassData.getName()));
-                            tmpClassData.getOtherDataValue().add(each_thematicData);
-                            tmpClassData.getOtherDataValue().add(each_popData);
-                            tmpClassData.getOtherDataLabel().add("评价人数");
-                            tmpClassData.getOtherDataLabel().add("人口数");
+                        Double each_thematicData=Double.parseDouble(tmpClassData.getData());
+                        Double each_popData=Double.parseDouble(popObj.getString(tmpClassData.getName()));
+                        tmpClassData.getOtherDataValue().add(each_thematicData);
+                        tmpClassData.getOtherDataValue().add(each_popData);
+                        tmpClassData.getOtherDataLabel().add("评价人数");
+                        tmpClassData.getOtherDataLabel().add("人口数");
 
 //                            System.out.print(i);
-                            tmpClassData.setData( String.valueOf(each_thematicData/each_popData*1000));
-                            tmpClassData.setLabel("评价活跃度");
-                            classList.set(i,tmpClassData);
-                        }
-                        legendName="评价活跃度";
-                        break;
-                    case "102"://事项评价覆盖率专题图处理
-                        classList = JUtil.getClassDataFromAPIV2(resultString,"点评项目数",regionParam,nameAtGeometry,isTimeSeries);
-                        classListForParam2=JUtil.getClassDataFromAPIV2(resultString,"项目总数",regionParam,nameAtGeometry,isTimeSeries);
+                        tmpClassData.setData( String.valueOf(each_thematicData/each_popData*1000));
+                        tmpClassData.setLabel("评价活跃度");
+                        classList.set(i,tmpClassData);
+                    }
+                    legendName="评价活跃度";
+                    break;
+                case "102"://事项评价覆盖率专题图处理
+                    classList = JUtil.getClassDataFromAPIV2(resultString,"点评项目数",regionParam,nameAtGeometry,isTimeSeries);
+                    classListForParam2=JUtil.getClassDataFromAPIV2(resultString,"项目总数",regionParam,nameAtGeometry,isTimeSeries);
 
-                        for(int i=0;i<classList.size();i++){
-                            Double each_thematicData1=Double.parseDouble(classList.get(i).getData());
-                            Double each_thematicData2=Double.parseDouble(classListForParam2.get(i).getData());
-                            System.out.print(i);
-                            classList.get(i).setData( String.valueOf(each_thematicData1/each_thematicData2));
-                            classList.get(i).setLabel("事项评价覆盖率");
-                            classList.get(i).getOtherDataValue().add(each_thematicData1);
-                            classList.get(i).getOtherDataValue().add(each_thematicData2);
-                            classList.get(i).getOtherDataLabel().add("评价的项目数");
-                            classList.get(i).getOtherDataLabel().add("项目总数");
-
-                        }
-                        legendName="事项评价覆盖率";
-                        break;
-                    default:
-                        classList = JUtil.getClassDataFromAPIV2(resultString,dataFieldName,regionParam,nameAtGeometry,isTimeSeries);
-                        legendName=dataFieldName;
-                }
-                double maxValue =  Double.parseDouble(classList.get(0).getData());
-                double minValue = Double.parseDouble(classList.get(0).getData());
-                String testData="";
-                for (int i=0;i<classList.size();i++){
-                    testData=testData+classList.get(i).getData()+",";
-                    if(Double.parseDouble(classList.get(i).getData())>maxValue){
-                        maxValue = Double.parseDouble(classList.get(i).getData());
+                    for(int i=0;i<classList.size();i++){
+                        Double each_thematicData1=Double.parseDouble(classList.get(i).getData());
+                        Double each_thematicData2=Double.parseDouble(classListForParam2.get(i).getData());
                         System.out.print(i);
+                        classList.get(i).setData( String.valueOf(each_thematicData1/each_thematicData2));
+                        classList.get(i).setLabel("事项评价覆盖率");
+                        classList.get(i).getOtherDataValue().add(each_thematicData1);
+                        classList.get(i).getOtherDataValue().add(each_thematicData2);
+                        classList.get(i).getOtherDataLabel().add("评价的项目数");
+                        classList.get(i).getOtherDataLabel().add("项目总数");
+
                     }
-                    if(Double.parseDouble(classList.get(i).getData())<minValue){
-                        minValue = Double.parseDouble(classList.get(i).getData());
-                    }
-                }
-
-                //采用对应的分类方法,根据各区域的数据值进行分类,并赋予颜色
-                JSONArray classDataArray = Classifiter.getClassIntervalJson(minValue,maxValue,breakNum,classList,colors,breakMethod);
-                double []classInterval = Classifiter.getIntervals(minValue,maxValue,breakNum,breakMethod);
-
-                //绘制分级图例
-                String imgStreamLegend=drawLegend(classInterval,breakNum,legendName,colors,ip);
-                JSONObject classObject = new JSONObject();
-
-                //传输JSON分级grapgics数组到前端
-                classObject.put("classDataArray",classDataArray);
-                classObject.put("dataSource",url);
-                classObject.put("isTimeSeries",isTimeSeries.getBoolean("isTimeSeries"));
-                classObject.put("nameAtGeometry",nameAtGeometry);
-                classObject.put("classLegend",imgStreamLegend.replaceAll("[\\s*\t\n\r]", ""));
-                PrintWriter out = response.getWriter();
-                out.print(classObject);
-                out.flush();
-                out.close();
-            } catch (SQLException e) {
-                e.printStackTrace();
-            } catch (IOException e) {
-                e.printStackTrace();
+                    legendName="事项评价覆盖率";
+                    break;
+                default:
+                    classList = JUtil.getClassDataFromAPIV2(resultString,dataFieldNames.getString(0),regionParam,nameAtGeometry,isTimeSeries);
+                    legendName=dataFieldNames.getString(0);
             }
+            double maxValue =  Double.parseDouble(classList.get(0).getData());
+            double minValue = Double.parseDouble(classList.get(0).getData());
+            String testData="";
+            for (int i=0;i<classList.size();i++){
+                testData=testData+classList.get(i).getData()+",";
+                if(Double.parseDouble(classList.get(i).getData())>maxValue){
+                    maxValue = Double.parseDouble(classList.get(i).getData());
+                    System.out.print(i);
+                }
+                if(Double.parseDouble(classList.get(i).getData())<minValue){
+                    minValue = Double.parseDouble(classList.get(i).getData());
+                }
+            }
+
+            //采用对应的分类方法,根据各区域的数据值进行分类,并赋予颜色
+            JSONArray classDataArray = Classifiter.getClassIntervalJson(minValue,maxValue,breakNum,classList,colors,breakMethod);
+            double []classInterval = Classifiter.getIntervals(minValue,maxValue,breakNum,breakMethod);
+
+            //绘制分级图例
+            String imgStreamLegend=drawLegend(classInterval,breakNum,legendName,colors,ip);
+            JSONObject classObject = new JSONObject();
+
+            //传输JSON分级grapgics数组到前端
+            classObject.put("classDataArray",classDataArray);
+            classObject.put("dataSource",url);
+            classObject.put("isTimeSeries",isTimeSeries.getBoolean("isTimeSeries"));
+            classObject.put("nameAtGeometry",nameAtGeometry);
+            classObject.put("classLegend",imgStreamLegend.replaceAll("[\\s*\t\n\r]", ""));
+            PrintWriter out = response.getWriter();
+            out.print(classObject);
+            out.flush();
+            out.close();
+        } catch (SQLException e) {
+            e.printStackTrace();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
 
        // }
 
@@ -229,7 +228,6 @@ public class ClassLayerServletForZJ extends HttpServlet {
             g2d.drawString(dataFieldName, startX, 25);
         }
 
-//            g2d.drawString("分级图图例", 40, 25);
         font = new Font("", Font.PLAIN, 13);
         g2d.setFont(font);
 
