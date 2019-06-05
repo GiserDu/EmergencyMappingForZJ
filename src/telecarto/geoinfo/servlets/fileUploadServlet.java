@@ -48,7 +48,10 @@ public class fileUploadServlet extends HttpServlet {
 
     protected void doGet(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
 
-        response.setContentType("text/javascript;charset=UTF-8");//返回json格式的数据
+
+        response.setHeader("Access-Control-Allow-Origin", "*");//设置任意域名都可以访问
+        response.setContentType("application/json;charset=UTF-8");//返回json格式的数据
+
         request.setCharacterEncoding("UTF-8");//设置服务器端对前端传输数据的解码方式!!!
 
         //得到上传文件的保存目录，将上传的文件存放于WEB-INF目录下，不允许外界直接访问，保证上传文件的安全
@@ -401,26 +404,16 @@ public class fileUploadServlet extends HttpServlet {
     public void doChartLayer(HttpServletRequest request, HttpServletResponse response) throws IOException {
         String ip = NetworkUtil.getIpAddr(request);
 
-        //获得空间数据各个指标
-//        JSONObject spatialdataJson=JSONObject.fromObject(request.getParameter("spatialdata"));//空间数据json对象
-//
-//        String tabID_spatialdata=spatialdataJson.getString("tabID");    //空间数据来源标识ID，1-行政区划，2-上传shp
-//        JSONArray regionDataValue=spatialdataJson.getJSONArray("regionDataValue");  //区域标识编码数组
-//        String fileName=spatialdataJson.getString("fileName");
-
-
         //获得统计数据各指标
         String chartLayerNum = request.getParameter("chartLayerNum");
         JSONObject dataJson = JSONObject.fromObject(request.getParameter("allTjLayerContent"));
         JSONObject statisticdataJson=JSONObject.fromObject(dataJson.getJSONObject("statisticdata"));
         System.out.println(statisticdataJson);
 
-        String tabID_statisticdata=statisticdataJson.getString("tabId");    //空间数据来源标识ID，1-行政区划，2-上传shp
-        String dataAddress=statisticdataJson.getString("dataAddress");
         String tableName=statisticdataJson.getString("tableName");
         String spatialId=statisticdataJson.getString("spatialId");
         String year = statisticdataJson.getString("timeId"); //根据实际情况修改
-//        String year = "2016";
+
         JSONArray fieldsNameArray=statisticdataJson.getJSONArray("fieldsName");
         String fieldsNames=statisticdataJson.getString("fieldsName");
         String[] fieldsName=new String[fieldsNameArray.size()];
@@ -429,20 +422,17 @@ public class fileUploadServlet extends HttpServlet {
                 fieldsName[i]=fieldsNameArray.get(i).toString();
 			}
 		}
-        int fieldsNum=statisticdataJson.getInt("fieldsNum");
+
 
         //获得画图数据各指标
         JSONObject cartographydataJson=JSONObject.fromObject(dataJson.getJSONObject("cartographydata"));
         System.out.println(cartographydataJson);
-//        String type=cartographydataJson.getString("cartographydataJson");
+
         String chartID0=cartographydataJson.getString("chartID");
         String chartID = chartID0.substring(1, 6);
         System.out.println(chartID);
 
-
-
         int width = cartographydataJson.getInt("symbolSizeSliderValue");// 符号长宽
-
         int height= cartographydataJson.getInt("symbolSizeSliderValue");
 
         StringBuffer fieldsNamesStr = new StringBuffer(fieldsNames);
@@ -451,21 +441,20 @@ public class fileUploadServlet extends HttpServlet {
         String fieldsNameString = fieldsNamesStr.toString();
         fieldsNameString = fieldsNameString.replaceAll("\"", "");
         String[] arr = fieldsNameString.split(",");
-//        tableName= statisticdataJson.getString("tableName");
-        String thematicData = tableName;
+
 
         //根据所选指标的数目进行不同的色彩配置(有几个指标配置几个色彩渐变)
         String colorRampSchema1 = cartographydataJson.getString("colorName");
-//        String colorRampSchema1 = "青黄色系";
-//		System.out.println(colorRampSchema1);
-//        String colorString="15538980;2498916;15855872";
+
         String colorString;
+        //根据属性字段数量和色系名称，生成配色数组
         colorString = ColorUtil.getColorScheme(arr.length,colorRampSchema1);
         String[] colors = colorString.split(";");
         int[] fieldColors = new int[colors.length]; // 专题符号颜色
         for (int i = 0; i < fieldColors.length; i++) {
             fieldColors[i] = Integer.parseInt(colors[i]);
         }
+
         String regionParam = request.getParameter("regionParam");
         String dataTabID = statisticdataJson.getString("tabId");
         String indiSource = "";
@@ -481,12 +470,9 @@ public class fileUploadServlet extends HttpServlet {
                 break;
         }
 
-        //Rectangle2D.Double DC = JUtil.StringToRect(dcString);// DC
+
         ChartStyleFactory chartStyleFactory = new ChartStyleFactory();
         ChartStyle chartStyle = chartStyleFactory.createcChartStyle(chartID);// 通过工厂模式实例化符号样式类
-        //设置符号宽高
-//        int width = Integer.parseInt(widthstring);
-//        int height = Integer.parseInt(heightstring);
 
         //根据符号ID加载符号样式
         String dir = "assets/";
@@ -495,9 +481,7 @@ public class fileUploadServlet extends HttpServlet {
         //初始化符号参数
         //统计符号的chartDataPara
         ChartDataPara chartDataPara = new ChartDataPara();
-
         chartDataPara.initial_ZJ(fieldsNameString,indiSource);// 初始化专题符号层参数
-
         chartDataPara.setFieldColor(fieldColors);
         chartDataPara.setWidth(width);
         chartDataPara.setHeight(height);
@@ -511,7 +495,6 @@ public class fileUploadServlet extends HttpServlet {
         chartDataPara.setScales(scales);
         String[] xStrings = ReadRegionData.getRegonX();
         String[] yStrings = ReadRegionData.getRegonY();
-        String[] nameStrings = ReadRegionData.getRegonName();//regionCodes为区域代码数组
 
         //生成图例
         ChartFactory chartFactoryLegend = new ChartFactory();
@@ -556,8 +539,7 @@ public class fileUploadServlet extends HttpServlet {
         byte[] bytesLegend = baosLegend.toByteArray();
         String imgStreamLegend = encoderLegend.encodeBuffer(bytesLegend).trim();
         //输出统计图图例到本地(底色透明)
-//        String tempPath = getServletContext().getRealPath("/") + "printMap";
-//        String tempFilePath = getServletContext().getRealPath("/") + "printMap\\"+ ip.replaceAll("\\.","-");
+
         File fileSavepath = new File(tempPath);
         File fileSavepathMap = new File(tempFilePath);
         if(!fileSavepath.exists()){
@@ -597,7 +579,6 @@ public class fileUploadServlet extends HttpServlet {
             chart.drawChart(g2D2, width/2, width/2, width, height, chartDataPara,
                     chartStyle, maxValues, minValues, averageValues,
                     indicatorData);
-
             int imgWidth = bi2.getWidth();
             int imgHeight = bi2.getHeight();
             ConvexHull convex = new ConvexHull();
@@ -638,20 +619,19 @@ public class fileUploadServlet extends HttpServlet {
                 singleChartAttr.put(valueName, value);
             }
             singleChartAttr.put("indiNum", indiNum);
-//				singleChart.put("indiNum",indiNum);
-//				singleChart.put("unit", indiUnits[0]);
             singleChart.put("img",imgStream);
             singleChart.put("imgWidth",convexWidth);
             singleChart.put("imgHeight",convexHeight);
             singleChart.put("attributes",singleChartAttr);
             chartArray.add(singleChart);
         }
+
         chartsObject.put("charts",chartArray);
-        //String timeData = yearString + "年";
-        //chartsObject.put("year",timeData);
         chartsObject.put("source",indiSource);
         chartsObject.put("chartLegend",imgStreamLegend.replaceAll("[\\s*\t\n\r]", ""));
         chartsObject.put("type","chartLayer");
+
+
         PrintWriter writer = response.getWriter();
         writer.print(chartsObject);
         writer.close();
@@ -668,13 +648,13 @@ public class fileUploadServlet extends HttpServlet {
         String spatialId = statisticdataJson.getString("spatialId");
 
         String fieldsNames = statisticdataJson.getString("fieldsName");
-//                        String year = statisticdataJson.getString("year");
+
         String year = "2016";
         StringBuffer fieldsNamesBuffer = new StringBuffer(fieldsNames);
         fieldsNamesBuffer.delete(0, 2);
         fieldsNamesBuffer.delete(fieldsNamesBuffer.length()-2, fieldsNamesBuffer.length());
         System.out.println(fieldsNamesBuffer);
-//                        String regionClass="1";
+
         String dataFieldName=fieldsNamesBuffer.toString();
         String fieldNameCN=dataFieldName;
 

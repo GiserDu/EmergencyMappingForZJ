@@ -46,13 +46,11 @@ public class ClassLayerServletForZJ extends HttpServlet {
     }
 
     protected void doGet(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
-        response.setContentType("text/javascript;charset=UTF-8");//返回json格式的数据
+
+        response.setHeader("Access-Control-Allow-Origin", "*");
+        response.setContentType("application/json;charset=UTF-8");//返回json格式的数据
         request.setCharacterEncoding("UTF-8");//设置服务器端对前端传输数据的解码方式!!!
-
-
         doClassLayer(request,response);
-
-
 
     }
     public void doClassLayer(HttpServletRequest request, HttpServletResponse response){
@@ -60,21 +58,10 @@ public class ClassLayerServletForZJ extends HttpServlet {
         String ip = NetworkUtil.getIpAddr(request);
         JSONObject dataJson = JSONObject.fromObject(request.getParameter("allTjLayerContent"));
         JSONObject statisticdataJson=JSONObject.fromObject(dataJson.getJSONObject("statisticdata"));
-        String classTableName = statisticdataJson.getString("tableName");
-        String spatialId = statisticdataJson.getString("spatialId");
+
         String thematicMapName=statisticdataJson.getString("thematicMapName");//专题图名称
 
-        String fieldsNames=statisticdataJson.getString("fieldsName");
         JSONArray dataFieldNames=statisticdataJson.getJSONArray("fieldsName");
-//      String year = statisticdataJson.getString("year");
-//        String year = "2016";
-//        StringBuffer fieldsNamesBuffer = new StringBuffer(fieldsNames);
-//        fieldsNamesBuffer.delete(0, 2);
-//        fieldsNamesBuffer.delete(fieldsNamesBuffer.length()-2, fieldsNamesBuffer.length());
-//        System.out.println(fieldsNamesBuffer);
-////                        String regionClass="1";
-//        String dataFieldName=fieldsNamesBuffer.toString();
-
 
         JSONObject cartographydataJson=JSONObject.fromObject(dataJson.getJSONObject("cartographydata"));
 
@@ -87,7 +74,7 @@ public class ClassLayerServletForZJ extends HttpServlet {
         String  colors[]= color.trim().split(";");
         System.out.println(colors);
 
-        String inputType = request.getParameter("inputType");
+
         String url=statisticdataJson.getString("dataAddress");
         String legendName="";//图例标题名称
 
@@ -104,7 +91,7 @@ public class ClassLayerServletForZJ extends HttpServlet {
             String configpath = JUtil.GetWebInfPath()+"/prop/thematicMap.properties";
             Properties pro = new Properties();
             pro.load(new InputStreamReader(new BufferedInputStream(new FileInputStream(configpath)),"GBK"));
-//                String mapCode = pro.getProperty("url");
+
             switch (thematicMapName){
                 case "101"://评价活跃度专题图处理
                     //获取人口数据
